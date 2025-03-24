@@ -1793,10 +1793,7 @@ function showExitConfirm() {
   confirmBtn.addEventListener('click', () => {
     document.body.removeChild(modal);
     // Exit logic here
-    window.location.href = 'about:home';
-    setTimeout(() => {
-  window.location.href = 'https://www.google.com'; // גיבוי אם הראשון נכשל
-}, 100);
+    window.location.href = 'https://www.google.com';
     };
   
   cancelBtn.addEventListener('click', () => {
