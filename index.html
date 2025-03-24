@@ -1791,21 +1791,24 @@ function showExitConfirm() {
   
   // Event listeners
   confirmBtn.addEventListener('click', () => {
-    document.body.removeChild(modal);
-    // Exit logic here
-    window.location.href = 'https://www.google.com';
-    };
-  
-  cancelBtn.addEventListener('click', () => {
-    document.body.removeChild(modal);
-  });
-  
-  // Prevent closing on outside click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      document.body.removeChild(modal);
+  document.body.removeChild(modal);
+  try {
+    // ניסיון לסגור את החלון
+    if(window.opener) {
+      window.close(); // עובד עבור חלונות שנפתחו ע"י JS
+    } else {
+      // אם לא ניתן לסגור, מעבר לדף ריק
+      window.location.href = 'about:blank';
+      // או הצעה למשתמש לסגור ידנית
+      setTimeout(() => {
+        alert('אנא סגור את הלשונית/חלון ידנית');
+      }, 100);
     }
-  });
+  } catch(e) {
+    console.error('לא ניתן לסגור את החלון:', e);
+    window.location.href = 'about:blank';
+  }
+});
 }
 
 // Update the back button handler
