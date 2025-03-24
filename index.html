@@ -1759,7 +1759,7 @@ function showExitConfirm() {
   modal.style.left = '0';
   modal.style.width = '100%';
   modal.style.height = '100%';
-  modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+  modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
   modal.style.zIndex = '10000';
   modal.style.display = 'flex';
   modal.style.justifyContent = 'center';
@@ -1769,30 +1769,27 @@ function showExitConfirm() {
   modalContent.id = 'exit-modal-content';
   modalContent.style.backgroundColor = 'var(--container-bg)';
   modalContent.style.color = 'var(--text-color)';
-  modalContent.style.padding = '20px';
+  modalContent.style.padding = '25px';
   modalContent.style.borderRadius = '10px';
   modalContent.style.textAlign = 'center';
-  modalContent.style.maxWidth = '80%';
-  modalContent.style.border = '1px solid var(--primary-color)';
-  modalContent.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+  modalContent.style.width = '300px';
+  modalContent.style.maxWidth = '90%';
+  modalContent.style.border = '2px solid var(--primary-color)';
+  modalContent.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
 
   const title = document.createElement('h3');
-  title.textContent = 'האם אתה בטוח שברצונך לצאת?';
+  title.textContent = 'יציאה מהאפליקציה';
   title.style.marginBottom = '15px';
+  title.style.color = 'var(--primary-color)';
+
+  const message = document.createElement('p');
+  message.textContent = 'האם אתה בטוח שברצונך לצאת?';
+  message.style.marginBottom = '25px';
 
   const buttonsContainer = document.createElement('div');
-  buttonsContainer.style.marginTop = '20px';
-
-  const confirmBtn = document.createElement('button');
-  confirmBtn.textContent = 'יציאה';
-  confirmBtn.style.backgroundColor = '#ff4444';
-  confirmBtn.style.color = 'white';
-  confirmBtn.style.border = 'none';
-  confirmBtn.style.padding = '10px 20px';
-  confirmBtn.style.borderRadius = '5px';
-  confirmBtn.style.margin = '0 10px';
-  confirmBtn.style.cursor = 'pointer';
-  confirmBtn.style.fontSize = '16px';
+  buttonsContainer.style.display = 'flex';
+  buttonsContainer.style.justifyContent = 'center';
+  buttonsContainer.style.gap = '15px';
 
   const cancelBtn = document.createElement('button');
   cancelBtn.textContent = 'ביטול';
@@ -1801,14 +1798,26 @@ function showExitConfirm() {
   cancelBtn.style.border = 'none';
   cancelBtn.style.padding = '10px 20px';
   cancelBtn.style.borderRadius = '5px';
-  cancelBtn.style.margin = '0 10px';
   cancelBtn.style.cursor = 'pointer';
   cancelBtn.style.fontSize = '16px';
+  cancelBtn.style.flex = '1';
+
+  const confirmBtn = document.createElement('button');
+  confirmBtn.textContent = 'יציאה';
+  confirmBtn.style.backgroundColor = '#ff4444';
+  confirmBtn.style.color = 'white';
+  confirmBtn.style.border = 'none';
+  confirmBtn.style.padding = '10px 20px';
+  confirmBtn.style.borderRadius = '5px';
+  confirmBtn.style.cursor = 'pointer';
+  confirmBtn.style.fontSize = '16px';
+  confirmBtn.style.flex = '1';
 
   // הרכבה של האלמנטים
   buttonsContainer.appendChild(cancelBtn);
   buttonsContainer.appendChild(confirmBtn);
   modalContent.appendChild(title);
+  modalContent.appendChild(message);
   modalContent.appendChild(buttonsContainer);
   modal.appendChild(modalContent);
   document.body.appendChild(modal);
@@ -1816,12 +1825,12 @@ function showExitConfirm() {
   // טיפול בלחיצות על הכפתורים
   confirmBtn.addEventListener('click', () => {
     document.body.removeChild(modal);
-    try {
-      // ניסיון לסגור את החלון
-      window.close();
-    } catch (e) {
-      // אם לא ניתן לסגור, מעבר לדף ריק
-      window.location.href = 'about:home';
+    // ניסיון סגירת החלון - עובד ברוב הדפדפנים המודרניים
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // אם אין היסטוריה, מעבר לדף ריק
+      window.location.href = 'about:blank';
     }
   });
 
