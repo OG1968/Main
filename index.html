@@ -1790,7 +1790,7 @@ function showExitConfirm() {
     confirmBtn.addEventListener('click', () => {
         document.body.removeChild(modal);
         try {
-            if (window.opener) {
+            if (window.opener && !window.opener.closed) {
                 window.close();
             } else {
                 window.location.href = '/';
@@ -1821,6 +1821,7 @@ window.onpopstate = function(event) {
         }, 100);
     }
 };
+
 
     </script>
   </body>
