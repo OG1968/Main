@@ -1817,65 +1817,85 @@ exitDialog.id = 'exitDialog';
 exitDialog.style = `
   display: none;
   position: fixed;
-  bottom: 20px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   background-color: #add8e6;
   color: #000;
-  padding: 15px;
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   z-index: 10000;
   text-align: center;
   font-weight: bold;
-  max-width: 90%;
+  max-width: 80%;
 `;
 
 exitDialog.innerHTML = `
-  <p style="margin:0 0 15px 0;">האם לצאת?</p>
-  <div style="display: flex; gap: 10px; justify-content: center;">
-    <button id="exitConfirm" style="background:#ff4444;color:#000;border:none;padding:5px 10px;border-radius:5px;font-weight:bold;">יציאה</button>
-    <button id="exitCancel" style="background:#4CAF50;color:#000;border:none;padding:5px 10px;border-radius:5px;font-weight:bold;">ביטול</button>
+  <p style="margin:0 0 20px 0; font-size: 18px;">האם אתה בטוח שברצונך לצאת?</p>
+  <div style="display: flex; gap: 15px; justify-content: center;">
+    <button id="exitConfirm" style="background:#ff4444;color:#000;border:none;padding:8px 16px;border-radius:5px;font-weight:bold;font-size:16px;cursor:pointer;">יציאה</button>
+    <button id="exitCancel" style="background:#4CAF50;color:#000;border:none;padding:8px 16px;border-radius:5px;font-weight:bold;font-size:16px;cursor:pointer;">ביטול</button>
   </div>
 `;
 
 document.body.appendChild(exitDialog);
 
-// פונקציות להצגה והסתרה
-function showExitDialog() {
-  exitDialog.style.display = 'block';
+// פונקציה להפניה לדף אחר
+function exitApplication() {
+  window.location.href = 'https://google.com';
+  
+  // הפניה לדף פרידה
+  // window.location.href = 'goodbye.html';
+  
+  // טעינה מחדש של הדף הנוכחי
+  // window.location.reload();
+  
+  //  הפניה לדף ריק
+  // window.location.href = 'about:blank';
+
 }
 
-function hideExitDialog() {
-  exitDialog.style.display = 'none';
-}
-
-// טיפול בלחיצות כפתורים - מתוקן
-document.getElementById('exitConfirm').addEventListener('click', function() {
-  // ניסיון לסגור את החלון
-  if (window.close) {
-    window.close();
-  } else {
-    // אם לא ניתן לסגור את החלון (לדוגמה, בחלון הראשי של הדפדפן)
-    // אפשר לשלוח את המשתמש לדף ריק או לדף הבית
-    window.location.href = 'about:blank';
-  }
-});
-
+// מאזין ללחיצות כפתורים
+document.getElementById('exitConfirm').addEventListener('click', exitApplication);
 document.getElementById('exitCancel').addEventListener('click', function() {
-  hideExitDialog();
+  exitDialog.style.display = 'none';
 });
 
-// מאזין ללחיצת אחורה - מתוקן
+// מאזין ללחיצת אחורה
 window.addEventListener('popstate', function(event) {
-  // מציג את הבאנר
   showExitDialog();
-  // מונע את פעולת הניווט
   history.pushState(null, null, window.location.pathname);
 });
 
+// פונקציה להצגת הדיאלוג
+function showExitDialog() {
+  exitDialog.style.display = 'block';
+  
+  // הוספת מאזין ללחיצה מחוץ לדיאלוג
+  setTimeout(() => {
+    document.addEventListener('click', handleClickOutside);
+  }, 0);
+}
+
+// פונקציה לטיפול בלחיצה מחוץ לדיאלוג
+function handleClickOutside(event) {
+  if (!exitDialog.contains(event.target)) {
+    exitDialog.style.display = 'none';
+    document.removeEventListener('click', handleClickOutside);
+  }
+}
+
 // אתחול היסטוריה
 history.pushState(null, null, window.location.pathname);
+
+// מאזין ללחיצת Escape
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && exitDialog.style.display === 'block') {
+    exitDialog.style.display = 'none';
+    document.removeEventListener('click', handleClickOutside);
+  }
+});
   
     </script>
   </body>
