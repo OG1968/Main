@@ -1812,14 +1812,29 @@ function showExitConfirm() {
   // טיפול בלחיצות על הכפתורים
   confirmBtn.addEventListener('click', () => {
     document.body.removeChild(modal);
-    // פתרון אמין ליציאה - מעבר לכתובת חיצונית
-    window.location.href = 'https://www.google.com'; // ניתן להחליף לכל כתובת אחרת
+    // הדרך הנכונה לחזור לדף הבית של הדפדפן
+    window.location.href = "about:home"; // עבור Firefox
+    
+    // גיבוי אם about:home לא עובד בכל הדפדפנים
+    setTimeout(() => {
+      // ניסיון לחזור לדף הבית של כרום
+      window.location.href = "chrome://newtab";
+      
+      // גיבוי נוסף למקרה שגם זה לא עובד
+      setTimeout(() => {
+        // ניסיון לחזור לדף הבית של Edge
+        window.location.href = "edge://newtab";
+        
+        // אם כל הניסיונות נכשלו, נחזור לדף ריק
+        setTimeout(() => {
+          window.location.href = "about:blank";
+        }, 100);
+      }, 100);
+    }, 100);
   });
 
   cancelBtn.addEventListener('click', () => {
     document.body.removeChild(modal);
-    // החזרת המצב ההיסטורי
-    history.pushState(null, null, window.location.href);
   });
 }
 
@@ -1830,14 +1845,17 @@ window.addEventListener('popstate', function(event) {
   
   // מניעת יציאה מיידית
   history.pushState(null, null, window.location.href);
-  
-  // מניעת פעולת ברירת המחדל
-  event.preventDefault();
 });
 
 // אתחול ראשוני של היסטוריה
 window.onload = function() {
   history.pushState(null, null, window.location.href);
+  
+  // הוספת אפשרות להפעיל את דיאלוג היציאה דרך כפתור מיועד
+  const exitButtons = document.querySelectorAll('.exit-app-button');
+  exitButtons.forEach(button => {
+    button.addEventListener('click', showExitConfirm);
+  });
 };
     </script>
   </body>
