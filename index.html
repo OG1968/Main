@@ -1766,20 +1766,33 @@ function handleBackButton() {
 function showExitConfirm() {
     const modal = document.createElement('div');
     modal.id = 'exit-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.6)';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '1000';
 
     const modalContent = document.createElement('div');
-    modalContent.id = 'exit-modal-content';
+    modalContent.style.backgroundColor = 'white';
+    modalContent.style.padding = '20px';
+    modalContent.style.borderRadius = '10px';
+    modalContent.style.textAlign = 'center';
 
     const title = document.createElement('h3');
     title.textContent = 'האם אתה בטוח שברצונך לצאת?';
 
     const confirmBtn = document.createElement('button');
-    confirmBtn.id = 'confirm-exit';
     confirmBtn.textContent = 'יציאה';
+    confirmBtn.style.margin = '10px';
 
     const cancelBtn = document.createElement('button');
-    cancelBtn.id = 'cancel-exit';
     cancelBtn.textContent = 'ביטול';
+    cancelBtn.style.margin = '10px';
 
     modalContent.appendChild(title);
     modalContent.appendChild(confirmBtn);
@@ -1790,16 +1803,13 @@ function showExitConfirm() {
     confirmBtn.addEventListener('click', () => {
         document.body.removeChild(modal);
         try {
-            if (window.opener && !window.opener.closed) {
-                window.close();
-            } else {
+            window.open('', '_self');
+            window.close();
+            if (!window.closed) {
                 window.location.href = '/';
-                setTimeout(() => {
-                    alert('אנא סגור את הלשונית/חלון ידנית');
-                }, 100);
             }
         } catch (e) {
-            console.error('לא ניתן לסגור את החלון:', e);
+            console.error('שגיאה בסגירת החלון:', e);
             window.location.href = '/';
         }
     });
@@ -1811,7 +1821,7 @@ function showExitConfirm() {
 
 let backButtonPressed = false;
 
-window.onpopstate = function(event) {
+window.onpopstate = function() {
     if (!backButtonPressed) {
         backButtonPressed = true;
         showExitConfirm();
@@ -1821,6 +1831,7 @@ window.onpopstate = function(event) {
         }, 100);
     }
 };
+
 
 
     </script>
