@@ -1850,13 +1850,28 @@ function hideExitDialog() {
   exitDialog.style.display = 'none';
 }
 
-// טיפול בלחיצות כפתורים
+// טיפול בלחיצות כפתורים - מתוקן
 document.getElementById('exitConfirm').addEventListener('click', function() {
-  window.history.back();
+  // ניסיון לסגור את החלון
+  if (window.close) {
+    window.close();
+  } else {
+    // אם לא ניתן לסגור את החלון (לדוגמה, בחלון הראשי של הדפדפן)
+    // אפשר לשלוח את המשתמש לדף ריק או לדף הבית
+    window.location.href = 'about:blank';
+  }
 });
 
 document.getElementById('exitCancel').addEventListener('click', function() {
   hideExitDialog();
+});
+
+// מאזין ללחיצת אחורה - מתוקן
+window.addEventListener('popstate', function(event) {
+  // מציג את הבאנר
+  showExitDialog();
+  // מונע את פעולת הניווט
+  history.pushState(null, null, window.location.pathname);
 });
 
 // אתחול היסטוריה
