@@ -672,56 +672,7 @@
 }
 
       /* סטייל למודל היציאה */
-/* Exit Modal Styles */
-#exit-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  z-index: 10000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#exit-modal-content {
-  background-color: var(--container-bg);
-  color: var(--text-color);
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  max-width: 80%;
-  border: 1px solid var(--primary-color);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-#exit-modal h3 {
-  margin-bottom: 15px;
-}
-
-#exit-modal button {
-  border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
-  margin: 0 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-#confirm-exit {
-  background-color: #ff4444;
-  color: white;
-}
-
-#cancel-exit {
-  background-color: var(--primary-color);
-  color: white;
-}
-
-/* Exit Modal Styles */
-#exit-modal {
+      #exit-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -735,8 +686,8 @@
 }
 
 #exit-modal-content {
-  background-color: #add8e6; /* תכלת */
-  color: #000; /* שחור */
+  background-color: #5a8de6; 
+  color: #000;
   padding: 20px;
   border-radius: 10px;
   text-align: center;
@@ -1690,12 +1641,9 @@
     console.error("Error loading recipes:", event.target.error);
   };
 }
-    
-      /**
-       * הצג הודעה למשתמש (Toast Message)
-       * @param {string} message - הטקסט שיוצג בהודעה
-       * @param {boolean} isError - האם זו הודעת שגיאה (צבע אדום) או הודעת הצלחה (צבע ירוק)
-       */
+
+        // הצג הודעה למשתמש (Toast Message) 
+
       function showToast(message, isError = false) {
         // יצירת אלמנט להודעה
         const toast = document.createElement("div");
@@ -1820,7 +1768,7 @@ exitDialog.style = `
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #add8e6;
+  background-color: #5a8de6;
   color: #000;
   padding: 20px;
   border-radius: 10px;
@@ -1868,34 +1816,40 @@ window.addEventListener('popstate', function(event) {
   history.pushState(null, null, window.location.pathname);
 });
 
-// פונקציה להצגת הדיאלוג
+// הצגת הדיאלוג הקיים מהקובץ CSS
 function showExitDialog() {
-  exitDialog.style.display = 'block';
-  
-  // הוספת מאזין ללחיצה מחוץ לדיאלוג
-  setTimeout(() => {
-    document.addEventListener('click', handleClickOutside);
-  }, 0);
-}
-
-// פונקציה לטיפול בלחיצה מחוץ לדיאלוג
-function handleClickOutside(event) {
-  if (!exitDialog.contains(event.target)) {
-    exitDialog.style.display = 'none';
-    document.removeEventListener('click', handleClickOutside);
+  const exitModal = document.getElementById('exit-modal');
+  if (exitModal) {
+    exitModal.style.display = 'flex';
   }
 }
+
+// הסתרת הדיאלוג
+function hideExitDialog() {
+  const exitModal = document.getElementById('exit-modal');
+  if (exitModal) {
+    exitModal.style.display = 'none';
+  }
+}
+
+// טיפול בלחיצות כפתורים
+document.getElementById('confirm-exit')?.addEventListener('click', exitApplication);
+document.getElementById('cancel-exit')?.addEventListener('click', hideExitDialog);
+
+// פונקציית יציאה
+function exitApplication() {
+  window.location.href = 'about:blank';
+  // או כל פעולת יציאה אחרת שאתה מעדיף
+}
+
+// מאזין ללחיצת אחורה
+window.addEventListener('popstate', function(event) {
+  showExitDialog();
+  history.pushState(null, null, window.location.pathname);
+});
 
 // אתחול היסטוריה
 history.pushState(null, null, window.location.pathname);
-
-// מאזין ללחיצת Escape
-document.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape' && exitDialog.style.display === 'block') {
-    exitDialog.style.display = 'none';
-    document.removeEventListener('click', handleClickOutside);
-  }
-});
   
     </script>
   </body>
