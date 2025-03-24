@@ -1743,8 +1743,8 @@ function shareRecipe(index) {
 
 
 
-// אתחול היסטוריה
-history.pushState(null, null, window.location.href);
+// אתחול היסטוריה כדי לזהות לחיצות אחורה
+history.pushState(null, null, window.location.pathname);
 
 // פונקציה להצגת דיאלוג יציאה
 function showExitConfirm() {
@@ -1793,12 +1793,25 @@ function showExitConfirm() {
 
   const cancelBtn = document.createElement('button');
   cancelBtn.textContent = 'ביטול';
-  cancelBtn.className = 'uniform-btn';
   cancelBtn.style.backgroundColor = 'var(--primary-color)';
+  cancelBtn.style.color = 'white';
+  cancelBtn.style.border = 'none';
+  cancelBtn.style.padding = '10px 20px';
+  cancelBtn.style.borderRadius = '5px';
+  cancelBtn.style.cursor = 'pointer';
+  cancelBtn.style.fontSize = '16px';
+  cancelBtn.style.flex = '1';
 
   const confirmBtn = document.createElement('button');
   confirmBtn.textContent = 'יציאה';
-  confirmBtn.className = 'uniform-btn delete-all-btn';
+  confirmBtn.style.backgroundColor = '#ff4444';
+  confirmBtn.style.color = 'white';
+  confirmBtn.style.border = 'none';
+  confirmBtn.style.padding = '10px 20px';
+  confirmBtn.style.borderRadius = '5px';
+  confirmBtn.style.cursor = 'pointer';
+  confirmBtn.style.fontSize = '16px';
+  confirmBtn.style.flex = '1';
 
   // הרכבה של האלמנטים
   buttonsContainer.appendChild(cancelBtn);
@@ -1812,29 +1825,19 @@ function showExitConfirm() {
   // טיפול בלחיצות על הכפתורים
   confirmBtn.addEventListener('click', () => {
     document.body.removeChild(modal);
-    // הדרך הנכונה לחזור לדף הבית של הדפדפן
-    window.location.href = "about:home"; // עבור Firefox
-    
-    // גיבוי אם about:home לא עובד בכל הדפדפנים
-    setTimeout(() => {
-      // ניסיון לחזור לדף הבית של כרום
-      window.location.href = "chrome://newtab";
-      
-      // גיבוי נוסף למקרה שגם זה לא עובד
-      setTimeout(() => {
-        // ניסיון לחזור לדף הבית של Edge
-        window.location.href = "edge://newtab";
-        
-        // אם כל הניסיונות נכשלו, נחזור לדף ריק
-        setTimeout(() => {
-          window.location.href = "about:blank";
-        }, 100);
-      }, 100);
-    }, 100);
+    // ניסיון סגירת החלון - עובד ברוב הדפדפנים המודרניים
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // אם אין היסטוריה, מעבר לדף ריק
+      window.location.href = 'about:blank';
+    }
   });
 
   cancelBtn.addEventListener('click', () => {
     document.body.removeChild(modal);
+    // החזרת המצב ההיסטורי
+    history.pushState(null, null, window.location.pathname);
   });
 }
 
@@ -1843,20 +1846,16 @@ window.addEventListener('popstate', function(event) {
   // הצגת דיאלוג היציאה
   showExitConfirm();
   
-  // מניעת יציאה מיידית
-  history.pushState(null, null, window.location.href);
+  // מניעת יציאה מיידית ע"י החזרת המצב ההיסטורי
+  history.pushState(null, null, window.location.pathname);
+  
+  // מניעת פעולת ברירת המחדל
+  event.preventDefault();
+  return false;
 });
 
 // אתחול ראשוני של היסטוריה
-window.onload = function() {
-  history.pushState(null, null, window.location.href);
-  
-  // הוספת אפשרות להפעיל את דיאלוג היציאה דרך כפתור מיועד
-  const exitButtons = document.querySelectorAll('.exit-app-button');
-  exitButtons.forEach(button => {
-    button.addEventListener('click', showExitConfirm);
-  });
-};
+history.pushState(null, null, window.location.pathname);
     </script>
   </body>
 </html>
