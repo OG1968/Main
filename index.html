@@ -1802,43 +1802,7 @@ function shareRecipe(index) {
 
 
 
-// Exit confirmation handling
-let shouldConfirmExit = true;
 
-function showExitModal() {
-  document.getElementById('exit-modal').style.display = 'flex';
-  return false;
-}
-
-function hideExitModal() {
-  document.getElementById('exit-modal').style.display = 'none';
-}
-
-document.getElementById('confirm-exit').addEventListener('click', function() {
-  shouldConfirmExit = false;
-  window.location.href = 'about:blank'; // או כל פעולת יציאה אחרת
-});
-
-document.getElementById('cancel-exit').addEventListener('click', function() {
-  hideExitModal();
-});
-
-// Handle back button/exit attempts
-window.addEventListener('beforeunload', function(e) {
-  if (shouldConfirmExit) {
-    e.preventDefault();
-    e.returnValue = '';
-    showExitModal();
-    return '';
-  }
-});
-
-// Allow normal navigation when clicking internal links
-document.addEventListener('click', function(e) {
-  if (e.target.tagName === 'A' && e.target.href) {
-    shouldConfirmExit = false;
-  }
-});
     </script>
   </body>
 </html>
