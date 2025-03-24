@@ -1767,6 +1767,7 @@ function handleBackButton() {
 }
 
 // פונקציה מעודכנת להצגת דיאלוג יציאה
+// פונקציה מעודכנת להצגת דיאלוג יציאה
 function showExitConfirm() {
   // Create modal elements
   const modal = document.createElement('div');
@@ -1795,43 +1796,27 @@ function showExitConfirm() {
   
   // Event listeners
   confirmBtn.addEventListener('click', () => {
-  document.body.removeChild(modal);
-  try {
-    // ניסיון לסגור את החלון
-    if(window.opener) {
-      window.close(); // עובד עבור חלונות שנפתחו ע"י JS
-    } else {
-      // אם לא ניתן לסגור, מעבר לדף ריק
+    document.body.removeChild(modal);
+    try {
+      if(window.opener) {
+        window.close();
+      } else {
+        window.location.href = 'about:blank';
+        setTimeout(() => {
+          alert('אנא סגור את הלשונית/חלון ידנית');
+        }, 100);
+      }
+    } catch(e) {
+      console.error('לא ניתן לסגור את החלון:', e);
       window.location.href = 'about:blank';
-      // או הצעה למשתמש לסגור ידנית
-      setTimeout(() => {
-        alert('אנא סגור את הלשונית/חלון ידנית');
-      }, 100);
     }
-  } catch(e) {
-    console.error('לא ניתן לסגור את החלון:', e);
-    window.location.href = 'about:blank';
-  }
-});
+  });
+
+  // הוספת האזנה לכפתור הביטול
+  cancelBtn.addEventListener('click', () => {
+    document.body.removeChild(modal);
+  });
 }
-
-// Update the back button handler
-let backButtonPressed = false;
-
-window.onpopstate = function(event) {
-  if (!backButtonPressed) {
-    backButtonPressed = true;
-    showExitConfirm();
-    // Push state again to prevent immediate exit
-    setTimeout(() => {
-      history.pushState(null, null, window.location.pathname);
-      backButtonPressed = false;
-    }, 100);
-  }
-};
-
-// Initialize
-history.pushState(null, null, window.location.pathname);
     </script>
   </body>
 </html>
