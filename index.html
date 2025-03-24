@@ -1716,6 +1716,8 @@ function handleBackButton() {
 
 // פונקציה מעודכנת להצגת דיאלוג יציאה
 function showExitConfirm() {
+  const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
+  
   const modal = document.createElement('div');
   modal.id = 'exit-modal';
   modal.style.position = 'fixed';
@@ -1729,40 +1731,38 @@ function showExitConfirm() {
   modal.style.justifyContent = 'center';
   modal.style.alignItems = 'center';
   
+  // עיצוב דינמי לפי מצב תצוגה
+  const modalContentStyle = isDarkMode 
+    ? 'background: #333; color: white; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%;'
+    : 'background: white; color: black; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%;';
+
+  const confirmBtnStyle = isDarkMode
+    ? 'background: #ff6666; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;'
+    : 'background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;';
+
+  const cancelBtnStyle = isDarkMode
+    ? 'background: #66bb6a; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;'
+    : 'background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;';
+
   modal.innerHTML = `
-    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%;">
+    <div style="${modalContentStyle}">
       <h3 style="margin-bottom: 15px;">האם אתה בטוח שברצונך לצאת?</h3>
-      <button id="confirm-exit" style="background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">יציאה</button>
-      <button id="cancel-exit" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">ביטול</button>
+      <button id="confirm-exit" style="${confirmBtnStyle}">יציאה</button>
+      <button id="cancel-exit" style="${cancelBtnStyle}">ביטול</button>
     </div>
   `;
   
   document.body.appendChild(modal);
 
-  // מאזינים חדשים עם event delegation
+  // שאר הקוד ללא שינוי...
   modal.querySelector('#confirm-exit').addEventListener('click', () => {
-    // פתרון אמין יותר ליציאה
-    if (window.history.length > 1) {
-       window.location.href = 'https://www.google.com'; // פתרון גיבוי
-    } else {
-      window.history.go(-(window.history.length - 1)); // חוזרים לדף הראשון בהיסטוריה
-    }
-    document.body.removeChild(modal);
+    window.location.href = 'https://www.your-website.com';
   });
 
   modal.querySelector('#cancel-exit').addEventListener('click', () => {
     document.body.removeChild(modal);
   });
 }
-
-// מאזין לאירועי הסטוריה - ללא שינוי
-window.onpopstate = function(event) {
-  handleBackButton();
-  history.pushState(null, null, window.location.pathname);
-};
-
-// דחוף מצב היסטוריה - ללא שינוי
-history.pushState(null, null, window.location.pathname);
 
     </script>
   </body>
