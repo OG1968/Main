@@ -1794,7 +1794,9 @@ function showExitConfirm() {
     document.body.removeChild(modal);
     // Exit logic here
     window.location.href = 'about:home';
-  });
+    setTimeout(() => {
+  window.location.href = 'https://www.google.com'; // גיבוי אם הראשון נכשל
+}, 100);
   
   cancelBtn.addEventListener('click', () => {
     document.body.removeChild(modal);
