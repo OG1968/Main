@@ -672,29 +672,52 @@
 }
 
       /* סטייל למודל היציאה */
-#exit-modal div {
+/* Exit Modal Styles */
+#exit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#exit-modal-content {
   background-color: var(--container-bg);
   color: var(--text-color);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 80%;
   border: 1px solid var(--primary-color);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+#exit-modal h3 {
+  margin-bottom: 15px;
+}
+
 #exit-modal button {
-  background-color: var(--primary-color);
-  color: var(--text-color);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  margin: 0 5px;
+  cursor: pointer;
   transition: background-color 0.3s;
 }
 
-#exit-modal #confirm-exit {
+#confirm-exit {
   background-color: #ff4444;
+  color: white;
 }
 
-#exit-modal #cancel-exit {
+#cancel-exit {
   background-color: var(--primary-color);
-}
-
-#exit-modal button:hover {
-  background-color: var(--primary-color-hover);
+  color: white;
 }
     </style>
     <script>
@@ -1741,48 +1764,67 @@ function handleBackButton() {
 
 // פונקציה מעודכנת להצגת דיאלוג יציאה
 function showExitConfirm() {
+  // Create modal elements
   const modal = document.createElement('div');
   modal.id = 'exit-modal';
-  modal.style.position = 'fixed';
-  modal.style.top = '0';
-  modal.style.left = '0';
-  modal.style.width = '100%';
-  modal.style.height = '100%';
-  modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-  modal.style.zIndex = '10000';
-  modal.style.display = 'flex';
-  modal.style.justifyContent = 'center';
-  modal.style.alignItems = 'center';
   
-  // שימוש במשתני CSS במקום ערכים קבועים
-  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--container-bg').trim();
-  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
-  const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
-
-  modal.innerHTML = `
-    <div style="background: ${bgColor}; color: ${textColor}; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%; border: 1px solid ${primaryColor}; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
-      <h3 style="margin-bottom: 15px;">האם אתה בטוח שברצונך לצאת?</h3>
-      <button id="confirm-exit" style="background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">יציאה</button>
-      <button id="cancel-exit" style="background: ${primaryColor}; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">ביטול</button>
-    </div>
-  `;
+  const modalContent = document.createElement('div');
+  modalContent.id = 'exit-modal-content';
   
+  const title = document.createElement('h3');
+  title.textContent = 'האם אתה בטוח שברצונך לצאת?';
+  
+  const confirmBtn = document.createElement('button');
+  confirmBtn.id = 'confirm-exit';
+  confirmBtn.textContent = 'יציאה';
+  
+  const cancelBtn = document.createElement('button');
+  cancelBtn.id = 'cancel-exit';
+  cancelBtn.textContent = 'ביטול';
+  
+  // Build modal structure
+  modalContent.appendChild(title);
+  modalContent.appendChild(confirmBtn);
+  modalContent.appendChild(cancelBtn);
+  modal.appendChild(modalContent);
   document.body.appendChild(modal);
-
-  modal.querySelector('#confirm-exit').addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.location.href = 'https://www.google.com'; 
-    } else {
-      window.history.go(-(window.history.length - 1)); 
-    }
+  
+  // Event listeners
+  confirmBtn.addEventListener('click', () => {
+    document.body.removeChild(modal);
+    // Exit logic here
+    window.location.href = 'about:blank';
+  });
+  
+  cancelBtn.addEventListener('click', () => {
     document.body.removeChild(modal);
   });
-
-  modal.querySelector('#cancel-exit').addEventListener('click', () => {
-    document.body.removeChild(modal);
+  
+  // Prevent closing on outside click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+    }
   });
 }
 
+// Update the back button handler
+let backButtonPressed = false;
+
+window.onpopstate = function(event) {
+  if (!backButtonPressed) {
+    backButtonPressed = true;
+    showExitConfirm();
+    // Push state again to prevent immediate exit
+    setTimeout(() => {
+      history.pushState(null, null, window.location.pathname);
+      backButtonPressed = false;
+    }, 100);
+  }
+};
+
+// Initialize
+history.pushState(null, null, window.location.pathname);
     </script>
   </body>
 </html>
