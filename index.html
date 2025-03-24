@@ -1743,83 +1743,89 @@ function shareRecipe(index) {
 
 
 
-// פונקציה להצגת דיאלוג יציאה
-function showExitConfirm() {
-    const modal = document.createElement('div');
-    modal.id = 'exit-modal';
-    modal.style.position = 'fixed';
-    modal.style.top = '0';
-    modal.style.left = '0';
-    modal.style.width = '100%';
-    modal.style.height = '100%';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.6)';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-    modal.style.zIndex = '1000';
+// פונקציה לטיפול בלחיצה אחורה - ללא שינוי
+let backButtonClicks = 0;
+let backButtonTimer = null;
 
-    const modalContent = document.createElement('div');
-    modalContent.style.backgroundColor = 'white';
-    modalContent.style.padding = '20px';
-    modalContent.style.borderRadius = '10px';
-    modalContent.style.textAlign = 'center';
-    modalContent.style.width = '90%';
-    modalContent.style.maxWidth = '400px';
-    modalContent.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-    modalContent.style.fontFamily = 'Arial, sans-serif';
-    modalContent.style.boxSizing = 'border-box';
-    modalContent.style.margin = '0 20px';
-
-    const title = document.createElement('h3');
-    title.textContent = 'האם אתה בטוח שברצונך לצאת?';
-    title.style.marginBottom = '20px';
-
-    const confirmBtn = document.createElement('button');
-    confirmBtn.textContent = 'יציאה';
-    confirmBtn.style.margin = '10px';
-    confirmBtn.style.padding = '10px 20px';
-    confirmBtn.style.backgroundColor = '#d9534f';
-    confirmBtn.style.color = 'white';
-    confirmBtn.style.border = 'none';
-    confirmBtn.style.borderRadius = '5px';
-    confirmBtn.style.cursor = 'pointer';
-    confirmBtn.style.fontSize = '16px';
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = 'ביטול';
-    cancelBtn.style.margin = '10px';
-    cancelBtn.style.padding = '10px 20px';
-    cancelBtn.style.backgroundColor = '#5bc0de';
-    cancelBtn.style.color = 'white';
-    cancelBtn.style.border = 'none';
-    cancelBtn.style.borderRadius = '5px';
-    cancelBtn.style.cursor = 'pointer';
-    cancelBtn.style.fontSize = '16px';
-
-    modalContent.appendChild(title);
-    modalContent.appendChild(confirmBtn);
-    modalContent.appendChild(cancelBtn);
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-
-    confirmBtn.addEventListener('click', () => {
-        document.body.removeChild(modal);
-        window.location.href = '/';
-    });
-
-    cancelBtn.addEventListener('click', () => {
-        document.body.removeChild(modal);
-        history.pushState(null, null, window.location.pathname); // מניעה של חזרה לא מכוונת
-    });
+function handleBackButton() {
+  backButtonClicks++;
+  
+  if (backButtonClicks === 1) {
+    backButtonTimer = setTimeout(() => {
+      window.location.reload();
+      backButtonClicks = 0;
+    }, 300);
+  } else if (backButtonClicks === 2) {
+    clearTimeout(backButtonTimer);
+    backButtonClicks = 0;
+    showExitConfirm();
+  }
 }
 
-window.addEventListener('popstate', (event) => {
+// פונקציה מעודכנת להצגת דיאלוג יציאה
+function showExitConfirm() {
+  // Create modal elements
+  const modal = document.createElement('div');
+  modal.id = 'exit-modal';
+  
+  const modalContent = document.createElement('div');
+  modalContent.id = 'exit-modal-content';
+  
+  const title = document.createElement('h3');
+  title.textContent = 'האם אתה בטוח שברצונך לצאת?';
+  
+  const confirmBtn = document.createElement('button');
+  confirmBtn.id = 'confirm-exit';
+  confirmBtn.textContent = 'יציאה';
+  
+  const cancelBtn = document.createElement('button');
+  cancelBtn.id = 'cancel-exit';
+  cancelBtn.textContent = 'ביטול';
+  
+  // Build modal structure
+  modalContent.appendChild(title);
+  modalContent.appendChild(confirmBtn);
+  modalContent.appendChild(cancelBtn);
+  modal.appendChild(modalContent);
+  document.body.appendChild(modal);
+  
+  // Event listeners
+  confirmBtn.addEventListener('click', () => {
+    document.body.removeChild(modal);
+    try {
+      if(window.opener) {
+        window.close();
+      } else {
+        window.location.href = 'about:blank';
+        setTimeout(() => {
+          alert('אנא סגור את הלשונית/חלון ידנית');
+        }, 100);
+      }
+    } catch(e) {
+      console.error('לא ניתן לסגור את החלון:', e);
+      window.location.href = 'about:blank';
+    }
+  });
+  
+  // Add click handler for cancel button
+  cancelBtn.addEventListener('click', () => {
+    document.body.removeChild(modal);
+  });
+}
+
+let backButtonPressed = false;
+
+window.onpopstate = function(event) {
+  if (!backButtonPressed) {
+    backButtonPressed = true;
     showExitConfirm();
-    history.pushState(null, null, window.location.pathname); // מניעה של חזרה לא מכוונת
-});
-
-history.pushState(null, null, window.location.pathname); // דחיפה ראשונית של state
-
+    // Push state again to prevent immediate exit
+    history.pushState(null, null, window.location.pathname);
+    setTimeout(() => {
+      backButtonPressed = false;
+    }, 100);
+  }
+};
     </script>
   </body>
 </html>
