@@ -1803,7 +1803,66 @@ function shareRecipe(index) {
 
 
 
-      
+<script>
+// מאזין ללחיצת אחורה
+window.addEventListener('popstate', function(event) {
+  // מציג את הבאנר
+  showExitDialog();
+  // מונע את פעולת הניווט
+  history.pushState(null, null, window.location.pathname);
+});
+
+// יצירת אלמנט הבאנר
+const exitDialog = document.createElement('div');
+exitDialog.id = 'exitDialog';
+exitDialog.style = `
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #add8e6;
+  color: #000;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  z-index: 10000;
+  text-align: center;
+  font-weight: bold;
+  max-width: 90%;
+`;
+
+exitDialog.innerHTML = `
+  <p style="margin:0 0 15px 0;">האם לצאת?</p>
+  <div style="display: flex; gap: 10px; justify-content: center;">
+    <button id="exitConfirm" style="background:#ff4444;color:#000;border:none;padding:5px 10px;border-radius:5px;font-weight:bold;">יציאה</button>
+    <button id="exitCancel" style="background:#4CAF50;color:#000;border:none;padding:5px 10px;border-radius:5px;font-weight:bold;">ביטול</button>
+  </div>
+`;
+
+document.body.appendChild(exitDialog);
+
+// פונקציות להצגה והסתרה
+function showExitDialog() {
+  exitDialog.style.display = 'block';
+}
+
+function hideExitDialog() {
+  exitDialog.style.display = 'none';
+}
+
+// טיפול בלחיצות כפתורים
+document.getElementById('exitConfirm').addEventListener('click', function() {
+  window.history.back();
+});
+
+document.getElementById('exitCancel').addEventListener('click', function() {
+  hideExitDialog();
+});
+
+// אתחול היסטוריה
+history.pushState(null, null, window.location.pathname);
+</script>      
     </script>
   </body>
 </html>
