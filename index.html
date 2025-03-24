@@ -1748,84 +1748,80 @@ let backButtonClicks = 0;
 let backButtonTimer = null;
 
 function handleBackButton() {
-  backButtonClicks++;
-  
-  if (backButtonClicks === 1) {
-    backButtonTimer = setTimeout(() => {
-      window.location.reload();
-      backButtonClicks = 0;
-    }, 300);
-  } else if (backButtonClicks === 2) {
-    clearTimeout(backButtonTimer);
-    backButtonClicks = 0;
-    showExitConfirm();
-  }
+    backButtonClicks++;
+
+    if (backButtonClicks === 1) {
+        backButtonTimer = setTimeout(() => {
+            window.location.reload();
+            backButtonClicks = 0;
+        }, 300);
+    } else if (backButtonClicks === 2) {
+        clearTimeout(backButtonTimer);
+        backButtonClicks = 0;
+        showExitConfirm();
+    }
 }
 
 // פונקציה מעודכנת להצגת דיאלוג יציאה
 function showExitConfirm() {
-  // Create modal elements
-  const modal = document.createElement('div');
-  modal.id = 'exit-modal';
-  
-  const modalContent = document.createElement('div');
-  modalContent.id = 'exit-modal-content';
-  
-  const title = document.createElement('h3');
-  title.textContent = 'האם אתה בטוח שברצונך לצאת?';
-  
-  const confirmBtn = document.createElement('button');
-  confirmBtn.id = 'confirm-exit';
-  confirmBtn.textContent = 'יציאה';
-  
-  const cancelBtn = document.createElement('button');
-  cancelBtn.id = 'cancel-exit';
-  cancelBtn.textContent = 'ביטול';
-  
-  // Build modal structure
-  modalContent.appendChild(title);
-  modalContent.appendChild(confirmBtn);
-  modalContent.appendChild(cancelBtn);
-  modal.appendChild(modalContent);
-  document.body.appendChild(modal);
-  
-  // Event listeners
-  confirmBtn.addEventListener('click', () => {
-    document.body.removeChild(modal);
-    try {
-      if(window.opener) {
-        window.close();
-      } else {
-        window.location.href = 'about:blank';
-        setTimeout(() => {
-          alert('אנא סגור את הלשונית/חלון ידנית');
-        }, 100);
-      }
-    } catch(e) {
-      console.error('לא ניתן לסגור את החלון:', e);
-      window.location.href = 'about:blank';
-    }
-  });
-  
-  // Add click handler for cancel button
-  cancelBtn.addEventListener('click', () => {
-    document.body.removeChild(modal);
-  });
+    const modal = document.createElement('div');
+    modal.id = 'exit-modal';
+
+    const modalContent = document.createElement('div');
+    modalContent.id = 'exit-modal-content';
+
+    const title = document.createElement('h3');
+    title.textContent = 'האם אתה בטוח שברצונך לצאת?';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.id = 'confirm-exit';
+    confirmBtn.textContent = 'יציאה';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.id = 'cancel-exit';
+    cancelBtn.textContent = 'ביטול';
+
+    modalContent.appendChild(title);
+    modalContent.appendChild(confirmBtn);
+    modalContent.appendChild(cancelBtn);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    confirmBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+        try {
+            if (window.opener) {
+                window.close();
+            } else {
+                window.location.href = '/';
+                setTimeout(() => {
+                    alert('אנא סגור את הלשונית/חלון ידנית');
+                }, 100);
+            }
+        } catch (e) {
+            console.error('לא ניתן לסגור את החלון:', e);
+            window.location.href = '/';
+        }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+    });
 }
 
 let backButtonPressed = false;
 
 window.onpopstate = function(event) {
-  if (!backButtonPressed) {
-    backButtonPressed = true;
-    showExitConfirm();
-    // Push state again to prevent immediate exit
-    history.pushState(null, null, window.location.pathname);
-    setTimeout(() => {
-      backButtonPressed = false;
-    }, 100);
-  }
+    if (!backButtonPressed) {
+        backButtonPressed = true;
+        showExitConfirm();
+        history.pushState(null, null, window.location.pathname);
+        setTimeout(() => {
+            backButtonPressed = false;
+        }, 100);
+    }
 };
+
     </script>
   </body>
 </html>
