@@ -3,10 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link
       rel="icon"
       type="image/x-icon"
@@ -1767,7 +1763,6 @@ function handleBackButton() {
 }
 
 // פונקציה מעודכנת להצגת דיאלוג יציאה
-// פונקציה מעודכנת להצגת דיאלוג יציאה
 function showExitConfirm() {
   // Create modal elements
   const modal = document.createElement('div');
@@ -1781,11 +1776,11 @@ function showExitConfirm() {
   
   const confirmBtn = document.createElement('button');
   confirmBtn.id = 'confirm-exit';
-  confirmBtn.textContent = 'לצאת';
+  confirmBtn.textContent = 'יציאה';
   
   const cancelBtn = document.createElement('button');
   cancelBtn.id = 'cancel-exit';
-  cancelBtn.textContent = 'להשאר';
+  cancelBtn.textContent = 'ביטול';
   
   // Build modal structure
   modalContent.appendChild(title);
@@ -1796,27 +1791,43 @@ function showExitConfirm() {
   
   // Event listeners
   confirmBtn.addEventListener('click', () => {
-    document.body.removeChild(modal);
-    try {
-      if(window.opener) {
-        window.close();
-      } else {
-        window.location.href = 'about:blank';
-        setTimeout(() => {
-          alert('אנא סגור את הלשונית/חלון ידנית');
-        }, 100);
-      }
-    } catch(e) {
-      console.error('לא ניתן לסגור את החלון:', e);
+  document.body.removeChild(modal);
+  try {
+    // ניסיון לסגור את החלון
+    if(window.opener) {
+      window.close(); // עובד עבור חלונות שנפתחו ע"י JS
+    } else {
+      // אם לא ניתן לסגור, מעבר לדף ריק
       window.location.href = 'about:blank';
+      // או הצעה למשתמש לסגור ידנית
+      setTimeout(() => {
+        alert('אנא סגור את הלשונית/חלון ידנית');
+      }, 100);
     }
-  });
-
-  // הוספת האזנה לכפתור הביטול
-  cancelBtn.addEventListener('click', () => {
-    document.body.removeChild(modal);
-  });
+  } catch(e) {
+    console.error('לא ניתן לסגור את החלון:', e);
+    window.location.href = 'about:blank';
+  }
+});
 }
+
+// Update the back button handler
+let backButtonPressed = false;
+
+window.onpopstate = function(event) {
+  if (!backButtonPressed) {
+    backButtonPressed = true;
+    showExitConfirm();
+    // Push state again to prevent immediate exit
+    setTimeout(() => {
+      history.pushState(null, null, window.location.pathname);
+      backButtonPressed = false;
+    }, 100);
+  }
+};
+
+// Initialize
+history.pushState(null, null, window.location.pathname);
     </script>
   </body>
 </html>
