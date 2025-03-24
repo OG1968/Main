@@ -1763,10 +1763,12 @@ function showExitConfirm() {
     modalContent.style.padding = '20px';
     modalContent.style.borderRadius = '10px';
     modalContent.style.textAlign = 'center';
-    modalContent.style.width = '80%';
+    modalContent.style.width = '90%';
     modalContent.style.maxWidth = '400px';
     modalContent.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
     modalContent.style.fontFamily = 'Arial, sans-serif';
+    modalContent.style.boxSizing = 'border-box';
+    modalContent.style.margin = '0 20px';
 
     const title = document.createElement('h3');
     title.textContent = 'האם אתה בטוח שברצונך לצאת?';
@@ -1775,22 +1777,24 @@ function showExitConfirm() {
     const confirmBtn = document.createElement('button');
     confirmBtn.textContent = 'יציאה';
     confirmBtn.style.margin = '10px';
-    confirmBtn.style.padding = '8px 16px';
+    confirmBtn.style.padding = '10px 20px';
     confirmBtn.style.backgroundColor = '#d9534f';
     confirmBtn.style.color = 'white';
     confirmBtn.style.border = 'none';
     confirmBtn.style.borderRadius = '5px';
     confirmBtn.style.cursor = 'pointer';
+    confirmBtn.style.fontSize = '16px';
 
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = 'ביטול';
     cancelBtn.style.margin = '10px';
-    cancelBtn.style.padding = '8px 16px';
+    cancelBtn.style.padding = '10px 20px';
     cancelBtn.style.backgroundColor = '#5bc0de';
     cancelBtn.style.color = 'white';
     cancelBtn.style.border = 'none';
     cancelBtn.style.borderRadius = '5px';
     cancelBtn.style.cursor = 'pointer';
+    cancelBtn.style.fontSize = '16px';
 
     modalContent.appendChild(title);
     modalContent.appendChild(confirmBtn);
