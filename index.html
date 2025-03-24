@@ -1695,6 +1695,26 @@ function shareRecipe(index) {
 
 
 
+// פונקציה לטיפול בלחיצה אחורה - ללא שינוי
+let backButtonClicks = 0;
+let backButtonTimer = null;
+
+function handleBackButton() {
+  backButtonClicks++;
+  
+  if (backButtonClicks === 1) {
+    backButtonTimer = setTimeout(() => {
+      window.location.reload();
+      backButtonClicks = 0;
+    }, 300);
+  } else if (backButtonClicks === 2) {
+    clearTimeout(backButtonTimer);
+    backButtonClicks = 0;
+    showExitConfirm();
+  }
+}
+
+// פונקציה מעודכנת להצגת דיאלוג יציאה
 function showExitConfirm() {
   const modal = document.createElement('div');
   modal.id = 'exit-modal';
@@ -1719,19 +1739,30 @@ function showExitConfirm() {
   
   document.body.appendChild(modal);
 
-  // מאזין ללחיצה על יציאה - מפנה לאתר חיצוני
+  // מאזינים חדשים עם event delegation
   modal.querySelector('#confirm-exit').addEventListener('click', () => {
-    // החלף את הכתובת לזו הרצויה לך
-    window.location.href = 'about:blank'; 
-    // או לדף ספציפי באתר שלך, לדוגמה:
-    // window.location.href = 'https://www.your-website.com/exit-page.html';
+    // פתרון אמין יותר ליציאה
+    if (window.history.length > 1) {
+      window.history.go(-(window.history.length - 1)); // חוזרים לדף הראשון בהיסטוריה
+    } else {
+      window.location.href = 'about:blank'; // פתרון גיבוי
+    }
+    document.body.removeChild(modal);
   });
 
-  // מאזין ללחיצה על ביטול - סוגר את המודל
   modal.querySelector('#cancel-exit').addEventListener('click', () => {
     document.body.removeChild(modal);
   });
 }
+
+// מאזין לאירועי הסטוריה - ללא שינוי
+window.onpopstate = function(event) {
+  handleBackButton();
+  history.pushState(null, null, window.location.pathname);
+};
+
+// דחוף מצב היסטוריה - ללא שינוי
+history.pushState(null, null, window.location.pathname);
 
     </script>
   </body>
