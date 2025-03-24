@@ -1743,9 +1743,9 @@ function showExitConfirm() {
   modal.querySelector('#confirm-exit').addEventListener('click', () => {
     // פתרון אמין יותר ליציאה
     if (window.history.length > 1) {
-      window.history.go(-(window.history.length - 1)); // חוזרים לדף הראשון בהיסטוריה
+       window.location.href = 'https://www.google.com'; // פתרון גיבוי
     } else {
-      window.location.href = 'https://www.google.com'; // פתרון גיבוי
+      window.history.go(-(window.history.length - 1)); // חוזרים לדף הראשון בהיסטוריה
     }
     document.body.removeChild(modal);
   });
