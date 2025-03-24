@@ -1754,19 +1754,22 @@ function showExitConfirm() {
   modal.style.justifyContent = 'center';
   modal.style.alignItems = 'center';
   
+  // שימוש במשתני CSS במקום ערכים קבועים
+  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--container-bg').trim();
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
+  const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+
   modal.innerHTML = `
-    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%;">
+    <div style="background: ${bgColor}; color: ${textColor}; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%; border: 1px solid ${primaryColor}; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
       <h3 style="margin-bottom: 15px;">האם אתה בטוח שברצונך לצאת?</h3>
       <button id="confirm-exit" style="background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">יציאה</button>
-      <button id="cancel-exit" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">ביטול</button>
+      <button id="cancel-exit" style="background: ${primaryColor}; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">ביטול</button>
     </div>
   `;
   
   document.body.appendChild(modal);
 
-  // מאזינים חדשים עם event delegation
   modal.querySelector('#confirm-exit').addEventListener('click', () => {
-    // פתרון אמין יותר ליציאה
     if (window.history.length > 1) {
       window.location.href = 'https://www.google.com'; 
     } else {
@@ -1779,15 +1782,6 @@ function showExitConfirm() {
     document.body.removeChild(modal);
   });
 }
-
-// מאזין לאירועי הסטוריה - ללא שינוי
-window.onpopstate = function(event) {
-  handleBackButton();
-  history.pushState(null, null, window.location.pathname);
-};
-
-// דחוף מצב היסטוריה - ללא שינוי
-history.pushState(null, null, window.location.pathname);
 
     </script>
   </body>
