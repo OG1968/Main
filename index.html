@@ -1820,20 +1820,12 @@ function showExitConfirm() {
     });
 }
 
-let backButtonPressed = false;
-
 window.addEventListener('popstate', (event) => {
-    if (!backButtonPressed) {
-        backButtonPressed = true;
-        showExitConfirm();
-        history.pushState(null, null, window.location.pathname);
-        setTimeout(() => {
-            backButtonPressed = false;
-        }, 100);
-    }
+    showExitConfirm();
+    history.pushState(null, null, window.location.pathname); // מניעה של חזרה ללא אישור
 });
 
-history.pushState(null, null, window.location.pathname); // להבטיח דחיפה ראשונית של state
+history.pushState(null, null, window.location.pathname); // דחיפה ראשונית של state
 
     </script>
   </body>
