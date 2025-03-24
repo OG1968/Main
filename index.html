@@ -1695,16 +1695,27 @@ function shareRecipe(index) {
 
 
 
-function showExitConfirm() {
-  // בדיקה אם המצב כהה פעיל
-  const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
-  
-  // צבעים דינמיים לפי מצב תצוגה
-  const bgColor = isDarkMode ? '#2d2d2d' : 'white';
-  const textColor = isDarkMode ? 'white' : 'black';
-  const confirmBtnBg = isDarkMode ? '#ff6666' : '#ff4444';
-  const cancelBtnBg = isDarkMode ? '#66bb6a' : '#4caf50';
+// פונקציה לטיפול בלחיצה אחורה - ללא שינוי
+let backButtonClicks = 0;
+let backButtonTimer = null;
 
+function handleBackButton() {
+  backButtonClicks++;
+  
+  if (backButtonClicks === 1) {
+    backButtonTimer = setTimeout(() => {
+      window.location.reload();
+      backButtonClicks = 0;
+    }, 300);
+  } else if (backButtonClicks === 2) {
+    clearTimeout(backButtonTimer);
+    backButtonClicks = 0;
+    showExitConfirm();
+  }
+}
+
+// פונקציה מעודכנת להצגת דיאלוג יציאה
+function showExitConfirm() {
   const modal = document.createElement('div');
   modal.id = 'exit-modal';
   modal.style.position = 'fixed';
@@ -1712,25 +1723,30 @@ function showExitConfirm() {
   modal.style.left = '0';
   modal.style.width = '100%';
   modal.style.height = '100%';
-  modal.style.backgroundColor = 'rgba(0,0,0,0.7)'; // רקע שקוף כהה יותר
+  modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
   modal.style.zIndex = '10000';
   modal.style.display = 'flex';
   modal.style.justifyContent = 'center';
   modal.style.alignItems = 'center';
   
   modal.innerHTML = `
-    <div style="background: ${bgColor}; color: ${textColor}; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-      <h3 style="margin-bottom: 15px; color: ${textColor};">האם אתה בטוח שברצונך לצאת?</h3>
-      <button id="confirm-exit" style="background: ${confirmBtnBg}; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px; cursor: pointer;">יציאה</button>
-      <button id="cancel-exit" style="background: ${cancelBtnBg}; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px; cursor: pointer;">ביטול</button>
+    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%;">
+      <h3 style="margin-bottom: 15px;">האם אתה בטוח שברצונך לצאת?</h3>
+      <button id="confirm-exit" style="background: #ff4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">יציאה</button>
+      <button id="cancel-exit" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin: 0 5px;">ביטול</button>
     </div>
   `;
   
   document.body.appendChild(modal);
 
-  // מאזינים ללחיצות
+  // מאזינים חדשים עם event delegation
   modal.querySelector('#confirm-exit').addEventListener('click', () => {
-    window.location.href = 'https://www.google.com';
+    // פתרון אמין יותר ליציאה
+    if (window.history.length > 1) {
+      window.history.go(-(window.history.length - 1)); // חוזרים לדף הראשון בהיסטוריה
+    } else {
+      window.location.href = 'about:blank'; // פתרון גיבוי
+    }
     document.body.removeChild(modal);
   });
 
@@ -1738,6 +1754,15 @@ function showExitConfirm() {
     document.body.removeChild(modal);
   });
 }
+
+// מאזין לאירועי הסטוריה - ללא שינוי
+window.onpopstate = function(event) {
+  handleBackButton();
+  history.pushState(null, null, window.location.pathname);
+};
+
+// דחוף מצב היסטוריה - ללא שינוי
+history.pushState(null, null, window.location.pathname);
 
     </script>
   </body>
