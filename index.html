@@ -1743,26 +1743,7 @@ function shareRecipe(index) {
 
 
 
-// פונקציה לטיפול בלחיצה אחורה - ללא שינוי
-let backButtonClicks = 0;
-let backButtonTimer = null;
-
-function handleBackButton() {
-    backButtonClicks++;
-
-    if (backButtonClicks === 1) {
-        backButtonTimer = setTimeout(() => {
-            window.location.reload();
-            backButtonClicks = 0;
-        }, 300);
-    } else if (backButtonClicks === 2) {
-        clearTimeout(backButtonTimer);
-        backButtonClicks = 0;
-        showExitConfirm();
-    }
-}
-
-// פונקציה מעודכנת להצגת דיאלוג יציאה
+// פונקציה להצגת דיאלוג יציאה
 function showExitConfirm() {
     const modal = document.createElement('div');
     modal.id = 'exit-modal';
@@ -1802,27 +1783,18 @@ function showExitConfirm() {
 
     confirmBtn.addEventListener('click', () => {
         document.body.removeChild(modal);
-        try {
-            window.open('', '_self');
-            window.close();
-            if (!window.closed) {
-                window.location.href = '/';
-            }
-        } catch (e) {
-            console.error('שגיאה בסגירת החלון:', e);
-            window.location.href = '/';
-        }
+        window.location.href = '/';
     });
 
     cancelBtn.addEventListener('click', () => {
         document.body.removeChild(modal);
-        history.pushState(null, null, window.location.pathname);  // מניעה של יציאה לא מכוונת
+        history.pushState(null, null, window.location.pathname); // מניעה של חזרה לא מכוונת
     });
 }
 
 window.addEventListener('popstate', (event) => {
     showExitConfirm();
-    history.pushState(null, null, window.location.pathname); // מניעה של חזרה ללא אישור
+    history.pushState(null, null, window.location.pathname); // מניעה של חזרה לא מכוונת
 });
 
 history.pushState(null, null, window.location.pathname); // דחיפה ראשונית של state
