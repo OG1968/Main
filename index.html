@@ -1751,25 +1751,7 @@ function shareRecipe(index) {
 }
 
 
-
-
-        // תוספות עבור פונקציית סגירת הישום
-
-
-
-
-
-
-
-// מאזין ללחיצת אחורה
-window.addEventListener('popstate', function(event) {
-  // מציג את הבאנר
-  showExitDialog();
-  // מונע את פעולת הניווט
-  history.pushState(null, null, window.location.pathname);
-});
-
-// יצירת אלמנט הבאנר
+// יצירת אלמנט באנר הסגירה 
 const exitDialog = document.createElement('div');
 exitDialog.id = 'exitDialog';
 exitDialog.style = `
@@ -1808,12 +1790,6 @@ function exitApplication() {
 document.getElementById('exitConfirm').addEventListener('click', exitApplication);
 document.getElementById('exitCancel').addEventListener('click', function() {
   exitDialog.style.display = 'none';
-});
-
-// מאזין ללחיצת אחורה
-window.addEventListener('popstate', function(event) {
-  showExitDialog();
-  history.pushState(null, null, window.location.pathname);
 });
 
 // הצגת הדיאלוג הקיים מהקובץ CSS
