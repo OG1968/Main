@@ -1802,16 +1802,6 @@ document.body.appendChild(exitDialog);
 // פונקציה להפניה לדף אחר
 function exitApplication() {
   window.location.href = 'https://google.com';
-  
-  // הפניה לדף פרידה
-  // window.location.href = 'goodbye.html';
-  
-  // טעינה מחדש של הדף הנוכחי
-  // window.location.reload();
-  
-  //  הפניה לדף ריק
-  // window.location.href = 'about:blank';
-
 }
 
 // מאזין ללחיצות כפתורים
@@ -1845,12 +1835,6 @@ function hideExitDialog() {
 // טיפול בלחיצות כפתורים
 document.getElementById('confirm-exit')?.addEventListener('click', exitApplication);
 document.getElementById('cancel-exit')?.addEventListener('click', hideExitDialog);
-
-// פונקציית יציאה
-function exitApplication() {
-  window.location.href = 'about:blank';
-  // או כל פעולת יציאה אחרת שאתה מעדיף
-}
 
 // מאזין ללחיצת אחורה
 window.addEventListener('popstate', function(event) {
