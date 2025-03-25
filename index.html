@@ -128,7 +128,7 @@
           background-color: var(--primary-color);
         }
         50% {
-          background-color: #ff4444; /* צבע אדום */
+          background-color: #ff4444; 
         }
         100% {
           background-color: var(--primary-color);
@@ -164,7 +164,7 @@
       .input-group input:focus,
       .input-group textarea:focus {
         border-color: #4caf50;
-        box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); /* צל קל סביב השדה */
+        box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); 
       }
       /* הגבלת גובה שדה הכותרת לשתי שורות */
       #title {
@@ -576,30 +576,30 @@
       .input-group-row textarea,
       .input-group-row select,
       .input-group-row input {
-        width: 100%; /* רוחב מלא של השדה */
-        height: 40px; /* גובה אחיד לשדות */
-        padding: 8px; /* ריפוד פנימי */
-        box-sizing: border-box; /* כולל ריפוד וגבול ברוחב */
-        border: 2px solid var(--primary-color); /* גבול בצבע ראשי */
-        border-radius: 5px; /* עיגול פינות כמו בשדה הכותרת */
-        background-color: var(--input-bg); /* צבע רקע */
-        color: var(--text-color); /* צבע טקסט */
-        font-size: 16px; /* גודל טקסט */
+        width: 100%; 
+        height: 40px; 
+        padding: 8px; 
+        box-sizing: border-box; 
+        border: 2px solid var(--primary-color); 
+        border-radius: 5px; 
+        background-color: var(--input-bg); 
+        color: var(--text-color); 
+        font-size: 16px; 
       }
 
       #title {
-        overflow: hidden; /* הסתרת חיצי הגלילה */
-        resize: none; /* מניעת שינוי גודל ידני */
+        overflow: hidden; 
+        resize: none; 
       }
 
       .input-group-row textarea {
-        resize: vertical; /* אפשר שינוי גובה אנכי בלבד */
-        min-height: 40px; /* גובה מינימלי */
+        resize: vertical; 
+        min-height: 40px; 
       }
 
       .input-group-row .input-group {
-        flex: 1; /* כל שדה יקבל את אותו הרוחב */
-        margin-right: 4px; /* רווח של 4 פיקסלים בין השדות */
+        flex: 1; 
+        margin-right: 4px; 
       }
 
       .input-group-row .input-group:last-child {
@@ -741,6 +741,7 @@
       <h1>ספר מתכונים</h1>
     </div>
     <div class="container">
+      
       <!-- כפתור פתח/סגור עורך -->
       <div class="buttons-container">
         <button
@@ -748,7 +749,7 @@
           id="toggle-edit-btn"
           class="uniform-btn"
         >
-          פתח עורך
+          הוסף מתכון
         </button>
       </div>
 
@@ -943,7 +944,7 @@
     </div>
 
     <script>
-      const defaultImage = "default_image.png";
+      const defaultImage = "./default_image.png";
 
       let db;
       window.onload = function () {
@@ -982,7 +983,7 @@
         addRecipeBtn.style.display = "none";
 
         const editBtn = document.getElementById("toggle-edit-btn");
-        editBtn.innerText = "פתח עורך";
+        editBtn.innerText = "הוסף מתכון";
 
         // בדיקה ראשונית של מצב הכפתור "הצג חיפוש"
         const toggleSearchBtn = document.getElementById("toggle-search-btn");
@@ -1592,7 +1593,7 @@
         const recipesContainer = document.getElementById("recipes");
         const toggleSearchBtn = document.getElementById("toggle-search-btn");
 
-        const isEditorOpen = editBtn.innerText.trim() === "פתח עורך";
+        const isEditorOpen = editBtn.innerText.trim() === "הוסף מתכון";
 
         // הצגה או הסתרה של שדות הקלט וכפתור הוספת המתכון
         inputFields.forEach((field) => {
@@ -1602,7 +1603,7 @@
         additionalButtons.style.display = isEditorOpen ? "flex" : "none";
 
         // עדכון טקסט הכפתור
-        editBtn.innerText = isEditorOpen ? "סגור עורך" : "פתח עורך";
+        editBtn.innerText = isEditorOpen ? "סגור עריכת מתכון" : "הוסף מתכון";
 
         // אם העורך נפתח, הסתר את תוצאות החיפוש והצג את רשימת המתכונים
         if (isEditorOpen) {
