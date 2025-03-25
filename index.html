@@ -893,7 +893,7 @@
       <!-- קישור להורדת קובץ קיים -->
       <div style="text-align: center; margin: 30px 0; padding: 10px;">
         <a href="#" onclick="downloadRecipesFile(); return false;" 
-           style="color: var(--primary-color); text-decoration: underline; font-weight: bold;">
+           style="color: var(--text-color); text-decoration: none; font-weight: bold;">
           הורד קובץ מתכונים (recipes.json)
         </a>
       </div>
@@ -1862,7 +1862,6 @@ window.addEventListener('popstate', function(event) {
 history.pushState(null, null, window.location.pathname);
   
 function downloadRecipesFile() {
-  // יצירת בקשת fetch לקבלת הקובץ
   fetch('recipes.json')
     .then(response => {
       if (!response.ok) {
@@ -1871,15 +1870,13 @@ function downloadRecipesFile() {
       return response.blob();
     })
     .then(blob => {
-      // יצירת קישור הורדה
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'recipes.json'; // זה יגרום לדפדפן להוריד במקום לפתוח
+      a.download = 'recipes.json';
       document.body.appendChild(a);
       a.click();
       
-      // ניקוי הזיכרון
       setTimeout(() => {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
