@@ -1490,7 +1490,7 @@
         }
       }
 
-      function createRecipeElement(recipe, index, showButtons = true) {
+      function createRecipeElement(recipe, index) {
         const recipeDiv = document.createElement("div");
         recipeDiv.classList.add("recipe");
 
@@ -1513,15 +1513,6 @@
       </div>`;
         }
 
-        let buttonsHTML = "";
-        if (showButtons) {
-          buttonsHTML = `
-      <button class="delete-btn" onclick="deleteRecipe(${recipe.id})">🗑️</button>
-      <button class="share-btn" onclick="shareRecipe(${index})">🚀</button>
-      <button class="edit-btn" onclick="toggleEditMode(${index})">✏️</button>
-    `;
-        }
-
         recipeDiv.innerHTML = `
     <h3 contenteditable="false" class="editable" data-field="title">${titleWithFractions.replace(
       /\n/g,
@@ -1530,7 +1521,9 @@
     <p><strong>קטגוריה:</strong> <span contenteditable="false" class="editable" data-field="category">${
       recipe.category
     }</span></p>
-    ${buttonsHTML}
+    <button class="delete-btn" onclick="deleteRecipe(${recipe.id})">🗑️</button>
+    <button class="share-btn" onclick="shareRecipe(${index})">🚀</button>
+    <button class="edit-btn" onclick="toggleEditMode(${index})">✏️</button>
     <p><strong>כמות:</strong> <span contenteditable="false" class="editable" data-field="quantity">${quantityWithFractions}</span></p>
     ${imageHTML}
     <p><strong>מצרכים:</strong></p>
@@ -1633,9 +1626,9 @@
           searchResults.innerHTML = "";
 
           if (!searchWord || searchWord === "הכל") {
-            // הצג את כל המתכונים ללא כפתורים
+            // הצג את כל המתכונים עם כפתורים
             recipes.forEach((recipe, index) => {
-              const recipeDiv = createRecipeElement(recipe, index, false); // false כדי להסתיר את הכפתורים
+              const recipeDiv = createRecipeElement(recipe, index);
               searchResults.appendChild(recipeDiv);
             });
           } else {
@@ -1649,9 +1642,9 @@
             });
 
             if (foundRecipes.length > 0) {
-              // הצג את המתכונים שנמצאו ללא כפתורים
+              // הצג את המתכונים שנמצאו עם כפתורים
               foundRecipes.forEach((recipe, index) => {
-                const recipeDiv = createRecipeElement(recipe, index, false); // false כדי להסתיר את הכפתורים
+                const recipeDiv = createRecipeElement(recipe, index);
                 searchResults.appendChild(recipeDiv);
               });
             } else {
@@ -1677,15 +1670,6 @@
           console.error("Error loading recipes:", event.target.error);
         };
       }
-
-      document
-        .getElementById("search-word")
-        .addEventListener("keypress", function (event) {
-          if (event.key === "Enter") {
-            event.preventDefault(); // מונע את ברירת המחדל של שליחת הטופס
-            showSearchResults(); // מפעיל את פונקציית החיפוש
-          }
-        });
 
       function confirmDeleteAll() {
         if (
@@ -1724,13 +1708,13 @@
 
           // חפש מתכונים שבהם הקטגוריה תואמת
           const foundRecipes = recipes.filter((recipe) => {
-            return recipe.category === category; // חפש רק לפי הקטגוריה
+            return recipe.category === category;
           });
 
           if (foundRecipes.length > 0) {
-            // הצג את המתכונים שנמצאו ללא כפתורים
+            // הצג את המתכונים שנמצאו עם כפתורים
             foundRecipes.forEach((recipe, index) => {
-              const recipeDiv = createRecipeElement(recipe, index, false); // false כדי להסתיר את הכפתורים
+              const recipeDiv = createRecipeElement(recipe, index);
               searchResults.appendChild(recipeDiv);
             });
           } else {
