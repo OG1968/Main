@@ -1068,7 +1068,18 @@
 
         request.onsuccess = (event) => {
           const recipes = event.target.result;
-          displayRecipes(recipes);
+          const recipesContainer = document.getElementById("recipes");
+          recipesContainer.innerHTML = "";
+
+          if (recipes.length === 0) {
+            recipesContainer.innerHTML = "<p>לא נמצאו מתכונים.</p>";
+            return;
+          }
+
+          recipes.forEach((recipe) => {
+            const recipeDiv = createRecipeElement(recipe);
+            recipesContainer.appendChild(recipeDiv);
+          });
         };
 
         request.onerror = (event) => {
@@ -1131,28 +1142,41 @@
         }
       }
 
-      function toggleEditMode(index) {
+      function toggleEditMode(recipeId) {
         const transaction = db.transaction(["recipes"], "readwrite");
         const store = transaction.objectStore("recipes");
-        const request = store.getAll();
+        const request = store.get(recipeId);
 
         request.onsuccess = (event) => {
-          const recipes = event.target.result;
-          const recipe = recipes[index];
-          const recipeDiv = document.querySelectorAll(".recipe")[index];
+          const recipe = event.target.result;
+          if (!recipe) {
+            console.error("Recipe not found with ID:", recipeId);
+            return;
+          }
+
+          const recipeDiv = document.querySelector(
+            `.recipe[data-id="${recipeId}"]`
+          );
+          if (!recipeDiv) {
+            console.error("Recipe element not found for ID:", recipeId);
+            return;
+          }
+
           const editables = recipeDiv.querySelectorAll(".editable");
           const isEnteringEditMode = editables[0].contentEditable !== "true";
 
           // הפעלת או ביטול מצב עריכה עבור שדות הניתנים לעריכה
           editables.forEach((editable) => {
             editable.contentEditable = isEnteringEditMode ? "true" : "false";
-            editable.addEventListener("input", () => {
-              updateRecipeInDB(
-                index,
-                editable.dataset.field,
-                editable.innerText
-              );
-            });
+            if (isEnteringEditMode) {
+              editable.addEventListener("input", () => {
+                updateRecipeInDB(
+                  recipeId,
+                  editable.dataset.field,
+                  editable.innerText
+                );
+              });
+            }
           });
 
           // יצירת או עדכון של אזור התמונה
@@ -1173,26 +1197,26 @@
               imageContainer.appendChild(
                 createImageButton(
                   "הוסף תמונה",
-                  () => changeRecipeImage(index),
+                  () => changeRecipeImage(recipeId),
                   "#4caf50"
                 )
               );
             } else {
               // אם יש תמונה, הצג כפתורי "החלף תמונה" ו"מחק תמונה"
               imageContainer.innerHTML = `
-                <img src="${recipe.imageData}" style="max-width: 100%; max-height: 200px; border-radius: 5px;" />
-              `;
+          <img src="${recipe.imageData}" style="max-width: 100%; max-height: 200px; border-radius: 5px;" />
+        `;
               imageContainer.appendChild(
                 createImageButton(
                   "החלף תמונה",
-                  () => changeRecipeImage(index),
+                  () => changeRecipeImage(recipeId),
                   "#4caf50"
                 )
               );
               imageContainer.appendChild(
                 createImageButton(
                   "מחק תמונה",
-                  () => removeImage(index),
+                  () => removeImage(recipeId),
                   "#ff4444"
                 )
               );
@@ -1201,8 +1225,8 @@
             // אם יוצאים ממצב עריכה, הסר את הכפתורים אך שמור את התמונה אם קיימת
             if (recipe.imageData && recipe.imageData.trim() !== "") {
               imageContainer.innerHTML = `
-                <img src="${recipe.imageData}" style="max-width: 100%; max-height: 200px; border-radius: 5px;" />
-              `;
+          <img src="${recipe.imageData}" style="max-width: 100%; max-height: 200px; border-radius: 5px;" />
+        `;
             } else {
               imageContainer.innerHTML = ""; // אם אין תמונה, הסר הכל
             }
@@ -1215,7 +1239,8 @@
         };
 
         request.onerror = (event) => {
-          console.error("Error loading recipes:", event.target.error);
+          console.error("Error loading recipe:", event.target.error);
+          showToast("שגיאה בטעינת המתכון לעריכה", true);
         };
       }
 
@@ -1234,31 +1259,36 @@
         return button;
       }
 
-      function updateRecipeInDB(index, field, newValue) {
+      function updateRecipeInDB(recipeId, field, newValue) {
         const transaction = db.transaction(["recipes"], "readwrite");
         const store = transaction.objectStore("recipes");
-        const request = store.getAll();
+        const request = store.get(recipeId);
 
         request.onsuccess = (event) => {
-          const recipes = event.target.result;
-          if (recipes[index]) {
-            recipes[index][field] = newValue;
-            const updateRequest = store.put(recipes[index]);
+          const recipe = event.target.result;
+          if (recipe) {
+            recipe[field] = newValue;
+            const updateRequest = store.put(recipe);
             updateRequest.onsuccess = () => {
-              console.log("Recipe updated successfully.");
+              console.log(`Recipe ${field} updated successfully.`);
             };
             updateRequest.onerror = (event) => {
-              console.error("Error updating recipe:", event.target.error);
+              console.error(
+                `Error updating recipe ${field}:`,
+                event.target.error
+              );
+              showToast(`שגיאה בעדכון ${field} של המתכון`, true);
             };
           }
         };
 
         request.onerror = (event) => {
-          console.error("Error loading recipes:", event.target.error);
+          console.error("Error loading recipe:", event.target.error);
+          showToast("שגיאה בטעינת המתכון לעדכון", true);
         };
       }
 
-      function changeRecipeImage(index) {
+      function changeRecipeImage(recipeId) {
         const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = "image/*";
@@ -1271,34 +1301,54 @@
           if (event.target.files && event.target.files[0]) {
             const reader = new FileReader();
             reader.onload = function (e) {
-              const recipeDiv = document.querySelectorAll(".recipe")[index];
+              const recipeDiv = document.querySelector(
+                `.recipe[data-id="${recipeId}"]`
+              );
+              if (!recipeDiv) {
+                console.error("Recipe element not found for ID:", recipeId);
+                return;
+              }
+
               const imageContainer = recipeDiv.querySelector(".recipe-image");
+              if (!imageContainer) {
+                console.error(
+                  "Image container not found for recipe:",
+                  recipeId
+                );
+                return;
+              }
+
               imageContainer.innerHTML = `
-                <img src="${e.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 5px;" />
-                <button class="remove-image-btn" onclick="removeImage(${index})" style="display: block; margin: 5px auto; padding: 3px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">הסר תמונה</button>
-              `;
+          <img src="${e.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 5px;" />
+          <button class="remove-image-btn" onclick="removeImage(${recipeId})" style="display: block; margin: 5px auto; padding: 3px 8px; background: #ff4444; color: white; border: none; border-radius: 3px; cursor: pointer;">הסר תמונה</button>
+        `;
 
               const transaction = db.transaction(["recipes"], "readwrite");
               const store = transaction.objectStore("recipes");
-              const request = store.getAll();
+              const request = store.get(recipeId);
 
               request.onsuccess = (event) => {
-                const recipes = event.target.result;
-                recipes[index].imageData = e.target.result;
-                const updateRequest = store.put(recipes[index]);
-                updateRequest.onsuccess = () => {
-                  console.log("Recipe image updated successfully.");
-                };
-                updateRequest.onerror = (event) => {
-                  console.error(
-                    "Error updating recipe image:",
-                    event.target.error
-                  );
-                };
+                const recipe = event.target.result;
+                if (recipe) {
+                  recipe.imageData = e.target.result;
+                  const updateRequest = store.put(recipe);
+                  updateRequest.onsuccess = () => {
+                    console.log("Recipe image updated successfully.");
+                    showToast("תמונת המתכון עודכנה בהצלחה!");
+                  };
+                  updateRequest.onerror = (event) => {
+                    console.error(
+                      "Error updating recipe image:",
+                      event.target.error
+                    );
+                    showToast("שגיאה בעדכון תמונת המתכון", true);
+                  };
+                }
               };
 
               request.onerror = (event) => {
-                console.error("Error loading recipes:", event.target.error);
+                console.error("Error loading recipe:", event.target.error);
+                showToast("שגיאה בטעינת המתכון לעדכון", true);
               };
             };
             reader.readAsDataURL(event.target.files[0]);
@@ -1307,31 +1357,46 @@
         };
       }
 
-      function removeImage(index) {
+      function removeImage(recipeId) {
         if (confirm("האם אתה בטוח שברצונך להסיר את התמונה?")) {
           const transaction = db.transaction(["recipes"], "readwrite");
           const store = transaction.objectStore("recipes");
-          const request = store.getAll();
+          const request = store.get(recipeId);
 
           request.onsuccess = (event) => {
-            const recipes = event.target.result;
-            recipes[index].imageData = null;
-            const updateRequest = store.put(recipes[index]);
-            updateRequest.onsuccess = () => {
-              console.log("Recipe image removed successfully.");
-              const recipeDiv = document.querySelectorAll(".recipe")[index];
-              const imageContainer = recipeDiv.querySelector(".recipe-image");
-              imageContainer.innerHTML = `
+            const recipe = event.target.result;
+            if (recipe) {
+              recipe.imageData = null;
+              const updateRequest = store.put(recipe);
+              updateRequest.onsuccess = () => {
+                console.log("Recipe image removed successfully.");
+                const recipeDiv = document.querySelector(
+                  `.recipe[data-id="${recipeId}"]`
+                );
+                if (recipeDiv) {
+                  const imageContainer =
+                    recipeDiv.querySelector(".recipe-image");
+                  if (imageContainer) {
+                    imageContainer.innerHTML = `
                 <img src="${defaultImage}" style="max-width: 100%; max-height: 200px; border-radius: 5px;" />
               `;
-            };
-            updateRequest.onerror = (event) => {
-              console.error("Error removing recipe image:", event.target.error);
-            };
+                  }
+                }
+                showToast("תמונת המתכון הוסרה בהצלחה!");
+              };
+              updateRequest.onerror = (event) => {
+                console.error(
+                  "Error removing recipe image:",
+                  event.target.error
+                );
+                showToast("שגיאה בהסרת תמונת המתכון", true);
+              };
+            }
           };
 
           request.onerror = (event) => {
-            console.error("Error loading recipes:", event.target.error);
+            console.error("Error loading recipe:", event.target.error);
+            showToast("שגיאה בטעינת המתכון לעדכון", true);
           };
         }
       }
@@ -1490,9 +1555,10 @@
         }
       }
 
-      function createRecipeElement(recipe, index) {
+      function createRecipeElement(recipe) {
         const recipeDiv = document.createElement("div");
         recipeDiv.classList.add("recipe");
+        recipeDiv.dataset.id = recipe.id; // הוספת ID המתכון כתכונה
 
         // החלפת שברים בטקסטים השונים
         const titleWithFractions = replaceFractions(recipe.title);
@@ -1522,8 +1588,8 @@
       recipe.category
     }</span></p>
     <button class="delete-btn" onclick="deleteRecipe(${recipe.id})">🗑️</button>
-    <button class="share-btn" onclick="shareRecipe(${index})">🚀</button>
-    <button class="edit-btn" onclick="toggleEditMode(${index})">✏️</button>
+    <button class="share-btn" onclick="shareRecipe(${recipe.id})">🚀</button>
+    <button class="edit-btn" onclick="toggleEditMode(${recipe.id})">✏️</button>
     <p><strong>כמות:</strong> <span contenteditable="false" class="editable" data-field="quantity">${quantityWithFractions}</span></p>
     ${imageHTML}
     <p><strong>מצרכים:</strong></p>
@@ -1706,28 +1772,23 @@
           const searchResults = document.getElementById("search-results");
           searchResults.innerHTML = "";
 
-          // חפש מתכונים שבהם הקטגוריה תואמת
           const foundRecipes = recipes.filter((recipe) => {
             return recipe.category === category;
           });
 
           if (foundRecipes.length > 0) {
-            // הצג את המתכונים שנמצאו עם כפתורים
-            foundRecipes.forEach((recipe, index) => {
-              const recipeDiv = createRecipeElement(recipe, index);
+            foundRecipes.forEach((recipe) => {
+              const recipeDiv = createRecipeElement(recipe);
               searchResults.appendChild(recipeDiv);
             });
           } else {
-            // אם לא נמצאו מתכונים, הצג הודעה
             searchResults.innerHTML = `<p>לא נמצאו מתכונים בקטגוריה: ${category}.</p>`;
           }
 
-          // הצג את אזור תוצאות החיפוש והסתר את רשימת המתכונים הרגילה
           searchResults.style.display = "block";
           const recipesContainer = document.getElementById("recipes");
           recipesContainer.style.display = "none";
 
-          // עדכון טקסט הכפתור ל"הסתר חיפוש"
           const toggleBtn = document.getElementById("toggle-search-btn");
           toggleBtn.innerText = "הסתר חיפוש";
         };
@@ -1765,24 +1826,23 @@
         }, 3000);
       }
 
-      function shareRecipe(index) {
+      function shareRecipe(recipeId) {
         const transaction = db.transaction(["recipes"], "readonly");
         const store = transaction.objectStore("recipes");
-        const request = store.getAll();
+        const request = store.get(recipeId); // שימוש ב-get עם ID במקום getAll
 
         request.onsuccess = (event) => {
-          const recipes = event.target.result;
-          const recipe = recipes[index];
+          const recipe = event.target.result;
 
           if (!recipe) {
-            alert("מתכון לא נמצא.");
+            showToast("מתכון לא נמצא.", true);
             return;
           }
 
           // יצירת תוכן לשיתוף (מיושר לימין עם מעבר שורה אחרי "מצרכים:" ו"הוראות הכנה:")
           const shareContent = {
-            title: recipe.title, // כותרת המתכון
-            text: `\u200F${recipe.title}\n\nכמות: ${recipe.quantity}\n\nמצרכים:\n${recipe.ingredients}\n\nהוראות הכנה:\n${recipe.instructions}`, // פרטי המתכון עם רווחים ומיושר לימין
+            title: recipe.title,
+            text: `\u200F${recipe.title}\n\nכמות: ${recipe.quantity}\n\nמצרכים:\n${recipe.ingredients}\n\nהוראות הכנה:\n${recipe.instructions}`,
           };
 
           // בדיקה אם Web Share API נתמך
@@ -1790,7 +1850,10 @@
             navigator
               .share(shareContent)
               .then(() => console.log("שיתוף בוצע בהצלחה!"))
-              .catch((error) => console.log("שגיאה בשיתוף:", error));
+              .catch((error) => {
+                console.log("שגיאה בשיתוף:", error);
+                showToast("שגיאה בשיתוף המתכון", true);
+              });
           } else {
             // אם Web Share API לא נתמך, נשתמש בקישורים מיוחדים
             const whatsappLink = `https://wa.me/?text=${encodeURIComponent(
@@ -1840,7 +1903,8 @@
         };
 
         request.onerror = (event) => {
-          console.error("Error loading recipes:", event.target.error);
+          console.error("Error loading recipe:", event.target.error);
+          showToast("שגיאה בטעינת המתכון לשיתוף", true);
         };
       }
 
