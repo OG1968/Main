@@ -128,7 +128,7 @@
           background-color: var(--primary-color);
         }
         50% {
-          background-color: #ff4444; 
+          background-color: #ff4444;
         }
         100% {
           background-color: var(--primary-color);
@@ -164,7 +164,7 @@
       .input-group input:focus,
       .input-group textarea:focus {
         border-color: #4caf50;
-        box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); 
+        box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
       }
       /* הגבלת גובה שדה הכותרת לשתי שורות */
       #title {
@@ -576,30 +576,30 @@
       .input-group-row textarea,
       .input-group-row select,
       .input-group-row input {
-        width: 100%; 
-        height: 40px; 
-        padding: 8px; 
-        box-sizing: border-box; 
-        border: 2px solid var(--primary-color); 
-        border-radius: 5px; 
-        background-color: var(--input-bg); 
-        color: var(--text-color); 
-        font-size: 16px; 
+        width: 100%;
+        height: 40px;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 2px solid var(--primary-color);
+        border-radius: 5px;
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        font-size: 16px;
       }
 
       #title {
-        overflow: hidden; 
-        resize: none; 
+        overflow: hidden;
+        resize: none;
       }
 
       .input-group-row textarea {
-        resize: vertical; 
-        min-height: 40px; 
+        resize: vertical;
+        min-height: 40px;
       }
 
       .input-group-row .input-group {
-        flex: 1; 
-        margin-right: 4px; 
+        flex: 1;
+        margin-right: 4px;
       }
 
       .input-group-row .input-group:last-child {
@@ -741,7 +741,6 @@
       <h1>ספר מתכונים</h1>
     </div>
     <div class="container">
-      
       <!-- כפתור פתח/סגור עורך -->
       <div class="buttons-container">
         <button
@@ -1495,6 +1494,12 @@
         const recipeDiv = document.createElement("div");
         recipeDiv.classList.add("recipe");
 
+        // החלפת שברים בטקסטים השונים
+        const titleWithFractions = replaceFractions(recipe.title);
+        const ingredientsWithFractions = replaceFractions(recipe.ingredients);
+        const instructionsWithFractions = replaceFractions(recipe.instructions);
+        const quantityWithFractions = replaceFractions(recipe.quantity);
+
         let imageHTML = "";
         if (recipe.imageData && recipe.imageData.trim() !== "") {
           imageHTML = `
@@ -1512,13 +1517,13 @@
         if (showButtons) {
           buttonsHTML = `
       <button class="delete-btn" onclick="deleteRecipe(${recipe.id})">🗑️</button>
-<button class="share-btn" onclick="shareRecipe(${index})">🚀</button>
-<button class="edit-btn" onclick="toggleEditMode(${index})">✏️</button>
+      <button class="share-btn" onclick="shareRecipe(${index})">🚀</button>
+      <button class="edit-btn" onclick="toggleEditMode(${index})">✏️</button>
     `;
         }
 
         recipeDiv.innerHTML = `
-    <h3 contenteditable="false" class="editable" data-field="title">${recipe.title.replace(
+    <h3 contenteditable="false" class="editable" data-field="title">${titleWithFractions.replace(
       /\n/g,
       "<br>"
     )}</h3>
@@ -1526,17 +1531,15 @@
       recipe.category
     }</span></p>
     ${buttonsHTML}
-    <p><strong>כמות:</strong> <span contenteditable="false" class="editable" data-field="quantity">${
-      recipe.quantity
-    }</span></p>
+    <p><strong>כמות:</strong> <span contenteditable="false" class="editable" data-field="quantity">${quantityWithFractions}</span></p>
     ${imageHTML}
     <p><strong>מצרכים:</strong></p>
-    <span contenteditable="false" class="editable" data-field="ingredients">${recipe.ingredients.replace(
+    <span contenteditable="false" class="editable" data-field="ingredients">${ingredientsWithFractions.replace(
       /\n/g,
       "<br>"
     )}</span>
     <p><strong>הוראות הכנה:</strong></p>
-    <span contenteditable="false" class="editable" data-field="instructions">${recipe.instructions.replace(
+    <span contenteditable="false" class="editable" data-field="instructions">${instructionsWithFractions.replace(
       /\n/g,
       "<br>"
     )}</span>
@@ -1962,6 +1965,22 @@
             showToast("שגיאה: " + error.message, true);
             console.error("Error downloading file:", error);
           });
+      }
+
+      function replaceFractions(text) {
+        const fractionMap = {
+          "1/2": "½",
+          "1/4": "¼",
+          "1/3": "⅓",
+          "2/3": "⅔",
+          "3/4": "¾",
+        };
+
+        let result = text;
+        for (const [fraction, symbol] of Object.entries(fractionMap)) {
+          result = result.replace(new RegExp(fraction, "g"), symbol);
+        }
+        return result;
       }
     </script>
   </body>
