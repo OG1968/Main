@@ -215,6 +215,17 @@
           padding: var(--input-padding);
         }
       }
+      
+      /* הסרת חצים לגלילה בשדות מספר בדפדפנים מסוימים */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
       /* סטייל למודל המותאם אישית */
       .modal {
@@ -299,6 +310,56 @@
         background-color: var(--button-hover);
         color: var(--text); /* צבע טקסט זהה ל-select המקורי */
       }
+
+      /* סטייל למודל היציאה */
+#exit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+#exit-modal-content {
+  background-color: #5a8de6;
+  color: #000;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 80%;
+  border: 1px solid var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#exit-modal h3 {
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+#exit-modal button {
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#confirm-exit {
+  background-color: #ff4444;
+  color: #000;
+}
+
+#cancel-exit {
+  background-color: var(--primary-color);
+  color: #000;
+}
+
     </style>
   </head>
   <body class="dark-theme">
@@ -314,6 +375,7 @@
             🥣 בחר סוג מזון
           </div>
           <div class="dropdown-options">
+
             <!-- פירות -->
             <div class="category-title">פירות</div>
             <div
@@ -3397,11 +3459,12 @@
         <!-- שדה בחירה שני: משקל בגרמים -->
         <label for="weight">משקל בגרמים:</label>
         <input
-          type="number"
-          id="weight"
-          min="1"
-          placeholder="הזן משקל בגרמים"
-        />
+        type="number"
+        id="weight"
+        min="1"
+        placeholder="הזן משקל בגרמים"
+        inputmode="numeric"
+      />
 
         <!-- כפתור חישוב -->
         <button type="button" onclick="calculateCalories()">
@@ -3415,6 +3478,12 @@
         <span id="nutritionInfo"></span>
       </div>
     </div>
+
+
+
+
+
+
 
     <!-- הדרכה -->
     <div id="customModal" class="modal">
@@ -3434,6 +3503,15 @@
         </p>
       </div>
     </div>
+
+<!-- Exit Confirmation Modal -->
+<div id="exit-modal">
+  <div id="exit-modal-content">
+    <h3>האם לצאת?</h3>
+    <button id="confirm-exit">יציאה</button>
+    <button id="cancel-exit">ביטול</button>
+  </div>
+</div>
 
     <script>
       // פונקציה להצגת הודעת שגיאה
@@ -3741,6 +3819,66 @@
       document
         .querySelector(".selected-item")
         .addEventListener("click", adjustDropdownHeight);
+
+    // פונקציה להפניה לדף אחר
+function exitApplication() {
+  window.location.href = "index.html";
+}
+
+// הצגת הדיאלוג הקיים מהקובץ CSS
+function showExitDialog() {
+  const exitModal = document.getElementById("exit-modal");
+  if (exitModal) {
+    exitModal.style.display = "flex";
+  }
+}
+
+// הסתרת הדיאלוג
+function hideExitDialog() {
+  const exitModal = document.getElementById("exit-modal");
+  if (exitModal) {
+    exitModal.style.display = "none";
+  }
+}
+
+// טיפול בלחיצות כפתורים
+document
+  .getElementById("confirm-exit")
+  ?.addEventListener("click", exitApplication);
+document
+  .getElementById("cancel-exit")
+  ?.addEventListener("click", hideExitDialog);
+
+// מאזין ללחיצת אחורה
+window.addEventListener("popstate", function (event) {
+  showExitDialog();
+  history.pushState(null, null, window.location.pathname);
+});
+
+// אתחול היסטוריה
+history.pushState(null, null, window.location.pathname);
+// פונקציית אתחול
+function initApp() {
+  // אתחול מערכת היציאה מהאפליקציה
+  history.pushState(null, null, window.location.pathname);
+
+  // הוספת מאזין ללחיצת אחורה
+  window.addEventListener("popstate", function (event) {
+    showExitDialog();
+    history.pushState(null, null, window.location.pathname);
+  });
+
+  // טיפול בלחיצות כפתורי היציאה
+  document
+    .getElementById("confirm-exit")
+    ?.addEventListener("click", exitApplication);
+  document
+    .getElementById("cancel-exit")
+    ?.addEventListener("click", hideExitDialog);
+}
+
+// הפעלת האתחול כאשר המסמך טעון
+document.addEventListener("DOMContentLoaded", initApp);    
     </script>
   </body>
 </html>
