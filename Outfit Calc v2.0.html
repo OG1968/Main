@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://www.iconpacks.net/icons/1/free-hanger-icon-81-thumb.png"
+    />
+    <title>המרת מידות ביגוד והנעלה</title>
+    <style>
+      /* === בסיס משותף - משתנים והגדרות בסיסיות === */
+      :root {
+        --transition-time: 2s;
+        --button-transition: background-color 0.3s;
+
+        /* ערכת צבעים כהה */
+        --dark-bg: #000;
+        --dark-container-bg: #2d2d2d;
+        --dark-text: #ffffff;
+        --dark-input-bg: #555555;
+        --dark-button: #6655e5;
+        --dark-button-hover: #9a8fffcb;
+        --dark-result: #2fff00;
+        --dark-timestamp: #777777;
+        --dark-border: #ffffff;
+
+        /* ערכת צבעים בהירה */
+        --light-bg: #00626d;
+        --light-container-bg: #dcdcdc;
+        --light-text: #00626d;
+        --light-input-bg: #ffffff;
+        --light-button: #004951;
+        --light-button-hover: #1399a8;
+        --light-timestamp: #555;
+        --light-border: #222;
+
+        /* הגדרות צבעים דיפולטיביות */
+        --bg: var(--dark-bg);
+        --container-bg: var(--dark-container-bg);
+        --text: var(--dark-text);
+        --input-bg: var(--dark-input-bg);
+        --button: var(--dark-button);
+        --button-hover: var(--dark-button-hover);
+        --result: var(--dark-result);
+        --timestamp: var(--dark-timestamp);
+        --border: var(--dark-border);
+      }
+
+      /* === הגדרות בסיסיות משותפות === */
+      body {
+        font-family: Arial, sans-serif;
+        direction: rtl;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding: 10px;
+        transition: background-color var(--transition-time) ease,
+          color var(--transition-time) ease;
+        background-color: var(--bg);
+        color: var(--text);
+      }
+
+      .container {
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: -1px -1px 5px 5px rgba(255, 47, 0, 0.655);
+        width: 400px;
+        transition: background-color var(--transition-time) ease,
+          box-shadow var(--transition-time) ease;
+        background-color: var(--container-bg);
+      }
+
+      h1,
+      h2 {
+        text-align: center;
+        font-family: "Secular One", sans-serif;
+        font-style: italic;
+        line-height: 1;
+        transition: color var(--transition-time) ease;
+        margin-bottom: 5px;
+        margin-top: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      h2 {
+        font-size: 20px;
+        line-height: 0.8;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        transition: color var(--transition-time) ease;
+      }
+
+      select,
+      input[type="text"],
+      .result {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 16px;
+        box-sizing: border-box;
+        background-color: var(--input-bg);
+        color: var(--text);
+        transition: color var(--transition-time) ease,
+          background-color var(--transition-time) ease,
+          border-color var(--transition-time) ease;
+      }
+
+      .result {
+        background-color: var(--container-bg);
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        margin-top: 10px;
+        border-radius: 5px;
+        color: var(--result);
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: var(--button);
+        color: white;
+        border-radius: 5px;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color var(--button-transition) ease;
+      }
+
+      button:hover {
+        background-color: var(--button-hover);
+      }
+
+      /* כפתור שינוי מצב תצוגה */
+      .theme-toggle {
+        width: 40px;
+        height: 40px;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        border: none;
+        border-radius: 50%;
+        background-color: #6c5ce7;
+        color: white;
+        font-size: 22px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s;
+      }
+
+      .theme-toggle:hover {
+        background-color: #5a4acb;
+      }
+
+      /* כפתור הדרכה */
+      #helpButton {
+        left: 60px;
+      }
+
+      /* === ערכת צבעים בהירה === */
+      body.light-theme {
+        --bg: var(--light-bg);
+        --container-bg: var(--light-container-bg);
+        --text: var(--light-text);
+        --input-bg: var(--light-input-bg);
+        --button: var(--light-button);
+        --button-hover: var(--light-button-hover);
+        --result: var(--light-text);
+        --timestamp: var(--light-timestamp);
+        --border: var(--light-border);
+      }
+
+      /* התאמה למסכים קטנים */
+      @media (max-width: 600px) {
+        :root {
+          --container-padding: 15px;
+          --font-size: 14px;
+          --input-padding: 10px;
+        }
+
+        .container {
+          padding: var(--container-padding);
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+
+        select,
+        input[type="text"],
+        .result,
+        button {
+          font-size: var(--font-size);
+          padding: var(--input-padding);
+        }
+      }
+
+      /* סטייל למודל המותאם אישית */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: var(--container-bg);
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid var(--border);
+        width: 80%;
+        max-width: 500px;
+        text-align: right;
+        color: var(--text);
+      }
+
+      .close {
+        color: var(--text);
+        float: left;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close:hover {
+        color: var(--button-hover);
+      }
+    </style>
+  </head>
+  <body class="dark-theme">
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+    <button id="helpButton" class="theme-toggle" style="left: 60px">❓</button>
+    <div class="container">
+      <h1>המרת מידות ביגוד והנעלה</h1>
+
+      <!-- קטגוריה -->
+      <label for="category">קטגוריה:</label>
+      <select id="category">
+        <option value="womensJeans">👖 נשים ג'ינס</option>
+        <option value="womensShirts">👚 נשים חולצות</option>
+        <option value="mensShirts">👔 גברים חולצות</option>
+        <option value="mensJeans">👖 גברים ג'ינס</option>
+        <option value="womensShoes">👠 נשים הנעלה</option>
+        <option value="mensShoes">👞 גברים הנעלה</option>
+      </select>
+
+      <!-- שיטת מידה -->
+      <label for="measurementSystem">משיטת מדידה:</label>
+      <select id="measurementSystem">
+        <option value="Europe">🇪🇺 אירופה</option>
+        <option value="US">🇺🇸 ארה"ב</option>
+        <option value="UK">🇬🇧 בריטניה</option>
+        <option value="Asia">🌏 אסיה</option>
+        <option value="International">🌐 בינלאומי</option>
+      </select>
+
+      <!-- הזנת מידה -->
+      <label for="inputSize">הזן מידה:</label>
+      <input type="text" id="inputSize" placeholder="לדוגמה: 42, M, 10" />
+
+      <!-- כפתור חישוב -->
+      <button
+        onclick="convertSize()"
+        style="
+          font-family: 'Secular One', sans-serif;
+          font-style: italic;
+          font-size: 20px;
+        "
+      >
+        המר מידה 🔁
+      </button>
+      <!-- תוצאה -->
+      <div class="result" id="result">המידות המקבילות יופיעו כאן ...</div>
+    </div>
+
+    <!-- הדרכה -->
+    <div id="customModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2><u>הדרכה</u></h2>
+        <p>
+          1. בחרו קטגוריה (לדוגמה: ג'ינס נשים).<br />
+          2. בחרו את שיטת המדידה הנוכחית<br />(לדוגמה: אירופה).<br />
+          3. הזינו את המידה שלכם (לדוגמה: 42 או M).<br />
+          4. לחצו על "המר מידה" כדי לקבל את המידה המקבילה בשיטות מדידה אחרות.<br />
+          5. ניתן לשנות את ערכת הצבעים באמצעות הכפתור בצד שמאל למעלה.<br /><br />
+          ✱ מאחר ולא קיים תקן בינלאומי אחיד , <br />טבלת ההמרה הינה להתרשמות
+          בלבד.<br />
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // נתוני המרה
+      const conversionData = {
+        womensJeans: {
+          Asia: [38, 40, 42, 44, 46, 48, 50, 52, 54],
+          Europe: [32, 34, 36, 38, 40, 42, 44, 46, 46],
+          UK: ["4/6", "6/8", "10", "10", "12", "14", "16", "16-18", "18"],
+          US: [0, 2, 4, 6, 8, 10, 12, 14, 16],
+          International: [
+            "XXS",
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "XXXL",
+            "XXXL",
+          ],
+          WaistCm: [
+            "58-60.5",
+            "60.5-63",
+            "68",
+            "68",
+            "73",
+            "78",
+            "83",
+            "86",
+            "90.5",
+          ],
+          HipsCm: [
+            "83.5-86",
+            "86-88.5",
+            "93.5",
+            "93.5",
+            "98.5",
+            "103.5",
+            "108.5",
+            "112",
+            "116",
+          ],
+        },
+        womensShirts: {
+          Asia: [
+            "40-42",
+            "42-44",
+            "44-46",
+            "46-48",
+            "48-50",
+            "50-52",
+            "52-54",
+            "54-56",
+          ],
+          Europe: [
+            "34-36",
+            "36-38",
+            "38-40",
+            "40-42",
+            "42-44",
+            "44-46",
+            "46-48",
+            "48-50",
+          ],
+          UK: [6, 8, 10, 12, 14, 16, 18, 20],
+          US: [6, 8, 10, 12, 14, 16, 18, 20],
+          International: ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"],
+          HeightCm: [
+            "148-153",
+            "153-158",
+            "158-163",
+            "163-168",
+            "168-173",
+            "173-178",
+            "178-183",
+            "183-188",
+          ],
+        },
+        mensShirts: {
+          Asia: [
+            "42-44",
+            "44-46",
+            "46-48",
+            "48-50",
+            "50-54",
+            "54-56",
+            "56-58",
+            "58-60",
+          ],
+          Europe: [
+            "40-42",
+            "42-44",
+            "44-46",
+            "46-48",
+            "48-50",
+            "50-52",
+            "52-56",
+            "56-60",
+          ],
+          UK: [8, 10, 12, 14, 16, 18, 20, 22],
+          US: [8, 10, 12, 14, 16, 18, 20, 22],
+          International: ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"],
+          HeightCm: [
+            "156-162",
+            "162-168",
+            "168-174",
+            "174-180",
+            "180-186",
+            "186-192",
+            "192-198",
+            "198-204",
+          ],
+        },
+        mensJeans: {
+          Asia: [40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64],
+          Europe: [34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58],
+          UK: [30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54],
+          US: [30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54],
+          International: [
+            "XXS",
+            "XXS-XS",
+            "XS",
+            "S",
+            "M",
+            "L",
+            "L-XL",
+            "XL",
+            "XXL",
+            "XXXL",
+            "XXXL",
+            "XXXL-XXXXL",
+            "XXXXL",
+          ],
+          WaistCm: [
+            "66-71",
+            "71-76",
+            "71-76",
+            "76-81",
+            "81-86",
+            "86-91",
+            "86-91",
+            "91-96",
+            "96-101",
+            "101-106",
+            "106-111",
+            "111-116",
+            "116-121",
+          ],
+          SizeW: [24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48],
+        },
+        womensShoes: {
+          Europe: [25, 36, 37, 37.5, 38, 38.5, 39, 40, 41, 42],
+          US: [5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 10, 10.5],
+          UK: ["-", 3, 4, 4.5, 5, 5.5, 6, 7, 8, 9],
+          Asia: ["-", 35, 36, 36.5, 37, 37.5, 38, 39, 40, 41],
+          International: [
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+          ],
+          Inches: [8.8, 9, 9.3, 9.4, 9.6, 9.7, 9.8, 10.1, 10.3, 10.7],
+          Centimeters: [
+            22.3, 22.9, 23.6, 23.9, 24.3, 24.6, 24.9, 25.6, 26.3, 27.3,
+          ],
+        },
+        mensShoes: {
+          Europe: [39, 40, 41, 42, 42.5, 43, 43.5, 44, 45, 46, 47, 48, 49, 50],
+          US: [7, 7.5, 8, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 14, 15],
+          UK: [6, 6.5, 7, 8, 8.5, 9, 9.5, 10, 11, 11.5, 12, 13, 13.5, 14],
+          Asia: [38, 39, 40, 41, 41.5, 42, 42.5, 43, 44, 45, 46, 47, 48, 49],
+          International: [
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+            "None",
+          ],
+          Inches: [
+            9.8, 10.1, 10.3, 10.6, 10.7, 10.9, 11, 11.1, 11.4, 11.6, 11.8, 12,
+            12.4, 13,
+          ],
+          Centimeters: [
+            24.9, 25.6, 26.3, 26.9, 27.3, 27.6, 27.9, 28.3, 28.9, 29.4, 30.2,
+            31.5, 33, 34.5,
+          ],
+        },
+      };
+
+      // פונקציה לעיצוב הטקסט של הקטגוריה
+      function formatCategoryText(category) {
+        const formattedText = category
+          .replace(/([A-Z])/g, " $1") // הוספת רווח לפני אות גדולה
+          .replace(/^./, (str) => str.toUpperCase()) // הפיכת האות הראשונה לגדולה
+          .replace("Womens", "Women's") // החלפת "Womens" ב-"Women's"
+          .replace("Mens", "Men's"); // החלפת "Mens" ב-"Men's"
+
+        return formattedText;
+      }
+
+      // פונקציה להצגת המידות האפשריות
+      function showAvailableSizes(category, system) {
+        const sizes = conversionData[category][system];
+        let sizeRange = "";
+
+        // אם המידות הן טווח (למשל, "40-42")
+        if (typeof sizes[0] === "string" && sizes[0].includes("-")) {
+          const minSize = sizes[0].split("-")[0];
+          const maxSize = sizes[sizes.length - 1].split("-")[1];
+          sizeRange = `${minSize}-${maxSize}`;
+        } else {
+          // אם המידות הן מספרים או אותיות
+          sizeRange = `${sizes[0]}-${sizes[sizes.length - 1]}`;
+        }
+
+        return sizeRange;
+      }
+
+      // פונקציה להמרת מידה
+      function convertSize() {
+        const category = document.getElementById("category").value;
+        const system = document.getElementById("measurementSystem").value;
+        const inputSize = document.getElementById("inputSize").value.trim();
+        const resultDiv = document.getElementById("result");
+
+        // וולידציה של הקלט
+        if (!validateInput(inputSize)) {
+          const availableSizes = showAvailableSizes(category, system);
+          const formattedCategory = formatCategoryText(category);
+          resultDiv.innerHTML = `מידה לא תקינה<br>${formattedCategory} ${system}<br>מידות אפשריות בין: ${availableSizes}`;
+          return;
+        }
+
+        // קבלת הטבלה הרלוונטית לפי קטגוריה ושיטת מידה
+        const sizes = conversionData[category][system];
+
+        // מציאת האינדקס של המידה שהוזנה
+        let index = -1;
+
+        for (let i = 0; i < sizes.length; i++) {
+          const sizeEntry = sizes[i];
+
+          // אם המידה היא טווח (למשל, "40-42")
+          if (typeof sizeEntry === "string" && sizeEntry.includes("-")) {
+            const [min, max] = sizeEntry.split("-").map(Number);
+            const size = parseFloat(inputSize);
+            if (!isNaN(size) && size >= min && size <= max) {
+              index = i;
+              break;
+            }
+          }
+          // אם המידה היא מספר או אות
+          else if (sizeEntry == inputSize) {
+            index = i;
+            break;
+          }
+        }
+
+        // אם המידה לא נמצאה
+        if (index === -1) {
+          const availableSizes = showAvailableSizes(category, system);
+          const formattedCategory = formatCategoryText(category);
+          resultDiv.innerHTML = `מידה לא תקינה<br>${formattedCategory} ${system}<br>מידות אפשריות בין: ${availableSizes}`;
+          return;
+        }
+
+        // המרת המידה
+        const convertedSizes = {};
+        for (const key in conversionData[category]) {
+          if (key !== system) {
+            convertedSizes[key] = conversionData[category][key][index];
+          }
+        }
+
+        // הצגת התוצאה
+        let resultHTML = "<h2>מידות מקבילות:</h2>";
+        for (const key in convertedSizes) {
+          resultHTML += `<p>${key}: ${convertedSizes[key]}</p>`;
+        }
+        resultDiv.innerHTML = resultHTML;
+      }
+
+      // פונקציה לבדיקת וולידציה של הקלט
+      function validateInput(input) {
+        // בודק אם הקלט הוא מספר, אות, או טווח (למשל, "40-42")
+        const regex = /^[0-9a-zA-Z\-/]+$/;
+        return regex.test(input);
+      }
+
+      // פונקציה להחלפת ערכת הצבעים
+      function toggleTheme() {
+        const body = document.body;
+        const themeToggle = document.getElementById("themeToggle");
+
+        if (body.classList.contains("dark-theme")) {
+          body.classList.remove("dark-theme");
+          body.classList.add("light-theme");
+          themeToggle.textContent = "🌞";
+        } else {
+          body.classList.remove("light-theme");
+          body.classList.add("dark-theme");
+          themeToggle.textContent = "🌙";
+        }
+      }
+
+      // פונקציה להצגת הודעת הדרכה
+      function showHelp() {
+        const modal = document.getElementById("customModal");
+        modal.style.display = "block";
+
+        const closeBtn = document.querySelector(".close");
+        closeBtn.onclick = function () {
+          modal.style.display = "none";
+        };
+
+        window.onclick = function (event) {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        };
+      }
+
+      // פונקציה לאיפוס שדה התוצאה
+      function resetResult() {
+        const resultDiv = document.getElementById("result");
+        resultDiv.textContent = "התוצאה תופיע כאן...";
+      }
+
+      // הוספת אירועים
+      document
+        .getElementById("themeToggle")
+        .addEventListener("click", toggleTheme);
+      document.getElementById("helpButton").addEventListener("click", showHelp);
+      document
+        .getElementById("category")
+        .addEventListener("change", resetResult);
+      document
+        .getElementById("measurementSystem")
+        .addEventListener("change", resetResult);
+      document
+        .getElementById("inputSize")
+        .addEventListener("input", resetResult);
+      document
+        .getElementById("inputSize")
+        .addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            convertSize();
+          }
+        });
+    </script>
+  </body>
+</html>

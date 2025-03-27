@@ -1,0 +1,3746 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://cdn-icons-png.freepik.com/512/7177/7177663.png?ga=GA1.1.119142766.1741685708"
+    />
+    <title>מחשבון קלוריות</title>
+    <style>
+      /* === בסיס משותף - משתנים והגדרות בסיסיות === */
+      :root {
+        --transition-time: 0.5s;
+        --button-transition: background-color 0.5s;
+
+        /* ערכת צבעים כהה */
+        --dark-bg: #000;
+        --dark-container-bg: #2d2d2d;
+        --dark-text: #ffffff;
+        --dark-input-bg: #555555;
+        --dark-button: #6655e5;
+        --dark-button-hover: #9a8fffcb;
+        --dark-result: #2fff00;
+        --dark-timestamp: #777777;
+        --dark-border: #ffffff;
+
+        /* ערכת צבעים בהירה */
+        --light-bg: #00626d;
+        --light-container-bg: #dcdcdc;
+        --light-text: #00626d;
+        --light-input-bg: #ffffff;
+        --light-button: #004951;
+        --light-button-hover: #1399a8;
+        --light-timestamp: #555;
+        --light-border: #222;
+
+        /* הגדרות צבעים דיפולטיביות */
+        --bg: var(--dark-bg);
+        --container-bg: var(--dark-container-bg);
+        --text: var(--dark-text);
+        --input-bg: var(--dark-input-bg);
+        --button: var(--dark-button);
+        --button-hover: var(--dark-button-hover);
+        --result: var(--dark-result);
+        --timestamp: var(--dark-timestamp);
+        --border: var(--dark-border);
+      }
+
+      /* === הגדרות בסיסיות משותפות === */
+      body {
+        overscroll-behavior-y: contain;
+        font-family: Arial, sans-serif;
+        direction: rtl; /* כיוון כללי של הדף */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding: 20px;
+        transition: background-color var(--transition-time) ease,
+          color var(--transition-time) ease;
+        background-color: var(--bg);
+        color: var(--text);
+      }
+
+      .container {
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: -1px -1px 5px 5px rgba(255, 47, 0, 0.655);
+        width: 400px;
+        height: 550px; /* הגדלנו את הגובה כדי להכיל את המידע הנוסף */
+        transition: background-color var(--transition-time) ease,
+          box-shadow var(--transition-time) ease;
+        background-color: var(--container-bg);
+      }
+
+      h1 {
+        text-align: center;
+        font-family: "Secular One", sans-serif;
+        font-style: italic;
+        line-height: 1;
+        transition: color var(--transition-time) ease;
+        margin-bottom: 5px;
+        margin-top: 0;
+        font-size: 28px;
+      }
+
+      label {
+        direction: rtl;
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        transition: color var(--transition-time) ease;
+      }
+
+      .category-title {
+        font-weight: bold;
+        padding: 10px;
+        color: white;
+        text-align: center;
+        margin: 5px 0;
+        border-radius: 5px;
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
+      input,
+      button {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        font-size: 16px;
+        box-sizing: border-box;
+        background-color: var(--input-bg);
+        color: var(--text);
+        transition: color var(--transition-time) ease,
+          background-color var(--transition-time) ease,
+          border-color var(--transition-time) ease;
+      }
+
+      button {
+        background-color: var(--button);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color var(--button-transition) ease;
+      }
+
+      button:hover {
+        background-color: var(--button-hover);
+      }
+
+      .result {
+        border: 1px solid var(--border); /* מסגרת */
+        background-color: var(--container-bg); /* רקע */
+        font-weight: bold;
+        text-align: right;
+        padding: 15px;
+        margin-top: 10px;
+        border-radius: 5px;
+        color: var(--result);
+        font-size: 12px; /* גודל פונט 12 פיקסל */
+        line-height: 1.5; /* ריווח בין שורות */
+      }
+
+      .result span {
+        font-weight: bold;
+        color: var(--result);
+      }
+
+      /* כפתור שינוי מצב תצוגה */
+      .theme-toggle {
+        width: 40px;
+        height: 40px;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        border: none;
+        border-radius: 50%;
+        background-color: #6c5ce7;
+        color: white;
+        font-size: 22px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s;
+      }
+
+      .theme-toggle:hover {
+        background-color: #5a4acb;
+      }
+
+      /* === ערכת צבעים בהירה === */
+      body.light-theme {
+        --bg: var(--light-bg);
+        --container-bg: var(--light-container-bg);
+        --text: var(--light-text);
+        --input-bg: var(--light-input-bg);
+        --button: var(--light-button);
+        --button-hover: var(--light-button-hover);
+        --result: var(--light-text);
+        --timestamp: var(--light-timestamp);
+        --border: var(--light-border);
+      }
+
+      /* התאמה למסכים קטנים */
+      @media (max-width: 600px) {
+        :root {
+          --container-padding: 15px;
+          --font-size: 14px;
+          --input-padding: 10px;
+        }
+
+        .container {
+          padding: var(--container-padding);
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+
+        input,
+        .result,
+        button {
+          font-size: var(--font-size);
+          padding: var(--input-padding);
+        }
+      }
+
+      /* סטייל למודל המותאם אישית */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-content {
+        background-color: var(--container-bg);
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid var(--border);
+        width: 80%;
+        max-width: 500px;
+        text-align: right;
+        color: var(--text);
+      }
+
+      .close {
+        color: var(--text);
+        float: left;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .close:hover {
+        color: var(--button-hover);
+      }
+
+      /* === אלמנט מותאם אישית לתפריט === */
+      .custom-select {
+        position: relative;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .selected-item {
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background-color: var(--input-bg);
+        color: var(--text);
+        cursor: pointer;
+        text-align: right;
+        font-size: 16px;
+      }
+
+      .dropdown-options {
+        display: none;
+        position: absolute;
+        width: 100%;
+        max-height: calc(
+          500px - 100px
+        ); /* גובה ה-container פחות הגובה של שאר האלמנטים */
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background-color: var(--input-bg);
+        z-index: 1;
+        text-align: right;
+        top: 100%; /* מתחיל מתחת ל-selected-item */
+        left: 0;
+      }
+
+      .dropdown-options div {
+        padding: 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 16px;
+        color: var(--text);
+      }
+
+      .dropdown-options div:hover {
+        background-color: var(--button-hover);
+        color: var(--text); /* צבע טקסט זהה ל-select המקורי */
+      }
+    </style>
+  </head>
+  <body class="dark-theme">
+    <button id="themeToggle" class="theme-toggle">🌙</button>
+    <button id="helpButton" class="theme-toggle" style="left: 60px">❓</button>
+    <div class="container">
+      <h1>מחשבון קלוריות</h1>
+      <form id="calorieForm">
+        <!-- שדה בחירה ראשון: סוג המאכל -->
+        <label for="foodItem">סוג המאכל:</label>
+        <div class="custom-select">
+          <div class="selected-item" onclick="toggleDropdown()">
+            🥣 בחר סוג מזון
+          </div>
+          <div class="dropdown-options">
+            <!-- פירות -->
+            <div class="category-title">פירות</div>
+            <div
+              data-value="0.3"
+              data-carbs="7.6"
+              data-protein="0.6"
+              data-fat="0.2"
+              data-fiber="0.4"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="72"
+            >
+              🍉 אבטיח
+            </div>
+            <div
+              data-value="1.6"
+              data-carbs="8.5"
+              data-protein="2.0"
+              data-fat="14.7"
+              data-fiber="6.7"
+              data-vitamins="ויטמין E, ויטמין K"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="2.0"
+              data-glycemic-index="15"
+            >
+              🥑 אבוקדו
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="15.2"
+              data-protein="0.4"
+              data-fat="0.1"
+              data-fiber="3.1"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן"
+              data-satiety-index="1.8"
+              data-glycemic-index="38"
+            >
+              🍐 אגס
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="14.0"
+              data-protein="0.7"
+              data-fat="0.3"
+              data-fiber="2.4"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="40"
+            >
+              🍏 אנונה
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="13.1"
+              data-protein="0.5"
+              data-fat="0.1"
+              data-fiber="1.4"
+              data-vitamins="ויטמין C, ויטמין B1"
+              data-minerals="מנגן, נחושת"
+              data-satiety-index="1.6"
+              data-glycemic-index="66"
+            >
+              🍍 אננס
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="9.5"
+              data-protein="0.9"
+              data-fat="0.3"
+              data-fiber="1.5"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, זרחן"
+              data-satiety-index="1.9"
+              data-glycemic-index="42"
+            >
+              🍑 אפרסק
+            </div>
+            <div
+              data-value="0.7"
+              data-carbs="18.6"
+              data-protein="0.6"
+              data-fat="0.2"
+              data-fiber="3.6"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="55"
+            >
+              🍅 אפרסמון
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="9.6"
+              data-protein="0.8"
+              data-fat="0.1"
+              data-fiber="1.1"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="25"
+            >
+              🍊 אשכולית
+            </div>
+            <div
+              data-value="0.6"
+              data-carbs="22.8"
+              data-protein="1.1"
+              data-fat="0.3"
+              data-fiber="2.6"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="51"
+            >
+              🍌 בננה
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="13.0"
+              data-protein="0.8"
+              data-fat="0.2"
+              data-fiber="5.4"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="40"
+            >
+              🍈 גויאבה
+            </div>
+            <div
+              data-value="0.1"
+              data-carbs="12.2"
+              data-protein="1.1"
+              data-fat="0.2"
+              data-fiber="2.1"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.8"
+              data-glycemic-index="22"
+            >
+              🍒 דובדבן
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="15.0"
+              data-protein="0.4"
+              data-fat="0.1"
+              data-fiber="1.7"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="35"
+            >
+              🍐 חבוש
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="12.0"
+              data-protein="0.4"
+              data-fat="0.1"
+              data-fiber="4.6"
+              data-vitamins="ויטמין C, ויטמין E"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.7"
+              data-glycemic-index="45"
+            >
+              🍒 חמוציות
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="9.3"
+              data-protein="0.9"
+              data-fat="0.3"
+              data-fiber="2.8"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="30"
+            >
+              🍋 לימון
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="8.2"
+              data-protein="0.8"
+              data-fat="0.2"
+              data-fiber="0.9"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="40"
+            >
+              🍈 מלון
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="15.0"
+              data-protein="0.8"
+              data-fat="0.4"
+              data-fiber="1.6"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.8"
+              data-glycemic-index="50"
+            >
+              🥭 מנגו
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="12.0"
+              data-protein="0.8"
+              data-fat="0.2"
+              data-fiber="1.8"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.7"
+              data-glycemic-index="42"
+            >
+              🍊 מנדרינה
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="11.0"
+              data-protein="1.0"
+              data-fat="0.3"
+              data-fiber="2.0"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="35"
+            >
+              🍑 משמש
+            </div>
+            <div
+              data-value="3.1"
+              data-carbs="62.0"
+              data-protein="3.4"
+              data-fat="0.5"
+              data-fiber="7.3"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, ברזל"
+              data-satiety-index="2.5"
+              data-glycemic-index="30"
+            >
+              🍑 משמש מיובש
+            </div>
+            <div
+              data-value="0.7"
+              data-carbs="14.0"
+              data-protein="1.0"
+              data-fat="0.3"
+              data-fiber="1.5"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.8"
+              data-glycemic-index="40"
+            >
+              🍑 נקטרינה
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="9.6"
+              data-protein="0.7"
+              data-fat="0.5"
+              data-fiber="3.6"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="35"
+            >
+              🌵 סברס (צבר)
+            </div>
+            <div
+              data-value="0.6"
+              data-carbs="18.1"
+              data-protein="0.7"
+              data-fat="0.2"
+              data-fiber="0.9"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.7"
+              data-glycemic-index="45"
+            >
+              🍇 ענבים
+            </div>
+            <div
+              data-value="0.6"
+              data-carbs="13.0"
+              data-protein="0.5"
+              data-fat="0.1"
+              data-fiber="10.4"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="35"
+            >
+              🍈 פסיפלורה
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="9.0"
+              data-protein="0.6"
+              data-fat="0.1"
+              data-fiber="1.0"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="25"
+            >
+              🍋‍🟩 פומלה
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="9.0"
+              data-protein="0.6"
+              data-fat="0.1"
+              data-fiber="1.0"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="25"
+            >
+              🍊 פומלית
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="12.0"
+              data-protein="1.0"
+              data-fat="0.5"
+              data-fiber="6.5"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.8"
+              data-glycemic-index="40"
+            >
+              🍓 פטל
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="11.0"
+              data-protein="0.5"
+              data-fat="0.1"
+              data-fiber="1.7"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="30"
+            >
+              🍈 פפאיה
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="14.0"
+              data-protein="1.1"
+              data-fat="0.5"
+              data-fiber="3.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="35"
+            >
+              🥝 קיוי
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="12.0"
+              data-protein="0.8"
+              data-fat="0.2"
+              data-fiber="1.8"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="40"
+            >
+              🍊 קלמנטינה
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="6.7"
+              data-protein="0.5"
+              data-fat="0.3"
+              data-fiber="2.8"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="30"
+            >
+              🌟 קרמבולה
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="18.0"
+              data-protein="1.7"
+              data-fat="0.3"
+              data-fiber="4.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, ברזל"
+              data-satiety-index="1.8"
+              data-glycemic-index="50"
+            >
+              🍎 רימון
+            </div>
+            <div
+              data-value="2.7"
+              data-carbs="79.0"
+              data-protein="3.1"
+              data-fat="0.5"
+              data-fiber="3.7"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="65"
+            >
+              🍇 צימוקים
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="11.0"
+              data-protein="0.7"
+              data-fat="0.3"
+              data-fiber="1.4"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.7"
+              data-glycemic-index="35"
+            >
+              🍑 שזיף
+            </div>
+            <div
+              data-value="2.5"
+              data-carbs="63.0"
+              data-protein="2.2"
+              data-fat="0.4"
+              data-fiber="7.1"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="30"
+            >
+              🍑 שזיפים מיובשים
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="7.7"
+              data-protein="0.7"
+              data-fat="0.3"
+              data-fiber="2.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="40"
+            >
+              🍓 תות
+            </div>
+            <div
+              data-value="0.8"
+              data-carbs="19.0"
+              data-protein="0.8"
+              data-fat="0.3"
+              data-fiber="2.9"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.8"
+              data-glycemic-index="50"
+            >
+              🍈 תאנה
+            </div>
+            <div
+              data-value="2.7"
+              data-carbs="63.0"
+              data-protein="3.3"
+              data-fat="0.9"
+              data-fiber="9.8"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="55"
+            >
+              🍈 תאנים מיובשות
+            </div>
+            <div
+              data-value="2.8"
+              data-carbs="75.0"
+              data-protein="2.5"
+              data-fat="0.4"
+              data-fiber="8.0"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, ברזל"
+              data-satiety-index="2.1"
+              data-glycemic-index="60"
+            >
+              🍒 תמרים יבשים
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="14.0"
+              data-protein="0.3"
+              data-fat="0.2"
+              data-fiber="2.4"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="38"
+            >
+              🍎 תפוח עץ
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="11.8"
+              data-protein="0.9"
+              data-fat="0.2"
+              data-fiber="2.4"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="42"
+            >
+              🍊 תפוז
+            </div>
+            <!-- ירקות -->
+            <div class="category-title">ירקות</div>
+            <div
+              data-value="0.1"
+              data-carbs="3.6"
+              data-protein="1.2"
+              data-fat="0.2"
+              data-fiber="1.6"
+              data-vitamins="ויטמין K, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.2"
+              data-glycemic-index="15"
+            >
+              🥬 אנדיב
+            </div>
+            <div
+              data-value="0.1"
+              data-carbs="10.5"
+              data-protein="3.3"
+              data-fat="0.2"
+              data-fiber="5.4"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="20"
+            >
+              🥬 ארטישוק
+            </div>
+            <div
+              data-value="0.1"
+              data-carbs="3.9"
+              data-protein="2.2"
+              data-fat="0.1"
+              data-fiber="2.1"
+              data-vitamins="ויטמין K, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.3"
+              data-glycemic-index="15"
+            >
+              🥒 אספרגוס
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="7.0"
+              data-protein="2.0"
+              data-fat="0.1"
+              data-fiber="3.2"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.4"
+              data-glycemic-index="25"
+            >
+              🥒 במיה
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="9.0"
+              data-protein="1.1"
+              data-fat="0.1"
+              data-fiber="1.7"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="30"
+            >
+              🧅 בצל יבש
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="8.0"
+              data-protein="1.0"
+              data-fat="0.1"
+              data-fiber="1.5"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="25"
+            >
+              🧅 בצל ירוק
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="6.0"
+              data-protein="2.8"
+              data-fat="0.4"
+              data-fiber="2.6"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="20"
+            >
+              🥦 ברוקולי
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="9.6"
+              data-protein="0.9"
+              data-fat="0.2"
+              data-fiber="2.8"
+              data-vitamins="ויטמין A, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="35"
+            >
+              🥕 גזר
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="6.5"
+              data-protein="1.0"
+              data-fat="0.1"
+              data-fiber="0.5"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="50"
+            >
+              🎃 דלעת
+            </div>
+            <div
+              data-value="0.1"
+              data-carbs="2.9"
+              data-protein="1.4"
+              data-fat="0.2"
+              data-fiber="1.3"
+              data-vitamins="ויטמין K, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.2"
+              data-glycemic-index="15"
+            >
+              🥬 חסה
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="5.9"
+              data-protein="0.9"
+              data-fat="0.2"
+              data-fiber="2.5"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.3"
+              data-glycemic-index="20"
+            >
+              🍆 חציל
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="5.8"
+              data-protein="1.3"
+              data-fat="0.1"
+              data-fiber="2.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="15"
+            >
+              🥬 כרוב
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="7.4"
+              data-protein="1.4"
+              data-fat="0.2"
+              data-fiber="2.5"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="20"
+            >
+              🟣 כרוב סגול
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="5.0"
+              data-protein="1.9"
+              data-fat="0.3"
+              data-fiber="2.5"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="20"
+            >
+              🥦 כרובית
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="8.0"
+              data-protein="3.4"
+              data-fat="0.3"
+              data-fiber="3.8"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="25"
+            >
+              🥬 כרוב ניצנים
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="6.0"
+              data-protein="1.5"
+              data-fat="0.2"
+              data-fiber="1.8"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="20"
+            >
+              🥬 כרישה
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="6.0"
+              data-protein="1.0"
+              data-fat="0.1"
+              data-fiber="1.5"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.3"
+              data-glycemic-index="15"
+            >
+              🥬 כרפס
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="6.0"
+              data-protein="1.0"
+              data-fat="0.1"
+              data-fiber="1.6"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="20"
+            >
+              🥬 לפת
+            </div>
+            <div
+              data-value="0.1"
+              data-carbs="3.6"
+              data-protein="0.7"
+              data-fat="0.1"
+              data-fiber="0.5"
+              data-vitamins="ויטמין K, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.2"
+              data-glycemic-index="15"
+            >
+              🥒 מלפפון
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="5.0"
+              data-protein="2.0"
+              data-fat="0.1"
+              data-fiber="1.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.3"
+              data-glycemic-index="20"
+            >
+              🌱 נבטים
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="9.6"
+              data-protein="1.6"
+              data-fat="0.2"
+              data-fiber="2.8"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="30"
+            >
+              🍠 סלק
+            </div>
+            <div
+              data-value="0.1"
+              data-carbs="3.4"
+              data-protein="0.7"
+              data-fat="0.2"
+              data-fiber="1.6"
+              data-vitamins="ויטמין K, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.2"
+              data-glycemic-index="15"
+            >
+              🥬 סלרי
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="3.9"
+              data-protein="0.9"
+              data-fat="0.2"
+              data-fiber="1.2"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.3"
+              data-glycemic-index="20"
+            >
+              🍅 עגבנייה
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="3.3"
+              data-protein="3.1"
+              data-fat="0.3"
+              data-fiber="2.5"
+              data-vitamins="ויטמין D, ויטמין B2"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="15"
+            >
+              🍄 פטריות
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="6.0"
+              data-protein="1.0"
+              data-fat="0.2"
+              data-fiber="2.0"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="30"
+            >
+              🫑 פלפל אדום
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="4.6"
+              data-protein="1.0"
+              data-fat="0.2"
+              data-fiber="1.7"
+              data-vitamins="ויטמין C, ויטמין A"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="25"
+            >
+              🫑 פלפל ירוק
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="6.0"
+              data-protein="1.0"
+              data-fat="0.1"
+              data-fiber="1.5"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.3"
+              data-glycemic-index="20"
+            >
+              🥬 צנון
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="3.1"
+              data-protein="1.2"
+              data-fat="0.1"
+              data-fiber="1.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.2"
+              data-glycemic-index="15"
+            >
+              🥒 קישוא
+            </div>
+            <div
+              data-value="1.0"
+              data-carbs="33.0"
+              data-protein="6.4"
+              data-fat="0.5"
+              data-fiber="2.1"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.8"
+              data-glycemic-index="30"
+            >
+              🧄 שום
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="7.0"
+              data-protein="1.8"
+              data-fat="0.2"
+              data-fiber="3.4"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="20"
+            >
+              🥒 שעועית ירוקה
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="7.0"
+              data-protein="1.8"
+              data-fat="0.2"
+              data-fiber="3.4"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="20"
+            >
+              🥒 שעועית צהובה
+            </div>
+            <div
+              data-value="0.2"
+              data-carbs="7.0"
+              data-protein="1.8"
+              data-fat="0.2"
+              data-fiber="3.4"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.3"
+              data-glycemic-index="15"
+            >
+              🥒 שעועית
+            </div>
+            <div
+              data-value="0.3"
+              data-carbs="3.6"
+              data-protein="2.9"
+              data-fat="0.4"
+              data-fiber="2.2"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="25"
+            >
+              🥬 תרד
+            </div>
+            <!-- פחמימות ודגנים -->
+            <div class="category-title">פחמימות ודגנים</div>
+            <div
+              data-value="3.6"
+              data-carbs="77.0"
+              data-protein="7.9"
+              data-fat="0.8"
+              data-fiber="3.5"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.5"
+              data-glycemic-index="50"
+            >
+              🌾 אורז מלא
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="79.0"
+              data-protein="6.7"
+              data-fat="0.3"
+              data-fiber="0.4"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="70"
+            >
+              🌾 אורז רגיל
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="75.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="3.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="60"
+            >
+              🌾 (שחור) אורז בר
+            </div>
+            <div
+              data-value="0.7"
+              data-carbs="17.0"
+              data-protein="2.0"
+              data-fat="0.1"
+              data-fiber="1.6"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="50"
+            >
+              🍠 ארטישוק ירושלמי
+            </div>
+            <div
+              data-value="3.5"
+              data-carbs="75.0"
+              data-protein="12.5"
+              data-fat="1.5"
+              data-fiber="8.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="55"
+            >
+              🍚 בורגול
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="20.0"
+              data-protein="1.6"
+              data-fat="0.1"
+              data-fiber="3.3"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.8"
+              data-glycemic-index="70"
+            >
+              🍠 בטטות
+            </div>
+            <div
+              data-value="4.0"
+              data-carbs="49.0"
+              data-protein="10.0"
+              data-fat="1.5"
+              data-fiber="2.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="72"
+            >
+              🥯 בייגל
+            </div>
+            <div
+              data-value="3.7"
+              data-carbs="74.0"
+              data-protein="10.0"
+              data-fat="1.0"
+              data-fiber="3.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.1"
+              data-glycemic-index="70"
+            >
+              🥨 בייגלה
+            </div>
+            <div
+              data-value="3.5"
+              data-carbs="72.0"
+              data-protein="13.0"
+              data-fat="1.0"
+              data-fiber="7.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.3"
+              data-glycemic-index="60"
+            >
+              🍚 גריסי כוסמת ופנינה
+            </div>
+            <div
+              data-value="3.1"
+              data-carbs="71.0"
+              data-protein="13.0"
+              data-fat="1.0"
+              data-fiber="12.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="60"
+            >
+              🌾 חיטה
+            </div>
+            <div
+              data-value="2.8"
+              data-carbs="49.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="2.5"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="75"
+            >
+              🥖 לחמנייה
+            </div>
+            <div
+              data-value="2.1"
+              data-carbs="41.0"
+              data-protein="13.0"
+              data-fat="3.0"
+              data-fiber="6.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="50"
+            >
+              🥖 לחם דגנים
+            </div>
+            <div
+              data-value="2.3"
+              data-carbs="49.0"
+              data-protein="13.0"
+              data-fat="1.0"
+              data-fiber="7.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.1"
+              data-glycemic-index="55"
+            >
+              🥖 לחם קמח מלא
+            </div>
+            <div
+              data-value="2.5"
+              data-carbs="49.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="70"
+            >
+              🥖 לחם
+            </div>
+            <div
+              data-value="2.4"
+              data-carbs="49.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="5.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.1"
+              data-glycemic-index="65"
+            >
+              🥖 לחם פומפרניקל
+            </div>
+            <div
+              data-value="2.4"
+              data-carbs="49.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="6.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="60"
+            >
+              🥖 לחם שיפון
+            </div>
+            <div
+              data-value="3.3"
+              data-carbs="49.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="1.5"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="75"
+            >
+              🥖 לחם לבן
+            </div>
+            <div
+              data-value="3.4"
+              data-carbs="75.0"
+              data-protein="10.0"
+              data-fat="1.0"
+              data-fiber="3.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.3"
+              data-glycemic-index="70"
+            >
+              🍘 מצה
+            </div>
+            <div
+              data-value="3.8"
+              data-carbs="51.0"
+              data-protein="23.0"
+              data-fat="1.0"
+              data-fiber="15.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.5"
+              data-glycemic-index="65"
+            >
+              🌾 נבט חיטה
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="75.0"
+              data-protein="12.0"
+              data-fat="1.0"
+              data-fiber="1.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="60"
+            >
+              🍚 סולת
+            </div>
+            <div
+              data-value="1.9"
+              data-carbs="51.0"
+              data-protein="15.0"
+              data-fat="1.0"
+              data-fiber="42.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.1"
+              data-glycemic-index="55"
+            >
+              🌾 סובין
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="49.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="70"
+            >
+              🥖 פירורי לחם
+            </div>
+            <div
+              data-value="1.1"
+              data-carbs="17.0"
+              data-protein="2.0"
+              data-fat="0.1"
+              data-fiber="1.0"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="80"
+            >
+              🥔 פירה
+            </div>
+            <div
+              data-value="3.9"
+              data-carbs="49.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="2.5"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="65"
+            >
+              🍞 צנים
+            </div>
+            <div
+              data-value="3.7"
+              data-carbs="75.0"
+              data-protein="12.0"
+              data-fat="1.0"
+              data-fiber="5.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="65"
+            >
+              🍚 קוסקוס מלא
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="75.0"
+              data-protein="12.0"
+              data-fat="1.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.1"
+              data-glycemic-index="60"
+            >
+              🌾 קמח חיטה
+            </div>
+            <div
+              data-value="1.0"
+              data-carbs="21.3"
+              data-protein="4.4"
+              data-fat="1.9"
+              data-fiber="2.8"
+              data-vitamins="ויטמין B6, ויטמין E"
+              data-minerals="מגנזיום, ברזל, אשלגן"
+              data-satiety-index="3.0"
+              data-glycemic-index="53"
+            >
+              🥗 קינואה
+            </div>
+            <div
+              data-value="3.9"
+              data-carbs="66.0"
+              data-protein="17.0"
+              data-fat="7.0"
+              data-fiber="10.6"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.3"
+              data-glycemic-index="55"
+            >
+              🌾 שיבולת שועל
+            </div>
+            <div
+              data-value="3.7"
+              data-carbs="66.0"
+              data-protein="17.0"
+              data-fat="7.0"
+              data-fiber="10.6"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="50"
+            >
+              🌾 שבולת שועל
+            </div>
+            <div
+              data-value="1.0"
+              data-carbs="12.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="מגנזיום, ברזל"
+              data-satiety-index="1.8"
+              data-glycemic-index="40"
+            >
+              🍞 שמרים טריים
+            </div>
+            <div
+              data-value="1.1"
+              data-carbs="19.0"
+              data-protein="3.0"
+              data-fat="1.0"
+              data-fiber="2.4"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.7"
+              data-glycemic-index="55"
+            >
+              🌽 תירס
+            </div>
+            <div
+              data-value="0.9"
+              data-carbs="17.0"
+              data-protein="2.0"
+              data-fat="0.1"
+              data-fiber="2.2"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="85"
+            >
+              🥔 תפוח אדמה
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="20.0"
+              data-protein="2.0"
+              data-fat="0.1"
+              data-fiber="2.2"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.7"
+              data-glycemic-index="90"
+            >
+              🥔 תפו"א צלוי
+            </div>
+            <!-- חלב ומוצריו -->
+            <div class="category-title">חלב ומוצריו</div>
+            <div
+              data-value="0.7"
+              data-carbs="4.0"
+              data-protein="4.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.6"
+              data-glycemic-index="20"
+            >
+              🥛 אשל
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="4.0"
+              data-protein="11.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.8"
+              data-glycemic-index="30"
+            >
+              🧀 גבינה בולגרית 5%
+            </div>
+            <div
+              data-value="1.3"
+              data-carbs="4.0"
+              data-protein="11.0"
+              data-fat="9.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.9"
+              data-glycemic-index="35"
+            >
+              🧀 גבינה לבנה 9%
+            </div>
+            <div
+              data-value="1.0"
+              data-carbs="4.0"
+              data-protein="11.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.8"
+              data-glycemic-index="30"
+            >
+              🧀 גבינה לבנה 5%
+            </div>
+            <div
+              data-value="2.6"
+              data-carbs="1.0"
+              data-protein="14.0"
+              data-fat="21.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.1"
+              data-glycemic-index="30"
+            >
+              🧀 גבינת פטה
+            </div>
+            <div
+              data-value="3.5"
+              data-carbs="1.0"
+              data-protein="25.0"
+              data-fat="27.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.2"
+              data-glycemic-index="30"
+            >
+              🧀 גבינת גאודה
+            </div>
+            <div
+              data-value="2.8"
+              data-carbs="1.0"
+              data-protein="22.0"
+              data-fat="17.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.1"
+              data-glycemic-index="30"
+            >
+              🧀 גבינת מוצרלה
+            </div>
+            <div
+              data-value="3.5"
+              data-carbs="1.0"
+              data-protein="21.0"
+              data-fat="30.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.3"
+              data-glycemic-index="40"
+            >
+              🧀 גבינת רוקפור
+            </div>
+            <div
+              data-value="1.0"
+              data-carbs="4.0"
+              data-protein="11.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.8"
+              data-glycemic-index="30"
+            >
+              🧀 גבינת קוטג' 5%
+            </div>
+            <div
+              data-value="1.3"
+              data-carbs="4.0"
+              data-protein="11.0"
+              data-fat="9.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.9"
+              data-glycemic-index="35"
+            >
+              🧀 קוטג' 9%
+            </div>
+            <div
+              data-value="2.0"
+              data-carbs="1.0"
+              data-protein="7.0"
+              data-fat="9.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.0"
+              data-glycemic-index="35"
+            >
+              🧀 גבינה צהובה 9%
+            </div>
+            <div
+              data-value="3.4"
+              data-carbs="1.0"
+              data-protein="7.0"
+              data-fat="24.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.2"
+              data-glycemic-index="40"
+            >
+              🧀 גבינה צהובה 24%
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="4.0"
+              data-protein="11.0"
+              data-fat="28.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.1"
+              data-glycemic-index="45"
+            >
+              🧀 גבינת שמנת 28%
+            </div>
+            <div
+              data-value="1.4"
+              data-carbs="4.0"
+              data-protein="11.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.8"
+              data-glycemic-index="30"
+            >
+              🧀 צפתית 5%
+            </div>
+            <div
+              data-value="1.5"
+              data-carbs="5.0"
+              data-protein="8.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.7"
+              data-glycemic-index="25"
+            >
+              🥛 חלב 3%
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="5.0"
+              data-protein="8.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.6"
+              data-glycemic-index="20"
+            >
+              🥛 חלב 1%
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="4.0"
+              data-protein="4.0"
+              data-fat="0.1"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.5"
+              data-glycemic-index="15"
+            >
+              🥛 יוגורט דיאט
+            </div>
+            <div
+              data-value="1.0"
+              data-carbs="4.0"
+              data-protein="4.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.7"
+              data-glycemic-index="25"
+            >
+              🥛 יוגורט ביו
+            </div>
+            <div
+              data-value="1.3"
+              data-carbs="4.0"
+              data-protein="4.0"
+              data-fat="10.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.9"
+              data-glycemic-index="35"
+            >
+              🥛 שמנת מתוקה 10%
+            </div>
+            <div
+              data-value="3.0"
+              data-carbs="4.0"
+              data-protein="4.0"
+              data-fat="30.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.2"
+              data-glycemic-index="45"
+            >
+              🥛 שמנת מתוקה 30%
+            </div>
+            <div
+              data-value="1.1"
+              data-carbs="4.0"
+              data-protein="4.0"
+              data-fat="9.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.8"
+              data-glycemic-index="30"
+            >
+              🥛 שמנת חמוצה 9%
+            </div>
+            <div
+              data-value="2.0"
+              data-carbs="4.0"
+              data-protein="4.0"
+              data-fat="20.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="2.1"
+              data-glycemic-index="40"
+            >
+              🥛15% שמנת חמוצה
+            </div>
+            <!-- ביצים -->
+            <div class="category-title">ביצים</div>
+            <div
+              data-value="1.0"
+              data-carbs="0.6"
+              data-protein="12.6"
+              data-fat="10.6"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🥚 ביצים
+            </div>
+            <div
+              data-value="1.0"
+              data-carbs="0.6"
+              data-protein="12.6"
+              data-fat="10.6"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🥚 ביצה קשה
+            </div>
+            <div
+              data-value="1.8"
+              data-carbs="0.6"
+              data-protein="12.6"
+              data-fat="10.6"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="2.2"
+              data-glycemic-index="0"
+            >
+              🍳 חביתה
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="0.6"
+              data-protein="2.7"
+              data-fat="4.5"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="1.5"
+              data-glycemic-index="0"
+            >
+              🟡 חלמון
+            </div>
+            <div
+              data-value="1.4"
+              data-carbs="0.6"
+              data-protein="12.6"
+              data-fat="0.1"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              ⚪ חלבון
+            </div>
+            <!-- בשר ועוף -->
+            <div class="category-title">בשר ועוף</div>
+            <div
+              data-value="2.1"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="20.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.3"
+              data-glycemic-index="0"
+            >
+              🥩 בקר טחון
+            </div>
+            <div
+              data-value="1.8"
+              data-carbs="0.0"
+              data-protein="25.0"
+              data-fat="10.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.2"
+              data-glycemic-index="0"
+            >
+              🥩 בקר פילה מדומה
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="15.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.5"
+              data-glycemic-index="0"
+            >
+              🥩 בקר רזה
+            </div>
+            <div
+              data-value="1.1"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🥩 בקר רזה מאד
+            </div>
+            <div
+              data-value="1.5"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="20.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.2"
+              data-glycemic-index="0"
+            >
+              🥩 בקר שמן
+            </div>
+            <div
+              data-value="1.5"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.1"
+              data-glycemic-index="0"
+            >
+              🥩 בקר שריר
+            </div>
+            <div
+              data-value="1.5"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="8.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.1"
+              data-glycemic-index="0"
+            >
+              🦃 הודו טחון
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🦃 הודו
+            </div>
+            <div
+              data-value="0.8"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              🍗 חזה עוף
+            </div>
+            <div
+              data-value="1.8"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="15.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.3"
+              data-glycemic-index="0"
+            >
+              🥩 טלה
+            </div>
+            <div
+              data-value="1.3"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.1"
+              data-glycemic-index="0"
+            >
+              🥩 כבד
+            </div>
+            <div
+              data-value="1.3"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.1"
+              data-glycemic-index="0"
+            >
+              🥩 כבד בקר
+            </div>
+            <div
+              data-value="1.9"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="15.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.4"
+              data-glycemic-index="0"
+            >
+              🥩 כבש
+            </div>
+            <div
+              data-value="1.3"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.1"
+              data-glycemic-index="0"
+            >
+              🥩 כבש רזה
+            </div>
+            <div
+              data-value="1.3"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="5.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.1"
+              data-glycemic-index="0"
+            >
+              🥩 לב
+            </div>
+            <div
+              data-value="2.0"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.1"
+              data-glycemic-index="0"
+            >
+              🍲 מרק עוף
+            </div>
+            <div
+              data-value="5.1"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.5"
+              data-glycemic-index="0"
+            >
+              🌭 נקניק סלאמי
+            </div>
+            <div
+              data-value="2.6"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.2"
+              data-glycemic-index="0"
+            >
+              🌭 נקניקיות בשר
+            </div>
+            <div
+              data-value="1.1"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="1.9"
+              data-glycemic-index="0"
+            >
+              🌭 נקניקיות עוף
+            </div>
+            <div
+              data-value="2.3"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.2"
+              data-glycemic-index="0"
+            >
+              🥩 סטייק חצי שמן
+            </div>
+            <div
+              data-value="2.8"
+              data-carbs="0.0"
+              data-protein="26.0"
+              data-fat="20.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.4"
+              data-glycemic-index="0"
+            >
+              🥩 סטייק טי-בון
+            </div>
+            <div
+              data-value="1.6"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.1"
+              data-glycemic-index="0"
+            >
+              🥩 סטייק רזה
+            </div>
+            <div
+              data-value="0.9"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="1.9"
+              data-glycemic-index="0"
+            >
+              🥩 עגל
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🍗 עוף
+            </div>
+            <div
+              data-value="1.0"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🍗 עוף צלוי
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🥩 פילה
+            </div>
+            <div
+              data-value="3.4"
+              data-carbs="0.0"
+              data-protein="27.0"
+              data-fat="3.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.3"
+              data-glycemic-index="0"
+            >
+              🥓 שינקן מעושן
+            </div>
+            <!-- דגים ופירות ים -->
+            <div class="category-title">דגים ופירות ים</div>
+            <div
+              data-value="2.1"
+              data-carbs="0.0"
+              data-protein="20.0"
+              data-fat="10.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.9"
+              data-glycemic-index="0"
+            >
+              🐟 אנשובי
+            </div>
+            <div
+              data-value="0.7"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🐟 בקלה
+            </div>
+            <div
+              data-value="2.2"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🐟 הרינג
+            </div>
+            <div
+              data-value="2.4"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.9"
+              data-glycemic-index="0"
+            >
+              🐟 טונה
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              🐟 טונה במים
+            </div>
+            <div
+              data-value="2.9"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="2.0"
+              data-glycemic-index="0"
+            >
+              🐟 טונה בשמן
+            </div>
+            <div
+              data-value="1.2"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🐟 מקרל
+            </div>
+            <div
+              data-value="1.6"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              🐟 מקרל מעושן
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🐟 פורל
+            </div>
+            <div
+              data-value="0.7"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🐟 קרפיון
+            </div>
+            <div
+              data-value="0.6"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🦑 קלמארי
+            </div>
+            <div
+              data-value="1.4"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              🐟 סלמון
+            </div>
+            <div
+              data-value="0.6"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🐟 סול
+            </div>
+            <div
+              data-value="2.3"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.9"
+              data-glycemic-index="0"
+            >
+              🐟 סרדינים
+            </div>
+            <div
+              data-value="0.9"
+              data-carbs="0.0"
+              data-protein="22.0"
+              data-fat="1.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🦀 סרטנים
+            </div>
+            <!-- שמנים ושומנים -->
+            <div class="category-title">שמנים ושומנים</div>
+            <div
+              data-value="6.9"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="0"
+            >
+              🥜 אגוזי אילסר
+            </div>
+            <div
+              data-value="7.1"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="7.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🥜 אגוזי ברזיל
+            </div>
+            <div
+              data-value="6.9"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="9.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🥜 אגוזי לוז
+            </div>
+            <div
+              data-value="7.1"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="6.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🥜 אגוזי מלך
+            </div>
+            <div
+              data-value="7.3"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🥜 אגוזי פקאן
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="9.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.4"
+              data-glycemic-index="0"
+            >
+              🥥 אגוז קוקוס
+            </div>
+            <div
+              data-value="5.9"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="3.3"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="0"
+            >
+              🥜 אגוזי קשיו
+            </div>
+            <div
+              data-value="5.8"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="8.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="0"
+            >
+              🥜 בוטנים
+            </div>
+            <div
+              data-value="6.4"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="8.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🥜 בוטנים קלויים
+            </div>
+            <div
+              data-value="5.9"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="1.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="0"
+            >
+              🌰 גרעיני אבטיח
+            </div>
+            <div
+              data-value="6.0"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="8.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="0"
+            >
+              🌰 גרעיני חמנייה
+            </div>
+            <div
+              data-value="7.8"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🧈 חמאה
+            </div>
+            <div
+              data-value="6.3"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🥜 חמאת בוטנים
+            </div>
+            <div
+              data-value="6.8"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="12.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🥜 טחינה
+            </div>
+            <div
+              data-value="7.7"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              🫙 מיונז
+            </div>
+            <div
+              data-value="3.3"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.4"
+              data-glycemic-index="0"
+            >
+              🫙 מיונז קל
+            </div>
+            <div
+              data-value="7.5"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🧈 מרגרינה
+            </div>
+            <div
+              data-value="1.9"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="4.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.3"
+              data-glycemic-index="0"
+            >
+              🌰 ערמונים
+            </div>
+            <div
+              data-value="6.2"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="10.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🥜 פיסטוק
+            </div>
+            <div
+              data-value="5.5"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="11.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.5"
+              data-glycemic-index="0"
+            >
+              🥜 שומשום
+            </div>
+            <div
+              data-value="8.8"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🥑 שמן אבוקדו
+            </div>
+            <div
+              data-value="9.3"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              🌽 שמן תירס
+            </div>
+            <div
+              data-value="9.3"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              🫒 שמן זית
+            </div>
+            <div
+              data-value="9.2"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🫘 שמן סויה
+            </div>
+            <div
+              data-value="9.3"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.8"
+              data-glycemic-index="0"
+            >
+              🌻 שמן חמניות
+            </div>
+            <div
+              data-value="8.9"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🥥 שמן קוקוס
+            </div>
+            <div
+              data-value="8.8"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="0.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.7"
+              data-glycemic-index="0"
+            >
+              🫒 שמן שומשום
+            </div>
+            <div
+              data-value="6.4"
+              data-carbs="0.0"
+              data-protein="0.0"
+              data-fat="100.0"
+              data-fiber="12.0"
+              data-vitamins="ויטמין E"
+              data-minerals="אשלגן, מגנזיום"
+              data-satiety-index="1.6"
+              data-glycemic-index="0"
+            >
+              🥜 שקדים
+            </div>
+            <!-- קטניות -->
+            <div class="category-title">קטניות</div>
+            <div
+              data-value="1.2"
+              data-carbs="9.0"
+              data-protein="11.0"
+              data-fat="5.0"
+              data-fiber="8.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.6"
+              data-glycemic-index="35"
+            >
+              🫛 אדממה
+            </div>
+            <div
+              data-value="0.4"
+              data-carbs="14.0"
+              data-protein="5.0"
+              data-fat="0.5"
+              data-fiber="5.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="30"
+            >
+              🫛 אפונה
+            </div>
+            <div
+              data-value="3.3"
+              data-carbs="60.0"
+              data-protein="25.0"
+              data-fat="1.0"
+              data-fiber="25.0"
+              data-vitamins="ויטמין B1, ויטמין B6"
+              data-minerals="ברזל, מגנזיום"
+              data-satiety-index="2.0"
+              data-glycemic-index="30"
+            >
+              🫛 אפונה יבשה
+            </div>
+            <div
+              data-value="3.2"
+              data-carbs="55.0"
+              data-protein="23.0"
+              data-fat="1.2"
+              data-fiber="18.0"
+              data-vitamins="ויטמין C, ויטמין K, חומצה פולית"
+              data-minerals="ברזל, סידן, מגנזיום"
+              data-satiety-index="2.0"
+              data-glycemic-index="35"
+            >
+              🫛 אפונת שלג
+            </div>
+            <div
+              data-value="3.3"
+              data-carbs="70.0"
+              data-protein="12.0"
+              data-fat="1.0"
+              data-fiber="15.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="ברזל, מגנזיום, אבץ"
+              data-satiety-index="1.8"
+              data-glycemic-index="50"
+            >
+              🫛 גריסים
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="60.0"
+              data-protein="20.0"
+              data-fat="6.0"
+              data-fiber="25.0"
+              data-vitamins="ויטמין B1, ויטמין B6"
+              data-minerals="ברזל, מגנזיום"
+              data-satiety-index="2.0"
+              data-glycemic-index="28"
+            >
+              🫛 חומוס יבש
+            </div>
+            <div
+              data-value="3.6"
+              data-carbs="65.0"
+              data-protein="26.0"
+              data-fat="1.8"
+              data-fiber="20.0"
+              data-vitamins="ויטמין A, ויטמין C, חומצה פולית"
+              data-minerals="ברזל, סידן, אשלגן"
+              data-satiety-index="2.4"
+              data-glycemic-index="20"
+            >
+              🫛 לוביה
+            </div>
+            <div
+              data-value="1.5"
+              data-carbs="2.0"
+              data-protein="8.0"
+              data-fat="4.0"
+              data-fiber="1.0"
+              data-vitamins="ויטמין B1, ויטמין B6"
+              data-minerals="ברזל, מגנזיום"
+              data-satiety-index="1.8"
+              data-glycemic-index="15"
+            >
+              🧈 טופו
+            </div>
+            <div
+              data-value="3.4"
+              data-carbs="60.0"
+              data-protein="25.0"
+              data-fat="1.0"
+              data-fiber="25.0"
+              data-vitamins="ויטמין B1, ויטמין B6"
+              data-minerals="ברזל, מגנזיום"
+              data-satiety-index="2.1"
+              data-glycemic-index="30"
+            >
+              🫛 עדשים אדומות
+            </div>
+            <div
+              data-value="3.5"
+              data-carbs="63.0"
+              data-protein="24.0"
+              data-fat="1.5"
+              data-fiber="22.0"
+              data-vitamins="ויטמין B1, ויטמין B6, חומצה פולית"
+              data-minerals="ברזל, מגנזיום, אשלגן"
+              data-satiety-index="2.3"
+              data-glycemic-index="25"
+            >
+              🫛 עדשים ירוקות
+            </div>
+            <div
+              data-value="3.4"
+              data-carbs="60.0"
+              data-protein="25.0"
+              data-fat="1.0"
+              data-fiber="25.0"
+              data-vitamins="ויטמין B1, ויטמין B6"
+              data-minerals="ברזל, מגנזיום"
+              data-satiety-index="2.1"
+              data-glycemic-index="30"
+            >
+              🫛 עדשים שחורות
+            </div>
+            <div
+              data-value="0.6"
+              data-carbs="14.0"
+              data-protein="5.0"
+              data-fat="0.5"
+              data-fiber="8.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.5"
+              data-glycemic-index="35"
+            >
+              🫛 פול ירוק
+            </div>
+            <div
+              data-value="3.2"
+              data-carbs="60.0"
+              data-protein="25.0"
+              data-fat="1.0"
+              data-fiber="25.0"
+              data-vitamins="ויטמין B1, ויטמין B6"
+              data-minerals="ברזל, מגנזיום"
+              data-satiety-index="2.0"
+              data-glycemic-index="30"
+            >
+              🫛 פול מצרי
+            </div>
+            <div
+              data-value="4.2"
+              data-carbs="30.0"
+              data-protein="36.0"
+              data-fat="18.0"
+              data-fiber="9.0"
+              data-vitamins="ויטמין B1, ויטמין B6"
+              data-minerals="ברזל, מגנזיום"
+              data-satiety-index="2.2"
+              data-glycemic-index="25"
+            >
+              🫛 פולי סויה
+            </div>
+            <div
+              data-value="0.5"
+              data-carbs="9.0"
+              data-protein="11.0"
+              data-fat="5.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין C, ויטמין K"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.4"
+              data-glycemic-index="30"
+            >
+              🫛 נבטי סויה
+            </div>
+            <div
+              data-value="3.8"
+              data-carbs="68.0"
+              data-protein="28.0"
+              data-fat="2.0"
+              data-fiber="24.0"
+              data-vitamins="ויטמין B1, ויטמין B6, חומצה פולית"
+              data-minerals="ברזל, מגנזיום, אשלגן"
+              data-satiety-index="2.5"
+              data-glycemic-index="15"
+            >
+              🫛 תורמוס
+            </div>
+            <!-- אוכל מהיר -->
+            <div class="category-title">אוכל מהיר</div>
+
+            <div
+              data-value="2.8"
+              data-carbs="45.0"
+              data-protein="15.0"
+              data-fat="10.0"
+              data-fiber="5.0"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="2.0"
+              data-glycemic-index="60"
+            >
+              🌯 בוריטו
+            </div>
+
+            <div
+              data-value="2.1"
+              data-carbs="25.0"
+              data-protein="3.0"
+              data-fat="8.0"
+              data-fiber="1.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.6"
+              data-glycemic-index="55"
+            >
+              🍨 גלידה
+            </div>
+
+            <div
+              data-value="2.0"
+              data-carbs="20.0"
+              data-protein="4.0"
+              data-fat="10.0"
+              data-fiber="1.0"
+              data-vitamins="ויטמין A, ויטמין D"
+              data-minerals="סידן, זרחן"
+              data-satiety-index="1.5"
+              data-glycemic-index="60"
+            >
+              🍩 דונאטס
+            </div>
+
+            <div
+              data-value="2.9"
+              data-carbs="30.0"
+              data-protein="15.0"
+              data-fat="20.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="2.0"
+              data-glycemic-index="60"
+            >
+              🍔 המבורגר
+            </div>
+
+            <div
+              data-value="2.3"
+              data-carbs="20.0"
+              data-protein="10.0"
+              data-fat="12.0"
+              data-fiber="3.0"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="1.8"
+              data-glycemic-index="55"
+            >
+              🌮 טאקו
+            </div>
+
+            <div
+              data-value="2.8"
+              data-carbs="40.0"
+              data-protein="10.0"
+              data-fat="15.0"
+              data-fiber="3.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="1.9"
+              data-glycemic-index="70"
+            >
+              🍗 כנפיים מטוגנות
+            </div>
+
+            <div
+              data-value="2.5"
+              data-carbs="28.0"
+              data-protein="12.0"
+              data-fat="14.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="1.8"
+              data-glycemic-index="60"
+            >
+              🍟 מקרוני גבינה
+            </div>
+
+            <div
+              data-value="2.5"
+              data-carbs="25.0"
+              data-protein="10.0"
+              data-fat="15.0"
+              data-fiber="1.5"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="1.9"
+              data-glycemic-index="65"
+            >
+              🌭 נקניקייה בלחמנייה
+            </div>
+
+            <div
+              data-value="2.5"
+              data-carbs="50.0"
+              data-protein="8.0"
+              data-fat="5.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין B1, ויטמין B3"
+              data-minerals="נתרן, ברזל"
+              data-satiety-index="1.7"
+              data-glycemic-index="65"
+            >
+              🍜 נודלס
+            </div>
+
+            <div
+              data-value="2.0"
+              data-carbs="30.0"
+              data-protein="15.0"
+              data-fat="8.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין D, ויטמין B12"
+              data-minerals="סלניום, יוד"
+              data-satiety-index="1.9"
+              data-glycemic-index="50"
+            >
+              🥪 סנדוויץ' טונה
+            </div>
+
+            <div
+              data-value="2.4"
+              data-carbs="40.0"
+              data-protein="10.0"
+              data-fat="12.0"
+              data-fiber="6.0"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="ברזל, מגנזיום"
+              data-satiety-index="2.1"
+              data-glycemic-index="55"
+            >
+              🥙 פלאפל בפיתה
+            </div>
+
+            <div
+              data-value="2.7"
+              data-carbs="33.0"
+              data-protein="12.0"
+              data-fat="10.0"
+              data-fiber="2.5"
+              data-vitamins="ויטמין A, ויטמין C"
+              data-minerals="סידן, ברזל"
+              data-satiety-index="1.8"
+              data-glycemic-index="70"
+            >
+              🍕 פיצה
+            </div>
+
+            <div
+              data-value="3.1"
+              data-carbs="41.0"
+              data-protein="3.0"
+              data-fat="15.0"
+              data-fiber="3.3"
+              data-vitamins="ויטמין C, ויטמין B6"
+              data-minerals="אשלגן, סידן"
+              data-satiety-index="1.7"
+              data-glycemic-index="75"
+            >
+              🍟 צ'יפס
+            </div>
+
+            <div
+              data-value="2.0"
+              data-carbs="20.0"
+              data-protein="8.0"
+              data-fat="10.0"
+              data-fiber="1.5"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="1.6"
+              data-glycemic-index="55"
+            >
+              🍗 צ'יקן נאגטס
+            </div>
+
+            <div
+              data-value="2.6"
+              data-carbs="25.0"
+              data-protein="12.0"
+              data-fat="15.0"
+              data-fiber="2.0"
+              data-vitamins="ויטמין B12, ויטמין B6"
+              data-minerals="ברזל, אבץ"
+              data-satiety-index="1.8"
+              data-glycemic-index="65"
+            >
+              🥪 שניצל בלחמנייה
+            </div>
+          </div>
+        </div>
+
+        <!-- שדה בחירה שני: משקל בגרמים -->
+        <label for="weight">משקל בגרמים:</label>
+        <input
+          type="number"
+          id="weight"
+          min="1"
+          placeholder="הזן משקל בגרמים"
+        />
+
+        <!-- כפתור חישוב -->
+        <button type="button" onclick="calculateCalories()">
+          חשב הקלוריות
+        </button>
+      </form>
+
+      <!-- שדה תוצאה: ערך קלורי -->
+      <div class="result">
+        ערך קלורי משוער: <span id="calorieResult">0</span> קלוריות<br />
+        <span id="nutritionInfo"></span>
+      </div>
+    </div>
+
+    <!-- הדרכה -->
+    <div id="customModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2><u>הדרכה</u></h2>
+        <p>
+          1. בחרו סוג מאכל מהרשימה.<br />
+          2. הזינו את המשקל בגרמים.<br />
+          3. לחצו על "חשב הקלוריות" כדי לקבל את הערך הקלורי והערכים
+          התזונתיים.<br />
+          4. ניתן לשנות את ערכת הצבעים באמצעות הכפתור בצד שמאל מעלה.<br /><br />
+          <h2><u>הערות</u></h2>
+          הערכים הקלוריים הינם משוערים בלבד !<br />
+          מאכלים מגיעים בגדלים שונים, לכן התבססות הערכים התזונתיים שמוצגים בטבלה 
+          הינה למשקל בגרמים שמזין המשתמש.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // פונקציה להצגת הודעת שגיאה
+      function showError(message) {
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "error-message";
+        errorDiv.textContent = message;
+        errorDiv.style.color = "red";
+        errorDiv.style.textAlign = "center";
+        errorDiv.style.marginTop = "10px";
+
+        // הסרת הודעת שגיאה קודמת אם קיימת
+        const existingError = document.querySelector(".error-message");
+        if (existingError) {
+          existingError.remove();
+        }
+
+        // הוספת הודעת השגיאה לפני שדה התוצאה
+        const resultDiv = document.querySelector(".result");
+        resultDiv.parentNode.insertBefore(errorDiv, resultDiv);
+      }
+
+      // פונקציה להסרת הודעת שגיאה
+      function clearError() {
+        const existingError = document.querySelector(".error-message");
+        if (existingError) {
+          existingError.remove();
+        }
+      }
+
+      // פונקציה להצגת/הסתרת התפריט
+      function toggleDropdown() {
+        const dropdown = document.querySelector(".dropdown-options");
+        if (!dropdown) {
+          console.error("Dropdown element not found!");
+          return;
+        }
+        dropdown.style.display =
+          dropdown.style.display === "block" ? "none" : "block";
+      }
+
+      // שימוש ב-event delegation עבור בחירת פריט מהתפריט
+      document
+        .querySelector(".dropdown-options")
+        .addEventListener("click", function (event) {
+          if (
+            event.target.tagName === "DIV" &&
+            !event.target.classList.contains("category-title")
+          ) {
+            const selectedItem = document.querySelector(".selected-item");
+            if (!selectedItem) {
+              console.error("Selected item element not found!");
+              return;
+            }
+            selectedItem.textContent = event.target.textContent;
+            selectedItem.setAttribute(
+              "data-value",
+              event.target.getAttribute("data-value")
+            );
+            selectedItem.setAttribute(
+              "data-carbs",
+              event.target.getAttribute("data-carbs")
+            );
+            selectedItem.setAttribute(
+              "data-protein",
+              event.target.getAttribute("data-protein")
+            );
+            selectedItem.setAttribute(
+              "data-fat",
+              event.target.getAttribute("data-fat")
+            );
+            selectedItem.setAttribute(
+              "data-vitamins",
+              event.target.getAttribute("data-vitamins")
+            );
+            selectedItem.setAttribute(
+              "data-minerals",
+              event.target.getAttribute("data-minerals")
+            );
+            selectedItem.setAttribute(
+              "data-satiety-index",
+              event.target.getAttribute("data-satiety-index")
+            );
+            selectedItem.setAttribute(
+              "data-glycemic-index",
+              event.target.getAttribute("data-glycemic-index")
+            );
+            selectedItem.setAttribute(
+              "data-fiber",
+              event.target.getAttribute("data-fiber")
+            );
+            // עדכון Glycemic Index
+            this.style.display = "none";
+
+            // איפוס התוצאה כאשר משתנה הבחירה בתפריט
+            document.getElementById("calorieResult").textContent = "0";
+            document.getElementById("nutritionInfo").textContent = "";
+            clearError(); // הסרת הודעת שגיאה כאשר המשתמש מתחיל לבחור מאכל חדש
+          }
+        });
+
+      // פונקציה לחישוב הקלוריות
+      function calculateCalories() {
+        const selectedItem = document.querySelector(".selected-item");
+        const weight = document.getElementById("weight");
+        const calorieResult = document.getElementById("calorieResult");
+        const nutritionInfo = document.getElementById("nutritionInfo");
+
+        if (!selectedItem || !weight || !calorieResult || !nutritionInfo) {
+          console.error("One or more elements not found!");
+          return;
+        }
+
+        const caloriesPerGram = parseFloat(
+          selectedItem.getAttribute("data-value")
+        );
+        const weightValue = parseFloat(weight.value);
+
+        // בדיקה אם המשקל שהוזן הוא מספר תקין
+        if (isNaN(weightValue)) {
+          showError("אנא הזן משקל תקין (מספר בלבד).");
+          return;
+        }
+
+        // בדיקה אם המשקל שהוזן הוא מספר חיובי
+        if (weightValue <= 0) {
+          showError("אנא הזן משקל גדול מ-0.");
+          return;
+        }
+
+        // בדיקה אם נבחר מאכל מהתפריט
+        if (isNaN(caloriesPerGram)) {
+          showError("אנא בחר מאכל מהתפריט.");
+          return;
+        }
+
+        // חישוב הקלוריות
+        const totalCalories = (caloriesPerGram * weightValue).toFixed(2);
+        if (isNaN(totalCalories) || !isFinite(totalCalories)) {
+          showError("שגיאה בחישוב הקלוריות. אנא נסה שוב.");
+          return;
+        }
+
+        // הצגת התוצאה והסרת הודעות שגיאה
+        clearError();
+        calorieResult.textContent = totalCalories;
+
+        // קריאת הערכים מהפריט הנבחר
+        const carbs = selectedItem.getAttribute("data-carbs");
+        const protein = selectedItem.getAttribute("data-protein");
+        const fat = selectedItem.getAttribute("data-fat");
+        const fiber = selectedItem.getAttribute("data-fiber") || "0"; // ברירת מחדל ל-0 אם הערך לא קיים
+        const vitamins = selectedItem.getAttribute("data-vitamins");
+        const minerals = selectedItem.getAttribute("data-minerals");
+        const satietyIndex = selectedItem.getAttribute("data-satiety-index");
+        const glycemicIndex = selectedItem.getAttribute("data-glycemic-index");
+
+        // חישוב הערכים התזונתיים בהתאם למשקל שהמשתמש מכניס
+        const carbsPerGram = parseFloat(carbs) / 100;
+        const proteinPerGram = parseFloat(protein) / 100;
+        const fatPerGram = parseFloat(fat) / 100;
+        const fiberPerGram = parseFloat(fiber) / 100;
+
+        const totalCarbs = (carbsPerGram * weightValue).toFixed(2);
+        const totalProtein = (proteinPerGram * weightValue).toFixed(2);
+        const totalFat = (fatPerGram * weightValue).toFixed(2);
+        const totalFiber = (fiberPerGram * weightValue).toFixed(2);
+
+        // הצגת התוצאה עם הערכים המחושבים
+        nutritionInfo.innerHTML = `
+    <br />
+    <strong>פילוג תזונתי:</strong><br />
+    - פחמימות: ${totalCarbs} גרם<br />
+    - חלבונים: ${totalProtein} גרם<br />
+    - שומנים: ${totalFat} גרם<br />
+    - סיבים: ${totalFiber} גרם<br />
+    <br />
+    <strong>ויטמינים:</strong> ${vitamins}<br />
+    <strong>מינרלים:</strong> ${minerals}<br />
+    <strong>מדד שובע (Satiety Index):</strong> ${
+      satietyIndex || "לא זמין"
+    }<br />
+    <strong>מדד גליקמי (Glycemic Index):</strong> ${glycemicIndex || "לא זמין"}
+  `;
+      }
+
+      // הוספת אירוע לחיצה על Enter בטופס
+      document
+        .getElementById("calorieForm")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault(); // מונע את ברירת המחדל של שליחת הטופס
+            calculateCalories();
+          }
+        });
+
+      // איפוס התוצאה כאשר המשתמש מזין ערך חדש בשדה המשקל
+      document.getElementById("weight").addEventListener("input", function () {
+        document.getElementById("calorieResult").textContent = "0";
+        document.getElementById("nutritionInfo").textContent = "";
+        clearError(); // הסרת הודעת שגיאה כאשר המשתמש מתחיל להזין ערך חדש
+      });
+
+      // איפוס התוצאה כאשר משתנה הבחירה בתפריט הגלילה
+      document
+        .querySelector(".selected-item")
+        .addEventListener("click", function () {
+          document.getElementById("calorieResult").textContent = "0";
+          document.getElementById("nutritionInfo").textContent = "";
+          clearError(); // הסרת הודעת שגיאה כאשר המשתמש מתחיל לבחור מאכל חדש
+        });
+
+      // פונקציה להחלפת ערכת הצבעים
+      function toggleTheme() {
+        const body = document.body;
+        const themeToggle = document.getElementById("themeToggle");
+
+        if (!body || !themeToggle) {
+          console.error("Body or theme toggle element not found!");
+          return;
+        }
+
+        body.classList.toggle("dark-theme");
+        body.classList.toggle("light-theme");
+        themeToggle.textContent = body.classList.contains("dark-theme")
+          ? "🌙"
+          : "🌞";
+      }
+
+      // פונקציה להצגת הודעת הדרכה
+      function showHelp() {
+        const modal = document.getElementById("customModal");
+        if (!modal) {
+          console.error("Modal element not found!");
+          return;
+        }
+        modal.style.display = "block";
+
+        const closeBtn = document.querySelector(".close");
+        if (!closeBtn) {
+          console.error("Close button not found!");
+          return;
+        }
+        closeBtn.onclick = function () {
+          modal.style.display = "none";
+        };
+
+        window.onclick = function (event) {
+          if (event.target === modal) {
+            modal.style.display = "none";
+          }
+        };
+      }
+
+      // הוספת אירוע לכפתור שינוי ערכת הצבעים
+      document
+        .getElementById("themeToggle")
+        .addEventListener("click", toggleTheme);
+
+      // הוספת אירוע לכפתור ההדרכה
+      document.getElementById("helpButton").addEventListener("click", showHelp);
+
+      // מניעת pull-to-refresh במכשירים ניידים
+      let startY = 0;
+
+      document.addEventListener(
+        "touchstart",
+        function (event) {
+          startY = event.touches[0].clientY;
+        },
+        { passive: true }
+      );
+
+      document.addEventListener(
+        "touchmove",
+        function (event) {
+          const currentY = event.touches[0].clientY;
+
+          // אם המשתמש גולל למעלה מהחלק העליון של הדף
+          if (window.scrollY === 0 && currentY > startY) {
+            event.preventDefault(); // מונע את pull-to-refresh
+          }
+        },
+        { passive: false }
+      );
+
+      // התאמת גובה ה-dropdown
+      function adjustDropdownHeight() {
+        const container = document.querySelector(".container");
+        const dropdown = document.querySelector(".dropdown-options");
+
+        if (!container || !dropdown) {
+          console.error("Container or dropdown element not found!");
+          return;
+        }
+
+        const containerHeight = container.offsetHeight;
+        const dropdownTop = dropdown.offsetTop;
+
+        dropdown.style.maxHeight = containerHeight - dropdownTop - 80 + "px"; // 20px מרווח לתחתית
+      }
+
+      // קריאה לפונקציה כאשר הטופס נטען או כאשר ה-dropdown נפתח
+      window.addEventListener("load", adjustDropdownHeight);
+      document
+        .querySelector(".selected-item")
+        .addEventListener("click", adjustDropdownHeight);
+    </script>
+  </body>
+</html>

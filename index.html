@@ -136,7 +136,7 @@
 
       .btn {
         display: inline-block;
-        padding: 0.5rem 1rem;
+        padding: 0.6rem 1.5rem;
         background: var(--primary-color);
         color: white;
         border-radius: 30px;
@@ -145,14 +145,15 @@
         transition: var(--transition);
         border: none;
         cursor: pointer;
-        font-size: 0.9rem;
       }
 
       .btn:hover {
-        background: rgb(253, 176, 32);
+        background: var(--accent-color);
         transform: translateY(-2px);
-        color: rgb(47, 32, 15);
+      }
 
+      .btn i {
+        margin-left: 5px;
       }
 
       footer {
@@ -187,6 +188,7 @@
         position: absolute;
         top: 10px;
         left: 10px;
+        background: var(--accent-color);
         color: white;
         padding: 0.2rem 0.6rem;
         border-radius: 20px;
@@ -249,6 +251,11 @@
         .app-info p {
           font-size: 0.8rem;
           min-height: 60px;
+        }
+        
+        .btn {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
         }
         
         footer {
