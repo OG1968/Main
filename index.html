@@ -377,12 +377,13 @@
 
       .about-card {
         margin-top: 2rem;
+        
       }
 
-      /* הוסף מרווח תחתון נוסף */
-      .about-card .app-info {
-        padding-bottom: 2rem;
-      }
+        /* הוסף מרווח תחתון נוסף */
+  .about-card .app-info {
+    padding-bottom: 2rem;
+  }
 
       .about-card .app-icon {
         height: 120px;
@@ -515,53 +516,54 @@
       }
 
       /* סטייל למודל היציאה */
-      #exit-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 10000;
-        display: none;
-        justify-content: center;
-        align-items: center;
-      }
+#exit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
 
-      #exit-modal-content {
-        background-color: white;
-        color: var(--text);
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        max-width: 80%;
-        border: 1px solid var(--primary-color);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
+#exit-modal-content {
+  background-color: white; 
+  color: var(--text);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 80%;
+  border: 1px solid var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 
-      #exit-modal h3 {
-        margin-bottom: 15px;
-        font-weight: bold;
-      }
+#exit-modal h3 {
+  margin-bottom: 15px;
+  font-weight: bold;
+}
 
-      #exit-modal button {
-        border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
-        margin: 0 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
+#exit-modal button {
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
 
-      #confirm-exit {
-        background-color: #ff4444;
-        color: white;
-      }
+#confirm-exit {
+  background-color: #ff4444;
+  color: white;
+}
 
-      #cancel-exit {
-        background-color: var(--primary-color);
-        color: white;
-      }
+#cancel-exit {
+  background-color: var(--primary-color);
+  color: white;
+}
+
     </style>
   </head>
   <body>
@@ -576,99 +578,102 @@
       <div class="filters">
         <div class="category-filters">
           <button class="filter-btn active" data-category="all">הצג הכל</button>
-          <button class="filter-btn" data-category="Lifestyle">
-            לייף סטייל
-          </button>
+          <button class="filter-btn" data-category="Lifestyle"> לייף סטייל</button>
           <button class="filter-btn" data-category="finance">פיננסי</button>
           <button class="filter-btn" data-category="health">בריאות</button>
-          <button class="filter-btn" data-category="Productive">
-            פרודוקטיביות
-          </button>
+          <button class="filter-btn" data-category="Productive">פרודוקטיביות</button>
           <button class="filter-btn" data-category="about">אודותנו</button>
         </div>
       </div>
 
-      <!-- אפליקציה 1 -->
-      <div class="app-card" data-category="Lifestyle">
-        <div class="app-icon">
-          <i class="fas fa-book"></i>
+      <div class="apps-grid">
+        <!-- אפליקציה 1 -->
+        <div class="app-card" data-category="Lifestyle">
+          </button>
+          <div class="app-icon">
+            <i class="fas fa-book"></i>
+          </div>
+          <div class="app-info">
+            <h3>חוברת מתכונים</h3>
+            <p>ארגן את המתכונים האהובים עליך בצורה יעילה ושתף אותם עם חברים.</p>
+            <a href="CookBook_v5.1.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
         </div>
-        <div class="app-info">
-          <h3>חוברת מתכונים</h3>
-          <p>ארגן את המתכונים האהובים עליך בצורה יעילה ושתף אותם עם חברים.</p>
-          <a href="CookBook_v5.1.html" class="btn"
-            >לכניסה <i class="fas fa-external-link-alt"></i
-          ></a>
-        </div>
-      </div>
 
-      <!-- אפליקציה 2 -->
-      <div class="app-card" data-category="finance">
-        <div class="app-icon">
-          <i class="fa-solid fa-calculator"></i>
+        <!-- אפליקציה 2 -->
+        <div class="app-card" data-category="finance">
+          </button>
+          <div class="app-icon">
+            <i class="fa-solid fa-calculator"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון המרות</h3>
+            <p>
+              המרת מטבעות בשער עדכני, מידות מרחקים, משקלים, טמפרטורה, נפח, שטח,
+              מהירות.
+            </p>
+            <a href="Conversions_v3.1.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
         </div>
-        <div class="app-info">
-          <h3>מחשבון המרות</h3>
-          <p>
-            המרת מטבעות בשער עדכני, מידות מרחקים, משקלים, טמפרטורה, נפח, שטח,
-            מהירות.
-          </p>
-          <a href="Conversions_v3.1.html" class="btn"
-            >לכניסה <i class="fas fa-external-link-alt"></i
-          ></a>
-        </div>
-      </div>
 
-      <!-- אפליקציה 3 -->
-      <div class="app-card" data-category="health">
-        <div class="app-icon">
-          <i class="fa-solid fa-utensils"></i>
+        <!-- אפליקציה 3 -->
+        <div class="app-card" data-category="health">
+          </button>
+          <div class="app-icon">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון קלורי</h3>
+            <p>
+              עקוב אחר הערך הקלורי, הויטמינים, מינרלים ערך גלוקימי ומדד השובע של
+              כל מה שבחרת לאכול לבחירות נבונות יותר.
+            </p>
+            <a href="Calorie_Calc_v2.6.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
         </div>
-        <div class="app-info">
-          <h3>מחשבון קלורי</h3>
-          <p>
-            עקוב אחר הערך הקלורי, הויטמינים, מינרלים ערך גלוקימי ומדד השובע של
-            כל מה שבחרת לאכול לבחירות נבונות יותר.
-          </p>
-          <a href="Calorie_Calc_v2.6.html" class="btn"
-            >לכניסה <i class="fas fa-external-link-alt"></i
-          ></a>
-        </div>
-      </div>
 
-      <!-- אפליקציה 4 -->
-      <div class="app-card" data-category="Lifestyle">
-        <div class="app-icon">
-          <i class="fas fa-shirt"></i>
+        <!-- אפליקציה 4 -->
+        <div class="app-card" data-category="Lifestyle">
+          </button>
+          <div class="app-icon">
+            <i class="fas fa-shirt"></i>
+          </div>
+          <div class="app-info">
+            <h3>ממיר המידות לביגוד והנעלה</h3>
+            <p>
+              ראית דיל מעולה ברשת, אבל המידה אמריקאית, בריטית אסייאתית ואתה לא
+              בטוח? הממיר הזה עבורך.
+            </p>
+            <a href="Outfit_Calc_v2.0.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
         </div>
-        <div class="app-info">
-          <h3>ממיר המידות לביגוד והנעלה</h3>
-          <p>
-            ראית דיל מעולה ברשת, אבל המידה אמריקאית, בריטית אסייאתית ואתה לא
-            בטוח? הממיר הזה עבורך.
-          </p>
-          <a href="Outfit_Calc_v2.0.html" class="btn"
-            >לכניסה <i class="fas fa-external-link-alt"></i
-          ></a>
-        </div>
-      </div>
 
-      <!-- אפליקציה 5 -->
-      <div class="app-card" data-category="Productive">
-        <div class="app-icon">
-          <i class="fa-solid fa-circle-check"></i>
+            <!-- אפליקציה 5 -->
+            <div class="app-card" data-category="Productive">
+            </button>
+            <div class="app-icon">
+              <i class="fa-solid fa-circle-check"></i>
+                        </div>
+            <div class="app-info">
+              <h3>הצ'קליסט האולטימטיבי</h3>
+              <p>
+                יוצאים לחו"ל או קמפינג בארץ, או סתם חוששים לשכוח לעשוד משהו? 
+                הצ'קליסט הזה יעשה לעם סדר, כיתבו מה לעשות והוא ישמור זאת עד למחיקה.
+              </p>
+              <a href="Traveler_Checklist_v2.0.html" class="btn"
+                >לכניסה <i class="fas fa-external-link-alt"></i
+              ></a>
+            </div>
+          </div>
         </div>
-        <div class="app-info">
-          <h3>הצ'קליסט האולטימטיבי</h3>
-          <p>
-            יוצאים לחו"ל או קמפינג בארץ, או סתם חוששים לשכוח לעשוד משהו?
-            הצ'קליסט הזה יעשה לעם סדר, כיתבו מה לעשות והוא ישמור זאת עד למחיקה.
-          </p>
-          <a href="Traveler_Checklist_v2.0.html" class="btn"
-            >לכניסה <i class="fas fa-external-link-alt"></i
-          ></a>
-        </div>
-      </div>
       <!-- אודותנו -->
       <div class="app-card about-card" data-category="about">
         <div class="app-icon">
@@ -701,44 +706,42 @@
     <div class="app-preview" id="appPreview"></div>
 
     <!-- Exit Confirmation Modal -->
-    <div id="exit-modal">
-      <div id="exit-modal-content">
-        <h3>האם לצאת?</h3>
-        <button id="confirm-exit">יציאה</button>
-        <button id="cancel-exit">ביטול</button>
-      </div>
-    </div>
+<div id="exit-modal">
+  <div id="exit-modal-content">
+    <h3>האם לצאת?</h3>
+    <button id="confirm-exit">יציאה</button>
+    <button id="cancel-exit">ביטול</button>
+  </div>
+</div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // פונקציונליות סינון
-        const filterBtns = document.querySelectorAll(".filter-btn");
-        const appCards = document.querySelectorAll(".app-card");
+document.addEventListener("DOMContentLoaded", function () {
+  // פונקציונליות סינון
+  const filterBtns = document.querySelectorAll(".filter-btn");
+  const appCards = document.querySelectorAll(".app-card");
 
-        function filterApps() {
-          const activeCategory =
-            document.querySelector(".filter-btn.active").dataset.category;
+  function filterApps() {
+    const activeCategory = document.querySelector(".filter-btn.active").dataset.category;
 
-          appCards.forEach((card) => {
-            const category = card.dataset.category;
-            const matchesCategory =
-              activeCategory === "all" || category === activeCategory;
+    appCards.forEach((card) => {
+      const category = card.dataset.category;
+      const matchesCategory = activeCategory === "all" || category === activeCategory;
 
-            if (matchesCategory) {
-              card.style.display = "flex";
-            } else {
-              card.style.display = "none";
-            }
-          });
-        }
+      if (matchesCategory) {
+        card.style.display = "flex";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
 
-        filterBtns.forEach((btn) => {
-          btn.addEventListener("click", function () {
-            filterBtns.forEach((b) => b.classList.remove("active"));
-            this.classList.add("active");
-            filterApps();
-          });
-        });
+  filterBtns.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      filterBtns.forEach((b) => b.classList.remove("active"));
+      this.classList.add("active");
+      filterApps();
+    });
+  });
 
         filterBtns.forEach((btn) => {
           btn.addEventListener("click", function () {
@@ -748,92 +751,90 @@
           });
         });
 
-        // פונקציה להצגת הודעות טוסט
-        function showToast(message) {
-          const toast = document.getElementById("toast");
-          toast.textContent = message;
-          toast.classList.add("show");
+  // פונקציה להצגת הודעות טוסט
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
 
-          setTimeout(() => {
-            toast.classList.remove("show");
-          }, 3000);
-        }
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 3000);
+  }
 
-        // אנימציה לגלילה חלקה
-        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-          anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute("href")).scrollIntoView({
-              behavior: "smooth",
-            });
-          });
+  // אנימציה לגלילה חלקה
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener("click", function (e) {
+      e.preventDefault();
+      document.querySelector(this.getAttribute("href")).scrollIntoView({
+        behavior: "smooth",
+      });
+    });
+  });
+
+  // אנימציה להדגשת כרטיסים בעת מעבר עם העכבר
+  const cards = document.querySelectorAll(".app-card");
+  cards.forEach((card) => {
+    card.addEventListener("mousemove", (e) => {
+      const x = e.pageX - card.offsetLeft;
+      const y = e.pageY - card.offsetTop;
+
+      card.style.setProperty("--mouse-x", x);
+      card.style.setProperty("--mouse-y", y);
+      card.style.transform = `perspective(1000px) rotateX(${
+        (y - card.offsetHeight / 2) / 20
+      }deg) rotateY(${-(x - card.offsetWidth / 2) / 20}deg)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "perspective(1000px) rotateX(0) rotateY(0)";
+    });
+  });
+
+  // אפקט ריחוף לכפתורים
+  document.querySelectorAll(".btn, .filter-btn").forEach((btn) => {
+    btn.addEventListener("mousemove", (e) => {
+      const x = e.pageX - btn.offsetLeft;
+      const y = e.pageY - btn.offsetTop;
+
+      btn.style.setProperty("--x", `${x}px`);
+      btn.style.setProperty("--y", `${y}px`);
+    });
+  });
+
+  // טעינה פרוגרסיבית עם אנימציה
+  function animateOnScroll() {
+    const elements = document.querySelectorAll(".app-card, header, .filters");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.animation = `fadeInUp 0.6s ${
+              entry.target.dataset.delay || "0s"
+            } ease-out forwards`;
+            observer.unobserve(entry.target);
+          }
         });
+      },
+      { threshold: 0.1 }
+    );
 
-        // אנימציה להדגשת כרטיסים בעת מעבר עם העכבר
-        const cards = document.querySelectorAll(".app-card");
-        cards.forEach((card) => {
-          card.addEventListener("mousemove", (e) => {
-            const x = e.pageX - card.offsetLeft;
-            const y = e.pageY - card.offsetTop;
+    elements.forEach((el, i) => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(20px)";
+      el.dataset.delay = `${i * 0.1}s`;
+      observer.observe(el);
+    });
+  }
 
-            card.style.setProperty("--mouse-x", x);
-            card.style.setProperty("--mouse-y", y);
-            card.style.transform = `perspective(1000px) rotateX(${
-              (y - card.offsetHeight / 2) / 20
-            }deg) rotateY(${-(x - card.offsetWidth / 2) / 20}deg)`;
-          });
+  animateOnScroll();
 
-          card.addEventListener("mouseleave", () => {
-            card.style.transform = "perspective(1000px) rotateX(0) rotateY(0)";
-          });
-        });
-
-        // אפקט ריחוף לכפתורים
-        document.querySelectorAll(".btn, .filter-btn").forEach((btn) => {
-          btn.addEventListener("mousemove", (e) => {
-            const x = e.pageX - btn.offsetLeft;
-            const y = e.pageY - btn.offsetTop;
-
-            btn.style.setProperty("--x", `${x}px`);
-            btn.style.setProperty("--y", `${y}px`);
-          });
-        });
-
-        // טעינה פרוגרסיבית עם אנימציה
-        function animateOnScroll() {
-          const elements = document.querySelectorAll(
-            ".app-card, header, .filters"
-          );
-
-          const observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                  entry.target.style.animation = `fadeInUp 0.6s ${
-                    entry.target.dataset.delay || "0s"
-                  } ease-out forwards`;
-                  observer.unobserve(entry.target);
-                }
-              });
-            },
-            { threshold: 0.1 }
-          );
-
-          elements.forEach((el, i) => {
-            el.style.opacity = "0";
-            el.style.transform = "translateY(20px)";
-            el.dataset.delay = `${i * 0.1}s`;
-            observer.observe(el);
-          });
-        }
-
-        animateOnScroll();
-
-        // תצוגה מקדימה של אפליקציות
-        document.querySelectorAll(".app-card").forEach((card) => {
-          const preview = document.createElement("div");
-          preview.className = "app-preview";
-          preview.innerHTML = `
+  // תצוגה מקדימה של אפליקציות
+  document.querySelectorAll(".app-card").forEach((card) => {
+    const preview = document.createElement("div");
+    preview.className = "app-preview";
+    preview.innerHTML = `
       <div class="preview-content">
         <span class="close-preview">&times;</span>
         <h3>${card.querySelector("h3").textContent}</h3>
@@ -843,59 +844,53 @@
         </a>
       </div>
     `;
-          document.body.appendChild(preview);
+    document.body.appendChild(preview);
 
-          card.addEventListener("click", (e) => {
-            if (!e.target.closest("a")) {
-              preview.style.display = "flex";
-              document.body.style.overflow = "hidden";
-            }
-          });
-
-          preview
-            .querySelector(".close-preview")
-            .addEventListener("click", () => {
-              preview.style.display = "none";
-              document.body.style.overflow = "auto";
-            });
-        });
-      });
-
-      // פונקציות לניהול יציאה
-      function exitApplication() {
-        window.location.href = "https://www.google.com";
+    card.addEventListener("click", (e) => {
+      if (!e.target.closest("a")) {
+        preview.style.display = "flex";
+        document.body.style.overflow = "hidden";
       }
+    });
 
-      function showExitDialog() {
-        const exitModal = document.getElementById("exit-modal");
-        if (exitModal) exitModal.style.display = "flex";
-      }
+    preview.querySelector(".close-preview").addEventListener("click", () => {
+      preview.style.display = "none";
+      document.body.style.overflow = "auto";
+    });
+  });
+});
 
-      function hideExitDialog() {
-        const exitModal = document.getElementById("exit-modal");
-        if (exitModal) exitModal.style.display = "none";
-      }
+// פונקציות לניהול יציאה
+function exitApplication() {
+  window.location.href = "https://www.google.com";
+}
 
-      // אתחול מערכת היציאה
-      function initExitSystem() {
-        history.pushState(null, null, window.location.pathname);
-        window.addEventListener("popstate", function (event) {
-          showExitDialog();
-          history.pushState(null, null, window.location.pathname);
-        });
-        document
-          .getElementById("confirm-exit")
-          ?.addEventListener("click", exitApplication);
-        document
-          .getElementById("cancel-exit")
-          ?.addEventListener("click", hideExitDialog);
-      }
+function showExitDialog() {
+  const exitModal = document.getElementById("exit-modal");
+  if (exitModal) exitModal.style.display = "flex";
+}
 
-      // הוספת הקריאה לאתחול בפונקציה הראשית
-      document.addEventListener("DOMContentLoaded", function () {
-        // הקוד הקיים שלך...
-        initExitSystem(); // הוסף שורה זו בסוף
-      });
+function hideExitDialog() {
+  const exitModal = document.getElementById("exit-modal");
+  if (exitModal) exitModal.style.display = "none";
+}
+
+// אתחול מערכת היציאה
+function initExitSystem() {
+  history.pushState(null, null, window.location.pathname);
+  window.addEventListener('popstate', function(event) {
+    showExitDialog();
+    history.pushState(null, null, window.location.pathname);
+  });
+  document.getElementById('confirm-exit')?.addEventListener('click', exitApplication);
+  document.getElementById('cancel-exit')?.addEventListener('click', hideExitDialog);
+}
+
+// הוספת הקריאה לאתחול בפונקציה הראשית
+document.addEventListener("DOMContentLoaded", function() {
+  // הקוד הקיים שלך...
+  initExitSystem(); // הוסף שורה זו בסוף
+});
     </script>
   </body>
 </html>
