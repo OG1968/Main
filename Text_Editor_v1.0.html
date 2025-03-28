@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>כלי לשיפור טקסטים</title>
+    <style>
+      :root {
+        --primary-color: #2c7873;
+        --secondary-color: #6fb98f;
+        --accent-color: #004445;
+        --light-color: #fff0b5;
+        --dark-color: #333;
+        --text-color: #444;
+        --error-color: #e74c3c;
+        --success-color: #2ecc71;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        margin: 10px;
+        background-color: var(--light-color);
+        color: var(--text-color);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+
+      body.loaded {
+        opacity: 1;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        animation: fadeIn 0.5s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .title-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 30px;
+      }
+
+      h1 {
+        color: var(--accent-color);
+        text-align: center;
+        font-size: 2.2rem;
+        position: relative;
+        padding: 0 10px;
+        text-shadow: 2px 2px 2px rgb(50, 60, 254);
+        margin: 0;
+      }
+
+      h1 span {
+        display: inline-block;
+        transition: all 0.3s ease;
+      }
+
+      h1:before,
+      h1:after {
+        content: "";
+        position: absolute;
+        height: 3px;
+        border-radius: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        bottom: -10px;
+        left: 0;
+        right: 0;
+        transform: scaleX(0);
+        transition: transform 0.5s ease;
+      }
+
+      h1:after {
+        bottom: -15px;
+        background: linear-gradient(
+          90deg,
+          var(--secondary-color),
+          var(--primary-color)
+        );
+        left: 15%;
+        right: 15%;
+      }
+
+      .container:hover h1:before {
+        transform: scaleX(1);
+      }
+
+      .container:hover h1:after {
+        transform: scaleX(0.7);
+      }
+
+      @keyframes titleGlow {
+        0% {
+          text-shadow: 0 0 5px rgba(44, 120, 115, 0.5);
+        }
+        50% {
+          text-shadow: 0 0 15px rgba(44, 120, 115, 0.8);
+        }
+        100% {
+          text-shadow: 0 0 5px rgba(44, 120, 115, 0.5);
+        }
+      }
+
+      @keyframes titleBounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      /* שאר הסגנונות נשארים כמו שהיו */
+      textarea {
+        width: calc(100% - 20px);
+        max-width: 600px;
+        min-height: 200px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        resize: vertical;
+        font-size: 16px;
+        direction: rtl;
+        text-align: right;
+        unicode-bidi: plaintext;
+        background-color: #fff;
+        transition: all 0.3s ease, box-shadow 0.2s ease;
+        margin: 0 auto 15px;
+        display: block;
+      }
+
+      textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(44, 120, 115, 0.3);
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+        width: 100%;
+      }
+
+      .button-row {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+        perspective: 1000px;
+      }
+
+      button {
+        padding: 0 10px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        height: 40px;
+        flex: 1;
+        max-width: 200px;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+        font-weight: bold;
+        position: relative;
+        overflow: hidden;
+        transform-style: preserve-3d;
+      }
+
+      button:hover {
+        transform: translateY(-2px) rotateX(10deg);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px var(--light-color);
+      }
+
+      button::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+      }
+
+      button:focus:not(:active)::after {
+        animation: ripple 0.6s ease-out;
+      }
+
+      @keyframes ripple {
+        0% {
+          transform: scale(0, 0);
+          opacity: 0.5;
+        }
+        100% {
+          transform: scale(20, 20);
+          opacity: 0;
+        }
+      }
+
+      .clear-btn {
+        background-color: var(--error-color);
+        width: calc(100% - 10px);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .clear-btn:hover {
+        background-color: #c0392b;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--accent-color);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 4px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .toast.show {
+        opacity: 1;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .success-animation {
+        animation: pulse 0.5s ease, fadeIn 0.5s ease;
+      }
+
+      @media (max-width: 600px) {
+        textarea {
+          width: calc(100% - 20px);
+        }
+
+        .clear-btn {
+          width: calc(100% - 10px);
+          max-width: 100%;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .button-row {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        button {
+          max-width: 100%;
+          width: 100%;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+          padding: 0 10px;
+        }
+      }
+
+      /* סטייל למודל היציאה */
+      #exit-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #exit-modal-content {
+        background-color: #5a8de6;
+        color: #000;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 80%;
+        border: 1px solid var(--primary-color);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      #exit-modal h3 {
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+
+      #exit-modal button {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #confirm-exit {
+        background-color: #ff4444;
+        color: #000;
+      }
+
+      #cancel-exit {
+        background-color: var(--primary-color);
+        color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="title-container">
+        <h1><span>עורך טקסטים מתקדם</span></h1>
+      </div>
+
+      <textarea id="textArea" placeholder="הדבק טקסט כאן..."></textarea>
+
+      <div class="controls">
+        <div class="button-row">
+          <button
+            onclick="changeTextDirection('ltr')"
+            aria-label="ישר טקסט לצד שמאל"
+          >
+            ישור לשמאל
+          </button>
+          <button onclick="fixHebrewText()" aria-label="הפוך טקסט עברי">
+            היפוך טקסט
+          </button>
+          <button
+            onclick="changeTextDirection('rtl')"
+            aria-label="ישר טקסט לצד ימין"
+          >
+            ישור לימין
+          </button>
+        </div>
+
+        <div class="button-row">
+          <button
+            onclick="capitalizeFirstLetters()"
+            aria-label="הפוך אות ראשונה לגדולה באנגלית"
+          >
+            (En) ראשונה גדולה
+          </button>
+          <button onclick="toUpperCase()" aria-label="הפוך טקסט לאנגלית גדולה">
+            (En) אותיות גדולות
+          </button>
+          <button onclick="toLowerCase()" aria-label="הפוך טקסט לאנגלית קטנה">
+            (En) אותיות קטנות
+          </button>
+        </div>
+
+        <div class="button-row">
+          <button
+            onclick="clearText()"
+            class="clear-btn"
+            aria-label="נקה את תיבת הטקסט"
+          >
+            נקה טקסט
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exit Confirmation Modal -->
+    <div id="exit-modal">
+      <div id="exit-modal-content">
+        <h3>האם לצאת?</h3>
+        <button id="confirm-exit">יציאה</button>
+        <button id="cancel-exit">ביטול</button>
+      </div>
+    </div>
+
+    <script>
+      const textArea = document.getElementById("textArea");
+
+      // פונקציות לטיפול בטקסט
+      function capitalizeFirstLetters() {
+        let text = textArea.value;
+        text = text
+          .toLowerCase()
+          .replace(/(^\w|\s\w)/g, (m) => m.toUpperCase());
+        textArea.value = text;
+        showToast("אותיות ראשונות הומרו לגדולות");
+        animateSuccess();
+      }
+
+      function toUpperCase() {
+        textArea.value = textArea.value.toUpperCase();
+        showToast("הטקסט הומר לאותיות גדולות");
+        animateSuccess();
+      }
+
+      function toLowerCase() {
+        textArea.value = textArea.value.toLowerCase();
+        showToast("הטקסט הומר לאותיות קטנות");
+        animateSuccess();
+      }
+
+      function fixHebrewText() {
+        let text = textArea.value;
+        let lines = text.split("\n");
+        let fixedLines = lines.map((line) => {
+          // טיפול מיוחד בטקסט מעורב אנגלית/עברית
+          let segments = line.split(/([\u0590-\u05FF]+|[^\u0590-\u05FF]+)/g);
+
+          let processedSegments = segments.map((segment) => {
+            // אם זה טקסט עברי
+            if (/[\u0590-\u05FF]/.test(segment)) {
+              return segment.split("").reverse().join("");
+            }
+            return segment;
+          });
+
+          return processedSegments.reverse().join("");
+        });
+
+        textArea.value = fixedLines.join("\n");
+        showToast("טקסט עברי תוקן");
+        animateSuccess();
+      }
+
+      function changeTextDirection(direction) {
+        textArea.style.direction = direction;
+        textArea.style.textAlign = direction === "rtl" ? "right" : "left";
+        showToast(`כיוון טקסט: ${direction === "rtl" ? "ימין" : "שמאל"}`);
+      }
+
+      function clearText() {
+        textArea.value = "";
+        showToast("הטקסט נוקה בהצלחה");
+      }
+
+      // פונקציות חדשות להודעות ואנימציות
+      function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.classList.add("show"), 10);
+
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      function animateSuccess() {
+        const container = document.querySelector(".container");
+        container.classList.add("success-animation");
+        setTimeout(() => {
+          container.classList.remove("success-animation");
+        }, 500);
+      }
+
+      // ניקוי שדה הטקסט בכניסה
+      window.addEventListener("load", function () {
+        document.body.classList.add("loaded");
+        textArea.value = "";
+        textArea.style.width = "calc(100% - 20px)";
+        textArea.style.maxWidth = "600px";
+
+        // אנימציה לכותרת בהטענה
+        const title = document.querySelector("h1 span");
+        setTimeout(() => {
+          title.style.animation =
+            "titleBounce 0.8s ease, titleGlow 2s ease-in-out";
+          setTimeout(() => {
+            title.style.animation = "";
+          }, 2000);
+        }, 500);
+
+        // הפעלת אתחול האפליקציה
+        initApp();
+      });
+
+      // פונקציה להפניה לדף אחר
+      function exitApplication() {
+        window.location.href = "index.html";
+      }
+
+      // הצגת הדיאלוג הקיים מהקובץ CSS
+      function showExitDialog() {
+        const exitModal = document.getElementById("exit-modal");
+        if (exitModal) {
+          exitModal.style.display = "flex";
+        }
+      }
+
+      // הסתרת הדיאלוג
+      function hideExitDialog() {
+        const exitModal = document.getElementById("exit-modal");
+        if (exitModal) {
+          exitModal.style.display = "none";
+        }
+      }
+
+      // אתחול היסטוריה
+      history.pushState(null, null, window.location.pathname);
+
+      // הוסף את זה לפונקציית האתחול הקיימת (או יצור אחת אם אין)
+      function initApp() {
+        // אתחול מערכת היציאה מהאפליקציה
+        history.pushState(null, null, window.location.pathname);
+
+        // הוספת מאזין ללחיצת אחורה
+        window.addEventListener("popstate", function (event) {
+          showExitDialog();
+          history.pushState(null, null, window.location.pathname);
+        });
+
+        // טיפול בלחיצות כפתורי היציאה
+        document
+          .getElementById("confirm-exit")
+          ?.addEventListener("click", exitApplication);
+        document
+          .getElementById("cancel-exit")
+          ?.addEventListener("click", hideExitDialog);
+      }
+
+      // הפעלת האתחול כאשר המסמך טעון
+      document.addEventListener("DOMContentLoaded", initApp);
+    </script>
+  </body>
+</html>
