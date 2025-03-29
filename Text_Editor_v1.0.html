@@ -131,7 +131,6 @@
         }
       }
 
-      /* שאר הסגנונות נשארים כמו שהיו */
       textarea {
         width: calc(100% - 20px);
         max-width: 600px;
@@ -295,7 +294,6 @@
         }
       }
 
-      /* סטייל למודל היציאה */
       #exit-modal {
         position: fixed;
         top: 0;
@@ -388,6 +386,33 @@
         </div>
 
         <div class="button-row">
+          <button onclick="removeEmptyLines()" aria-label="הסר שורות ריקות">
+            הסר שורות ריקות
+          </button>
+          <button onclick="removeDoubleSpaces()" aria-label="הסר רווחים כפולים">
+            הסר רווחים כפולים
+          </button>
+          <button onclick="countCharacters()" aria-label="ספור תווים">
+            ספור תווים
+          </button>
+        </div>
+
+        <div class="button-row">
+          <button
+            onclick="toggleCharacterLanguage()"
+            aria-label="היפוך שפת תווים"
+          >
+            היפוך שפת תווים
+          </button>
+          <button onclick="convertToBubbleText()" aria-label="כותרות בלון">
+            כותרות בלון
+          </button>
+          <button onclick="toggleBinaryText()" aria-label="היפוך בינארי/רגיל">
+            היפוך בינארי/רגיל
+          </button>
+        </div>
+
+        <div class="button-row">
           <button
             onclick="clearText()"
             class="clear-btn"
@@ -399,7 +424,6 @@
       </div>
     </div>
 
-    <!-- Exit Confirmation Modal -->
     <div id="exit-modal">
       <div id="exit-modal-content">
         <h3>האם לצאת?</h3>
@@ -409,9 +433,9 @@
     </div>
 
     <script>
+      // פונקציות לטיפול בטקסט
       const textArea = document.getElementById("textArea");
 
-      // פונקציות לטיפול בטקסט
       function capitalizeFirstLetters() {
         let text = textArea.value;
         text = text
@@ -438,20 +462,15 @@
         let text = textArea.value;
         let lines = text.split("\n");
         let fixedLines = lines.map((line) => {
-          // טיפול מיוחד בטקסט מעורב אנגלית/עברית
           let segments = line.split(/([\u0590-\u05FF]+|[^\u0590-\u05FF]+)/g);
-
           let processedSegments = segments.map((segment) => {
-            // אם זה טקסט עברי
             if (/[\u0590-\u05FF]/.test(segment)) {
               return segment.split("").reverse().join("");
             }
             return segment;
           });
-
           return processedSegments.reverse().join("");
         });
-
         textArea.value = fixedLines.join("\n");
         showToast("טקסט עברי תוקן");
         animateSuccess();
@@ -468,7 +487,212 @@
         showToast("הטקסט נוקה בהצלחה");
       }
 
-      // פונקציות חדשות להודעות ואנימציות
+      function removeEmptyLines() {
+        let text = textArea.value;
+        text = text.replace(/^\s*[\r\n]/gm, "");
+        textArea.value = text;
+        showToast("שורות ריקות הוסרו");
+        animateSuccess();
+      }
+
+      function removeDoubleSpaces() {
+        let text = textArea.value;
+        text = text.replace(/\s+/g, " ");
+        textArea.value = text;
+        showToast("רווחים כפולים הוסרו");
+        animateSuccess();
+      }
+
+      function countCharacters() {
+        let text = textArea.value;
+        let count = text.length;
+        showToast(`מספר תווים: ${count}`);
+      }
+
+      // פונקציות חדשות
+      function toggleCharacterLanguage() {
+        const charMap = {
+          א: "t",
+          ב: "c",
+          ג: "d",
+          ד: "s",
+          ה: "v",
+          ו: "u",
+          ז: "z",
+          ח: "j",
+          ט: "y",
+          י: "h",
+          כ: "f",
+          ל: "k",
+          מ: "n",
+          נ: "b",
+          ס: "x",
+          ע: "g",
+          פ: "p",
+          צ: "m",
+          ק: "e",
+          ר: "r",
+          ש: "a",
+          ת: ",",
+          t: "א",
+          c: "ב",
+          d: "ג",
+          s: "ד",
+          v: "ה",
+          u: "ו",
+          z: "ז",
+          j: "ח",
+          y: "ט",
+          h: "י",
+          f: "כ",
+          k: "ל",
+          n: "מ",
+          b: "נ",
+          x: "ס",
+          g: "ע",
+          p: "פ",
+          m: "צ",
+          e: "ק",
+          r: "ר",
+          a: "ש",
+          ",": "ת",
+        };
+
+        let text = textArea.value;
+        let result = "";
+
+        for (let char of text) {
+          result += charMap[char] || char;
+        }
+
+        textArea.value = result;
+        showToast("שפת תווים התהפכה");
+        animateSuccess();
+      }
+
+      function convertToBubbleText() {
+        const bubbleMap = {
+          a: "ⓐ",
+          b: "ⓑ",
+          c: "ⓒ",
+          d: "ⓓ",
+          e: "ⓔ",
+          f: "ⓕ",
+          g: "ⓖ",
+          h: "ⓗ",
+          i: "ⓘ",
+          j: "ⓙ",
+          k: "ⓚ",
+          l: "ⓛ",
+          m: "ⓜ",
+          n: "ⓝ",
+          o: "ⓞ",
+          p: "ⓟ",
+          q: "ⓠ",
+          r: "ⓡ",
+          s: "ⓢ",
+          t: "ⓣ",
+          u: "ⓤ",
+          v: "ⓥ",
+          w: "ⓦ",
+          x: "ⓧ",
+          y: "ⓨ",
+          z: "ⓩ",
+          A: "Ⓐ",
+          B: "Ⓑ",
+          C: "Ⓒ",
+          D: "Ⓓ",
+          E: "Ⓔ",
+          F: "Ⓕ",
+          G: "Ⓖ",
+          H: "Ⓗ",
+          I: "Ⓘ",
+          J: "Ⓙ",
+          K: "Ⓚ",
+          L: "Ⓛ",
+          M: "Ⓜ",
+          N: "Ⓝ",
+          O: "Ⓞ",
+          P: "Ⓟ",
+          Q: "Ⓠ",
+          R: "Ⓡ",
+          S: "Ⓢ",
+          T: "Ⓣ",
+          U: "Ⓤ",
+          V: "Ⓥ",
+          W: "Ⓦ",
+          X: "Ⓧ",
+          Y: "Ⓨ",
+          Z: "Ⓩ",
+        };
+
+        let text = textArea.value;
+        let result = "";
+
+        // בדיקה אם הטקסט כבר בפורמט בלון
+        const isBubble = /[ⓐ-ⓩⒶ-Ⓩ]/.test(text);
+
+        for (let char of text) {
+          if (isBubble) {
+            // המרה חזרה לטקסט רגיל
+            let normalChar = Object.keys(bubbleMap).find(
+              (key) => bubbleMap[key] === char
+            );
+            result += normalChar || char;
+          } else {
+            // המרה לבלון
+            result +=
+              bubbleMap[char.toLowerCase()] ||
+              bubbleMap[char.toUpperCase()] ||
+              char;
+          }
+        }
+
+        textArea.value = result;
+        showToast(isBubble ? "טקסט בלון הומר חזרה" : "טקסט הומר לבלון");
+        animateSuccess();
+      }
+
+      function toggleBinaryText() {
+        let text = textArea.value;
+
+        if (/^[01\s]+$/.test(text)) {
+          // המרה מבינארי לטקסט רגיל
+          let binaryArray = text.split(" ");
+          let result = "";
+
+          for (let binary of binaryArray) {
+            if (binary) {
+              let decimal = parseInt(binary, 2);
+              result += String.fromCharCode(decimal);
+            } else {
+              result += " ";
+            }
+          }
+
+          textArea.value = result;
+          showToast("בינארי הומר לטקסט רגיל");
+        } else {
+          // המרה מטקסט רגיל לבינארי
+          let result = "";
+
+          for (let char of text) {
+            if (char === " ") {
+              result += " ";
+            } else {
+              let binary = char.charCodeAt(0).toString(2);
+              result += binary + " ";
+            }
+          }
+
+          textArea.value = result.trim();
+          showToast("טקסט הומר לבינארי");
+        }
+
+        animateSuccess();
+      }
+
+      // פונקציות עזר
       function showToast(message) {
         const toast = document.createElement("div");
         toast.className = "toast";
@@ -491,14 +715,12 @@
         }, 500);
       }
 
-      // ניקוי שדה הטקסט בכניסה
-      window.addEventListener("load", function () {
+      // אתחול האפליקציה
+      function initApp() {
         document.body.classList.add("loaded");
         textArea.value = "";
-        textArea.style.width = "calc(100% - 20px)";
-        textArea.style.maxWidth = "600px";
 
-        // אנימציה לכותרת בהטענה
+        // אנימציה לכותרת
         const title = document.querySelector("h1 span");
         setTimeout(() => {
           title.style.animation =
@@ -508,56 +730,36 @@
           }, 2000);
         }, 500);
 
-        // הפעלת אתחול האפליקציה
-        initApp();
-      });
+        // טיפול בלחיצות כפתורי היציאה
+        document
+          .getElementById("confirm-exit")
+          .addEventListener("click", exitApplication);
+        document
+          .getElementById("cancel-exit")
+          .addEventListener("click", hideExitDialog);
+      }
 
-      // פונקציה להפניה לדף אחר
       function exitApplication() {
         window.location.href = "index.html";
       }
 
-      // הצגת הדיאלוג הקיים מהקובץ CSS
       function showExitDialog() {
-        const exitModal = document.getElementById("exit-modal");
-        if (exitModal) {
-          exitModal.style.display = "flex";
-        }
+        document.getElementById("exit-modal").style.display = "flex";
       }
 
-      // הסתרת הדיאלוג
       function hideExitDialog() {
-        const exitModal = document.getElementById("exit-modal");
-        if (exitModal) {
-          exitModal.style.display = "none";
-        }
+        document.getElementById("exit-modal").style.display = "none";
       }
 
-      // אתחול היסטוריה
-      history.pushState(null, null, window.location.pathname);
-
-      // הוסף את זה לפונקציית האתחול הקיימת (או יצור אחת אם אין)
-      function initApp() {
-        // אתחול מערכת היציאה מהאפליקציה
+      // טעינת האפליקציה
+      window.addEventListener("load", initApp);
+      document.addEventListener("DOMContentLoaded", function () {
         history.pushState(null, null, window.location.pathname);
-
-        // הוספת מאזין ללחיצת אחורה
         window.addEventListener("popstate", function (event) {
           showExitDialog();
           history.pushState(null, null, window.location.pathname);
         });
-
-        // טיפול בלחיצות כפתורי היציאה
-        document
-          .getElementById("confirm-exit")
-          ?.addEventListener("click", exitApplication);
-        document
-          .getElementById("cancel-exit")
-          ?.addEventListener("click", hideExitDialog);
-      }
-
-      // הפעלת האתחול כאשר המסמך טעון
-      document.addEventListener("DOMContentLoaded", initApp);
+      });
     </script>
   </body>
 </html>
