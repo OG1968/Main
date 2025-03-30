@@ -913,6 +913,15 @@
       .form-group.has-error .invalid-icon {
         display: block;
       }
+
+      /* סגנונות לסימונים המותאמים */
+      .custom-marker-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        text-shadow: 0 0 3px #000;
+      }
     </style>
   </head>
   <body>
@@ -1270,6 +1279,7 @@
           updateSelectedPlace(place);
           document.getElementById("fromOptions").style.display = "none";
           refreshSortedPlaces(place.id);
+          refreshMarkers();
         }
       }
 
@@ -1280,6 +1290,7 @@
           routingControl = null;
         }
         document.getElementById("routeInfo").style.display = "none";
+        refreshMarkers();
       }
 
       // פונקציה להצגת מסלול לנקודה ספציפית
@@ -1322,13 +1333,24 @@
           showSpinner(false);
           const routes = e.routes;
           const route = routes[0];
-          document.getElementById("walkDistance").textContent = (
-            route.summary.totalDistance / 1000
-          ).toFixed(2);
+          const distanceKm = route.summary.totalDistance / 1000;
+          document.getElementById("walkDistance").textContent =
+            distanceKm.toFixed(2);
           document.getElementById("walkTime").textContent = Math.round(
-            route.summary.totalTime / 60
-          );
+            distanceKm * 10
+          ); // 10 דקות לק"מ
           document.getElementById("routeInfo").style.display = "block";
+
+          // רענון הסימונים על המפה
+          refreshMarkers();
+
+          // התאמת הזום כך ששתי הנקודות יהיו גלויות
+          const bounds = L.latLngBounds([
+            [fromPlace.lat, fromPlace.lng],
+            [toPlace.lat, toPlace.lng],
+          ]);
+          map.fitBounds(bounds, { padding: [50, 50] });
+
           showToast("מסלול נמצא והוצג בהצלחה", "success");
         });
 
@@ -1336,6 +1358,53 @@
           showSpinner(false);
           showToast("שגיאה במציאת מסלול: " + e.message, "error");
         });
+      }
+
+      // פונקציה לרענון הסימונים על המפה
+      function refreshMarkers() {
+        // ניקוי סימונים קודמים
+        markers.forEach((marker) => map.removeLayer(marker));
+        markers = [];
+
+        // הוספת סימון לנקודת המוצא אם קיימת
+        const fromId = document.getElementById("from").value;
+        if (fromId) {
+          const fromPlace = places.find((p) => p.id == fromId);
+          if (fromPlace) {
+            const marker = L.marker([fromPlace.lat, fromPlace.lng], {
+              icon: L.divIcon({
+                className: "custom-marker-icon",
+                html: "📍",
+                iconSize: [30, 30],
+              }),
+            }).addTo(map).bindPopup(`
+              <b>${fromPlace.name}</b>
+              <br>${fromPlace.address}
+              <br>קואורדינטות: ${fromPlace.lat},${fromPlace.lng}`);
+            markers.push(marker);
+          }
+        }
+
+        // הוספת סימון לנקודת היעד אם קיימת
+        if (routingControl) {
+          const waypoints = routingControl.getWaypoints();
+          if (waypoints.length >= 2) {
+            const destination = waypoints[1];
+            const marker = L.marker(
+              [destination.latLng.lat, destination.latLng.lng],
+              {
+                icon: L.divIcon({
+                  className: "custom-marker-icon",
+                  html: "🎯",
+                  iconSize: [30, 30],
+                }),
+              }
+            ).addTo(map).bindPopup(`
+              <b>יעד</b>
+              <br>קואורדינטות: ${destination.latLng.lat},${destination.latLng.lng}`);
+            markers.push(marker);
+          }
+        }
       }
 
       // פונקציה לסינון לפי קטגוריה
@@ -1551,33 +1620,6 @@
           shopping: "שופינג",
         };
         return names[category] || "אחר";
-      }
-
-      // פונקציה לרענון הסימונים על המפה
-      function refreshMarkers() {
-        // ניקוי סימונים קודמים
-        markers.forEach((marker) => map.removeLayer(marker));
-        markers = [];
-
-        // הוספת סימונים חדשים
-        places.forEach((place) => {
-          const marker = L.marker([place.lat, place.lng]).addTo(map).bindPopup(`
-            <b>${place.name}</b>
-            <br>${place.address}
-            <br>קואורדינטות: ${place.lat},${place.lng}
-            <br><button class="show-route-btn" data-id="${place.id}">הצג מסלול</button>`);
-          markers.push(marker);
-
-          // הוספת אירוע לחיצה לכפתור הצג מסלול בפופ-אפ
-          marker.on("popupopen", function () {
-            document
-              .querySelector(".show-route-btn")
-              .addEventListener("click", function () {
-                const placeId = this.getAttribute("data-id");
-                showRouteToPlace(placeId);
-              });
-          });
-        });
       }
 
       // פונקציה לפרסור קואורדינטות
@@ -1968,7 +2010,6 @@
         refreshSortedPlaces(places[0].id);
       }
 
-      // אירוע לכפתור פתיחה/סגירה של טופס הוספת מקום
       // אירוע לכפתור פתיחה/סגירה של טופס הוספת מקום
       document
         .getElementById("toggleFormBtn")
