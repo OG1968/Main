@@ -2,1525 +2,925 @@
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <link rel="icon" href="around_me.png" type="image/png" />
-    <link rel="apple-touch-icon" href="around_me.png" />
-    <title>מה שקרוב אלי</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="logo_white.png" />
+    <title>אפליקציות ווב</title>
     <link
       rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@800&family=Varela+Round&display=swap"
       rel="stylesheet"
-      href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
     />
-
     <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          background-color: #fff2b0;
+      :root {
+        --primary-color: #4e54c8;
+        --secondary-color: #8f94fb;
+        --light-color: #ffe6a7;
+        --dark-color: #343a40;
+        --accent-color: #ff6b6b;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, var(--light-color), #ffffff);
+        color: var(--dark-color);
+        line-height: 1.2;
+        padding-bottom: 2rem;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.05;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      header {
+        text-align: center;
+        animation: fadeIn 1s ease-in-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      header::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        transform: skewY(-2deg);
+        transform-origin: top left;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-family: "Heebo", sans-serif;
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1),
+          4px 4px 0px rgba(78, 84, 200, 0.2), 6px 6px 0px rgba(78, 84, 200, 0.1);
+        margin-bottom: 1.5rem;
+        position: relative;
+        display: inline-block;
+        letter-spacing: -1px;
+        line-height: 1.1;
+        text-transform: uppercase;
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        padding: 0 10px;
+        background-size: 200% auto;
+      }
+
+      h1::after {
+        content: "";
+        position: absolute;
+        width: 80%;
+        height: 6px;
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--accent-color),
+          var(--secondary-color)
+        );
+        bottom: -15px;
+        left: 10%;
+        border-radius: 5px;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        transform: skewX(-15deg);
+        animation: pulse 2s ease infinite;
+      }
+
+      p.subtitle {
+        font-size: 1.4rem;
+        color: #666;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      .filters {
+        margin: 1.5rem 0;
+        text-align: center;
+      }
+
+      .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .filter-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        background: #eee;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .filter-btn::after {
+        content: "";
+        position: absolute;
+        top: var(--y);
+        left: var(--x);
+        width: 0;
+        height: 0;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition: width 0.3s ease, height 0.3s ease;
+        z-index: -1;
+      }
+
+      .filter-btn:hover::after {
+        width: 200px;
+        height: 200px;
+      }
+
+      .filter-btn.active {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .filter-btn:hover {
+        background: #ff7575;
+      }
+
+      .apps-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-top: 1rem;
+      }
+
+      .app-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        opacity: 0;
+        transform: translateY(20px);
+        overflow: hidden;
+      }
+
+      .app-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .app-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .app-icon {
+        width: 100%;
+        height: 160px;
+        background: linear-gradient(
+          to bottom right,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .app-icon::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0.3) 0%,
+          rgba(255, 255, 255, 0) 50%
+        );
+        transform: rotate(30deg);
+        transition: all 0.5s ease;
+      }
+
+      .app-card:hover .app-icon::after {
+        left: 100%;
+      }
+
+      .app-info {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-info h3 {
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+      }
+
+      .app-info p {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        flex-grow: 1;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.6rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .btn::after {
+        content: "";
+        position: absolute;
+        top: var(--y);
+        left: var(--x);
+        width: 0;
+        height: 0;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition: width 0.3s ease, height 0.3s ease;
+        z-index: -1;
+      }
+
+      .btn:hover::after {
+        width: 200px;
+        height: 200px;
+      }
+
+      .btn:hover {
+        background: var(--accent-color);
+        transform: translateY(-2px);
+      }
+
+      .btn i {
+        margin-left: 5px;
+      }
+
+      footer {
+        width: 100%;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        margin-top: 1rem;
+        text-align: center;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: var(--shadow);
+      }
+
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      footer a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        transition: var(--transition);
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .about-card {
+        margin-top: 2rem;
+      }
+
+      /* הוסף מרווח תחתון נוסף */
+      .about-card .app-info {
+        padding-bottom: 2rem;
+      }
+
+      .about-card .app-icon {
+        height: 120px;
+      }
+
+      .about-card .btn {
+        padding: 0.8rem 1.5rem;
+      }
+
+      .app-preview {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .preview-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+        transform: scale(0.9);
+        animation: scaleIn 0.3s ease forwards;
+      }
+
+      .close-preview {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary-color);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
-      
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes scaleIn {
+        to {
+          transform: scale(1);
+        }
+      }
+
+      /* Responsive - 2 cards always */
+      @media (max-width: 600px) {
         .container {
-          max-width: 800px;
-          margin: 0 auto;
-          background-color: rgb(255, 249, 239);
-          padding: 20px;
-          border-radius: 24px;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          padding: 1rem;
         }
-      
-        h1 {
-          color: #2c3e50;
-          text-align: center;
+
+        .apps-grid {
+          gap: 1rem;
+        }
+
+        .app-icon {
+          height: 120px;
           font-size: 2.5rem;
-          margin-bottom: 10px;
-          padding-bottom: 15px;
-          position: relative;
-          font-weight: 700;
-          letter-spacing: 0px;
-        }
-      
-        h1:after {
-          content: "";
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 280px;
-          height: 4px;
-          background: linear-gradient(90deg, #3498db, #2ecc71);
-          border-radius: 2px;
-        }
-      
-        /* גרסא למצב כהה */
-        body.dark-mode h1 {
-          color: #ffffff;
-          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-      
-        body.dark-mode h1:after {
-          background: linear-gradient(90deg, #2980b9, #27ae60);
-        }
-      
-        h1,
-        h2 {
-          color: #2c3e50;
-          text-align: center;
-        }
-      
-        .controls {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          margin-bottom: 20px;
-        }
-      
-        select,
-        button,
-        input,
-        textarea {
-          padding: 10px;
-          font-size: 16px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          width: 100%;
-          box-sizing: border-box;
-        }
-      
-        button {
-          background-color: #3498db;
-          color: white;
-          cursor: pointer;
-          border: none;
-          margin-top: 10px;
-          transition: background-color 0.3s;
-        }
-      
-        button:hover {
-          background-color: #1b5379;
-        }
-      
-        #map {
-          height: 400px;
-          width: 100%;
-          margin: auto;
-          margin-bottom: 20px;
-          border-radius: 4px;
-          z-index: 1;
-        }
-      
-        .places-list {
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          padding: 10px;
-        }
-      
-        .place-item {
-          padding: 12px;
-          border-bottom: 1px solid #eee;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-direction: row-reverse;
-          gap: 10px;
-          overflow: hidden;
-        }
-      
-        .place-item:last-child {
-          border-bottom: none;
-        }
-      
-        .place-info {
-          flex-grow: 1;
-          min-width: 0;
-        }
-      
-        .place-info > div {
-          white-space: normal;
-          word-break: break-word;
-          margin-bottom: 4px;
-        }
-      
-        .place-info .distance,
-        .place-info .walking-time {
-          white-space: nowrap;
-        }
-      
-        .delete-btn,
-        .edit-btn,
-        .coords-btn {
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-size: 18px;
-          padding: 0;
-          margin: 0 0 0 10px;
-          width: 24px;
-          height: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 30px;
-          height: 30px;
-          font-size: 20px;
-          margin: 0 0 0 10px;
-          border-radius: 50%;
-        }
-      
-        .delete-btn:hover,
-        .edit-btn:hover,
-        .coords-btn:hover,
-        .show-route-btn:hover {
-          background-color: #4e71ff;  
-          transition: background-color 0.3s;
-        }
-      
-        body.dark-mode .delete-btn:hover,
-        body.dark-mode .edit-btn:hover,
-        body.dark-mode .coords-btn:hover,
-        body.dark-mode .show-route-btn:hover {
-          background-color: #444;
-        }
-      
-        .distance {
-          color: #7f8c8d;
-          font-size: 0.9em;
-        }
-      
-        .walking-time {
-          color: #27ae60;
-          font-weight: bold;
-        }
-      
-        .category {
-          display: inline-block;
-          padding: 3px 8px;
-          border-radius: 12px;
-          font-size: 0.8em;
-          margin-left: 5px;
-        }
-      
-        .add-place-form {
-          border: 1px solid #ddd;
-          padding: 15px;
-          border-radius: 4px;
-          margin-bottom: 20px;
-          display: none;
-          max-height: 0;
-          overflow: hidden;
-          transition: max-height 0.3s ease;
-        }
-      
-        .add-place-form.visible {
-          display: block;
-          max-height: 1000px;
-        }
-      
-        .form-group {
-          margin-bottom: 10px;
-        }
-      
-        label {
-          display: block;
-          margin-bottom: 5px;
-          font-weight: bold;
-        }
-      
-        .lodging {
-          background-color: #f39c12;
-          color: white;
-        }
-      
-        .attraction {
-          background-color: #e74c3c;
-          color: white;
-        }
-      
-        .restaurant {
-          background-color: #005122;
-          color: white;
-        }
-      
-        .cafe {
-          background-color: #9b59b6;
-          color: white;
-        }
-      
-        .pub {
-          background-color: #0080ff;
-          color: white;
-        }
-      
-        .shopping {
-          background-color: #1abc9c;
-          color: white;
-        }
-      
-        .error-message {
-          color: #e74c3c;
-          margin-top: 5px;
-          font-size: 0.9em;
-        }
-      
-        .route-info {
-          background-color: #e8f4fc;
-          padding: 10px;
-          border-radius: 4px;
-          margin-bottom: 15px;
-          border: 1px solid #d4e6f1;
-        }
-      
-        .walking-path {
-          stroke: #27ae60;
-          stroke-width: 5;
-          stroke-opacity: 0.7;
-          fill: none;
-        }
-      
-        .category-filter {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 4px;
-          margin-bottom: 8px;
-          width: min-content;
-          min-width: 100%;
-          justify-content: center;
-          overflow-x: auto;
-          padding-bottom: 3px;
-        }
-      
-        .category-btn {
-          padding: 8px 5px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 14px;
-          white-space: nowrap;
-          flex: 0 0 auto;
-          width: 70px;
-          min-width: 0;
-          box-sizing: content-box;
-        }
-      
-        .category-btn.active {
-          box-shadow: 0 0 0 2px #2c3e50;
-        }
-      
-        .json-buttons {
-          display: flex;
-          gap: 10px;
-          margin-top: 20px;
-        }
-      
-        .json-buttons button {
-          flex: 1;
-        }
-      
-        #fileInput {
-          display: none;
-        }
-      
-        .toggle-form-btn {
-          background-color: #3498db;
-          color: white;
-          cursor: pointer;
-          border: none;
-          padding: 10px;
-          font-size: 16px;
-          border-radius: 4px;
-          width: 100%;
-          margin-bottom: 20px;
-          transition: background-color 0.3s;
-        }
-      
-        .toggle-form-btn:hover {
-          background-color: #2980b9;
-        }
-      
-        .custom-select-wrapper {
-          position: relative;
-          width: 100%;
-        }
-      
-        .custom-select {
-          padding: 10px;
-          font-size: 16px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          width: 100%;
-          box-sizing: border-box;
-          background-color: white;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-      
-        .custom-select-options {
-          position: absolute;
-          top: 100%;
-          left: 0;
-          right: 0;
-          max-height: 200px;
-          overflow-y: auto;
-          background-color: white;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          z-index: 1000;
-          display: none;
-        }
-      
-        .custom-select-option {
-          padding: 8px 10px;
-          min-height: 20px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-        }
-      
-        .custom-select-option:hover {
-          background-color: #f5f5f5;
-        }
-      
-        .color-dot {
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          margin-left: 8px;
-          margin-right: 8px;
-          flex-shrink: 0;
-        }
-      
-        .custom-select-selected {
-          min-height: 20px;
-          display: flex;
-          align-items: center;
-        }
-      
-        .custom-select-arrow {
-          margin-right: 8px;
-        }
-      
-        /* סגנונות קיימים למצב כהה */
-        body.dark-mode .custom-select-options {
-          background-color: #2d2d2d;
-          border-color: #444;
-          color: #ffffff;
-        }
-      
-        body.dark-mode .custom-select-option:hover {
-          background-color: #3d3d3d;
-        }
-      
-        body.dark-mode .custom-select {
-          background-color: #2d2d2d;
-          color: #ffffff;
-          border-color: #444;
-        }
-      
-        .coordinates {
-          display: none;
-          font-size: 0.8em;
-          color: #666;
-          margin-top: 4px;
-        }
-      
-        .show-coords .coordinates {
-          display: block;
-        }
-      
-        .details-container {
-          margin-top: 5px;
-        }
-      
-        .details-truncated {
-          display: block;
-        }
-      
-        .details-full {
-          display: none;
-          margin-top: 5px;
-          padding: 5px;
-          background-color: #ffffff;
-          border-radius: 4px;
-          display: none;
-        }
-      
-        .show-full .details-full {
-          display: block;
-        }
-      
-        .show-more-btn {
-          background: none;
-          border: none;
-          color: #3498db;
-          cursor: pointer;
-          padding: 0;
-          font-size: 0.9em;
-          margin-top: 4px;
-          text-decoration: underline;
-        }
-      
-        /* סגנונות למובייל */
-        @media (max-width: 768px) {
-          .container {
-            padding: 10px;
-          }
-      
-          .place-item {
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 10px 8px;
-          }
-      
-          .place-item > div:last-child {
-            margin-top: 8px;
-            width: 100%;
-            justify-content: flex-end;
-            display: flex;
-            flex-direction: row;
-            gap: 5px;
-          }
-      
-          .category-filter {
-            justify-content: center;
-          }
-      
-          .category-btn {
-            padding: 8px 5px;
-            font-size: 12px;
-            width: 60px;
-          }
-      
-          #map {
-            height: 300px;
-          }
-      
-          .add-place-form {
-            padding: 10px;
-          }
-      
-          .form-group {
-            margin-bottom: 8px;
-          }
-      
-          input,
-          select,
-          textarea,
-          button {
-            font-size: 14px;
-            padding: 8px;
-          }
-      
-          .place-info > div:nth-last-child(2) {
-            display: none;
-          }
-        }
-      
-        @media (min-width: 769px) {
-          .place-item > div:last-child {
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-end;
-          }
-        }
-      
-        /* סגנונות למצב כהה */
-        body.dark-mode {
-          background-color: #121212;
-          color: #ffffff;
-        }
-      
-        body.dark-mode .container {
-          background-color: #1e1e1e;
-          box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-        }
-      
-        body.dark-mode h1,
-        body.dark-mode h2 {
-          color: #ffffff;
-        }
-      
-        body.dark-mode .places-list,
-        body.dark-mode .add-place-form,
-        body.dark-mode select,
-        body.dark-mode input,
-        body.dark-mode textarea {
-          background-color: #2d2d2d;
-          color: #ffffff;
-          border-color: #444;
-        }
-      
-        body.dark-mode .route-info {
-          background-color: #2a3a4a;
-          border-color: #3a4a5a;
-        }
-      
-        body.dark-mode .place-item {
-          border-bottom-color: #444;
-        }
-      
-        body.dark-mode .details-full {
-          background-color: #2d2d2d;
-        }
-      
-        /* כפתור מצב כהה */
-        .dark-mode-toggle {
-          position: absolute;
-          top: 20px;
-          left: 20px;
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          background-color: #3498db;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          cursor: pointer;
-          z-index: 1000;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-          user-select: none;
-          margin: 0;
-        }
-      
-        body.dark-mode .dark-mode-toggle {
-          background-color: #2980b9;
-        }
-      
-        .title-logo {
-          width: 30px;
-          height: 30px;
-          vertical-align: middle;
-          margin-right: 0px;
-        }
-      
-        /* כפתור הצג מסלול בפופ-אפ */
-        .show-route-btn {
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-size: 18px;
-          padding: 0;
-          margin: 0 0 0 10px;
-          width: 24px;
-          height: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 30px;
-          height: 30px;
-          font-size: 20px;
-          margin: 0 0 0 10px;
-          border-radius: 50%;
-        }
-      
-        .show-route-btn:hover {
-          background-color: #4e71ff;
-        }
-      
-        /* כפתור נקה מסלולים */
-        #clearRouteBtn {
-          background-color: #e74c3c;
-        }
-      
-        #clearRouteBtn:hover {
-          background-color: #c0392b;
-        }
-      
-        /* סגנונות מתוקנים לכפתורים */
-        .coords-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 30px;
-          height: 30px;
-          text-decoration: none;
-          color: inherit;
-          border-radius: 50%;
-        }
-      
-        .coords-btn:hover {
-          text-decoration: none;
-          background-color: #4e71ff;
         }
 
-        /* סגנונות למצב כהה עבור Leaflet Routing Machine */
-body.dark-mode .leaflet-routing-container {
-  background-color: #2d2d2d;
-  color: #ffffff;
-}
-
-body.dark-mode .leaflet-routing-alt {
-  background-color: #2d2d2d;
-  color: #ffffff;
-}
-
-body.dark-mode .leaflet-routing-alt table {
-  color: #ffffff;
-}
-
-body.dark-mode .leaflet-routing-alt h3 {
-  color: #ffffff;
-}
-
-body.dark-mode .leaflet-routing-alt-minimized {
-  background-color: #2d2d2d;
-}
-
-body.dark-mode .leaflet-routing-geocoders input {
-  background-color: #2d2d2d;
-  color: #ffffff;
-  border-color: #444;
-}
-
-body.dark-mode .leaflet-routing-geocoders button {
-  background-color: #3498db;
-  color: #ffffff;
-}
-
-body.dark-mode .leaflet-routing-geocoders button:hover {
-  background-color: #2980b9;
-}
-
-body.dark-mode .leaflet-routing-error {
-  color: #ff6b6b;
-}
-
-        /* סטייל למודל היציאה */
-        #exit-modal {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
-          z-index: 10000;
-          display: none;
-          justify-content: center;
-          align-items: center;
+        .app-info {
+          padding: 1rem;
         }
 
-        #exit-modal-content {
-          background-color: #5a8de6;
-          color: #000;
-          padding: 20px;
-          border-radius: 10px;
-          text-align: center;
-          max-width: 80%;
-          border: 1px solid var(--primary-color);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        .btn {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
         }
 
-        #exit-modal h3 {
-          margin-bottom: 15px;
-          font-weight: bold;
+        footer {
+          padding: 0.8rem;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .apps-grid {
+          gap: 0.5rem;
         }
 
-        #exit-modal button {
-          border: none;
-          padding: 8px 15px;
-          border-radius: 5px;
-          margin: 0 5px;
-          cursor: pointer;
-          transition: background-color 0.3s;
+        .app-icon {
+          height: 100px;
         }
 
-        #confirm-exit {
-          background-color: #ff4444;
-          color: #000;
+        .app-info h3 {
+          font-size: 1rem;
         }
 
-        #cancel-exit {
-          background-color: #3498db;
-          color: #000;
+        .app-info p {
+          font-size: 0.8rem;
         }
+      }
 
-        body.dark-mode #exit-modal-content {
-          background-color: #2d2d2d;
-          color: #ffffff;
-          border-color: #444;
-        }
+      /* סטייל למודל היציאה */
+      #exit-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
 
-        body.dark-mode #exit-modal button {
-          color: #ffffff;
-        }
-      </style>
+      #exit-modal-content {
+        background-color: white;
+        color: var(--text);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 80%;
+        border: 1px solid var(--primary-color);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      #exit-modal h3 {
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+
+      #exit-modal button {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #confirm-exit {
+        background-color: #ff4444;
+        color: white;
+      }
+
+      #cancel-exit {
+        background-color: var(--primary-color);
+        color: white;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>
-        <img src="around_me.png" alt="לוגו" class="title-logo" />
-        מה שקרוב אלי
-      </h1>
-      <button class="toggle-form-btn" id="toggleFormBtn">הוספת מקום חדש</button>
-      <div class="add-place-form" id="addPlaceForm">
-        <h2>הוספת מקום חדש</h2>
-        <div class="form-group">
-          <label for="category">קטגוריה:</label>
-          <select id="category" required>
-            <option value="">בחר קטגוריה</option>
-            <option value="lodging">שמורים</option>
-            <option value="attraction">אתר תירותי</option>
-            <option value="restaurant">מסעדה</option>
-            <option value="cafe">בית קפה</option>
-            <option value="pub">פאב</option>
-            <option value="shopping">שופינג</option>
-          </select>
+      <header>
+        <h1>מרכז ה WebApp שלנו</h1>
+        <p class="subtitle">
+          גלה את כל הכלים המקוונים שלנו הזמינים ישירות מהדפדפן ללא צורך בהורדה
+        </p>
+      </header>
+
+      <div class="filters">
+        <div class="category-filters">
+          <button class="filter-btn active" data-category="all">הצג הכל</button>
+          <button class="filter-btn" data-category="Lifestyle">
+            לייף סטייל
+          </button>
+          <button class="filter-btn" data-category="finance">פיננסי</button>
+          <button class="filter-btn" data-category="health">בריאות</button>
+          <button class="filter-btn" data-category="Productive">
+            פרודוקטיביות
+          </button>
+          <button class="filter-btn" data-category="about">אודותנו</button>
         </div>
-        <div class="form-group">
-          <label for="placeName">שם המקום:</label>
-          <input type="text" id="placeName" required />
+      </div>
+
+      <div class="apps-grid">
+        <!-- אפליקציה 1 -->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fas fa-book"></i>
+          </div>
+          <div class="app-info">
+            <h3>חוברת מתכונים</h3>
+            <p>ארגן את המתכונים האהובים עליך בצורה יעילה ושתף אותם עם חברים.</p>
+            <a href="CookBook_v5.1.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="address">כתובת:</label>
-          <input type="text" id="address" required />
+
+        <!-- אפליקציה 2 -->
+        <div class="app-card" data-category="finance">
+          <div class="app-icon">
+            <i class="fa-solid fa-calculator"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון המרות</h3>
+            <p>
+              המרת מטבעות בשער עדכני, מידות מרחקים, משקלים, טמפרטורה, נפח, שטח,
+              מהירות.
+            </p>
+            <a href="Conversions_v3.1.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="coordinates">קואורדינטות (קו רוחב,קו אורך):</label>
-          <input
-            type="text"
-            id="coordinates"
-            placeholder="לדוגמה: 32.0853,34.7818"
-            required
+
+        <!-- אפליקציה 3 -->
+        <div class="app-card" data-category="health">
+          <div class="app-icon">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון קלורי</h3>
+            <p>
+              עקוב אחר הערך הקלורי, הויטמינים, מינרלים ערך גלוקימי ומדד השובע של
+              כל מה שבחרת לאכול לבחירות נבונות יותר.
+            </p>
+            <a href="Calorie_Calc_v2.6.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 4 -->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fas fa-shirt"></i>
+          </div>
+          <div class="app-info">
+            <h3>ממיר המידות לביגוד והנעלה</h3>
+            <p>
+              ראית דיל מעולה ברשת, אבל המידה אמריקאית, בריטית אסייאתית ואתה לא
+              בטוח? הממיר הזה עבורך.
+            </p>
+            <a href="Outfit_Calc_v2.0.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 5 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="app-info">
+            <h3>הצ'קליסט האולטימטיבי</h3>
+            <p>
+              יוצאים לחו"ל או קמפינג בארץ, או סתם חוששים לשכוח לעשוד משהו?
+              הצ'קליסט הזה יעשה לעם סדר, כיתבו מה לעשות והוא ישמור זאת עד
+              למחיקה.
+            </p>
+            <a href="Traveler_Checklist_v2.0.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 6 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-pencil"></i>
+          </div>
+          <div class="app-info">
+            <h3>עורך טקסטים מתקדם</h3>
+            <p>
+              אז העתקת והדבקת טקסט , אבל הוא מבולבל אותיות הפוכות ומילים בסדר
+              הפוך , בקיצור לא קריא אל דאגה אנחנו כאן לעזור...
+            </p>
+            <a href="Text_Editor_v1.0.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 7 -->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <div class="app-info">
+            <h3>מה קרוב אלי</h3>
+            <p>
+              אז אתה בטיול בחו"ל ויש לא מעט מקומות שאתה רוצה לראות, מסעדות לבקר
+              וכ"ו, ולא מתחשק לך ללכת במסלולים מעגליים או בזיג זג, הפתרון פה.
+            </p>
+            <a href="Trip_Planer_v1.0.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- אודותנו -->
+      <div class="app-card about-card" data-category="about">
+        <div class="app-icon">
+          <img
+            src="logo_white.png"
+            alt="לוגו"
+            style="width: 100px; height: 100px"
           />
-          <div class="coord-example">
-            פורמט: מספר עשרוני,מספר עשרוני (ללא רווחים)
-          </div>
-          <div id="coordError" class="error-message"></div>
         </div>
-        <div class="form-group">
-          <label for="details">פרטים נוספים:</label>
-          <textarea id="details" rows="3"></textarea>
-        </div>
-        <button id="addPlace">הוסף מקום</button>
-      </div>
-      <div class="controls">
-        <div>
-          <label for="from">נקודת מוצא:</label>
-          <div class="custom-select-wrapper">
-            <div class="custom-select" id="customFromSelect">
-              <div class="custom-select-selected">
-                <span class="color-dot" id="selectedDot"></span>
-                <span id="selectedText">בחר נקודת מוצא</span>
-              </div>
-              <span class="custom-select-arrow">▼</span>
-            </div>
-            <div class="custom-select-options" id="fromOptions"></div>
-          </div>
-          <input type="hidden" id="from" value="" />
-        </div>
-        <button id="showRoute">הצג מסלולי הליכה</button>
-        <button id="clearRouteBtn">נקה מסלולים</button>
-      </div>
-      <div id="routeInfo" class="route-info" style="display: none">
-        <div>
-          <strong>מרחק הליכה:</strong>
-          <span id="walkDistance">0</span> ק"מ
-        </div>
-        <div>
-          <strong>זמן הליכה משוער:</strong>
-          <span id="walkTime">0</span> דקות
+        <div class="app-info">
+          <h3>אודותנו</h3>
+          <p>פרטים ליצירת קשר.</p>
+          <a href="about_me.html" class="btn"
+            >לכניסה <i class="fas fa-external-link-alt"></i
+          ></a>
         </div>
       </div>
-      <div id="map"></div>
-      <h2>מיון מקומות לפי מרחק הליכה מנקודת המוצא</h2>
-      <div class="category-filter">
-        <button class="category-btn active" data-category="all">הכל</button>
-        <button class="category-btn lodging" data-category="lodging">
-          שמורים
-        </button>
-        <button class="category-btn attraction" data-category="attraction">
-          אתר תירותי
-        </button>
-        <button class="category-btn restaurant" data-category="restaurant">
-          מסעדה
-        </button>
-        <button class="category-btn cafe" data-category="cafe">בית קפה</button>
-        <button class="category-btn pub" data-category="pub">פאב</button>
-        <button class="category-btn shopping" data-category="shopping">
-          שופינג
-        </button>
-      </div>
-      <div id="sortedPlaces" class="places-list"></div>
-      <div class="json-buttons">
-        <button id="exportBtn">ייצא מקומות לקובץ JSON</button>
-        <button id="importBtn">יבא מקומות מקובץ JSON</button>
-        <input type="file" id="fileInput" accept=".json" />
+
+      <footer>
+        <div class="footer-content">
+          <p><strong>2025 כל הזכויות שמורות G©.</strong></p>
+        </div>
+      </footer>
+
+      <!-- הודעת טוסט -->
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <!-- תצוגה מקדימה של אפליקציות -->
+    <div class="app-preview" id="appPreview"></div>
+
+    <!-- Exit Confirmation Modal -->
+    <div id="exit-modal">
+      <div id="exit-modal-content">
+        <h3>האם לצאת?</h3>
+        <button id="confirm-exit">יציאה</button>
+        <button id="cancel-exit">ביטול</button>
       </div>
     </div>
-        <!-- Exit Confirmation Modal -->
-        <div id="exit-modal">
-            <div id="exit-modal-content">
-              <h3 id="exit-modal-title">האם לצאת?</h3>
-              <button id="confirm-exit">יציאה</button>
-              <button id="cancel-exit">ביטול</button>
-            </div>
-          </div>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
     <script>
-      // מצב תצוגה כהה
-      const darkModeToggle = document.createElement("div");
-      darkModeToggle.className = "dark-mode-toggle";
-      darkModeToggle.textContent = "🌙";
-      document.body.appendChild(darkModeToggle);
-      // בדיקה אם מצב כהה שמור ב-localStorage
-      const isDarkMode = localStorage.getItem("darkMode") === "true";
-      if (isDarkMode) {
-        document.body.classList.add("dark-mode");
-        darkModeToggle.textContent = "☀️";
-      }
-      // אירוע לחיצה על כפתור המצב הכהה
-      darkModeToggle.addEventListener("click", function () {
-        const isDark = document.body.classList.toggle("dark-mode");
-        darkModeToggle.textContent = isDark ? "☀️" : "🌙";
-        localStorage.setItem("darkMode", isDark);
-      });
-      // רשימת מקומות (מאוחסנת ב-localStorage)
-      let places = JSON.parse(localStorage.getItem("places")) || [
-        {
-          id: 1,
-          name: "Tel Aviv Museum of Art",
-          category: "lodging",
-          address: "The Golda Meir Cultural and Art Center, Sderot Sha'ul HaMelech 27, Tel Aviv-Yafo",
-          lat: 32.0773210373916, 
-          lng: 34.786100810294606,
-          details: "מוזאון תל אביב לאמנויות",
-        },
-        {
-          id: 2,
-          name: "Eretz Israel Museum",
-          category: "lodging",
-          address: "Chaim Levanon St 2, Tel Aviv-Yafo",
-          lat: 32.10332469857782, 
-          lng: 34.79617896796738,
-          details: "מוזאון הארץ",
-        },
-      ];
-      // שמירת המקומות ב-localStorage
-      function savePlaces() {
-        localStorage.setItem("places", JSON.stringify(places));
-      }
-      // אתחול המפה
-      const map = L.map("map").setView([50.051472, 19.950742], 12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }).addTo(map);
-      let routingControl = null;
-      let markers = [];
-      // פונקציה לקבלת צבע הקטגוריה
-      function getCategoryColor(category) {
-        const colors = {
-          lodging: "#f39c12",
-          attraction: "#e74c3c",
-          restaurant: "#005122",
-          cafe: "#9b59b6",
-          pub: "#0080ff",
-          shopping: "#1abc9c",
-        };
-        return colors[category] || "#3498db";
-      }
-      // פונקציה לבדיקת כפילות במקומות
-      function isDuplicatePlace(newPlace) {
-        return places.some(
-          (place) =>
-            place.name === newPlace.name ||
-            (place.lat === newPlace.lat && place.lng === newPlace.lng)
-        );
-      }
-      // פונקציה לחישוב מרחק הליכה בין שתי נקודות
-      function getWalkingDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // רדיוס כדור הארץ בק"מ
-        const dLat = ((lat2 - lat1) * Math.PI) / 180;
-        const dLon = ((lon2 - lon1) * Math.PI) / 180;
-        const a =
-          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos((lat1 * Math.PI) / 180) *
-            Math.cos((lat2 * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c;
-        // מחזיר את המרחק ואת זמן ההליכה המשוער (בדקות) - 10 דקות לק"מ
-        return {
-          distance: distance,
-          time: Math.round(distance * 10),
-        };
-      }
-      // פונקציה לרענון הרשימות הנפתחות
-      function refreshSelects() {
-        const fromOptions = document.getElementById("fromOptions");
-        fromOptions.innerHTML = "";
-        if (places.length === 0) {
-          document.getElementById("selectedText").textContent =
-            "אין מקומות זמינים";
-          document.getElementById("selectedDot").style.backgroundColor =
-            "transparent";
-          document.getElementById("selectedDot").style.width = "0";
-          document.getElementById("selectedDot").style.height = "0";
-          document.getElementById("from").value = "";
-          return;
-        }
-        places.forEach((place) => {
-          const optionDiv = document.createElement("div");
-          optionDiv.className = "custom-select-option";
-          optionDiv.dataset.id = place.id;
-          optionDiv.innerHTML = `
-            <span class="color-dot" style="background-color: ${getCategoryColor(
-              place.category
-            )}"></span>
-            ${place.name}
-          `;
-          optionDiv.addEventListener("click", function () {
-            selectPlace(place.id);
+      document.addEventListener("DOMContentLoaded", function () {
+        // פונקציונליות סינון
+        const filterBtns = document.querySelectorAll(".filter-btn");
+        const appCards = document.querySelectorAll(".app-card");
+
+        function filterApps() {
+          const activeCategory =
+            document.querySelector(".filter-btn.active").dataset.category;
+
+          appCards.forEach((card) => {
+            const category = card.dataset.category;
+            const matchesCategory =
+              activeCategory === "all" || category === activeCategory;
+
+            if (matchesCategory) {
+              card.style.display = "flex";
+            } else {
+              card.style.display = "none";
+            }
           });
-          fromOptions.appendChild(optionDiv);
+        }
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            filterBtns.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            filterApps();
+          });
         });
-        // עדכון הנקודה הנבחרת
-        const currentValue = document.getElementById("from").value;
-        if (currentValue) {
-          const place = places.find((p) => p.id == currentValue);
-          if (place) {
-            updateSelectedPlace(place);
-          }
-        }
-      }
-      // פונקציה לעדכון המקום הנבחר
-      function updateSelectedPlace(place) {
-        const selectedDot = document.getElementById("selectedDot");
-        document.getElementById("selectedText").textContent = place.name;
-        selectedDot.style.backgroundColor = getCategoryColor(place.category);
-        selectedDot.style.width = "18px";
-        selectedDot.style.height = "18px";
-        document.getElementById("from").value = place.id;
-      }
-      // פונקציה לבחירת מקום
-      function selectPlace(id) {
-        const place = places.find((p) => p.id == id);
-        if (place) {
-          updateSelectedPlace(place);
-          document.getElementById("fromOptions").style.display = "none";
-          refreshSortedPlaces(id);
-        }
-      }
-      // פונקציה לנקוי כל המסלולים
-      function clearRoutes() {
-        if (routingControl) {
-          map.removeControl(routingControl);
-          routingControl = null;
-        }
-        document.getElementById("routeInfo").style.display = "none";
-      }
-      // פונקציה להצגת מסלול לנקודה ספציפית
-      function showRouteToPlace(placeId) {
-        const fromId = document.getElementById("from").value;
-        if (!fromId) {
-          alert("נא לבחור נקודת מוצא");
-          return;
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            filterBtns.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            filterApps();
+          });
+        });
+
+        // פונקציה להצגת הודעות טוסט
+        function showToast(message) {
+          const toast = document.getElementById("toast");
+          toast.textContent = message;
+          toast.classList.add("show");
+
+          setTimeout(() => {
+            toast.classList.remove("show");
+          }, 3000);
         }
 
-        const fromPlace = places.find((p) => p.id == fromId);
-        const toPlace = places.find((p) => p.id == placeId);
-        if (!fromPlace || !toPlace) return;
+        // אנימציה לגלילה חלקה
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+              behavior: "smooth",
+            });
+          });
+        });
 
-        // הסרת מסלול קודם אם קיים
-        clearRoutes();
+        // אנימציה להדגשת כרטיסים בעת מעבר עם העכבר
+        const cards = document.querySelectorAll(".app-card");
+        cards.forEach((card) => {
+          card.addEventListener("mousemove", (e) => {
+            const x = e.pageX - card.offsetLeft;
+            const y = e.pageY - card.offsetTop;
 
-        // יצירת מסלול הליכה
-        routingControl = L.Routing.control({
-          waypoints: [
-            L.latLng(fromPlace.lat, fromPlace.lng),
-            L.latLng(toPlace.lat, toPlace.lng),
-          ],
-          routeWhileDragging: false,
-          showAlternatives: false,
-          lineOptions: {
-            styles: [{ color: "#27ae60", opacity: 0.7, weight: 5 }],
-          },
-          addWaypoints: false,
-          draggableWaypoints: false,
-          fitSelectedRoutes: true,
-          collapsible: true,
-        }).addTo(map);
+            card.style.setProperty("--mouse-x", x);
+            card.style.setProperty("--mouse-y", y);
+            card.style.transform = `perspective(1000px) rotateX(${
+              (y - card.offsetHeight / 2) / 20
+            }deg) rotateY(${-(x - card.offsetWidth / 2) / 20}deg)`;
+          });
 
-        // הצגת פרטי המסלול
-        routingControl.on("routesfound", function (e) {
-          const routes = e.routes;
-          const route = routes[0];
-          document.getElementById("walkDistance").textContent = (
-            route.summary.totalDistance / 1000
-          ).toFixed(2);
-          document.getElementById("walkTime").textContent = Math.round(
-            route.summary.totalTime / 60
+          card.addEventListener("mouseleave", () => {
+            card.style.transform = "perspective(1000px) rotateX(0) rotateY(0)";
+          });
+        });
+
+        // אפקט ריחוף לכפתורים
+        document.querySelectorAll(".btn, .filter-btn").forEach((btn) => {
+          btn.addEventListener("mousemove", (e) => {
+            const x = e.pageX - btn.offsetLeft;
+            const y = e.pageY - btn.offsetTop;
+
+            btn.style.setProperty("--x", `${x}px`);
+            btn.style.setProperty("--y", `${y}px`);
+          });
+        });
+
+        // טעינה פרוגרסיבית עם אנימציה
+        function animateOnScroll() {
+          const elements = document.querySelectorAll(
+            ".app-card, header, .filters"
           );
-          document.getElementById("routeInfo").style.display = "block";
-        });
-      }
-      // פונקציה לסינון לפי קטגוריה
-      function filterByCategory(category, event) {
-        const fromId = document.getElementById("from").value;
-        if (!fromId) return;
-        const fromPlace = places.find((p) => p.id == fromId);
-        if (!fromPlace) return;
-        // הסרת active מכל הכפתורים
-        document.querySelectorAll(".category-btn").forEach((btn) => {
-          btn.classList.remove("active");
-        });
-        // הוספת active לכפתור הנוכחי
-        if (event && event.target) {
-          event.target.classList.add("active");
-        } else {
-          // אם אין אירוע, נחפש את הכפתור המתאים לפי הקטגוריה
-          const btn = document.querySelector(
-            `.category-btn[data-category="${category}"]`
-          );
-          if (btn) btn.classList.add("active");
-        }
-        // סינון המקומות
-        const filteredPlaces =
-          category === "all"
-            ? [...places]
-            : places.filter((p) => p.category === category);
-        // יצירת עותק של המקומות ומיון לפי מרחק הליכה
-        const sortedPlaces = filteredPlaces
-          .filter((p) => p.id != fromId)
-          .map((p) => {
-            const walkingData = getWalkingDistance(
-              fromPlace.lat,
-              fromPlace.lng,
-              p.lat,
-              p.lng
-            );
-            return {
-              ...p,
-              distance: walkingData.distance,
-              walkingTime: walkingData.time,
-            };
-          })
-          .sort((a, b) => a.distance - b.distance);
-        // הצגת הרשימה הממוינת
-        displaySortedPlaces(sortedPlaces);
-      }
-      // פונקציה נפרדת להצגת מקומות ממוינים
-      function displaySortedPlaces(sortedPlaces) {
-        const sortedPlacesDiv = document.getElementById("sortedPlaces");
-        sortedPlacesDiv.innerHTML = "";
 
-        sortedPlaces.forEach((place) => {
-          const placeDiv = document.createElement("div");
-          placeDiv.className = "place-item";
-          const categoryClass = place.category || "other";
-          const categoryName = getCategoryName(place.category);
-
-          // יצירת קישור לחיפוש בגוגל מפות
-          const mapsSearchLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-            place.name + " " + place.address
-          )}`;
-
-          placeDiv.innerHTML = `
-            <div class="place-info">
-                <strong>${place.name}</strong>
-                <span class="category ${categoryClass}">${categoryName}</span>
-                <div class="distance">${place.distance.toFixed(
-                  2
-                )} ק"מ הליכה מנקודת המוצא</div>
-                <div class="walking-time">זמן הליכה משוער: ${
-                  place.walkingTime
-                } דקות</div>
-                <div>${place.address}</div>
-                ${
-                  place.details
-                    ? place.details.length > 50
-                      ? `
-                            <div class="details-container">
-                                <div class="details-truncated">${place.details.substring(
-                                  0,
-                                  50
-                                )}...</div>
-                                <div class="details-full">${place.details.substring(
-                                  50
-                                )}</div>
-                                <button class="show-more-btn">קרא עוד</button>
-                            </div>
-                        `
-                      : `<div>${place.details}</div>`
-                    : ""
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.style.animation = `fadeInUp 0.6s ${
+                    entry.target.dataset.delay || "0s"
+                  } ease-out forwards`;
+                  observer.unobserve(entry.target);
                 }
-            </div>
-            <div>
-                <button class="edit-btn" data-id="${place.id}">✏️</button>
-                <button class="delete-btn" data-id="${place.id}">🗑️</button>
-                <a href="${mapsSearchLink}" target="_blank" class="coords-btn">📍</a>
-                <button class="show-route-btn" data-id="${place.id}">🚶</button>
-            </div>
-        `;
-
-          sortedPlacesDiv.appendChild(placeDiv);
-
-          // אירוע "קרא עוד" לפרטים ארוכים
-          if (place.details && place.details.length > 50) {
-            placeDiv
-              .querySelector(".show-more-btn")
-              .addEventListener("click", function () {
-                this.parentElement.classList.toggle("show-full");
-                this.textContent = this.parentElement.classList.contains(
-                  "show-full"
-                )
-                  ? "הצג פחות"
-                  : "קרא עוד";
               });
-          }
+            },
+            { threshold: 0.1 }
+          );
 
-          // אירוע הצגת מסלול
-          placeDiv
-            .querySelector(".show-route-btn")
-            .addEventListener("click", function () {
-              const placeId = this.getAttribute("data-id");
-              showRouteToPlace(placeId);
+          elements.forEach((el, i) => {
+            el.style.opacity = "0";
+            el.style.transform = "translateY(20px)";
+            el.dataset.delay = `${i * 0.1}s`;
+            observer.observe(el);
+          });
+        }
+
+        animateOnScroll();
+
+        // תצוגה מקדימה של אפליקציות
+        document.querySelectorAll(".app-card").forEach((card) => {
+          const preview = document.createElement("div");
+          preview.className = "app-preview";
+          preview.innerHTML = `
+      <div class="preview-content">
+        <span class="close-preview">&times;</span>
+        <h3>${card.querySelector("h3").textContent}</h3>
+        <p>${card.querySelector("p").textContent}</p>
+        <a href="${card.querySelector("a").getAttribute("href")}" class="btn">
+          לכניסה <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+    `;
+          document.body.appendChild(preview);
+
+          card.addEventListener("click", (e) => {
+            if (!e.target.closest("a")) {
+              preview.style.display = "flex";
+              document.body.style.overflow = "hidden";
+            }
+          });
+
+          preview
+            .querySelector(".close-preview")
+            .addEventListener("click", () => {
+              preview.style.display = "none";
+              document.body.style.overflow = "auto";
             });
         });
-
-        // אירועי מחיקה ועריכה
-        document.querySelectorAll(".delete-btn").forEach((btn) => {
-          btn.addEventListener("click", function () {
-            const id = parseInt(this.getAttribute("data-id"));
-            deletePlace(id);
-          });
-        });
-
-        document.querySelectorAll(".edit-btn").forEach((btn) => {
-          btn.addEventListener("click", function () {
-            const id = parseInt(this.getAttribute("data-id"));
-            editPlace(id);
-          });
-        });
-      }
-      // פונקציה לעריכת מקום
-      function editPlace(id) {
-        const place = places.find((p) => p.id === id);
-        if (!place) return;
-        // מילוי הטופס עם נתוני המקום
-        document.getElementById("category").value = place.category;
-        document.getElementById("placeName").value = place.name;
-        document.getElementById("address").value = place.address;
-        document.getElementById(
-          "coordinates"
-        ).value = `${place.lat},${place.lng}`;
-        document.getElementById("details").value = place.details || "";
-        // מחיקת המקום מהרשימה
-        places = places.filter((p) => p.id !== id);
-        savePlaces();
-        refreshSelects();
-        refreshMarkers();
-        refreshSortedPlaces(document.getElementById("from").value);
-        // פתיחת הטופס
-        document.getElementById("addPlaceForm").classList.add("visible");
-        document.getElementById("toggleFormBtn").textContent = "סגור עורך";
-        // גלילה לטופס העריכה
-        document.getElementById("addPlaceForm").scrollIntoView({
-          behavior: "smooth",
-        });
-      }
-      // פונקציה לרענון רשימת המקומות הממוינים
-      function refreshSortedPlaces(fromPlaceId) {
-        if (!fromPlaceId || fromPlaceId === "") return;
-        const activeBtn = document.querySelector(".category-btn.active");
-        const activeCategory = activeBtn
-          ? activeBtn.getAttribute("data-category")
-          : "all";
-        filterByCategory(activeCategory);
-      }
-      // פונקציה לקבלת שם הקטגוריה
-      function getCategoryName(category) {
-        const names = {
-          lodging: "שמורים",
-          attraction: "אתר תירותי",
-          restaurant: "מסעדה",
-          cafe: "בית קפה",
-          pub: "פאב",
-          shopping: "שופינג",
-        };
-        return names[category] || "אחר";
-      }
-      // פונקציה לרענון הסימונים על המפה
-      function refreshMarkers() {
-        // ניקוי סימונים קודמים
-        markers.forEach((marker) => map.removeLayer(marker));
-        markers = [];
-        // הוספת סימונים חדשים
-        places.forEach((place) => {
-          const marker = L.marker([place.lat, place.lng]).addTo(map).bindPopup(`
-            <b>${place.name}</b>
-            <br>${place.address}
-            <br>קואורדינטות: ${place.lat},${place.lng}
-            <br><button class="show-route-btn" data-id="${place.id}">הצג מסלול</button>`);
-          markers.push(marker);
-
-          // הוספת אירוע לחיצה לכפתור הצג מסלול בפופ-אפ
-          marker.on("popupopen", function () {
-            document
-              .querySelector(".show-route-btn")
-              .addEventListener("click", function () {
-                const placeId = this.getAttribute("data-id");
-                showRouteToPlace(placeId);
-              });
-          });
-        });
-      }
-      // פונקציה לפרסור קואורדינטות
-      function parseCoordinates(coordStr) {
-        try {
-          const parts = coordStr.split(",");
-          if (parts.length !== 2) return null;
-          const lat = parseFloat(parts[0].trim());
-          const lng = parseFloat(parts[1].trim());
-          if (isNaN(lat) || isNaN(lng)) return null;
-          if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
-          return {
-            lat,
-            lng,
-          };
-        } catch (e) {
-          return null;
-        }
-      }
-      // פונקציה לייצוא המקומות לקובץ JSON
-      function exportToJSON() {
-        const dataStr = JSON.stringify(places, null, 2);
-        const dataUri =
-          "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-        const exportFileDefaultName = "places.json";
-        const linkElement = document.createElement("a");
-        linkElement.setAttribute("href", dataUri);
-        linkElement.setAttribute("download", exportFileDefaultName);
-        linkElement.click();
-      }
-      // פונקציה לייבוא מקומות מקובץ JSON
-      function importFromJSON(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          try {
-            const importedPlaces = JSON.parse(e.target.result);
-            if (Array.isArray(importedPlaces)) {
-              // הוספת מזהה ייחודי לכל מקום מיובא אם חסר
-              importedPlaces.forEach((place) => {
-                if (!place.id)
-                  place.id = Date.now() + Math.floor(Math.random() * 1000);
-              });
-              places = importedPlaces;
-              savePlaces();
-              refreshSelects();
-              refreshMarkers();
-              refreshSortedPlaces(document.getElementById("from").value);
-              alert(`יובאו ${importedPlaces.length} מקומות בהצלחה!`);
-            } else {
-              alert("קובץ לא תקין - יש לטעון קובץ JSON עם מערך של מקומות");
-            }
-          } catch (error) {
-            alert("שגיאה בקריאת הקובץ: " + error.message);
-          }
-        };
-        reader.readAsText(file);
-        // איפוס הערך כדי לאפשר טעינה חוזרת של אותו קובץ
-        event.target.value = "";
-      }
-      // פונקציה למחיקת מקום
-      function deletePlace(id) {
-        if (confirm("האם אתה בטוח שברצונך למחוק מקום זה?")) {
-          places = places.filter((p) => p.id !== id);
-          savePlaces();
-          refreshSelects();
-          refreshMarkers();
-          const fromId = document.getElementById("from").value;
-          refreshSortedPlaces(fromId);
-        }
-      }
-      // טעינת הנתונים הראשונית
-      refreshSelects();
-      refreshMarkers();
-      // אירועים ל-select המותאם אישית
-      document
-        .getElementById("customFromSelect")
-        .addEventListener("click", function (e) {
-          e.stopPropagation();
-          const options = document.getElementById("fromOptions");
-          options.style.display =
-            options.style.display === "block" ? "none" : "block";
-        });
-      // סגירת ה-select כאשר לוחצים מחוצה לו
-      document.addEventListener("click", function () {
-        document.getElementById("fromOptions").style.display = "none";
       });
-      // מניעת סגירת ה-select כאשר לוחצים עליו
-      document
-        .getElementById("fromOptions")
-        .addEventListener("click", function (e) {
-          e.stopPropagation();
-        });
-      // הוספת אירועי לחיצה לכפתורי הקטגוריה
-      document.querySelectorAll(".category-btn").forEach((btn) => {
-        btn.addEventListener("click", function (e) {
-          filterByCategory(this.getAttribute("data-category"), e);
-        });
-      });
-      // אירוע לחיצה על כפתור הצגת מסלול
-      document
-        .getElementById("showRoute")
-        .addEventListener("click", function () {
-          const fromId = document.getElementById("from").value;
-          if (!fromId) {
-            alert("נא לבחור נקודת מוצא");
-            return;
-          }
 
-          const fromPlace = places.find((p) => p.id == fromId);
-          if (!fromPlace) return;
-
-          // רענון רשימת המקומות הממוינים
-          refreshSortedPlaces(fromId);
-
-          // הצגת מסלול למקום הראשון ברשימה
-          const sortedPlacesDiv = document.getElementById("sortedPlaces");
-          const firstPlaceItem = sortedPlacesDiv.querySelector(".place-item");
-          if (firstPlaceItem) {
-            const placeId = firstPlaceItem
-              .querySelector(".edit-btn")
-              .getAttribute("data-id");
-            showRouteToPlace(placeId);
-          }
-        });
-      // אירוע לחיצה על כפתור נקה מסלולים
-      document
-        .getElementById("clearRouteBtn")
-        .addEventListener("click", clearRoutes);
-      // אירוע הוספת מקום חדש
-      document
-        .getElementById("addPlace")
-        .addEventListener("click", function () {
-          const category = document.getElementById("category").value;
-          const name = document.getElementById("placeName").value.trim();
-          const address = document.getElementById("address").value.trim();
-          const coordStr = document.getElementById("coordinates").value.trim();
-          const details = document.getElementById("details").value.trim();
-          if (!category || !name || !address || !coordStr) {
-            alert("נא למלא את כל השדות הנדרשים");
-            return;
-          }
-          // פרסור הקואורדינטות
-          const coords = parseCoordinates(coordStr);
-          if (!coords) {
-            document.getElementById("coordError").textContent =
-              "נא להזין קואורדינטות בפורמט תקין, לדוגמה: 32.0853,34.7818";
-            return;
-          } else {
-            document.getElementById("coordError").textContent = "";
-          }
-          // יצירת מקום חדש
-          const newPlace = {
-            id: Date.now(),
-            category,
-            name,
-            address,
-            lat: coords.lat,
-            lng: coords.lng,
-            details,
-          };
-          // בדיקת כפילות
-          if (isDuplicatePlace(newPlace)) {
-            alert("מקום עם שם זה או קואורדינטות אלה כבר קיים ברשימה");
-            return;
-          }
-          // הוספה לרשימה
-          places.push(newPlace);
-          savePlaces();
-          // רענון הממשק
-          refreshSelects();
-          refreshMarkers();
-          refreshSortedPlaces(document.getElementById("from").value);
-          // איפוס הטופס
-          document.getElementById("category").selectedIndex = 0;
-          document.getElementById("placeName").value = "";
-          document.getElementById("address").value = "";
-          document.getElementById("coordinates").value = "";
-          document.getElementById("details").value = "";
-          alert("המקום נוסף בהצלחה!");
-        });
-      // אירועים לכפתורי ייבוא וייצוא
-      document
-        .getElementById("exportBtn")
-        .addEventListener("click", exportToJSON);
-      document
-        .getElementById("importBtn")
-        .addEventListener("click", function () {
-          document.getElementById("fileInput").click();
-        });
-      document
-        .getElementById("fileInput")
-        .addEventListener("change", importFromJSON);
-      // רענון רשימת המקומות הממוינים בהתאם לבחירה הראשונית
-      if (places.length > 0) {
-        document.getElementById("from").value = places[0].id;
-        updateSelectedPlace(places[0]);
-        refreshSortedPlaces(places[0].id);
-      }
-      // אירוע לכפתור פתיחה/סגירה של טופס הוספת מקום
-      document
-        .getElementById("toggleFormBtn")
-        .addEventListener("click", function () {
-          const form = document.getElementById("addPlaceForm");
-          form.classList.toggle("visible");
-          if (form.classList.contains("visible")) {
-            this.textContent = "סגור עורך";
-          } else {
-            this.textContent = "הוספת מקום חדש";
-          }
-        });
-
-              // פונקציה להפניה לדף אחר
+      // פונקציות לניהול יציאה
       function exitApplication() {
-        window.location.href = "index.html"; // ניתן לשנות את ה-URL לפי הצורך
+        window.location.href = "https://www.google.com";
       }
 
-      // הצגת הדיאלוג הקיים מהקובץ CSS
       function showExitDialog() {
         const exitModal = document.getElementById("exit-modal");
-        if (exitModal) {
-          exitModal.style.display = "flex";
-        }
+        if (exitModal) exitModal.style.display = "flex";
       }
 
-      // הסתרת הדיאלוג
       function hideExitDialog() {
         const exitModal = document.getElementById("exit-modal");
-        if (exitModal) {
-          exitModal.style.display = "none";
-        }
+        if (exitModal) exitModal.style.display = "none";
       }
 
-      // אתחול מערכת היציאה מהאפליקציה
+      // אתחול מערכת היציאה
       function initExitSystem() {
-        // אתחול היסטוריה
         history.pushState(null, null, window.location.pathname);
-
-        // הוספת מאזין ללחיצת אחורה
         window.addEventListener("popstate", function (event) {
           showExitDialog();
           history.pushState(null, null, window.location.pathname);
         });
-
-        // טיפול בלחיצות כפתורי היציאה
         document
           .getElementById("confirm-exit")
           ?.addEventListener("click", exitApplication);
@@ -1529,9 +929,10 @@ body.dark-mode .leaflet-routing-error {
           ?.addEventListener("click", hideExitDialog);
       }
 
-      // קריאה לאתחול מערכת היציאה כאשר הדף נטען
-      document.addEventListener("DOMContentLoaded", function() {
-        initExitSystem();
+      // הוספת הקריאה לאתחול בפונקציה הראשית
+      document.addEventListener("DOMContentLoaded", function () {
+        // הקוד הקיים שלך...
+        initExitSystem(); // הוסף שורה זו בסוף
       });
     </script>
   </body>
