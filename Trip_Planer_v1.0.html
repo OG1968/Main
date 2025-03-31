@@ -8,7 +8,7 @@
     />
     <link rel="icon" href="around_me.png" type="image/png" />
     <link rel="apple-touch-icon" href="around_me.png" />
-    <title>מה קרוב אלי</title>
+    <title>מה שקרוב אלי</title>
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -43,29 +43,12 @@
       h1 {
         color: #2c3e50;
         text-align: center;
-        font-size: 2.1rem;
+        font-size: 2.2rem;
         margin-bottom: 10px;
         padding-bottom: 15px;
         position: relative;
         font-weight: 700;
         letter-spacing: -2px;
-      }
-
-      h4 {
-        font-size: 1.35rem;
-        margin-bottom: 10px;
-        padding-bottom: 15px;
-        position: relative;
-        font-weight: 700;
-        letter-spacing: 0px;
-      }
-
-      h1,
-      h2,
-      h4 {
-        color: #2c3e50;
-        text-align: center;
-        margin: 0px;
       }
 
       h1:after {
@@ -88,6 +71,13 @@
 
       body.dark-mode h1:after {
         background: linear-gradient(90deg, #2980b9, #27ae60);
+      }
+
+      h1,
+      h2 {
+        color: #2c3e50;
+        text-align: center;
+        margin: 0px;
       }
 
       .controls {
@@ -365,7 +355,7 @@
         cursor: pointer;
         border: none;
         padding: 10px;
-        font-size: 18px;
+        font-size: 16px;
         border-radius: 4px;
         width: 100%;
         margin-bottom: 20px;
@@ -373,7 +363,7 @@
       }
 
       .toggle-form-btn:hover {
-        background-color: #1b5379;
+        background-color: #2980b9;
       }
 
       .custom-select-wrapper {
@@ -576,8 +566,7 @@
       }
 
       body.dark-mode h1,
-      body.dark-mode h2,
-      body.dark-mode h4 {
+      body.dark-mode h2 {
         color: #ffffff;
       }
 
@@ -641,7 +630,7 @@
         background: none;
         border: none;
         cursor: pointer;
-        font-size: 20px;
+        font-size: 18px;
         padding: 0;
         margin: 0 0 0 10px;
         width: 24px;
@@ -934,31 +923,17 @@
         font-size: 24px;
         text-shadow: 0 0 3px #000;
       }
-
-      .button-container {
-  display: flex;   
-  gap: 10px;  
-  width: 100%; 
-  margin-bottom: 5px;
-}
-
-.route-button {
-  flex: 1;       
-  padding: 10px;    
-  font-size: 16px;  
-  text-align: center; 
-}
     </style>
   </head>
   <body>
     <div class="container">
       <h1>
         <img src="around_me.png" alt="לוגו" class="title-logo" />
-        מה קרוב אלי
+        מה שקרוב אלי
       </h1>
       <button class="toggle-form-btn" id="toggleFormBtn">הוספת מקום חדש</button>
       <div class="add-place-form" id="addPlaceForm">
-        <h3>הוספת מקום חדש</h3>
+        <h2>הוספת מקום חדש</h2>
         <div class="form-group" id="categoryGroup">
           <label for="category">קטגוריה:</label>
           <select id="category" required>
@@ -1025,10 +1000,10 @@
             <div class="custom-select-options" id="fromOptions"></div>
           </div>
           <input type="hidden" id="from" value="" />
-          <div class="button-container">
-            <button id="showRoute" class="route-button">הצג מסלול</button>
-            <button id="clearRouteBtn" class="route-button">נקה מסלולים</button>
-          </div>
+        </div>
+        <button id="showRoute">הצג מסלולי הליכה</button>
+        <button id="clearRouteBtn">נקה מסלולים</button>
+      </div>
       <div id="routeInfo" class="route-info" style="display: none">
         <div>
           <strong>מרחק הליכה:</strong>
@@ -1040,7 +1015,7 @@
         </div>
       </div>
       <div id="map"></div>
-      <h4>מיון מרחקים מנקודת המוצא</h4>
+      <h2>מיון לפי מרחק מנקודת המוצא</h2>
       <div class="category-filter">
         <button class="category-btn active" data-category="all">הכל</button>
         <button class="category-btn lodging" data-category="lodging">
