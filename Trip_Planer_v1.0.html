@@ -934,6 +934,20 @@
         font-size: 24px;
         text-shadow: 0 0 3px #000;
       }
+
+      .button-container {
+  display: flex;   
+  gap: 10px;  
+  width: 100%; 
+  margin-bottom: 5px;
+}
+
+.route-button {
+  flex: 1;       
+  padding: 10px;    
+  font-size: 16px;  
+  text-align: center; 
+}
     </style>
   </head>
   <body>
@@ -1011,10 +1025,10 @@
             <div class="custom-select-options" id="fromOptions"></div>
           </div>
           <input type="hidden" id="from" value="" />
-        </div>
-        <button id="showRoute">הצג מסלולי הליכה</button>
-        <button id="clearRouteBtn">נקה מסלולים</button>
-      </div>
+          <div class="button-container">
+            <button id="showRoute" class="route-button">הצג מסלול</button>
+            <button id="clearRouteBtn" class="route-button">נקה מסלולים</button>
+          </div>
       <div id="routeInfo" class="route-info" style="display: none">
         <div>
           <strong>מרחק הליכה:</strong>
