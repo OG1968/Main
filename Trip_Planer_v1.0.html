@@ -51,6 +51,18 @@
         letter-spacing: -2px;
       }
 
+      h1:after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 260px;
+        height: 4px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        border-radius: 2px;
+      }
+
       h4 {
         font-size: 1.35rem;
         margin-bottom: 10px;
@@ -66,18 +78,6 @@
         color: #2c3e50;
         text-align: center;
         margin: 0px;
-      }
-
-      h1:after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 260px;
-        height: 4px;
-        background: linear-gradient(90deg, #3498db, #2ecc71);
-        border-radius: 2px;
       }
 
       /* גרסא למצב כהה */
@@ -123,12 +123,12 @@
       }
 
       #map {
-        height: 400px;
         width: 100%;
         margin: auto;
         margin-bottom: 20px;
         border-radius: 4px;
         z-index: 1;
+        height: 300px;
       }
 
       .places-list {
@@ -170,15 +170,14 @@
 
       .delete-btn,
       .edit-btn,
-      .coords-btn {
+      .coords-btn,
+      .show-route {
         background: none;
         border: none;
         cursor: pointer;
         font-size: 18px;
         padding: 0;
         margin: 0 0 0 10px;
-        width: 24px;
-        height: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -186,7 +185,7 @@
         height: 30px;
         font-size: 20px;
         margin: 0 0 0 10px;
-        border-radius: 50%;
+        border-radius: 10%;
       }
 
       .delete-btn:hover,
@@ -201,11 +200,11 @@
       body.dark-mode .edit-btn:hover,
       body.dark-mode .coords-btn:hover,
       body.dark-mode .show-route-btn:hover {
-        background-color: #444;
+        background-color: #f7fa3e;
       }
 
       .distance {
-        color: #7f8c8d;
+        color: #b9b9b9;
         font-size: 0.9em;
       }
 
@@ -255,7 +254,7 @@
       }
 
       .attraction {
-        background-color: #e74c3c;
+        background-color: #ff1900;
         color: white;
       }
 
@@ -270,12 +269,12 @@
       }
 
       .pub {
-        background-color: #0080ff;
+        background-color: #0059ff;
         color: white;
       }
 
       .shopping {
-        background-color: #1abc9c;
+        background-color: #00a92a;
         color: white;
       }
 
@@ -322,7 +321,7 @@
       .category-btn {
         padding: 8px 5px;
         border: none;
-        border-radius: 4px;
+        border-radius: 20px;
         cursor: pointer;
         font-size: 14px;
         white-space: nowrap;
@@ -333,8 +332,8 @@
       }
 
       .category-btn.active {
-        box-shadow: 0 0 0 2px #2c3e50;
-      }
+        box-shadow: 0 0 0 2px #000000;
+      }      
 
       .half-width-btn {
         flex: 0.5;
@@ -442,8 +441,8 @@
 
       /* סגנונות קיימים למצב כהה */
       body.dark-mode .custom-select-options {
-        background-color: #2d2d2d;
-        border-color: #444;
+        background-color: #000000;
+        border-color: #444444;
         color: #ffffff;
       }
 
@@ -531,10 +530,6 @@
           width: 60px;
         }
 
-        #map {
-          height: 300px;
-        }
-
         .add-place-form {
           padding: 10px;
         }
@@ -566,13 +561,13 @@
 
       /* סגנונות למצב כהה */
       body.dark-mode {
-        background-color: #121212;
+        background-color: #000000;
         color: #ffffff;
       }
 
       body.dark-mode .container {
         background-color: #1e1e1e;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 10px rgb(255, 235, 82);
       }
 
       body.dark-mode h1,
@@ -609,8 +604,8 @@
         position: absolute;
         top: 20px;
         left: 20px;
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         background-color: #3498db;
         color: white;
@@ -623,10 +618,6 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         user-select: none;
         margin: 0;
-      }
-
-      body.dark-mode .dark-mode-toggle {
-        background-color: #2980b9;
       }
 
       .title-logo {
@@ -653,11 +644,6 @@
         height: 30px;
         font-size: 20px;
         margin: 0 0 0 10px;
-        border-radius: 50%;
-      }
-
-      .show-route-btn:hover {
-        background-color: #4e71ff;
       }
 
       /* כפתור נקה מסלולים */
@@ -666,24 +652,7 @@
       }
 
       #clearRouteBtn:hover {
-        background-color: #c0392b;
-      }
-
-      /* סגנונות מתוקנים לכפתורים */
-      .coords-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 30px;
-        height: 30px;
-        text-decoration: none;
-        color: inherit;
-        border-radius: 50%;
-      }
-
-      .coords-btn:hover {
-        text-decoration: none;
-        background-color: #4e71ff;
+        background-color: #841c11;
       }
 
       /* סגנונות למצב כהה עבור Leaflet Routing Machine */
