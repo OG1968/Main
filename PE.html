@@ -52,8 +52,7 @@
       }
 
       h1 {
-        font-size: 1.8rem;
-        tex
+        font-size: 2.6rem;
         margin-bottom: 0.5rem;
         text-align: center;
         color: var(--primary-color);
@@ -63,7 +62,7 @@
 
       h2 {
         font-size: 1.4rem;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.1rem;
       }
 
       .form-group {
@@ -78,8 +77,8 @@
       }
 
       .title-logo {
-        width: 30px;
-        height: 30px;
+        width: 40px;
+        height: 40px;
         vertical-align: middle;
         margin-left: 10px;
       }
@@ -106,7 +105,7 @@
       }
 
       textarea {
-        height: 100px;
+        height: 80px;
         resize: vertical;
       }
 
@@ -465,7 +464,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin: 1rem 0;
+        margin: 0rem 0;
       }
 
       .filter-controls {
@@ -548,6 +547,13 @@
         transform: none !important;
         box-shadow: none !important;
       }
+      #clear-fields-btn {
+        background-color: var(--primary-color);
+      }
+
+      #clear-fields-btn:hover {
+        background-color: var(--primary-hover);
+      }
     </style>
   </head>
   <body>
@@ -590,6 +596,7 @@
             <span id="loading"> <span class="spinner"></span> מחפש... </span>
             חפש מקומות
           </button>
+          <button id="clear-fields-btn">נקה שדות</button>
           <button id="clear-btn" class="delete">נקה זיכרון</button>
         </div>
         <div id="status-message" class="status-message"></div>
@@ -704,10 +711,13 @@
       // פונקציות עזר
       function showStatus(message, isError = false) {
         const statusDiv = document.getElementById("status-message");
+        // בדיקה אם ההודעה כבר מתחילה באמוג'י
+        const startsWithEmoji = /^[^\w]/.test(message.trim());
+
         statusDiv.innerHTML = `
-              ${isError ? "❌" : "✅"} ${message}
-              <button class="close-status" onclick="this.parentElement.style.display='none'">&times;</button>
-          `;
+    ${!startsWithEmoji ? (isError ? "❌" : "✅") : ""} ${message}
+    <button class="close-status" onclick="this.parentElement.style.display='none'">&times;</button>
+  `;
         statusDiv.className = isError
           ? "status-message error"
           : "status-message success";
@@ -1952,6 +1962,16 @@
           }
         };
         reader.readAsText(file);
+      }
+      document
+        .getElementById("clear-fields-btn")
+        .addEventListener("click", clearInputFields);
+      function clearInputFields() {
+        document.getElementById("name").value = "";
+        document.getElementById("city").value = "";
+        document.getElementById("country").value = "";
+        document.getElementById("category").selectedIndex = 0;
+        location.reload();
       }
     </script>
   </body>
