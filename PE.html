@@ -239,24 +239,115 @@
       }
 
       .status-message {
-        padding: 0.6rem 0.8rem;
-        margin: 0.8rem 0;
-        border-radius: var(--radius);
+        position: relative;
+        padding-right: 30px;
+      }
+
+      .close-status {
+        position: absolute;
+        right: 1px;
+        top: 40%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: inherit;
+      }
+
+      .existing-places-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0rem 0;
+      }
+
+      .filter-controls {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+      }
+
+      .filter-controls input,
+      .filter-controls select {
+        flex: 1;
+      }
+
+      .places-count {
+        font-size: 0.9rem;
+        color: var(--gray-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .place-actions {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        display: flex;
+        gap: 0.4rem;
+      }
+
+      .place-actions button {
+        padding: 1rem 0.6rem;
+        font-size: 1rem;
+        margin: 12px;
+        margin-top: 150px;
+        border-radius: 50%;
+      }
+
+      .icon {
+        margin-left: 0.3rem;
+      }
+
+      .description {
+        margin-top: 0.5rem;
+      }
+
+      .description-text {
+        white-space: pre-line;
+        margin-top: 5px;
+        padding: 8px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        min-height: 40px;
+        cursor: text;
+      }
+
+      .description-text:hover {
+        border-color: var(--primary-color);
+      }
+
+      .scroll-to-top {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 20px;
+        height: 20px;
+        background: none;
+        border: none;
+        box-shadow: none;
+        cursor: pointer;
+        font-size: 30px;
+        z-index: 1000;
         display: none;
-        font-weight: 1000;
-        box-shadow: var(--shadow);
+        padding: 0;
+        margin: 0;
+        line-height: 1;
+        color: var(--primary-color);
       }
 
-      .error {
-        background-color: #ffebee;
-        color: var(--danger-color);
-        border-left: 3px solid var(--danger-color);
+      .scroll-to-top:hover {
+        background: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+      #clear-fields-btn {
+        background-color: var(--primary-color);
       }
 
-      .success {
-        background-color: #e8f5e9;
-        color: #2e7d32;
-        border-left: 3px solid #2e7d32;
+      #clear-fields-btn:hover {
+        background-color: var(--primary-hover);
       }
 
       .search-result {
@@ -444,115 +535,24 @@
       }
 
       .status-message {
-        position: relative;
-        padding-right: 30px;
-      }
-
-      .close-status {
-        position: absolute;
-        right: 1px;
-        top: 40%;
-        transform: translateY(-50%);
-        background: transparent;
-        border: none;
-        font-size: 1.2rem;
-        cursor: pointer;
-        color: inherit;
-      }
-
-      .existing-places-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 0rem 0;
-      }
-
-      .filter-controls {
-        display: flex;
-        gap: 0.6rem;
-        margin-bottom: 1rem;
-      }
-
-      .filter-controls input,
-      .filter-controls select {
-        flex: 1;
-      }
-
-      .places-count {
-        font-size: 0.9rem;
-        color: var(--gray-color);
-        margin-bottom: 0.5rem;
-      }
-
-      .place-actions {
-        position: absolute;
-        left: 10px;
-        top: 10px;
-        display: flex;
-        gap: 0.4rem;
-      }
-
-      .place-actions button {
-        padding: 1rem 0.6rem;
-        font-size: 1rem;
-        margin: 12px;
-        margin-top: 150px;
-        border-radius: 50%;
-      }
-
-      .icon {
-        margin-left: 0.3rem;
-      }
-
-      .description {
-        margin-top: 0.5rem;
-      }
-
-      .description-text {
-        white-space: pre-line;
-        margin-top: 5px;
-        padding: 8px;
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        min-height: 40px;
-        cursor: text;
-      }
-
-      .description-text:hover {
-        border-color: var(--primary-color);
-      }
-
-      .scroll-to-top {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        width: 20px;
-        height: 20px;
-        background: none;
-        border: none;
-        box-shadow: none;
-        cursor: pointer;
-        font-size: 30px;
-        z-index: 1000;
+        padding: 0.6rem 0.8rem;
+        margin: 0.8rem 0;
+        border-radius: var(--radius);
         display: none;
-        padding: 0;
-        margin: 0;
-        line-height: 1;
-        color: var(--primary-color);
+        font-weight: 1000;
+        box-shadow: var(--shadow);
       }
 
-      .scroll-to-top:hover {
-        background: transparent !important;
-        transform: none !important;
-        box-shadow: none !important;
-      }
-      #clear-fields-btn {
-        background-color: var(--primary-color);
+      .error {
+        background-color: #ffebee;
+        color: var(--danger-color);
+        border-left: 3px solid var(--danger-color);
       }
 
-      #clear-fields-btn:hover {
-        background-color: var(--primary-hover);
+      .success {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-left: 3px solid #2e7d32;
       }
     </style>
   </head>
@@ -659,6 +659,7 @@
       let lastSearchResults = [];
       let currentEditField = null;
       let outsideClickHandler = null;
+      let editedFields = {};
       let searchStatus = {
         found: 0,
         notFound: 0,
@@ -666,6 +667,16 @@
         errors: 0,
         updated: 0,
       };
+
+      const CATEGORIES = [
+        { value: "lodging", text: "שמורים" },
+        { value: "attraction", text: "אתר תירותי" },
+        { value: "restaurant", text: "מסעדה" },
+        { value: "cafe", text: "בית קפה" },
+        { value: "pub", text: "פאב" },
+        { value: "shopping", text: "שופינג" },
+        { value: "other", text: "אחר" },
+      ];
 
       // מילון תרגום מורחב
       const hebrewToEnglish = {
@@ -829,7 +840,11 @@
                   originalName: name,
                   category: category,
                   notFound: true,
-                  details: "פרטים נוספים לא זמינים",
+                  lat: 0,
+                  lon: 0,
+                  details: "אין תיאור זמין",
+                  display_name:
+                    name + ", " + (city || "") + ", " + (country || ""),
                 });
                 searchStatus.notFound++;
                 showStatus(
@@ -845,6 +860,8 @@
                 category: category,
                 error: true,
                 details: `שגיאה: ${error.message || "פרטים נוספים לא זמינים"}`,
+                lat: 0,
+                lon: 0,
               });
               searchStatus.errors++;
               showStatus(
@@ -1073,218 +1090,253 @@
 
           if (place.error) {
             div.innerHTML = `
-                      <div class="editable-field" data-field="name">${
-                        place.originalName
-                      }</div>
-                      <p style="color: var(--danger-color);">שגיאה בחיפוש: ${
-                        place.details
-                      }</p>
-                      <div class="search-buttons">
-                          <button onclick="addManualPlace('${place.originalName.replace(
-                            /'/g,
-                            "\\'"
-                          )}')">הוסף ידנית</button>
-                          <button onclick="removeSearchResult(${index})" class="delete">מחק</button>
-                      </div>
-                  `;
-          } else if (place.notFound) {
-            div.innerHTML = `
-                      <div class="editable-field" data-field="name">${
-                        place.originalName
-                      }</div>
-                      <p>לא נמצא</p>
-                      <p>
-                          <strong>פרטים נוספים:</strong>
-                          <span class="editable-field" data-field="details" style="white-space: pre-line;">${
-                            place.details
-                          }</span>
-                      </p>
-                      <div class="search-buttons">
-                          <button onclick="addManualPlace('${place.originalName.replace(
-                            /'/g,
-                            "\\'"
-                          )}')">הוסף ידנית</button>
-                          <button onclick="removeSearchResult(${index})" class="delete">מחק</button>
-                      </div>
-                  `;
+              <div class="editable-field" data-field="name">${
+                place.originalName
+              }</div>
+              <p style="color: var(--danger-color);">שגיאה בחיפוש: ${
+                place.details
+              }</p>
+              <div class="search-buttons">
+                  <button onclick="addManualPlace('${place.originalName.replace(
+                    /'/g,
+                    "\\'"
+                  )}')">הוסף ידנית</button>
+                  <button onclick="removeSearchResult(${index})" class="delete">מחק</button>
+              </div>
+            `;
           } else {
-            const displayName = place.display_name.split(",")[0];
+            const displayName =
+              place.display_name?.split(",")[0] || place.originalName;
             div.innerHTML = `
-                      <div class="editable-field" data-field="name">${displayName}</div>
-                      <p>
-                          <strong>כתובת:</strong>
-                          <span class="editable-field" data-field="address">${cleanAddress(
-                            place
-                          )}</span>
-                      </p>
-                      <p>
-                          <strong>קואורדינטות:</strong>
-                          <span class="editable-field" data-field="lat">${
-                            place.lat
-                          }</span>, 
-                          <span class="editable-field" data-field="lng">${
-                            place.lon
-                          }</span>
-                      </p>
-                      <p>
-                          <strong>קטגוריה:</strong>
-                          <span class="editable-field" data-field="category">${
-                            document.getElementById("category").options[
-                              document.getElementById("category").selectedIndex
-                            ].text
-                          }</span>
-                      </p>
-                      <div class="description">
-                          <strong>תיאור המקום:</strong>
-                          <div class="description-text editable-field" data-field="details">${
-                            place.details || "אין תיאור זמין"
-                          }</div>
-                      </div>
-                      <div class="update-options">
-                          <button onclick="addSelectedPlace(${index})">הוסף כחדש</button>
-                          <button onclick="updateExistingPlace(${index})" class="update-btn">עדכן קיים</button>
-                          <button onclick="removeSearchResult(${index})" class="delete">מחק</button>
-                      </div>
-                  `;
+              <div class="editable-field" data-field="name">${displayName}</div>
+              <p>
+                  <strong>כתובת:</strong>
+                  <span class="editable-field" data-field="address">${
+                    cleanAddress(place) ||
+                    place.display_name ||
+                    "כתובת לא ידועה"
+                  }</span>
+              </p>
+              <p>
+                  <strong>קואורדינטות:</strong>
+                  <span class="editable-field" data-field="lat">${
+                    place.lat || 0
+                  }</span>, 
+                  <span class="editable-field" data-field="lng">${
+                    place.lon || 0
+                  }</span>
+              </p>
+              <p>
+                  <strong>קטגוריה:</strong>
+                  <span class="editable-field" data-field="category">${
+                    getCategoryName(place.category) || "לא מוגדר"
+                  }</span>
+              </p>
+              <div class="description">
+                  <strong>תיאור המקום:</strong>
+                  <div class="description-text editable-field" data-field="details">${
+                    place.details || "אין תיאור זמין"
+                  }</div>
+              </div>
+              <div class="search-buttons">
+                  <button onclick="savePlaceFromSearchResult(${index})">שמור</button>
+                  <button onclick="removeSearchResult(${index})" class="delete">מחק</button>
+              </div>
+            `;
           }
           container.appendChild(div);
         });
 
+        // הוספת אירועים לשדות הניתנים לעריכה
         document.querySelectorAll(".editable-field").forEach((field) => {
-          field.addEventListener("click", function (e) {
-            e.stopPropagation();
-            if (currentEditField && currentEditField !== this) {
-              const inputElement = currentEditField.querySelector(
-                ".edit-input, .edit-textarea, .edit-select"
+          field.addEventListener("click", handleFieldClick);
+          field.addEventListener("blur", function () {
+            if (this.isContentEditable) {
+              const fieldName = this.dataset.field;
+              const resultIndex = parseInt(
+                this.closest(".search-result").dataset.index
               );
-              if (inputElement) {
-                const fieldName = currentEditField.dataset.field;
-                saveEdit(currentEditField, inputElement, fieldName);
+              const place = lastSearchResults[resultIndex];
+
+              if (fieldName === "name") {
+                if (place.originalName) place.originalName = this.textContent;
+                if (place.display_name) {
+                  const parts = place.display_name.split(",");
+                  parts[0] = this.textContent;
+                  place.display_name = parts.join(",");
+                }
+              } else if (fieldName === "address") {
+                place.display_name = this.textContent;
+              } else if (fieldName === "lat") {
+                place.lat = parseFloat(this.textContent) || 0;
+              } else if (fieldName === "lng") {
+                place.lon = parseFloat(this.textContent) || 0;
+              } else if (fieldName === "details") {
+                place.details = this.textContent;
               }
+
+              this.contentEditable = false;
             }
-            startEditField(this);
           });
         });
 
         document.getElementById("search-results").style.display = "block";
       }
 
-      function startEditField(fieldElement) {
-        if (fieldElement === currentEditField) {
-          return;
-        }
-
-        if (currentEditField) {
-          const inputElement = currentEditField.querySelector(
-            ".edit-input, .edit-textarea, .edit-select"
-          );
-          if (inputElement) {
-            const fieldName = currentEditField.dataset.field;
-            saveEdit(currentEditField, inputElement, fieldName);
-          }
-        }
-
-        currentEditField = fieldElement;
-        const currentValue = fieldElement.textContent;
-        const fieldName = fieldElement.dataset.field;
-        const isCategory = fieldName === "category";
-        const isDetails = fieldName === "details";
-        const isCoordinates = fieldName === "lat" || fieldName === "lng";
-
-        fieldElement.dataset.originalValue = currentValue;
-        let inputElement;
-
-        if (isCategory) {
-          inputElement = document.createElement("select");
-          inputElement.className = "edit-select";
-          const categories = [
-            { value: "lodging", text: "שמורים" },
-            { value: "attraction", text: "אתר תירותי" },
-            { value: "restaurant", text: "מסעדה" },
-            { value: "cafe", text: "בית קפה" },
-            { value: "pub", text: "פאב" },
-            { value: "shopping", text: "שופינג" },
-            { value: "other", text: "אחר" },
-          ];
-
-          categories.forEach((cat) => {
-            const option = document.createElement("option");
-            option.value = cat.value;
-            option.textContent = cat.text;
-            if (currentValue === cat.text) option.selected = true;
-            inputElement.appendChild(option);
-          });
-        } else if (isDetails) {
-          inputElement = document.createElement("textarea");
-          inputElement.className = "edit-textarea";
-          inputElement.value = currentValue;
-        } else {
-          inputElement = document.createElement("input");
-          inputElement.type = isCoordinates ? "number" : "text";
-          inputElement.className = "edit-input";
-          inputElement.value = currentValue;
-        }
-
-        const saveButton = document.createElement("button");
-        saveButton.textContent = "שמור";
-        saveButton.className = "save-btn";
-
-        const cancelButton = document.createElement("button");
-        cancelButton.textContent = "ביטול";
-        cancelButton.className = "cancel-btn";
-
-        const buttonsContainer = document.createElement("div");
-        buttonsContainer.className = "save-cancel-buttons";
-        buttonsContainer.appendChild(saveButton);
-        buttonsContainer.appendChild(cancelButton);
-
-        const editContainer = document.createElement("div");
-        editContainer.className = "edit-container";
-        editContainer.appendChild(inputElement);
-        editContainer.appendChild(buttonsContainer);
-
-        fieldElement.innerHTML = "";
-        fieldElement.appendChild(editContainer);
-        inputElement.focus();
-
-        saveButton.addEventListener("click", function (e) {
-          e.stopPropagation();
-          saveEdit(fieldElement, inputElement, fieldName);
-        });
-
-        cancelButton.addEventListener("click", function (e) {
-          e.stopPropagation();
-          cancelEdit(fieldElement);
-        });
-
-        inputElement.addEventListener("keydown", function (e) {
-          if (e.key === "Enter" && !isDetails) {
-            e.preventDefault();
-            saveEdit(fieldElement, inputElement, fieldName);
-          } else if (e.key === "Escape") {
-            e.preventDefault();
-            cancelEdit(fieldElement);
-          }
-        });
-
-        if (outsideClickHandler) {
-          document.removeEventListener("click", outsideClickHandler);
-        }
-
-        outsideClickHandler = function (e) {
-          if (!fieldElement.contains(e.target)) {
-            const inputElement = fieldElement.querySelector(
-              ".edit-input, .edit-textarea, .edit-select"
-            );
-            if (inputElement) {
-              saveEdit(fieldElement, inputElement, fieldElement.dataset.field);
-            }
-          }
+      function savePlaceFromSearchResult(index) {
+        const place = lastSearchResults[index];
+        const newPlace = {
+          id: nextId++,
+          category: place.category || document.getElementById("category").value,
+          name: place.display_name?.split(",")[0] || place.originalName,
+          address:
+            cleanAddress(place) || place.display_name || "כתובת לא ידועה",
+          lat: parseFloat(place.lat) || 0,
+          lng: parseFloat(place.lon) || 0,
+          details: place.details || "אין תיאור זמין",
         };
 
-        setTimeout(() => {
-          document.addEventListener("click", outsideClickHandler);
-        }, 10);
+        const existingPlaceIndex = places.findIndex(
+          (p) =>
+            p.name.toLowerCase() === newPlace.name.toLowerCase() &&
+            p.address.toLowerCase() === newPlace.address.toLowerCase()
+        );
+
+        if (existingPlaceIndex !== -1) {
+          if (
+            confirm(
+              `"${newPlace.name}" כבר קיים ברשימה. האם ברצונך להחליף את הרשומה הקיימת?`
+            )
+          ) {
+            newPlace.id = places[existingPlaceIndex].id;
+            Object.assign(places[existingPlaceIndex], newPlace);
+            showStatus(`✅ "${newPlace.name}" עודכן בהצלחה`, false);
+          } else {
+            return;
+          }
+        } else {
+          places.push(newPlace);
+          showStatus(`✅ "${newPlace.name}" נוסף בהצלחה`, false);
+        }
+
+        saveToLocalStorage();
+        updateJSONPreview();
+        removeSearchResult(index);
+      }
+
+      function startEditField(fieldElement) {
+        const fieldName = fieldElement.dataset.field;
+        const resultIndex = parseInt(
+          fieldElement.closest(".search-result").dataset.index
+        );
+        const place = lastSearchResults[resultIndex];
+
+        if (fieldName === "category") {
+          editCategoryField(fieldElement, place.category);
+        } else {
+          editRegularField(fieldElement);
+        }
+      }
+
+      function editCategoryField(fieldElement, currentCategory) {
+        const select = document.createElement("select");
+        select.className = "category-select";
+
+        CATEGORIES.forEach((cat) => {
+          const option = document.createElement("option");
+          option.value = cat.value;
+          option.textContent = cat.text;
+          if (cat.value === currentCategory) option.selected = true;
+          select.appendChild(option);
+        });
+
+        fieldElement.innerHTML = "";
+        fieldElement.appendChild(select);
+        select.focus();
+
+        select.addEventListener("blur", () => {
+          saveCategoryEdit(fieldElement, select.value);
+        });
+
+        select.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            saveCategoryEdit(fieldElement, select.value);
+          } else if (e.key === "Escape") {
+            fieldElement.textContent = getCategoryName(currentCategory);
+          }
+        });
+      }
+
+      function saveCategoryEdit(fieldElement, newValue) {
+        const resultIndex = parseInt(
+          fieldElement.closest(".search-result").dataset.index
+        );
+        const place = lastSearchResults[resultIndex];
+
+        place.category = newValue;
+        fieldElement.textContent = getCategoryName(newValue);
+
+        // הוספת אירוע מחדש לאחר סיום העריכה
+        fieldElement.addEventListener("click", handleFieldClick);
+      }
+
+      function editRegularField(fieldElement) {
+        const currentValue = fieldElement.textContent;
+        fieldElement.dataset.originalValue = currentValue;
+        fieldElement.contentEditable = true;
+        fieldElement.focus();
+
+        // הוספת אירועי מקלדת
+        fieldElement.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            this.blur();
+          } else if (e.key === "Escape") {
+            this.textContent = this.dataset.originalValue;
+            this.blur();
+          }
+        });
+      }
+
+      function handleFieldClick(e) {
+        if (!this.isContentEditable) {
+          startEditField(this);
+        }
+      }
+
+      function saveEditOnBlur(fieldElement) {
+        const newValue = fieldElement.textContent.trim();
+        const fieldName = fieldElement.dataset.field;
+        const resultIndex = parseInt(
+          fieldElement.closest(".search-result").dataset.index
+        );
+        const place = lastSearchResults[resultIndex];
+
+        fieldElement.contentEditable = false;
+
+        if (fieldName === "name") {
+          if (place.originalName) {
+            place.originalName = newValue;
+          }
+          if (place.display_name) {
+            const parts = place.display_name.split(",");
+            parts[0] = newValue;
+            place.display_name = parts.join(",");
+          } else {
+            place.display_name = newValue + ", " + (place.address || "");
+          }
+        } else if (fieldName === "address") {
+          place.display_name = newValue;
+        } else if (fieldName === "lat") {
+          place.lat = parseFloat(newValue) || 0;
+        } else if (fieldName === "lng") {
+          place.lon = parseFloat(newValue) || 0;
+        } else if (fieldName === "category") {
+          place.category = newValue;
+        } else if (fieldName === "details") {
+          place.details = newValue;
+        }
       }
 
       function saveEdit(fieldElement, inputElement, fieldName) {
@@ -1342,26 +1394,20 @@
       }
 
       function cancelEdit(fieldElement) {
-        fieldElement.textContent = fieldElement.dataset.originalValue;
-        fieldElement.addEventListener("click", function (e) {
-          e.stopPropagation();
-          startEditField(this);
-        });
+        const fieldName = fieldElement.dataset.field;
+        const resultIndex = parseInt(
+          fieldElement.closest(".search-result").dataset.index
+        );
 
-        if (outsideClickHandler) {
-          document.removeEventListener("click", outsideClickHandler);
-          outsideClickHandler = null;
+        if (editedFields[resultIndex] && editedFields[resultIndex][fieldName]) {
+          fieldElement.textContent = editedFields[resultIndex][fieldName];
         }
-
-        currentEditField = null;
+        fieldElement.contentEditable = false;
       }
 
       function removeSearchResult(index) {
-        if (confirm("⚠️ האם אתה בטוח שברצונך למחוק את תוצאת החיפוש הזו?")) {
-          lastSearchResults.splice(index, 1);
-          displaySearchResults();
-          showStatus("🗑️ הרשומה נמחקה בהצלחה", false);
-        }
+        lastSearchResults.splice(index, 1);
+        displaySearchResults();
       }
 
       function addSelectedPlace(index) {
@@ -1370,9 +1416,10 @@
           id: nextId++,
           category: place.category,
           name: place.display_name.split(",")[0] || place.originalName,
-          address: cleanAddress(place),
-          lat: parseFloat(place.lat),
-          lng: parseFloat(place.lon),
+          address:
+            cleanAddress(place) || place.display_name || "כתובת לא ידועה",
+          lat: parseFloat(place.lat) || 0,
+          lng: parseFloat(place.lon) || 0,
           details: place.details || "אין תיאור זמין",
         };
 
@@ -1401,9 +1448,10 @@
           id: nextId++,
           category: place.category,
           name: place.display_name?.split(",")[0] || place.originalName,
-          address: cleanAddress(place),
-          lat: parseFloat(place.lat),
-          lng: parseFloat(place.lon),
+          address:
+            cleanAddress(place) || place.display_name || "כתובת לא ידועה",
+          lat: parseFloat(place.lat) || 0,
+          lng: parseFloat(place.lon) || 0,
           details: place.details || "אין תיאור זמין",
         };
 
