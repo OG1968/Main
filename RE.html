@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="recipe.png" type="image/png" />
+    <link rel="apple-touch-icon" href="recipe.png" />
+    <title>מערכת ניהול מתכונים</title>
+    <style>
+      :root {
+        --primary-color: #4361ee;
+        --primary-hover: #3a56d4;
+        --secondary-color: #3f37c9;
+        --success-color: #0074c7;
+        --success-hover: #007fa5;
+        --danger-color: #ff0000;
+        --danger-hover: #ff5757;
+        --warning-color: #ff8c00;
+        --warning-hover: #ffab44;
+        --info-color: #2e6500;
+        --dark-color: #1a1a2e;
+        --light-color: #f8f9fa;
+        --gray-color: #6c757d;
+        --border-color: #dee2e6;
+        --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.15);
+        --radius: 6px;
+        --transition: all 0.2s ease;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        direction: rtl;
+        padding: 20px;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.5;
+        color: #333;
+        background-color: #f5f5f5;
+      }
+
+      h1,
+      h2 {
+        color: var(--dark-color);
+      }
+
+      h1 {
+        font-size: 2.6rem;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 8px;
+      }
+
+      h2 {
+        font-size: 1.4rem;
+        margin-bottom: 0.1rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+      }
+
+      .title-logo {
+        width: 40px;
+        height: 40px;
+        vertical-align: middle;
+        margin-left: 10px;
+      }
+
+      textarea,
+      input,
+      select {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        transition: var(--transition);
+        background-color: white;
+      }
+
+      textarea:focus,
+      input:focus,
+      select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+      }
+
+      textarea {
+        height: 120px;
+        resize: vertical;
+      }
+
+      textarea#title {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 0.95rem;
+      }
+
+      button {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 0.6rem 1rem;
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0.2rem 0;
+        transition: var(--transition);
+        box-shadow: var(--shadow);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+      }
+
+      button:hover {
+        background-color: var(--primary-hover);
+        box-shadow: var(--shadow-hover);
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      button:disabled {
+        background-color: var(--gray-color);
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      #search-btn {
+        background-color: var(--success-color);
+      }
+
+      #search-btn:hover {
+        background-color: var(--success-hover);
+      }
+
+      #download-btn {
+        background-color: var(--info-color);
+        width: 50%;
+        margin-top: 0.2rem;
+      }
+
+      #download-btn:hover {
+        background-color: #19a400;
+      }
+
+      #upload-btn {
+        background-color: var(--warning-color);
+        width: 50%;
+        margin-top: 0.2rem;
+      }
+
+      @media (max-width: 600px) {
+        #download-btn,
+        #upload-btn {
+          width: 50%;
+        }
+      }
+
+      #upload-btn:hover {
+        background-color: var(--warning-hover);
+      }
+
+      button.delete {
+        background-color: var(--danger-color);
+      }
+
+      button.delete:hover {
+        background-color: var(--danger-hover);
+      }
+
+      #loading {
+        display: none;
+        margin-right: 0.4rem;
+      }
+
+      .spinner {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .recipe-item {
+        background-color: white;
+        padding: 1rem;
+        margin-bottom: 0.8rem;
+        border-radius: var(--radius);
+        border-left: 3px solid var(--primary-color);
+        box-shadow: var(--shadow);
+        position: relative;
+      }
+
+      #json-output {
+        background-color: white;
+        padding: 0.8rem;
+        border-radius: var(--radius);
+        white-space: pre-wrap;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.85rem;
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow);
+        max-height: 250px;
+        overflow-y: auto;
+      }
+
+      .status-message {
+        position: relative;
+        padding-right: 30px;
+      }
+
+      .close-status {
+        position: absolute;
+        right: 1px;
+        top: 40%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: inherit;
+      }
+
+      .existing-recipes-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0rem 0;
+      }
+
+      .filter-controls {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+      }
+
+      .filter-controls input,
+      .filter-controls select {
+        flex: 1;
+      }
+
+      .recipes-count {
+        font-size: 0.9rem;
+        color: var(--gray-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .recipe-actions {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        display: flex;
+        gap: 0.4rem;
+      }
+
+      .recipe-actions button {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        margin: 0;
+        margin-top: 70px;
+        border-radius: 50%;
+      }
+
+      .recipe-item p {
+        margin-bottom: 0.8rem;
+      }
+
+      .icon {
+        margin-left: 0.3rem;
+      }
+
+      .instructions {
+        margin-top: 0.5rem;
+      }
+
+      .instructions-text {
+        white-space: pre-line;
+        margin-top: 5px;
+        padding: 8px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        min-height: 40px;
+        cursor: text;
+      }
+
+      .instructions-text:hover {
+        border-color: var(--primary-color);
+      }
+
+      .scroll-to-top {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 20px;
+        height: 20px;
+        background: none;
+        border: none;
+        box-shadow: none;
+        cursor: pointer;
+        font-size: 30px;
+        z-index: 1000;
+        display: none;
+        padding: 0;
+        margin: 0;
+        line-height: 1;
+        color: var(--primary-color);
+      }
+
+      .scroll-to-top:hover {
+        background: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+      #clear-fields-btn {
+        background-color: var(--primary-color);
+      }
+
+      #clear-fields-btn:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .search-result {
+        margin-bottom: 0.8rem;
+        padding: 0.8rem;
+        background-color: white;
+        border-radius: var(--radius);
+        position: relative;
+        box-shadow: var(--shadow);
+        border-left: 3px solid var(--info-color);
+      }
+
+      .search-result.error-result {
+        border-left-color: var(--danger-color);
+      }
+
+      .search-result.not-found {
+        border-left-color: var(--warning-color);
+      }
+
+      .button-group {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 0.2rem;
+        width: 100%;
+      }
+
+      .button-group button {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .search-buttons {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.6rem;
+      }
+
+      .search-buttons button {
+        flex: 1;
+      }
+
+      .editable-field {
+        padding: 0.4rem;
+        margin: 0.4rem 0;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: white;
+        cursor: pointer;
+        min-height: 20px;
+        transition: var(--transition);
+        font-size: 0.9rem;
+      }
+
+      .editable-field:hover {
+        background-color: #f0f4f8;
+        border-color: var(--primary-color);
+      }
+
+      .edit-container {
+        position: relative;
+        margin: 0.4rem 0;
+      }
+
+      .edit-input {
+        width: 100%;
+        padding: 0.6rem;
+        border: 2px solid var(--primary-color);
+        border-radius: var(--radius);
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .edit-textarea {
+        width: 100%;
+        padding: 0.6rem;
+        border: 2px solid var(--primary-color);
+        border-radius: var(--radius);
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        min-height: 120px;
+        resize: vertical;
+        margin-bottom: 0.4rem;
+      }
+
+      .edit-select {
+        width: 100%;
+        padding: 0.6rem;
+        border: 2px solid var(--primary-color);
+        border-radius: var(--radius);
+        box-sizing: border-box;
+        font-size: 0.95rem;
+        background-color: white;
+        margin-bottom: 0.4rem;
+      }
+
+      .save-cancel-buttons {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.4rem;
+      }
+
+      .save-cancel-buttons button {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+        flex: 1;
+      }
+
+      .save-btn {
+        background-color: #2e7d32;
+      }
+
+      .save-btn:hover {
+        background-color: #1b5e20;
+      }
+
+      .cancel-btn {
+        background-color: var(--danger-color);
+      }
+
+      .cancel-btn:hover {
+        background-color: var(--danger-hover);
+      }
+
+      .update-options {
+        display: flex;
+        gap: 0.4rem;
+        margin-top: 0.6rem;
+      }
+
+      .update-options button {
+        flex: 1;
+        padding: 0.6rem;
+        font-size: 0.85rem;
+      }
+
+      .update-btn {
+        background-color: var(--warning-color);
+      }
+
+      .update-btn:hover {
+        background-color: var(--warning-hover);
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 15px;
+        }
+
+        h1 {
+          font-size: 1.6rem;
+        }
+
+        h2 {
+          font-size: 1.2rem;
+        }
+
+        .search-buttons,
+        .update-options,
+        .save-cancel-buttons {
+          flex-direction: column;
+        }
+
+        .button-group {
+          flex-direction: row;
+          gap: 0.6rem;
+        }
+
+        button {
+          width: 100%;
+        }
+
+        #json-output {
+          font-size: 0.8rem;
+          max-height: 200px;
+        }
+      }
+
+      .download-upload-group {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: 0.8rem;
+      }
+
+      .status-message {
+        padding: 0.6rem 0.8rem;
+        margin: 0.8rem 0;
+        border-radius: var(--radius);
+        display: none;
+        font-weight: 1000;
+        box-shadow: var(--shadow);
+      }
+
+      .error {
+        background-color: #ffebee;
+        color: var(--danger-color);
+        border-left: 3px solid var(--danger-color);
+      }
+
+      .success {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-left: 3px solid #2e7d32;
+      }
+
+      .recipe-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius);
+        margin-top: 0.5rem;
+      }
+
+      .recipe-image-preview {
+        max-width: 200px;
+        max-height: 200px;
+        display: block;
+        margin: 0.5rem 0;
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+      }
+
+      #image-preview-container {
+        margin: 0.5rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      <img src="recipe.png" alt="לוגו" class="title-logo" />מערכת ניהול מתכונים
+    </h1>
+    <div class="recipe-form">
+      <div class="form-group">
+        <label for="title">שם המתכון</label>
+        <input
+          type="text"
+          id="title"
+          required
+          placeholder="לדוגמה: עוגיות שוקולד צ'יפס"
+        />
+      </div>
+      <div class="form-group">
+        <label for="ingredients">מרכיבים (שורה לכל מרכיב)</label>
+        <textarea
+          id="ingredients"
+          required
+          placeholder="הזן מרכיבים באופן הבא:
+1 כוס קמח
+2 ביצים
+1 כפית סוכר"
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label for="quantity">כמות</label>
+        <input
+          type="text"
+          id="quantity"
+          placeholder="לדוגמה: תבנית 24, 4 מנות"
+        />
+      </div>
+      <div class="form-group">
+        <label for="instructions">הוראות הכנה (שורה לכל שלב)</label>
+        <textarea
+          id="instructions"
+          required
+          placeholder="הזן הוראות הכנה באופן הבא:
+1. מחממים תנור ל-180 מעלות
+2. מערבבים את כל המרכיבים"
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label for="category">קטגוריה</label>
+        <select id="category">
+          <option value="">בחר קטגוריה</option>
+          <option value="ראשונות">ראשונות</option>
+          <option value="עיקריות">עיקריות</option>
+          <option value="תוספות">תוספות</option>
+          <option value="קינוחים">קינוחים</option>
+          <option value="אפיה">אפיה</option>
+          <option value="משקאות">משקאות</option>
+          <option value="אחר">אחר</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="recipe-image">תמונה למתכון</label>
+        <input type="file" id="recipe-image" accept="image/*" />
+      </div>
+      <div class="button-group">
+        <button id="add-btn">הוסף מתכון</button>
+        <button id="clear-fields-btn">נקה שדות</button>
+        <button id="clear-btn" class="delete">נקה זיכרון</button>
+      </div>
+      <div id="status-message" class="status-message"></div>
+
+      <div id="image-preview-container"></div>
+
+      <div id="existing-recipes-section">
+        <div class="existing-recipes-header">
+          <h2>מתכונים קיימים</h2>
+          <div class="recipes-count" id="recipes-count"></div>
+        </div>
+        <div class="filter-controls">
+          <input type="text" id="recipes-search" placeholder="חפש מתכונים..." />
+          <select id="recipes-category-filter">
+            <option value="">כל הקטגוריות</option>
+            <option value="ראשונות">ראשונות</option>
+            <option value="עיקריות">עיקריות</option>
+            <option value="תוספות">תוספות</option>
+            <option value="קינוחים">קינוחים</option>
+            <option value="אפיה">אפיה</option>
+            <option value="משקאות">משקאות</option>
+            <option value="אחר">אחר</option>
+          </select>
+        </div>
+        <div id="existing-recipes-container"></div>
+      </div>
+
+      <div>
+        <h2>תצוגה מקדימה</h2>
+        <pre id="json-output" dir="ltr">[]</pre>
+      </div>
+      <div class="download-upload-group">
+        <button id="download-btn">הורד קובץ JSON</button>
+        <button id="upload-btn">העלה קובץ JSON</button>
+      </div>
+      <input type="file" id="file-input" accept=".json" style="display: none" />
+    </div>
+
+    <button
+      class="scroll-to-top"
+      onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+      aria-label="גלילה למעלה"
+    >
+      ⬆️
+    </button>
+
+    <script>
+      // כפתור גלילה מעלה
+      window.addEventListener("scroll", function () {
+        const scrollButton = document.querySelector(".scroll-to-top");
+        scrollButton.style.display =
+          window.pageYOffset > 300 ? "block" : "none";
+      });
+
+      // משתנים גלובליים
+      let recipes = [];
+      let nextId = Date.now();
+      let currentEditField = null;
+      let outsideClickHandler = null;
+      let currentImageFile = null;
+
+      const CATEGORIES = [
+        { value: "ראשונות", text: "ראשונות" },
+        { value: "עיקריות", text: "עיקריות" },
+        { value: "תוספות", text: "תוספות" },
+        { value: "קינוחים", text: "קינוחים" },
+        { value: "אפיה", text: "אפיה" },
+        { value: "משקאות", text: "משקאות" },
+        { value: "אחר", text: "אחר" },
+      ];
+
+      // אירועים
+      document.getElementById("add-btn").addEventListener("click", addRecipe);
+      document
+        .getElementById("download-btn")
+        .addEventListener("click", downloadJSON);
+      document
+        .getElementById("clear-btn")
+        .addEventListener("click", clearLocalStorage);
+      document
+        .getElementById("upload-btn")
+        .addEventListener("click", function () {
+          document.getElementById("file-input").click();
+        });
+      document
+        .getElementById("recipes-search")
+        .addEventListener("input", filterRecipes);
+      document
+        .getElementById("recipes-category-filter")
+        .addEventListener("change", filterRecipes);
+      document
+        .getElementById("clear-fields-btn")
+        .addEventListener("click", clearInputFields);
+      document
+        .getElementById("recipe-image")
+        .addEventListener("change", handleImageUpload);
+      window.addEventListener("DOMContentLoaded", loadFromLocalStorage);
+      document
+        .getElementById("file-input")
+        .addEventListener("change", handleFileUpload);
+
+      // פונקציות עזר
+      function showStatus(message, isError = false) {
+        const statusDiv = document.getElementById("status-message");
+        const startsWithEmoji = /^[^\w]/.test(message.trim());
+
+        statusDiv.innerHTML = `
+          ${!startsWithEmoji ? (isError ? "❌" : "✅") : ""} ${message}
+          <button class="close-status" onclick="this.parentElement.style.display='none'">&times;</button>
+        `;
+        statusDiv.className = isError
+          ? "status-message error"
+          : "status-message success";
+        statusDiv.style.display = "block";
+
+        if (!isError) {
+          setTimeout(() => {
+            statusDiv.style.display = "none";
+          }, 5000);
+        }
+      }
+
+      function getCategoryName(categoryValue) {
+        const categoryMap = {
+          ראשונות: "ראשונות",
+          עיקריות: "עיקריות",
+          תוספות: "תוספות",
+          קינוחים: "קינוחים",
+          אפיה: "אפיה",
+          משקאות: "משקאות",
+          אחר: "אחר",
+        };
+        return categoryMap[categoryValue] || categoryValue;
+      }
+
+      function findExistingRecipe(recipeToFind) {
+        return recipes.find((existingRecipe) => {
+          const titleMatch =
+            existingRecipe.title.toLowerCase() ===
+            recipeToFind.title.toLowerCase();
+          const ingredientsMatch =
+            existingRecipe.ingredients.toLowerCase() ===
+            recipeToFind.ingredients.toLowerCase();
+          return titleMatch && ingredientsMatch;
+        });
+      }
+
+      function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // בדיקת סוג הקובץ
+        const validTypes = ["image/jpeg", "image/png", "image/gif"];
+        if (!validTypes.includes(file.type)) {
+          showStatus("❌ נא להעלות קובץ תמונה בלבד (JPEG, PNG, GIF)", true);
+          e.target.value = "";
+          return;
+        }
+
+        currentImageFile = file;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const previewContainer = document.getElementById(
+            "image-preview-container"
+          );
+          previewContainer.innerHTML = "";
+
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.className = "recipe-image-preview";
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function resizeImage(file, maxWidth, maxHeight, callback) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > maxWidth) {
+                height *= maxWidth / width;
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width *= maxHeight / height;
+                height = maxHeight;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(
+              function (blob) {
+                callback(blob);
+              },
+              file.type || "image/jpeg",
+              0.7
+            );
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // פונקציות עיקריות
+      function addRecipe() {
+        const title = document.getElementById("title").value.trim();
+        const ingredients = document.getElementById("ingredients").value.trim();
+        const quantity = document.getElementById("quantity").value.trim();
+        const instructions = document
+          .getElementById("instructions")
+          .value.trim();
+        const category = document.getElementById("category").value;
+
+        if (!title || !ingredients || !instructions) {
+          showStatus(
+            "❌ אנא מלא את כל השדות החובה (שם, מרכיבים, הוראות)",
+            true
+          );
+          return;
+        }
+
+        const processImage = (callback) => {
+          if (!currentImageFile) {
+            callback(null);
+            return;
+          }
+
+          resizeImage(currentImageFile, 800, 800, function (resizedBlob) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              callback(e.target.result);
+            };
+            reader.readAsDataURL(resizedBlob);
+          });
+        };
+
+        processImage((imageData) => {
+          const newRecipe = {
+            id: nextId++,
+            title: title,
+            ingredients: ingredients,
+            quantity: quantity || "לא צוין",
+            instructions: instructions,
+            category: category || "אחר",
+            imageData: imageData,
+          };
+
+          const existingRecipe = findExistingRecipe(newRecipe);
+          if (existingRecipe) {
+            if (
+              confirm(
+                `"${newRecipe.title}" כבר קיים ברשימה. האם ברצונך להחליף את הרשומה הקיימת?`
+              )
+            ) {
+              Object.assign(existingRecipe, newRecipe);
+              showStatus(`✅ "${newRecipe.title}" עודכן בהצלחה`, false);
+            } else {
+              return;
+            }
+          } else {
+            recipes.push(newRecipe);
+            showStatus(`✅ "${newRecipe.title}" נוסף בהצלחה`, false);
+          }
+
+          saveToLocalStorage();
+          updateJSONPreview();
+          displayExistingRecipes();
+          clearInputFields();
+          currentImageFile = null;
+        });
+      }
+
+      function displayExistingRecipes() {
+        filterRecipes();
+      }
+
+      function filterRecipes() {
+        const searchTerm = document
+          .getElementById("recipes-search")
+          .value.toLowerCase();
+        const categoryFilter = document.getElementById(
+          "recipes-category-filter"
+        ).value;
+
+        const filteredRecipes = recipes.filter((recipe) => {
+          const matchesSearch =
+            recipe.title.toLowerCase().includes(searchTerm) ||
+            recipe.ingredients.toLowerCase().includes(searchTerm) ||
+            recipe.instructions.toLowerCase().includes(searchTerm);
+
+          const matchesCategory =
+            !categoryFilter || recipe.category === categoryFilter;
+
+          return matchesSearch && matchesCategory;
+        });
+
+        renderExistingRecipes(filteredRecipes);
+      }
+
+      function renderExistingRecipes(recipesToRender) {
+        const container = document.getElementById("existing-recipes-container");
+        container.innerHTML = "";
+
+        if (recipesToRender.length === 0) {
+          container.innerHTML = "<p>לא נמצאו מתכונים</p>";
+          document.getElementById("recipes-count").textContent = "";
+          return;
+        }
+
+        document.getElementById(
+          "recipes-count"
+        ).textContent = `מציג ${recipesToRender.length} מתוך ${recipes.length} מתכונים`;
+
+        recipesToRender.forEach((recipe) => {
+          const div = document.createElement("div");
+          div.className = "recipe-item";
+          div.dataset.id = recipe.id;
+
+          div.innerHTML = `
+            <div class="recipe-actions">
+              <button onclick="deleteExistingRecipe(${
+                recipe.id
+              })" class="delete">מחק</button>
+              <button onclick="editExistingRecipe(${recipe.id})">ערוך</button>
+            </div>
+            <h3 class="editable-field" data-field="title" data-id="${
+              recipe.id
+            }">${recipe.title}</h3>
+            <p>
+              <strong>קטגוריה:</strong>
+              <span class="editable-field" data-field="category" data-id="${
+                recipe.id
+              }">${getCategoryName(recipe.category)}</span>
+            </p>
+            <p>
+              <strong>כמות:</strong>
+              <span class="editable-field" data-field="quantity" data-id="${
+                recipe.id
+              }">${recipe.quantity}</span>
+            </p>
+            <div class="form-group">
+              <strong>מרכיבים:</strong>
+              <div class="editable-field" data-field="ingredients" data-id="${
+                recipe.id
+              }">${recipe.ingredients || "אין מרכיבים"}</div>
+            </div>
+            <div class="instructions">
+              <strong>הוראות הכנה:</strong>
+              <div class="instructions-text editable-field" data-field="instructions" data-id="${
+                recipe.id
+              }">${recipe.instructions || "אין הוראות הכנה"}</div>
+            </div>
+            ${
+              recipe.imageData
+                ? `<img src="${recipe.imageData}" class="recipe-image" alt="${recipe.title}" onerror="this.src='default_image.png'">`
+                : '<img src="default_image.png" class="recipe-image" alt="תמונת ברירת מחדל">'
+            }
+          `;
+
+          container.appendChild(div);
+        });
+
+        // הוספת אירועי לחיצה לשדות הניתנים לעריכה
+        document.querySelectorAll(".editable-field").forEach((field) => {
+          field.addEventListener("click", function (e) {
+            e.stopPropagation();
+            if (currentEditField && currentEditField !== this) {
+              const inputElement = currentEditField.querySelector(
+                ".edit-input, .edit-textarea, .edit-select"
+              );
+              if (inputElement) {
+                const fieldName = currentEditField.dataset.field;
+                const recipeId = currentEditField.dataset.id;
+                saveExistingRecipeEdit(
+                  currentEditField,
+                  inputElement,
+                  fieldName,
+                  recipeId
+                );
+              }
+            }
+            startEditExistingField(this);
+          });
+        });
+      }
+
+      function startEditExistingField(fieldElement) {
+        if (fieldElement === currentEditField) {
+          return;
+        }
+
+        if (currentEditField) {
+          const inputElement = currentEditField.querySelector(
+            ".edit-input, .edit-textarea, .edit-select"
+          );
+          if (inputElement) {
+            const fieldName = currentEditField.dataset.field;
+            const recipeId = currentEditField.dataset.id;
+            saveExistingRecipeEdit(
+              currentEditField,
+              inputElement,
+              fieldName,
+              recipeId
+            );
+          }
+        }
+
+        currentEditField = fieldElement;
+        const currentValue = fieldElement.textContent;
+        const fieldName = fieldElement.dataset.field;
+        const recipeId = fieldElement.dataset.id;
+        const isCategory = fieldName === "category";
+        const isInstructions = fieldName === "instructions";
+        const isIngredients = fieldName === "ingredients";
+
+        fieldElement.dataset.originalValue = currentValue;
+        let inputElement;
+
+        if (isCategory) {
+          inputElement = document.createElement("select");
+          inputElement.className = "edit-select";
+          const categories = [
+            { value: "ראשונות", text: "ראשונות" },
+            { value: "עיקריות", text: "עיקריות" },
+            { value: "תוספות", text: "תוספות" },
+            { value: "קינוחים", text: "קינוחים" },
+            { value: "אפיה", text: "אפיה" },
+            { value: "משקאות", text: "משקאות" },
+            { value: "אחר", text: "אחר" },
+          ];
+
+          categories.forEach((cat) => {
+            const option = document.createElement("option");
+            option.value = cat.value;
+            option.textContent = cat.text;
+            if (currentValue === cat.text) option.selected = true;
+            inputElement.appendChild(option);
+          });
+        } else if (isInstructions || isIngredients) {
+          inputElement = document.createElement("textarea");
+          inputElement.className = "edit-textarea";
+          inputElement.value = currentValue;
+        } else {
+          inputElement = document.createElement("input");
+          inputElement.type = "text";
+          inputElement.className = "edit-input";
+          inputElement.value = currentValue;
+        }
+
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "שמור";
+        saveButton.className = "save-btn";
+
+        const cancelButton = document.createElement("button");
+        cancelButton.textContent = "ביטול";
+        cancelButton.className = "cancel-btn";
+
+        const buttonsContainer = document.createElement("div");
+        buttonsContainer.className = "save-cancel-buttons";
+        buttonsContainer.appendChild(saveButton);
+        buttonsContainer.appendChild(cancelButton);
+
+        const editContainer = document.createElement("div");
+        editContainer.className = "edit-container";
+        editContainer.appendChild(inputElement);
+        editContainer.appendChild(buttonsContainer);
+
+        fieldElement.innerHTML = "";
+        fieldElement.appendChild(editContainer);
+        inputElement.focus();
+
+        saveButton.addEventListener("click", function (e) {
+          e.stopPropagation();
+          saveExistingRecipeEdit(
+            fieldElement,
+            inputElement,
+            fieldName,
+            recipeId
+          );
+        });
+
+        cancelButton.addEventListener("click", function (e) {
+          e.stopPropagation();
+          cancelEdit(fieldElement);
+        });
+
+        inputElement.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" && !isInstructions && !isIngredients) {
+            e.preventDefault();
+            saveExistingRecipeEdit(
+              fieldElement,
+              inputElement,
+              fieldName,
+              recipeId
+            );
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            cancelEdit(fieldElement);
+          }
+        });
+
+        if (outsideClickHandler) {
+          document.removeEventListener("click", outsideClickHandler);
+        }
+
+        outsideClickHandler = function (e) {
+          if (!fieldElement.contains(e.target)) {
+            const inputElement = fieldElement.querySelector(
+              ".edit-input, .edit-textarea, .edit-select"
+            );
+            if (inputElement) {
+              saveExistingRecipeEdit(
+                fieldElement,
+                inputElement,
+                fieldElement.dataset.field,
+                fieldElement.dataset.id
+              );
+            }
+          }
+        };
+
+        setTimeout(() => {
+          document.addEventListener("click", outsideClickHandler);
+        }, 10);
+      }
+
+      function saveExistingRecipeEdit(
+        fieldElement,
+        inputElement,
+        fieldName,
+        recipeId
+      ) {
+        let newValue;
+        if (inputElement.tagName === "SELECT") {
+          newValue = inputElement.options[inputElement.selectedIndex].text;
+        } else {
+          newValue = inputElement.value
+            .replace(/\\r\\n/g, "\n")
+            .replace(/\\n/g, "\n")
+            .replace(/\r\n/g, "\n")
+            .replace(/\n/g, "\n");
+        }
+
+        fieldElement.textContent = newValue;
+        fieldElement.addEventListener("click", function (e) {
+          e.stopPropagation();
+          startEditExistingField(this);
+        });
+
+        const recipeIndex = recipes.findIndex((r) => r.id == recipeId);
+        if (recipeIndex === -1) return;
+
+        if (fieldName === "title") {
+          recipes[recipeIndex].title = newValue;
+        } else if (fieldName === "ingredients") {
+          recipes[recipeIndex].ingredients = newValue;
+        } else if (fieldName === "quantity") {
+          recipes[recipeIndex].quantity = newValue;
+        } else if (fieldName === "instructions") {
+          recipes[recipeIndex].instructions = newValue;
+        } else if (fieldName === "category") {
+          recipes[recipeIndex].category = inputElement.value;
+        }
+
+        saveToLocalStorage();
+        updateJSONPreview();
+
+        if (outsideClickHandler) {
+          document.removeEventListener("click", outsideClickHandler);
+          outsideClickHandler = null;
+        }
+
+        currentEditField = null;
+      }
+
+      function cancelEdit(fieldElement) {
+        const fieldName = fieldElement.dataset.field;
+        const recipeId = fieldElement.dataset.id;
+
+        fieldElement.textContent = fieldElement.dataset.originalValue;
+        fieldElement.addEventListener("click", function (e) {
+          e.stopPropagation();
+          startEditExistingField(this);
+        });
+
+        if (outsideClickHandler) {
+          document.removeEventListener("click", outsideClickHandler);
+          outsideClickHandler = null;
+        }
+
+        currentEditField = null;
+      }
+
+      function editExistingRecipe(id) {
+        const recipeIndex = recipes.findIndex((r) => r.id === id);
+        if (recipeIndex === -1) return;
+
+        const recipe = recipes[recipeIndex];
+
+        document.getElementById("title").value = recipe.title;
+        document.getElementById("ingredients").value = recipe.ingredients;
+        document.getElementById("quantity").value = recipe.quantity;
+        document.getElementById("instructions").value = recipe.instructions;
+        document.getElementById("category").value = recipe.category;
+
+        // גלילה למעלה לטופס
+        document
+          .querySelector(".recipe-form")
+          .scrollIntoView({ behavior: "smooth" });
+
+        // הסרת המתכון הקיים אם המשתמש ילחץ על הוסף
+        if (
+          confirm(
+            "האם אתה בטוח שברצונך לערוך את המתכון? לחץ על 'הוסף מתכון' לאחר העריכה."
+          )
+        ) {
+          recipes.splice(recipeIndex, 1);
+          saveToLocalStorage();
+          updateJSONPreview();
+          displayExistingRecipes();
+        }
+      }
+
+      function deleteExistingRecipe(id) {
+        const recipeIndex = recipes.findIndex((r) => r.id === id);
+        if (recipeIndex === -1) return;
+
+        const recipeTitle = recipes[recipeIndex].title;
+
+        if (
+          confirm(
+            `⚠️ האם אתה בטוח שברצונך למחוק את המתכון "${recipeTitle}"?\n\nפעולה זו לא ניתנת לביטול!`
+          )
+        ) {
+          recipes.splice(recipeIndex, 1);
+          saveToLocalStorage();
+          updateJSONPreview();
+          displayExistingRecipes();
+          showStatus(`🗑️ "${recipeTitle}" נמחק בהצלחה`, false);
+        }
+      }
+
+      function updateJSONPreview() {
+        const jsonOutput = document.getElementById("json-output");
+        jsonOutput.textContent = JSON.stringify(recipes, null, 2);
+      }
+
+      function downloadJSON() {
+        if (recipes.length === 0) {
+          showStatus("❌ אין מתכונים להורדה", true);
+          return;
+        }
+
+        let fileName = prompt("הזן שם לקובץ ה-JSON:", "recipes");
+        if (fileName === null || fileName.trim() === "") {
+          fileName = "recipes";
+        }
+
+        fileName = fileName.trim();
+        if (!fileName.toLowerCase().endsWith(".json")) {
+          fileName += ".json";
+        }
+
+        const data = JSON.stringify(recipes, null, 2);
+        const blob = new Blob([data], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showStatus(`✅ קובץ ${fileName} הורד בהצלחה!`, false);
+      }
+
+      function loadFromLocalStorage() {
+        const savedRecipes = localStorage.getItem("savedRecipes");
+        if (savedRecipes) {
+          recipes = JSON.parse(savedRecipes);
+          if (recipes.length > 0) {
+            nextId = Math.max(...recipes.map((r) => r.id)) + 1;
+          }
+          updateJSONPreview();
+          displayExistingRecipes();
+          showStatus(
+            `✅ נטענו ${recipes.length} מתכונים מהזיכרון המקומי`,
+            false
+          );
+        }
+      }
+
+      function saveToLocalStorage() {
+        localStorage.setItem("savedRecipes", JSON.stringify(recipes));
+        updateJSONPreview();
+        displayExistingRecipes();
+      }
+
+      function clearLocalStorage() {
+        if (
+          confirm(
+            "⚠️ האם אתה בטוח שברצונך למחוק את כל המתכונים מהזיכרון המקומי?\n\nפעולה זו לא ניתנת לביטול!"
+          )
+        ) {
+          localStorage.removeItem("savedRecipes");
+          recipes = [];
+          nextId = Date.now();
+          updateJSONPreview();
+          document.getElementById("existing-recipes-container").innerHTML = "";
+          document.getElementById("recipes-count").textContent = "";
+          showStatus("🧹 כל המתכונים נמחקו מהזיכרון המקומי", false);
+        }
+      }
+
+      function handleFileUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const uploadedRecipes = JSON.parse(e.target.result);
+            if (!Array.isArray(uploadedRecipes)) {
+              throw new Error("הקובץ אינו מכיל מערך של מתכונים");
+            }
+            if (
+              confirm(
+                `האם אתה בטוח שברצונך להחליף את ${recipes.length} המתכונים הקיימים ב-${uploadedRecipes.length} מתכונים מהקובץ?`
+              )
+            ) {
+              recipes = uploadedRecipes;
+              if (recipes.length > 0) {
+                nextId = Math.max(...recipes.map((r) => r.id)) + 1;
+              }
+              saveToLocalStorage();
+              updateJSONPreview();
+              showStatus(
+                `✅ נטענו ${recipes.length} מתכונים מהקובץ בהצלחה`,
+                false
+              );
+            }
+          } catch (error) {
+            console.error("שגיאה בטעינת הקובץ:", error);
+            showStatus(`❌ שגיאה בטעינת הקובץ: ${error.message}`, true);
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      function clearInputFields() {
+        document.getElementById("title").value = "";
+        document.getElementById("ingredients").value = "";
+        document.getElementById("quantity").value = "";
+        document.getElementById("instructions").value = "";
+        document.getElementById("category").selectedIndex = 0;
+        document.getElementById("recipe-image").value = "";
+        document.getElementById("image-preview-container").innerHTML = "";
+        currentImageFile = null;
+      }
+
+      // הפונקציות הבאות נדרשות להיות גלובליות לשימוש באירועי onclick
+      window.deleteExistingRecipe = deleteExistingRecipe;
+      window.editExistingRecipe = editExistingRecipe;
+    </script>
+  </body>
+</html>
