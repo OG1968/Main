@@ -1,704 +1,432 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="gallery.png" type="image/png" />
     <link rel="apple-touch-icon" href="gallery.png" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
     <title>יוצר גלריות</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         box-sizing: border-box;
+        font-family: "Rubik", sans-serif;
       }
 
       body {
-        font-family: "Rubik", sans-serif;
-        background: linear-gradient(135deg, #5100ff 0%, #2e9cfc 100%);
+        background-color: #6b6b6b;
         margin: 0;
         padding: 20px;
-        touch-action: manipulation;
         min-height: 100vh;
       }
 
-      #gallery-form {
-        background-color: rgba(255, 255, 255, 0.9);
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        max-width: 600px;
-        width: 100%;
+      .container {
+        max-width: 1000px;
         margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        direction: rtl;
+        background-color: rgb(255, 246, 192);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       }
 
-      #gallery-form h1 {
-        color: #00308a;
+      h1 {
         text-align: center;
-        margin: 0 0 15px 0;
-      }
-
-      #gallery-form label {
-        font-weight: bold;
-        color: #242424;
-        text-align: right;
-        display: block;
-      }
-
-      #gallery-form input,
-      #gallery-form textarea {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-family: inherit;
-        width: 100%;
-        text-align: right;
-      }
-
-      .custom-file-input {
-        position: relative;
-        overflow: hidden;
-        display: inline-block;
-        width: 100%;
-      }
-
-      .custom-file-input input[type="file"] {
-        position: absolute;
-        left: 0;
-        top: 0;
-        opacity: 0;
-        width: 100%;
-        height: 100%;
-        cursor: pointer;
-      }
-
-      .custom-file-input-label {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #1f8fff;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s;
-        text-align: center;
-        gap: 8px;
-      }
-
-      .custom-file-input-label:hover {
-        background-color: #46c0fd;
-      }
-
-      .file-icon {
-        width: 20px;
-        height: 20px;
-        display: none;
-      }
-
-      #gallery-form button {
-        background-color: #1f8fff;
-        color: white;
-        border: none;
-        padding: 12px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s;
-        margin-top: 10px;
-      }
-
-      #gallery-form button:hover {
-        background-color: #46c0fd;
-      }
-
-      .hidden {
-        display: none;
-      }
-
-      #download-btn {
-        background-color: #01ff62;
         color: #333;
+        margin-bottom: 30px;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      input[type="text"],
+      input[type="file"],
+      select {
+        width: 100%;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      /* הגדלת שדה הכותרת במיוחד */
+      #gallery-title {
+        height: 60px;
+        font-size: 18px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
         border: none;
-        padding: 12px 20px;
-        border-radius: 5px;
+        padding: 15px 25px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 16px;
-        margin-top: 20px;
-        font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s;
+        transition: background-color 0.3s;
       }
 
-      #download-btn:hover {
-        background-color: #00e055;
-        transform: translateY(-2px);
-      }
-
-      .image-input {
-        margin-bottom: 15px;
-        padding: 15px;
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 8px;
-        text-align: right;
-      }
-
-      .preview-image {
-        max-width: 100px;
-        max-height: 100px;
-        border-radius: 5px;
-        border: 2px solid #8a5a00;
-        display: block;
-        margin-top: 10px;
-      }
-
-      .background-preview {
-        width: 100%;
-        height: 100px;
-        border-radius: 5px;
-        margin-top: 10px;
-        border: 1px solid #ccc;
-        background-size: contain;
-        background-position: center;
-        background-repeat: no-repeat;
-      }
-
-      #gallery-preview {
-        max-width: 100%;
-        overflow-y: auto;
-        padding: 10px;
-      }
-
-      #preview-content {
-        width: 1000px;
-        max-width: 100%;
-        margin: 0 auto;
+      button:hover {
+        background-color: #45a049;
       }
 
       .preview-container {
-        max-height: 80vh;
-        overflow-y: auto;
-        padding: 10px;
-        border-radius: 10px;
+        margin-top: 40px;
+        border-top: 1px solid #eee;
+        padding-top: 30px;
+      }
+
+      .preview-title {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .image-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .preview-item {
+        width: calc(33.333% - 10px);
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .preview-item img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+      }
+
+      .preview-item .caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px;
+        text-align: center;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .image-input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+      }
+
+      .image-input-group input[type="text"] {
+        flex: 2;
+        height: 50px;
+      }
+
+      .image-input-group input[type="file"] {
+        flex: 1;
+      }
+
+      .remove-btn {
+        background-color: #f44336;
+        padding: 10px 15px;
+      }
+
+      .add-btn {
+        background-color: #2196f3;
+        font-size: 18px;
+        padding: 15px 30px;
+        width: 100%;
       }
 
       @media (max-width: 768px) {
-        #preview-content {
-          width: 100%;
+        .preview-item {
+          width: calc(50% - 8px);
         }
 
-        .preview-container {
-          padding: 5px;
+        .container {
+          padding: 15px;
+        }
+
+        .image-input-group {
+          flex-direction: column;
+        }
+
+        .image-input-group input[type="text"],
+        .image-input-group input[type="file"] {
+          width: 100%;
         }
       }
     </style>
   </head>
   <body>
-    <div id="gallery-form">
-      <h1>יצירת גלריה</h1>
+    <div class="container">
+      <h1>יוצר גלריה אישית</h1>
 
-      <label for="gallery-title">כותרת הגלריה:</label>
-      <input
-        type="text"
-        id="gallery-title"
-        placeholder="לדוגמה: גלריה משפחתית"
-        value="גלריה שלי"
-      />
-
-      <label for="gallery-background">רקע הגלריה:</label>
-      <div class="custom-file-input">
-        <input type="file" id="gallery-background" accept="image/*" />
-        <label for="gallery-background" class="custom-file-input-label">
-          <img
-            id="background-icon"
-            class="file-icon"
-            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTggMTcuMmw0LTQgNC00IDEuNCAxLjQtNC40IDQuNC00LjQtNC40TDEyIDguOGwtNCA0eiIgZmlsbD0id2hpdGUiLz48L3N2Zz4="
-            alt="icon"
-          />
-          בחר רקע גלריה
-        </label>
-      </div>
-      <div id="background-preview" class="background-preview"></div>
-
-      <div id="image-inputs">
-        <!-- קלטים לתמונות יתווספו כאן -->
+      <div class="form-group">
+        <label for="gallery-title">כותרת הגלריה:</label>
+        <input type="text" id="gallery-title" placeholder="הכנס כותרת לגלריה" />
       </div>
 
-      <button type="button" id="add-image-btn">הוסף תמונה</button>
-      <button type="button" id="generate-btn">צור גלריה</button>
-    </div>
+      <div class="form-group">
+        <label for="bg-image">תמונת רקע (אופציונלי):</label>
+        <input type="file" id="bg-image" accept="image/*" />
+      </div>
 
-    <div id="gallery-preview" class="hidden">
-      <button
-        id="back-btn"
-        style="background-color: #8a5a00; color: white; margin-bottom: 20px"
+      <div class="form-group">
+        <label>תמונות הגלריה (3-10 תמונות):</label>
+        <div id="image-inputs-container">
+          <!-- Dynamic inputs will be added here -->
+        </div>
+        <button type="button" class="add-btn" id="add-image-btn">
+          הוסף תמונה
+        </button>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="preview-btn">תצוגה מקדימה</button>
+        <button type="button" id="download-btn">הורד קובץ HTML</button>
+      </div>
+
+      <div
+        class="preview-container"
+        id="preview-container"
+        style="display: none"
       >
-        חזור לעריכה
-      </button>
-      <div class="preview-container">
-        <div id="preview-content"></div>
+        <h2 class="preview-title">תצוגה מקדימה</h2>
+        <div class="image-preview" id="image-preview"></div>
       </div>
-      <button id="download-btn">הורד קובץ HTML</button>
     </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const imageInputs = document.getElementById("image-inputs");
+        // Getting DOM elements
+        const imageInputsContainer = document.getElementById(
+          "image-inputs-container"
+        );
         const addImageBtn = document.getElementById("add-image-btn");
-        const generateBtn = document.getElementById("generate-btn");
+        const previewBtn = document.getElementById("preview-btn");
         const downloadBtn = document.getElementById("download-btn");
-        const backBtn = document.getElementById("back-btn");
-        const galleryForm = document.getElementById("gallery-form");
-        const galleryPreview = document.getElementById("gallery-preview");
-        const previewContent = document.getElementById("preview-content");
-        const backgroundInput = document.getElementById("gallery-background");
-        const backgroundPreview = document.getElementById("background-preview");
-        const backgroundIcon = document.getElementById("background-icon");
+        const previewContainer = document.getElementById("preview-container");
+        const imagePreview = document.getElementById("image-preview");
+        const galleryTitleInput = document.getElementById("gallery-title");
+        const bgImageInput = document.getElementById("bg-image");
 
-        let imageCount = 0;
-        const maxImages = 10;
-        let selectedBackground = null;
+        // Initialize data arrays
+        let imagesData = [];
+        let bgImageData = null;
 
-        // אתחול עם 2 קלטים לתמונות
-        addImageInput();
-        addImageInput();
+        // Initialize with 3 image inputs
+        for (let i = 0; i < 3; i++) {
+          addImageInput();
+        }
 
-        // מאזין לבחירת רקע
-        backgroundInput.addEventListener("change", function (e) {
-          const file = e.target.files[0];
-          if (!file) return;
+        // Add new image input function
+        function addImageInput() {
+          const group = document.createElement("div");
+          group.className = "image-input-group";
 
-          const reader = new FileReader();
-          reader.onload = function (event) {
-            backgroundPreview.style.backgroundImage = `url('${event.target.result}')`;
-            selectedBackground = event.target.result;
-            backgroundIcon.style.display = "inline";
-          };
-          reader.onerror = function () {
-            alert("שגיאה בטעינת הרקע. נסה קובץ אחר.");
-          };
-          reader.readAsDataURL(file);
+          const fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.accept = "image/*";
+          fileInput.required = true;
+
+          const captionInput = document.createElement("input");
+          captionInput.type = "text";
+          captionInput.placeholder = "כותרת לתמונה";
+          captionInput.required = true;
+
+          const removeBtn = document.createElement("button");
+          removeBtn.type = "button";
+          removeBtn.className = "remove-btn";
+          removeBtn.textContent = "X";
+          removeBtn.addEventListener("click", function () {
+            if (imageInputsContainer.children.length > 3) {
+              imageInputsContainer.removeChild(group);
+            } else {
+              alert("חובה לבחור לפחות 3 תמונות");
+            }
+          });
+
+          group.appendChild(fileInput);
+          group.appendChild(captionInput);
+          group.appendChild(removeBtn);
+          imageInputsContainer.appendChild(group);
+        }
+
+        // Add event listeners
+        addImageBtn.addEventListener("click", function () {
+          if (imageInputsContainer.children.length < 10) {
+            addImageInput();
+          } else {
+            alert("ניתן להוסיף עד 10 תמונות בלבד");
+          }
         });
 
-        addImageBtn.addEventListener("click", addImageInput);
-        generateBtn.addEventListener("click", generateGallery);
-        downloadBtn.addEventListener("click", downloadHTML);
-        backBtn.addEventListener("click", goBackToEdit);
-
-        function addImageInput() {
-          if (imageCount >= maxImages) {
-            alert(`ניתן להוסיף עד ${maxImages} תמונות בגלריה זו.`);
-            return;
-          }
-
-          imageCount++;
-
-          const div = document.createElement("div");
-          div.className = "image-input";
-          div.id = `image-input-${imageCount}`;
-
-          div.innerHTML = `
-            <label for="image-title-${imageCount}">כותרת לתמונה ${imageCount}:</label>
-            <input type="text" id="image-title-${imageCount}" placeholder="לדוגמה: משפחה בחופשה">
-
-            <label for="image-file-${imageCount}">תמונה ${imageCount}:</label>
-            <div class="custom-file-input">
-              <input type="file" id="image-file-${imageCount}" accept="image/*">
-              <label for="image-file-${imageCount}" class="custom-file-input-label">
-                <img id="file-icon-${imageCount}" class="file-icon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTggMTcuMmw0LTQgNC00IDEuNCAxLjQtNC40IDQuNC00LjQtNC40TDEyIDguOGwtNCA0eiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=" alt="icon">
-                בחר קובץ
-              </label>
-            </div>
-
-            <div id="image-preview-container-${imageCount}" class="image-preview-container"></div>
-          `;
-
-          imageInputs.appendChild(div);
-
-          // מאזין לאירוע שינוי לתצוגה מקדימה
-          document
-            .getElementById(`image-file-${imageCount}`)
-            .addEventListener("change", function (e) {
-              const previewContainer = document.getElementById(
-                `image-preview-container-${imageCount}`
-              );
-              const fileIcon = document.getElementById(
-                `file-icon-${imageCount}`
-              );
-
-              if (!e.target.files || !e.target.files[0]) {
-                previewContainer.innerHTML = "";
-                fileIcon.style.display = "none";
-                return;
-              }
-
-              const reader = new FileReader();
-              reader.onload = function (event) {
-                const img = document.createElement("img");
-                img.src = event.target.result;
-                img.className = "preview-image";
-                previewContainer.innerHTML = "";
-                previewContainer.appendChild(img);
-                fileIcon.style.display = "inline";
-              };
-              reader.onerror = function () {
-                alert("שגיאה בטעינת התמונה. נסה קובץ אחר.");
-                previewContainer.innerHTML = "";
-                fileIcon.style.display = "none";
-              };
-              reader.readAsDataURL(e.target.files[0]);
-            });
-        }
-
-        function generateGallery() {
-          const title = document.getElementById("gallery-title").value.trim();
-          if (!title) {
-            alert("אנא הזן כותרת לגלריה");
-            return;
-          }
-
-          const imagesData = [];
-          let hasErrors = false;
-
-          for (let i = 1; i <= imageCount; i++) {
-            const imageTitle = document
-              .getElementById(`image-title-${i}`)
-              .value.trim();
-            const imageFileInput = document.getElementById(`image-file-${i}`);
-
-            if (
-              !imageTitle ||
-              !imageFileInput.files ||
-              !imageFileInput.files[0]
-            ) {
-              alert(`אנא מלא את כל השדות עבור תמונה ${i}`);
-              hasErrors = true;
-              document.getElementById(`image-input-${i}`).scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-              break;
-            }
-
-            imagesData.push({
-              title: imageTitle,
-              file: imageFileInput.files[0],
-            });
-          }
-
-          if (hasErrors || imagesData.length === 0) return;
-
-          createPreview(title, imagesData);
-        }
-
-        function createPreview(title, imagesData) {
-          previewContent.innerHTML = `
-    <div class="container">
-      <h1>${title}</h1>
-    </div>
-    <div class="panels-container" id="preview-panels"></div>
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-
-      body.preview-body {
-        font-family: "Rubik", sans-serif;
-        background: ${
-          selectedBackground
-            ? `url('${selectedBackground}')`
-            : "linear-gradient(135deg, #b37a00 0%, #8a5a00 100%)"
-        };
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-        touch-action: manipulation;
-      }
-
-      .container {
-        display: flex;
-        width: 100%;
-        max-width: 1000px;
-        padding: 10px 0;
-        gap: 10px;
-        margin: 0 auto;
-      }
-
-      .panels-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        width: 100%;
-        max-width: 1000px;
-        gap: 10px;
-      }
-
-      h1 {
-        font-size: 42px;
-        color: #01ff62;
-        text-shadow: 0 6px 4px rgba(0, 0, 0, 0.8);
-        text-align: center;
-        margin: 20px 0;
-      }
-
-      .panel {
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        height: 80vh;
-        border-radius: 20px;
-        color: #01ff62;
-        cursor: pointer;
-        flex: 0.5;
-        position: relative;
-        transition: all 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        -webkit-tap-highlight-color: transparent;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        overflow: hidden;
-      }
-
-      .panel::before {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 40%;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
-      }
-
-      .panel h3 {
-        font-size: 28px;
-        position: absolute;
-        bottom: 30px;
-        left: 30px;
-        right: 30px;
-        margin: 0;
-        opacity: 0;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-        padding: 12px 16px;
-        border-radius: 10px;
-        text-align: center;
-        transition: all 0.3s ease;
-      }
-
-      .panel.active {
-        flex: 5;
-      }
-
-      .panel.active h3 {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .panel:hover {
-        transform: translateY(-5px);
-      }
-
-      @media (max-width: 768px) {
-        .container, .panels-container {
-          padding: 10px;
-        }
-        
-        .panels-container {
-          display: flex;
-          flex-direction: row;
-          overflow-x: auto;
-          scroll-snap-type: x mandatory;
-          -webkit-overflow-scrolling: touch;
-          width: 100%;
-        }
-        
-        .panel {
-          min-width: 75%;
-          height: 350px;
-          margin-right: 10px;
-          flex: none;
-          scroll-snap-align: start;
-          opacity: 0.7;
-          transition: all 0.3s ease;
-        }
-        
-        .panel.active {
-          flex: none;
-          min-width: 75%;
-          height: 350px;
-          opacity: 1;
-          transform: scale(1.05);
-        }
-        
-        .panel h3 {
-          font-size: 18px;
-          bottom: 15px;
-          left: 15px;
-          right: 15px;
-        }
-        
-        .panel.active h3 {
-          opacity: 1;
-        }
-
-        h1 {
-          font-size: 34px;
-          margin: 10px 0;
-        }
-      }
-    </style>
-  `;
-
-          const previewPanels = document.getElementById("preview-panels");
-
-          let loadedCount = 0;
-          imagesData.forEach((imageData, index) => {
+        // Read file as data URL function
+        function readFileAsDataURL(file) {
+          return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            reader.onload = function (event) {
-              const panel = document.createElement("div");
-              panel.className = index === 0 ? "panel active" : "panel";
-              panel.style.backgroundImage = `url('${event.target.result}')`;
-
-              const titleElement = document.createElement("h3");
-              titleElement.textContent = imageData.title;
-              panel.appendChild(titleElement);
-              previewPanels.appendChild(panel);
-
-              loadedCount++;
-              if (loadedCount === imagesData.length) {
-                initGalleryPreview();
-                galleryForm.classList.add("hidden");
-                galleryPreview.classList.remove("hidden");
-                document.body.classList.add("preview-body");
-              }
-            };
-            reader.onerror = function () {
-              alert(`שגיאה בטעינת תמונה ${index + 1}. נסה קובץ אחר.`);
-            };
-            reader.readAsDataURL(imageData.file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("בעיה בקריאת הקובץ"));
+            reader.readAsDataURL(file);
           });
         }
 
-        function initGalleryPreview() {
-          const panels = document.querySelectorAll(".panel");
-          const isMobile = window.innerWidth <= 768;
-
-          // התחל עם התמונה הראשונה פעילה
-          if (panels.length > 0) {
-            panels[0].classList.add("active");
-          }
-
-          panels.forEach((panel) => {
-            panel.addEventListener("click", function () {
-              removeActiveClasses();
-              this.classList.add("active");
-
-              // גלילה לאלמנט הפעיל במובייל
-              if (isMobile) {
-                this.scrollIntoView({
-                  behavior: "smooth",
-                  block: "nearest",
-                  inline: "center",
-                });
-              }
-            });
-
-            panel.addEventListener("touchend", function (e) {
-              removeActiveClasses();
-              this.classList.add("active");
-            });
-          });
-        }
-
-        function goBackToEdit() {
-          galleryPreview.classList.add("hidden");
-          galleryForm.classList.remove("hidden");
-          document.body.classList.remove("preview-body");
-        }
-
-        function downloadHTML() {
-          const title = document.getElementById("gallery-title").value.trim();
+        // Validate inputs function
+        async function validateInputs() {
+          const title = galleryTitleInput.value.trim();
           if (!title) {
-            alert("אנא הזן כותרת לגלריה לפני ההורדה");
-            return;
+            alert("נא להזין כותרת לגלריה");
+            galleryTitleInput.focus();
+            return false;
           }
 
-          const imagesData = [];
-          let filesToLoad = 0;
+          const inputs =
+            imageInputsContainer.querySelectorAll(".image-input-group");
+          if (inputs.length < 3) {
+            alert("נא לבחור לפחות 3 תמונות");
+            return false;
+          }
 
-          for (let i = 1; i <= imageCount; i++) {
-            const imageTitle = document
-              .getElementById(`image-title-${i}`)
-              .value.trim();
-            const imageFile = document.getElementById(`image-file-${i}`)
-              .files[0];
+          for (let i = 0; i < inputs.length; i++) {
+            const fileInput = inputs[i].querySelector('input[type="file"]');
+            const captionInput = inputs[i].querySelector('input[type="text"]');
 
-            if (imageTitle && imageFile) {
-              filesToLoad++;
-              const reader = new FileReader();
-              reader.onload = function (event) {
-                imagesData.push({
-                  title: imageTitle,
-                  image: event.target.result,
-                });
+            if (!fileInput.files || !fileInput.files[0]) {
+              alert(`נא לבחור תמונה עבור תמונה מספר ${i + 1}`);
+              fileInput.focus();
+              return false;
+            }
 
-                if (imagesData.length === filesToLoad) {
-                  createHTMLFile(title, imagesData);
-                }
-              };
-              reader.onerror = function () {
-                alert(`שגיאה בטעינת תמונה ${i}. נסה קובץ אחר.`);
-              };
-              reader.readAsDataURL(imageFile);
+            if (!captionInput.value.trim()) {
+              alert(`נא להזין כותרת עבור תמונה מספר ${i + 1}`);
+              captionInput.focus();
+              return false;
             }
           }
 
-          if (filesToLoad === 0) {
-            alert("אנא הוסף לפחות תמונה אחת לפני ההורדה");
+          return true;
+        }
+
+        // Update preview function
+        async function updatePreview() {
+          try {
+            imagePreview.innerHTML = "";
+            imagesData = [];
+
+            // Process background image if selected
+            if (bgImageInput.files && bgImageInput.files[0]) {
+              bgImageData = await readFileAsDataURL(bgImageInput.files[0]);
+            }
+
+            const inputs =
+              imageInputsContainer.querySelectorAll(".image-input-group");
+
+            // Process each image
+            for (let i = 0; i < inputs.length; i++) {
+              const fileInput = inputs[i].querySelector('input[type="file"]');
+              const captionInput =
+                inputs[i].querySelector('input[type="text"]');
+
+              if (fileInput.files && fileInput.files[0]) {
+                try {
+                  const imageData = await readFileAsDataURL(fileInput.files[0]);
+                  const caption = captionInput.value.trim();
+
+                  imagesData.push({
+                    image: imageData,
+                    caption: caption,
+                  });
+
+                  const previewItem = document.createElement("div");
+                  previewItem.className = "preview-item";
+
+                  const img = document.createElement("img");
+                  img.src = imageData;
+                  img.alt = caption;
+
+                  const captionDiv = document.createElement("div");
+                  captionDiv.className = "caption";
+                  captionDiv.textContent = caption;
+
+                  previewItem.appendChild(img);
+                  previewItem.appendChild(captionDiv);
+                  imagePreview.appendChild(previewItem);
+                } catch (error) {
+                  console.error("Error processing image:", error);
+                  alert(`שגיאה בעיבוד תמונה ${i + 1}: ${error.message}`);
+                }
+              }
+            }
+
+            if (imagesData.length > 0) {
+              return true;
+            } else {
+              alert("לא נמצאו תמונות תקינות");
+              return false;
+            }
+          } catch (error) {
+            console.error("Error in updatePreview:", error);
+            alert("שגיאה בעדכון התצוגה המקדימה: " + error.message);
+            return false;
           }
         }
 
-        function createHTMLFile(title, imagesData) {
-          let panelsHTML = "";
-          imagesData.forEach((image, index) => {
-            panelsHTML += `
-      <div class="panel ${
-        index === 0 ? "active" : ""
-      }" style="background-image: url('${image.image}')">
-        <h3>${image.title}</h3>
-      </div>
-    `;
-          });
+        // Generate HTML
+        function createGalleryHTML(title, images, bgImage) {
+          try {
+            const imagesHTML = images
+              .map(
+                (img, index) => `
+            <div class="panel ${
+              index === 0 ? "active" : ""
+            }" style="background-image: url('${img.image}')">
+              <h3>${img.caption}</h3>
+            </div>
+          `
+              )
+              .join("\n");
 
-          const htmlContent = `<!DOCTYPE html>
-<html lang="he">
+            return `<!DOCTYPE html>
+<html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>${title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
+      font-family: 'Rubik', sans-serif;
     }
 
     body {
-      font-family: "Rubik", sans-serif;
-      background: ${
-        selectedBackground
-          ? `url('${selectedBackground}')`
-          : "linear-gradient(135deg, #b37a00 0%, #8a5a00 100%)"
-      };
+      ${
+        bgImage
+          ? `background-image: url('${bgImage}');`
+          : "background-color: #f5f5f5;"
+      }
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -711,32 +439,23 @@
       touch-action: manipulation;
     }
 
-    .container {
-      display: flex;
-      width: 100%;
-      max-width: 1000px;
-      padding: 10px 0;
-      gap: 10px;
-      margin: 0 auto;
-    }
-
-    .panels-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: 100%;
-      max-width: 1000px;
-      gap: 10px;
-    }
-
     h1 {
       font-size: 42px;
       color: #01ff62;
       text-shadow: 0 6px 4px rgba(0, 0, 0, 0.8);
       text-align: center;
       margin: 20px 0;
-            width: 100%;
+      width: 100%;
+    }
 
+    .panels-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      max-width: 1200px;
+      gap: 10px;
+      height: 80vh;
+      justify-content: center;
     }
 
     .panel {
@@ -786,7 +505,6 @@
 
     .panel.active h3 {
       opacity: 1;
-      transform: translateY(0);
     }
 
     .panel:hover {
@@ -794,35 +512,25 @@
     }
 
     @media (max-width: 768px) {
-      .container, .panels-container {
-        padding: 10px;
-      }
-      
       .panels-container {
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        width: 100%;
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
       }
       
       .panel {
-        min-width: 100%;
-        height: 30px;
-        margin-right: 10px;
+        height: 60px;
+        width: 100%;
         flex: none;
-        scroll-snap-align: start;
+        margin-bottom: 10px;
         opacity: 0.7;
         transition: all 0.3s ease;
       }
       
       .panel.active {
         flex: none;
-        min-width: 100%;
         height: 350px;
         opacity: 1;
-        transform: scale(1.05);
       }
       
       .panel h3 {
@@ -832,120 +540,165 @@
         right: 15px;
       }
       
-      .panel.active h3 {
-        opacity: 1;
-      }
-
       h1 {
         font-size: 28px;
         margin: 10px 0;
-                width: 100%;
-
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>${title}</h1>
-  </div>
+  <h1>${title}</h1>
 
   <div class="panels-container">
-    ${panelsHTML}
+    ${imagesHTML}
   </div>
-  
+
   <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const panels = document.querySelectorAll(".panel");
-    const isMobile = window.innerWidth <= 768;
-    
-    // Start with first panel active
-    if (panels.length > 0) {
-      panels[0].classList.add("active");
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const panels = document.querySelectorAll(".panel");
+      const isMobile = window.innerWidth <= 768;
+      
+      // Start with first panel active
+      if (panels.length > 0) {
+        panels[0].classList.add("active");
+      }
 
-    function removeActiveClasses() {
-      panels.forEach((panel) => {
-        panel.classList.remove("active");
-      });
-    }
-
-    panels.forEach((panel) => {
-      panel.addEventListener("click", function() {
-        removeActiveClasses();
-        this.classList.add("active");
-        
-        // Scroll to active element on mobile
-        if (isMobile) {
-          this.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'center'
-          });
-        }
-      });
-
-      panel.addEventListener("touchend", function(e) {
-        removeActiveClasses();
-        this.classList.add("active");
-      });
-    });
-
-    // Track horizontal scrolling on mobile and update active element
-    if (isMobile) {
-      const panelsContainer = document.querySelector(".panels-container");
-      panelsContainer.addEventListener('scroll', function() {
-        const scrollPosition = panelsContainer.scrollLeft;
-        let closestPanel = null;
-        let minDistance = Infinity;
-        
+      function removeActiveClasses() {
         panels.forEach(panel => {
-          const rect = panel.getBoundingClientRect();
-          const distance = Math.abs(rect.left - 20);
+          panel.classList.remove("active");
+        });
+      }
+
+      panels.forEach(panel => {
+        panel.addEventListener("click", function() {
+          removeActiveClasses();
+          this.classList.add("active");
           
-          if (distance < minDistance) {
-            minDistance = distance;
-            closestPanel = panel;
+          // Scroll to active element on mobile
+          if (isMobile) {
+            this.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
           }
         });
-        
-        if (closestPanel) {
+
+        panel.addEventListener("touchend", function(e) {
+          e.preventDefault();
           removeActiveClasses();
-          closestPanel.classList.add('active');
+          this.classList.add("active");
+        });
+      });
+
+      // Handle screen orientation change
+      window.addEventListener("orientationchange", function() {
+        setTimeout(function() {
+          const activePanel = document.querySelector(".panel.active");
+          if (activePanel) {
+            activePanel.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 300);
+      });
+      
+      // Handle window resize
+      window.addEventListener("resize", function() {
+        const isMobileNow = window.innerWidth <= 768;
+        if (isMobile !== isMobileNow) {
+          location.reload();
         }
       });
-    }
-
-    // Handle screen orientation change on mobile
-    window.addEventListener("orientationchange", function() {
-      setTimeout(function() {
-        const activePanel = document.querySelector(".panel.active");
-        if (activePanel) {
-          activePanel.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'center'
-          });
-        }
-      }, 300);
     });
-  });
   <\/script>
 </body>
 </html>`;
+          } catch (error) {
+            console.error("Error generating HTML:", error);
+            alert("שגיאה ביצירת קובץ HTML: " + error.message);
+            return null;
+          }
+        }
 
-          const blob = new Blob([htmlContent], { type: "text/html" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${title.replace(/\s+/g, "_")}.html`;
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => {
+        // Generate and download HTML file
+        function generateHTMLFile() {
+          try {
+            const title = galleryTitleInput.value.trim();
+            const htmlContent = createGalleryHTML(
+              title,
+              imagesData,
+              bgImageData
+            );
+
+            if (!htmlContent) {
+              return;
+            }
+
+            const blob = new Blob([htmlContent], { type: "text/html" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${title.replace(/[^a-z0-9א-ת]/gi, "_")}.html`;
+            document.body.appendChild(a);
+            a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-          }, 100);
+          } catch (error) {
+            console.error("Error in generateHTMLFile:", error);
+            alert("שגיאה בהורדת הקובץ: " + error.message);
+          }
         }
+
+        // Preview button click handler
+        previewBtn.addEventListener("click", async function () {
+          try {
+            if (await validateInputs()) {
+              const success = await updatePreview();
+              if (success) {
+                previewContainer.style.display = "block";
+                previewContainer.scrollIntoView({ behavior: "smooth" });
+              }
+            }
+          } catch (error) {
+            console.error("Error in preview button click:", error);
+            alert("שגיאה בתצוגה המקדימה: " + error.message);
+          }
+        });
+
+        // Download button click handler
+        downloadBtn.addEventListener("click", async function () {
+          try {
+            if (await validateInputs()) {
+              const success = await updatePreview();
+              if (success) {
+                generateHTMLFile();
+              }
+            }
+          } catch (error) {
+            console.error("Error in download button click:", error);
+            alert("שגיאה בהורדת הקובץ: " + error.message);
+          }
+        });
+
+        // Background image change handler
+        bgImageInput.addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            readFileAsDataURL(file)
+              .then((data) => {
+                bgImageData = data;
+              })
+              .catch((error) => {
+                console.error("Error reading background image:", error);
+                alert("שגיאה בקריאת תמונת הרקע: " + error.message);
+              });
+          } else {
+            bgImageData = null;
+          }
+        });
       });
     </script>
   </body>
