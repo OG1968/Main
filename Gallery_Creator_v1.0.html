@@ -19,7 +19,7 @@
       body {
         background-color: #ffca76;
         margin: 0;
-        padding: 20px;
+        padding: 10px;
         min-height: 100vh;
       }
 
@@ -27,7 +27,7 @@
         max-width: 800px;
         margin: 0 auto;
         background-color: rgb(255, 246, 192);
-        padding: 30px;
+        padding: 10px;
         border-radius: 15px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 6);
       }
@@ -36,7 +36,7 @@
         font-size: 36px;
         text-align: center;
         color: #333;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
       }
 
       .form-group {
@@ -73,18 +73,18 @@
         padding: 12px 20px;
         border-radius: 8px;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 18px;
         transition: background-color 0.3s;
       }
 
       button:hover {
-        background-color: #45a049;
+        background-color: #5645a0;
       }
 
       .preview-container {
         margin-top: 40px;
         border-top: 1px solid #eee;
-        padding-top: 30px;
+        padding-top: 10px;
       }
 
       .preview-title {
@@ -141,6 +141,9 @@
       .image-input-group input[type="text"] {
         flex: 2;
         height: 50px;
+        padding: 0 15px;
+        line-height: normal;
+        box-sizing: border-box;
       }
 
       .file-input-wrapper {
@@ -163,13 +166,19 @@
       .file-input-btn {
         display: block;
         width: 100%;
-        padding: 16px 20px;
+        height: 50px;
+        padding: 0 15px;
         background-color: #2196f3;
         color: white;
         text-align: center;
         border-radius: 8px;
         cursor: pointer;
         transition: background-color 0.3s;
+        line-height: 50px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-sizing: border-box;
       }
 
       .file-input-btn:hover {
@@ -178,20 +187,27 @@
 
       .remove-btn {
         background-color: #f44336;
-        padding: 16px 20px;
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        line-height: 1;
       }
 
       .add-btn {
         background-color: #2196f3;
         font-size: 16px;
-        padding: 12px 20px;
+        padding: 12px 10px;
       }
 
       .action-buttons {
         display: flex;
         gap: 15px;
         justify-content: center;
-        margin-top: 20px;
+        margin-top: 10px;
       }
 
       .action-buttons button {
@@ -205,16 +221,34 @@
         }
 
         .container {
-          padding: 15px;
+          padding: 5px;
         }
 
         .image-input-group {
-          flex-direction: column;
+          flex-direction: row;
+          gap: 5px;
         }
 
         .image-input-group input[type="text"],
         .file-input-wrapper {
-          width: 100%;
+          width: 50%;
+        }
+
+        .image-input-group input[type="text"],
+        .file-input-btn,
+        .remove-btn {
+          height: 40px;
+          line-height: 40px;
+          font-size: 14px;
+        }
+
+        .remove-btn {
+          width: 40px;
+          font-size: 16px;
+        }
+
+        .file-input-btn {
+          padding: 0 10px;
         }
 
         .action-buttons {
@@ -223,6 +257,10 @@
 
         .action-buttons button {
           max-width: 100%;
+        }
+
+        .form-group {
+          margin-bottom: 10px;
         }
       }
     </style>
@@ -316,11 +354,15 @@
           captionInput.type = "text";
           captionInput.placeholder = "כותרת לתמונה";
           captionInput.required = true;
+          captionInput.className = "caption-input";
 
           const removeBtn = document.createElement("button");
           removeBtn.type = "button";
           removeBtn.className = "remove-btn";
           removeBtn.textContent = "X";
+          removeBtn.style.display = "flex";
+          removeBtn.style.alignItems = "center";
+          removeBtn.style.justifyContent = "center";
           removeBtn.addEventListener("click", function () {
             if (imageInputsContainer.children.length > 3) {
               imageInputsContainer.removeChild(group);
