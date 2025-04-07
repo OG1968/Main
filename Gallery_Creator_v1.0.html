@@ -17,25 +17,26 @@
       }
 
       body {
-        background-color: #6b6b6b;
+        background-color: #ffca76;
         margin: 0;
         padding: 20px;
         min-height: 100vh;
       }
 
       .container {
-        max-width: 1000px;
+        max-width: 800px;
         margin: 0 auto;
         background-color: rgb(255, 246, 192);
         padding: 30px;
         border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 6);
       }
 
       h1 {
+        font-size: 36px;
         text-align: center;
         color: #333;
-        margin-bottom: 30px;
+        margin-bottom: 10px;
       }
 
       .form-group {
@@ -50,14 +51,13 @@
       }
 
       input[type="text"],
-      input[type="file"],
       select {
         width: 100%;
-        padding: 15px;
+        padding: 5px;
         border: 1px solid #ddd;
         border-radius: 8px;
         font-size: 16px;
-        margin-bottom: 10px;
+        margin-bottom: 0px;
       }
 
       /* הגדלת שדה הכותרת במיוחד */
@@ -70,7 +70,7 @@
         background-color: #4caf50;
         color: white;
         border: none;
-        padding: 15px 25px;
+        padding: 12px 20px;
         border-radius: 8px;
         cursor: pointer;
         font-size: 16px;
@@ -120,7 +120,7 @@
         right: 0;
         background: rgba(0, 0, 0, 0.7);
         color: white;
-        padding: 8px;
+        padding: 2px;
         text-align: center;
       }
 
@@ -143,20 +143,60 @@
         height: 50px;
       }
 
-      .image-input-group input[type="file"] {
+      .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
         flex: 1;
+      }
+
+      .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .file-input-btn {
+        display: block;
+        width: 100%;
+        padding: 16px 20px;
+        background-color: #2196f3;
+        color: white;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .file-input-btn:hover {
+        background-color: #0b7dda;
       }
 
       .remove-btn {
         background-color: #f44336;
-        padding: 10px 15px;
+        padding: 16px 20px;
       }
 
       .add-btn {
         background-color: #2196f3;
-        font-size: 18px;
-        padding: 15px 30px;
-        width: 100%;
+        font-size: 16px;
+        padding: 12px 20px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .action-buttons button {
+        flex: 1;
+        max-width: 200px;
       }
 
       @media (max-width: 768px) {
@@ -173,8 +213,16 @@
         }
 
         .image-input-group input[type="text"],
-        .image-input-group input[type="file"] {
+        .file-input-wrapper {
           width: 100%;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .action-buttons button {
+          max-width: 100%;
         }
       }
     </style>
@@ -190,7 +238,10 @@
 
       <div class="form-group">
         <label for="bg-image">תמונת רקע (אופציונלי):</label>
-        <input type="file" id="bg-image" accept="image/*" />
+        <div class="file-input-wrapper">
+          <button class="file-input-btn">בחר תמונה</button>
+          <input type="file" id="bg-image" accept="image/*" />
+        </div>
       </div>
 
       <div class="form-group">
@@ -198,12 +249,12 @@
         <div id="image-inputs-container">
           <!-- Dynamic inputs will be added here -->
         </div>
+      </div>
+
+      <div class="action-buttons">
         <button type="button" class="add-btn" id="add-image-btn">
           הוסף תמונה
         </button>
-      </div>
-
-      <div class="actions">
         <button type="button" id="preview-btn">תצוגה מקדימה</button>
         <button type="button" id="download-btn">הורד קובץ HTML</button>
       </div>
@@ -246,10 +297,20 @@
           const group = document.createElement("div");
           group.className = "image-input-group";
 
+          const fileInputWrapper = document.createElement("div");
+          fileInputWrapper.className = "file-input-wrapper";
+
+          const fileInputBtn = document.createElement("button");
+          fileInputBtn.className = "file-input-btn";
+          fileInputBtn.textContent = "בחר תמונה";
+
           const fileInput = document.createElement("input");
           fileInput.type = "file";
           fileInput.accept = "image/*";
           fileInput.required = true;
+
+          fileInputWrapper.appendChild(fileInputBtn);
+          fileInputWrapper.appendChild(fileInput);
 
           const captionInput = document.createElement("input");
           captionInput.type = "text";
@@ -268,10 +329,19 @@
             }
           });
 
-          group.appendChild(fileInput);
+          group.appendChild(fileInputWrapper);
           group.appendChild(captionInput);
           group.appendChild(removeBtn);
           imageInputsContainer.appendChild(group);
+
+          // Update button text when file is selected
+          fileInput.addEventListener("change", function () {
+            if (this.files && this.files[0]) {
+              fileInputBtn.textContent = this.files[0].name;
+            } else {
+              fileInputBtn.textContent = "בחר תמונה";
+            }
+          });
         }
 
         // Add event listeners
@@ -441,7 +511,7 @@
 
     h1 {
       font-size: 42px;
-      color: #01ff62;
+      color: #4b3bff;
       text-shadow: 0 6px 4px rgba(0, 0, 0, 0.8);
       text-align: center;
       margin: 20px 0;
@@ -687,6 +757,9 @@
         bgImageInput.addEventListener("change", function (e) {
           const file = e.target.files[0];
           if (file) {
+            const btn = e.target.previousElementSibling;
+            btn.textContent = file.name;
+
             readFileAsDataURL(file)
               .then((data) => {
                 bgImageData = data;
@@ -696,6 +769,8 @@
                 alert("שגיאה בקריאת תמונת הרקע: " + error.message);
               });
           } else {
+            const btn = e.target.previousElementSibling;
+            btn.textContent = "בחר תמונה";
             bgImageData = null;
           }
         });
