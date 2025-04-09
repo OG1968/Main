@@ -9,16 +9,7 @@
     <meta name="application-name" content="צקליסט למטייל" />
 
     <title>צ'קליסט למטייל</title>
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="https://wallpapers.com/images/high/checklist-icon-orange-h059378k7d96l1vl.png"
-    />
-
-    <link
-      href="https://fonts.googleapis.com/css2?family=Secular+One&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="icon" type="image/x-icon" href="checklist.png" />
 
     <style>
       :root {
@@ -450,6 +441,25 @@
         background-color: var(--primary-color);
         color: #000;
       }
+
+      /* סטייל להודעות מערכת */
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+      }
     </style>
   </head>
   <body>
@@ -532,6 +542,23 @@
         <button class="clear-all-btn" onclick="clearAll()" id="clear-all-btn">
           מחק הכל
         </button>
+        <button class="export-btn" onclick="exportToJSON()" id="export-btn">
+          ייצא ל-JSON
+        </button>
+        <button
+          class="import-btn"
+          onclick="document.getElementById('import-file').click()"
+          id="import-btn"
+        >
+          ייבא מ-JSON
+        </button>
+        <input
+          type="file"
+          id="import-file"
+          accept=".json"
+          style="display: none"
+          onchange="importFromJSON(event)"
+        />
       </div>
       <div class="neon-text">כל הזכויות שמורות G©.</div>
     </div>
@@ -544,6 +571,9 @@
         <button id="cancel-exit">ביטול</button>
       </div>
     </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
 
     <script>
       // אתחול הרשימה מ-localStorage
@@ -560,6 +590,11 @@
           progressText: "הושלמו",
           deleteBtn: "מחק",
           confirmDelete: "האם אתה בטוח שברצונך למחוק את כל הפריטים?",
+          exportBtn: "ייצא רשימה 📥",
+          importBtn: "ייבא רשימה 📤",
+          exportSuccess: "הרשימה יוצאה בהצלחה!",
+          importSuccess: "הרשימה יובאה בהצלחה!",
+          importError: "שגיאה בייבוא הקובץ. אנא ודא שזה קובץ JSON תקף.",
         },
         en: {
           title: "Traveler Checklist 📋",
@@ -570,12 +605,18 @@
           progressText: "Completed",
           deleteBtn: "Delete",
           confirmDelete: "Are you sure you want to delete all items?",
+          exportBtn: "Export File 📥",
+          importBtn: "Import File 📤",
+          exportSuccess: "Checklist exported successfully!",
+          importSuccess: "Checklist imported successfully!",
+          importError:
+            "Error importing file. Please make sure it's a valid JSON file.",
         },
       };
 
       // טעינת שפה מ-localStorage
       let currentLanguage = localStorage.getItem("checklistLanguage") || "he";
-      document.body.setAttribute("data-language", currentLanguage); // עדכון שפה כברירת מחדל
+      document.body.setAttribute("data-language", currentLanguage);
 
       // עדכון תצוגת הדגלים כברירת מחדל
       document.querySelector(".he-flag").style.display =
@@ -646,7 +687,6 @@
       function moveItemUp(id) {
         const index = items.findIndex((item) => item.id === id);
         if (index > 0) {
-          // החלפת פריטים במערך
           [items[index], items[index - 1]] = [items[index - 1], items[index]];
           renderAllItems();
           saveItems();
@@ -656,7 +696,6 @@
       function moveItemDown(id) {
         const index = items.findIndex((item) => item.id === id);
         if (index < items.length - 1) {
-          // החלפת פריטים במערך
           [items[index], items[index + 1]] = [items[index + 1], items[index]];
           renderAllItems();
           saveItems();
@@ -671,36 +710,27 @@
 
         if (!item) return;
 
-        // הוספת קלאס לסימון שנמצאים במצב עריכה
         li.classList.add("editing");
-
-        // עדכון ערך שדה הטקסט לערך הנוכחי של הפריט
         editInput.value = item.text;
-
-        // הסתרת הטקסט והצגת שדה הקלט
         textSpan.style.display = "none";
         editInput.style.display = "block";
-
-        // מיקוד על שדה הקלט
         editInput.focus();
 
-        // הגדרת האירועים לשמירת השינויים
         function saveEdit() {
           const newText = editInput.value.trim();
           if (newText) {
-            // עדכון הטקסט בפריט
             item.text = newText;
             textSpan.textContent = newText;
             saveItems();
           }
-          finishEdit(); // הוספת קריאה לפונקציה לסיום עריכה
+          finishEdit();
         }
 
         function handleKeyDown(e) {
           if (e.key === "Enter") {
             saveEdit();
           } else if (e.key === "Escape") {
-            finishEdit(); // הוספת קריאה לפונקציה לסיום עריכה
+            finishEdit();
           }
         }
 
@@ -712,7 +742,6 @@
           editInput.removeEventListener("keydown", handleKeyDown);
         }
 
-        // הוספת האירועים
         editInput.addEventListener("blur", saveEdit);
         editInput.addEventListener("keydown", handleKeyDown);
       }
@@ -732,7 +761,7 @@
         <span class="item-text" ondblclick="editItem(${item.id})">${
           item.text
         }</span>
-        <input type="text" class="edit-input" style="display: none;" /> <!-- הוספת style כדי להסתיר את שדה העריכה -->
+        <input type="text" class="edit-input" style="display: none;" />
         <div class="move-buttons">
             <button class="move-btn" onclick="moveItemUp(${item.id})" 
                     ${index === 0 ? "disabled" : ""}>↑</button>
@@ -759,16 +788,13 @@
         const progressFill = document.querySelector(".progress-fill");
         const progressText = document.querySelector(".progress-text");
 
-        // עדכון טקסט התקדמות
         progressText.textContent = `${Math.round(progress)}% ${
           languages[currentLanguage].progressText
         }`;
 
-        // עדכון צבע טקסט בהתאם לניגודיות
         const luminance = progress > 50 ? 255 : 0;
         progressText.style.textShadow = `1px 1px 2px rgba(${luminance},${luminance},${luminance},0.5)`;
 
-        // עדכון כיוון המילוי של בר ההתקדמות בהתאם לשפה
         if (currentLanguage === "he") {
           progressFill.style.right = "0";
           progressFill.style.left = "auto";
@@ -784,11 +810,11 @@
       function setLanguage(lang) {
         currentLanguage = lang;
         localStorage.setItem("checklistLanguage", lang);
-        document.body.setAttribute("data-language", lang); // עדכון שפה ב-body
+        document.body.setAttribute("data-language", lang);
         updateTexts();
         updateProgress();
+        updateExitModalTexts();
 
-        // עדכון תצוגת הדגלים
         document.querySelector(".he-flag").style.display =
           lang === "he" ? "inline" : "none";
         document.querySelector(".en-flag").style.display =
@@ -810,10 +836,13 @@
           languages[currentLanguage].clearCompletedBtn;
         document.getElementById("clear-all-btn").textContent =
           languages[currentLanguage].clearAllBtn;
+        document.getElementById("export-btn").textContent =
+          languages[currentLanguage].exportBtn;
+        document.getElementById("import-btn").textContent =
+          languages[currentLanguage].importBtn;
 
         updateProgress();
 
-        // עדכון כפתורי "מחק" בכל פריט
         document.querySelectorAll(".delete-btn").forEach((btn) => {
           btn.textContent = languages[currentLanguage].deleteBtn;
         });
@@ -845,8 +874,68 @@
         }
       }
 
+      // פונקציות ייבוא וייצוא
+      function exportToJSON() {
+        const dataStr = JSON.stringify(items, null, 2);
+        const dataUri =
+          "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+        const exportFileDefaultName = `traveler-checklist-${new Date()
+          .toISOString()
+          .slice(0, 10)}.json`;
+
+        const linkElement = document.createElement("a");
+        linkElement.setAttribute("href", dataUri);
+        linkElement.setAttribute("download", exportFileDefaultName);
+        linkElement.click();
+
+        showToast(languages[currentLanguage].exportSuccess);
+      }
+
+      function importFromJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const importedItems = JSON.parse(e.target.result);
+            if (Array.isArray(importedItems)) {
+              items = importedItems;
+              renderAllItems();
+              saveItems();
+              showToast(languages[currentLanguage].importSuccess);
+            } else {
+              throw new Error("Invalid format");
+            }
+          } catch (error) {
+            showToast(languages[currentLanguage].importError);
+            console.error("Error parsing JSON:", error);
+          }
+        };
+        reader.onerror = function () {
+          showToast(languages[currentLanguage].importError);
+        };
+        reader.readAsText(file);
+
+        // איפוס הערך כדי לאפשר ייבוא של אותו קובץ שוב
+        event.target.value = "";
+      }
+
+      // פונקציה להצגת הודעות מערכת
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
       // אירועים
       document.addEventListener("DOMContentLoaded", initApp);
+
       // טעינת שפה וערכת נושא
       const savedTheme = localStorage.getItem("checklistTheme") || "dark";
       setTheme(savedTheme);
@@ -863,7 +952,7 @@
 
       // פונקציה להפניה לדף אחר
       function exitApplication() {
-        window.location.href = "index.html"; // ניתן לשנות את ה-URL לפי הצורך
+        window.location.href = "index.html";
       }
 
       // הצגת הדיאלוג הקיים מהקובץ CSS
@@ -884,16 +973,13 @@
 
       // אתחול מערכת היציאה מהאפליקציה
       function initExitSystem() {
-        // אתחול היסטוריה
         history.pushState(null, null, window.location.pathname);
 
-        // הוספת מאזין ללחיצת אחורה
         window.addEventListener("popstate", function (event) {
           showExitDialog();
           history.pushState(null, null, window.location.pathname);
         });
 
-        // טיפול בלחיצות כפתורי היציאה
         document
           .getElementById("confirm-exit")
           ?.addEventListener("click", exitApplication);
@@ -901,7 +987,6 @@
           .getElementById("cancel-exit")
           ?.addEventListener("click", hideExitDialog);
 
-        // עדכון טקסטים לפי שפה
         updateExitModalTexts();
       }
 
@@ -919,22 +1004,6 @@
           cancelExitBtn.textContent =
             currentLanguage === "he" ? "ביטול" : "Cancel";
         }
-      }
-
-      // עדכון פונקציית setLanguage כדי לכלול עדכון טקסטים במודל היציאה
-      function setLanguage(lang) {
-        currentLanguage = lang;
-        localStorage.setItem("checklistLanguage", lang);
-        document.body.setAttribute("data-language", lang);
-        updateTexts();
-        updateProgress();
-        updateExitModalTexts(); // הוספת קריאה זו
-
-        // עדכון תצוגת הדגלים
-        document.querySelector(".he-flag").style.display =
-          lang === "he" ? "inline" : "none";
-        document.querySelector(".en-flag").style.display =
-          lang === "en" ? "inline" : "none";
       }
 
       // עדכון פונקציית האתחול הראשונית
