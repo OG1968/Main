@@ -1409,13 +1409,24 @@
           const dataStr = JSON.stringify(recipes, null, 2);
           const dataBlob = new Blob([dataStr], { type: "application/json" });
 
+          // הצגת חלון לבחירת שם קובץ
+          const defaultFilename =
+            "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
+          const userFilename = prompt("הזן שם לקובץ הייצוא:", defaultFilename);
+
+          if (!userFilename) return; // אם המשתמש ביטל
+
+          const filename = userFilename.endsWith(".json")
+            ? userFilename
+            : userFilename + ".json";
+
           if (
             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
               navigator.userAgent
             )
           ) {
             if (navigator.share) {
-              const file = new File([dataBlob], "recipes.json", {
+              const file = new File([dataBlob], filename, {
                 type: "application/json",
               });
               navigator
@@ -1434,7 +1445,7 @@
             const url = URL.createObjectURL(dataBlob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "recipes.json";
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1444,6 +1455,7 @@
 
         request.onerror = (event) => {
           console.error("Error loading recipes:", event.target.error);
+          showToast("שגיאה בטעינת המתכונים לייצוא", true);
         };
       }
 
@@ -1993,10 +2005,23 @@
             return response.blob();
           })
           .then((blob) => {
+            // הצגת חלון לבחירת שם קובץ
+            const defaultFilename =
+              "recipes_backup_" +
+              new Date().toISOString().slice(0, 10) +
+              ".json";
+            const userFilename = prompt("הזן שם לקובץ:", defaultFilename);
+
+            if (!userFilename) return; // אם המשתמש ביטל
+
+            const filename = userFilename.endsWith(".json")
+              ? userFilename
+              : userFilename + ".json";
+
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "recipes.json";
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
 
@@ -2005,7 +2030,7 @@
               URL.revokeObjectURL(url);
             }, 100);
 
-            showToast("הקובץ recipes.json הורד בהצלחה");
+            showToast(`הקובץ ${filename} הורד בהצלחה`);
           })
           .catch((error) => {
             showToast("שגיאה: " + error.message, true);
