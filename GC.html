@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="application-name" content="יוצר גלריה" />
+
+    <link rel="icon" href="gallery.png" type="image/png" />
+    <link rel="apple-touch-icon" href="gallery.png" />
+    <title>יוצר גלריות</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: "Rubik", sans-serif;
+      }
+
+      body {
+        background-color: #ffca76;
+        margin: 0;
+        padding: 10px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: rgb(255, 246, 192);
+        padding: 10px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 6);
+      }
+
+      h1 {
+        font-size: 36px;
+        text-align: center;
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      input[type="text"],
+      select {
+        width: 100%;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-bottom: 0px;
+      }
+
+      /* הגדלת שדה הכותרת במיוחד */
+      #gallery-title {
+        height: 60px;
+        font-size: 18px;
+      }
+
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #5645a0;
+      }
+
+      .preview-container {
+        margin-top: 40px;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+      }
+
+      .preview-title {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .image-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .preview-item {
+        width: calc(33.333% - 10px);
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .preview-item img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+      }
+
+      .preview-item .caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 2px;
+        text-align: center;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .image-input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+      }
+
+      .image-input-group input[type="text"] {
+        flex: 2;
+        height: 50px;
+        padding: 0 15px;
+        line-height: normal;
+        box-sizing: border-box;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        flex: 1;
+      }
+
+      .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .file-input-btn {
+        display: block;
+        width: 100%;
+        height: 50px;
+        padding: 0 15px;
+        background-color: #2196f3;
+        color: white;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        line-height: 50px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-sizing: border-box;
+      }
+
+      .file-input-btn:hover {
+        background-color: #0b7dda;
+      }
+
+      .remove-btn {
+        background-color: #f44336;
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .add-btn {
+        background-color: #2196f3;
+        font-size: 16px;
+        padding: 12px 10px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 10px;
+      }
+
+      .action-buttons button {
+        flex: 1;
+        max-width: 200px;
+      }
+
+      @media (max-width: 768px) {
+        .preview-item {
+          width: calc(50% - 8px);
+        }
+
+        .container {
+          padding: 5px;
+        }
+
+        .image-input-group {
+          flex-direction: row;
+          gap: 5px;
+        }
+
+        .image-input-group input[type="text"],
+        .file-input-wrapper {
+          width: 50%;
+        }
+
+        .image-input-group input[type="text"],
+        .file-input-btn,
+        .remove-btn {
+          height: 40px;
+          line-height: 40px;
+          font-size: 14px;
+        }
+
+        .remove-btn {
+          width: 40px;
+          font-size: 16px;
+        }
+
+        .file-input-btn {
+          padding: 0 10px;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .action-buttons button {
+          max-width: 100%;
+        }
+
+        .form-group {
+          margin-bottom: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>יוצר גלריה אישית</h1>
+
+      <div class="form-group">
+        <label for="gallery-title">כותרת הגלריה:</label>
+        <input type="text" id="gallery-title" placeholder="הכנס כותרת לגלריה" />
+      </div>
+
+      <div class="form-group">
+        <label for="bg-image">תמונת רקע (אופציונלי):</label>
+        <div class="file-input-wrapper">
+          <button class="file-input-btn">בחר תמונה</button>
+          <input type="file" id="bg-image" accept="image/*" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>תמונות הגלריה (3-10 תמונות):</label>
+        <div id="image-inputs-container">
+          <!-- Dynamic inputs will be added here -->
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button type="button" class="add-btn" id="add-image-btn">
+          הוסף תמונה
+        </button>
+        <button type="button" id="preview-btn">תצוגה מקדימה</button>
+        <button type="button" id="download-btn">הורד קובץ HTML</button>
+      </div>
+
+      <div
+        class="preview-container"
+        id="preview-container"
+        style="display: none"
+      >
+        <h2 class="preview-title">תצוגה מקדימה</h2>
+        <div class="image-preview" id="image-preview"></div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Getting DOM elements
+        const imageInputsContainer = document.getElementById(
+          "image-inputs-container"
+        );
+        const addImageBtn = document.getElementById("add-image-btn");
+        const previewBtn = document.getElementById("preview-btn");
+        const downloadBtn = document.getElementById("download-btn");
+        const previewContainer = document.getElementById("preview-container");
+        const imagePreview = document.getElementById("image-preview");
+        const galleryTitleInput = document.getElementById("gallery-title");
+        const bgImageInput = document.getElementById("bg-image");
+
+        // Initialize data arrays
+        let imagesData = [];
+        let bgImageData = null;
+
+        // Initialize with 3 image inputs
+        for (let i = 0; i < 3; i++) {
+          addImageInput();
+        }
+
+        // Add new image input function
+        function addImageInput() {
+          const group = document.createElement("div");
+          group.className = "image-input-group";
+
+          const fileInputWrapper = document.createElement("div");
+          fileInputWrapper.className = "file-input-wrapper";
+
+          const fileInputBtn = document.createElement("button");
+          fileInputBtn.className = "file-input-btn";
+          fileInputBtn.textContent = "בחר תמונה";
+
+          const fileInput = document.createElement("input");
+          fileInput.type = "file";
+          fileInput.accept = "image/*";
+          fileInput.required = true;
+
+          fileInputWrapper.appendChild(fileInputBtn);
+          fileInputWrapper.appendChild(fileInput);
+
+          const captionInput = document.createElement("input");
+          captionInput.type = "text";
+          captionInput.placeholder = "כותרת לתמונה";
+          captionInput.required = true;
+          captionInput.className = "caption-input";
+
+          const removeBtn = document.createElement("button");
+          removeBtn.type = "button";
+          removeBtn.className = "remove-btn";
+          removeBtn.textContent = "X";
+          removeBtn.style.display = "flex";
+          removeBtn.style.alignItems = "center";
+          removeBtn.style.justifyContent = "center";
+          removeBtn.addEventListener("click", function () {
+            if (imageInputsContainer.children.length > 3) {
+              imageInputsContainer.removeChild(group);
+            } else {
+              alert("חובה לבחור לפחות 3 תמונות");
+            }
+          });
+
+          group.appendChild(fileInputWrapper);
+          group.appendChild(captionInput);
+          group.appendChild(removeBtn);
+          imageInputsContainer.appendChild(group);
+
+          // Update button text when file is selected
+          fileInput.addEventListener("change", function () {
+            if (this.files && this.files[0]) {
+              fileInputBtn.textContent = this.files[0].name;
+            } else {
+              fileInputBtn.textContent = "בחר תמונה";
+            }
+          });
+        }
+
+        // Add event listeners
+        addImageBtn.addEventListener("click", function () {
+          if (imageInputsContainer.children.length < 10) {
+            addImageInput();
+          } else {
+            alert("ניתן להוסיף עד 10 תמונות בלבד");
+          }
+        });
+
+        // Read file as data URL function
+        function readFileAsDataURL(file) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error("בעיה בקריאת הקובץ"));
+            reader.readAsDataURL(file);
+          });
+        }
+
+        // Validate inputs function
+        async function validateInputs() {
+          const title = galleryTitleInput.value.trim();
+          if (!title) {
+            alert("נא להזין כותרת לגלריה");
+            galleryTitleInput.focus();
+            return false;
+          }
+
+          const inputs =
+            imageInputsContainer.querySelectorAll(".image-input-group");
+          if (inputs.length < 3) {
+            alert("נא לבחור לפחות 3 תמונות");
+            return false;
+          }
+
+          for (let i = 0; i < inputs.length; i++) {
+            const fileInput = inputs[i].querySelector('input[type="file"]');
+            const captionInput = inputs[i].querySelector('input[type="text"]');
+
+            if (!fileInput.files || !fileInput.files[0]) {
+              alert(`נא לבחור תמונה עבור תמונה מספר ${i + 1}`);
+              fileInput.focus();
+              return false;
+            }
+
+            if (!captionInput.value.trim()) {
+              alert(`נא להזין כותרת עבור תמונה מספר ${i + 1}`);
+              captionInput.focus();
+              return false;
+            }
+          }
+
+          return true;
+        }
+
+        // Update preview function
+        async function updatePreview() {
+          try {
+            imagePreview.innerHTML = "";
+            imagesData = [];
+
+            // Process background image if selected
+            if (bgImageInput.files && bgImageInput.files[0]) {
+              bgImageData = await readFileAsDataURL(bgImageInput.files[0]);
+            }
+
+            const inputs =
+              imageInputsContainer.querySelectorAll(".image-input-group");
+
+            // Process each image
+            for (let i = 0; i < inputs.length; i++) {
+              const fileInput = inputs[i].querySelector('input[type="file"]');
+              const captionInput =
+                inputs[i].querySelector('input[type="text"]');
+
+              if (fileInput.files && fileInput.files[0]) {
+                try {
+                  const imageData = await readFileAsDataURL(fileInput.files[0]);
+                  const caption = captionInput.value.trim();
+
+                  imagesData.push({
+                    image: imageData,
+                    caption: caption,
+                  });
+
+                  const previewItem = document.createElement("div");
+                  previewItem.className = "preview-item";
+
+                  const img = document.createElement("img");
+                  img.src = imageData;
+                  img.alt = caption;
+
+                  const captionDiv = document.createElement("div");
+                  captionDiv.className = "caption";
+                  captionDiv.textContent = caption;
+
+                  previewItem.appendChild(img);
+                  previewItem.appendChild(captionDiv);
+                  imagePreview.appendChild(previewItem);
+                } catch (error) {
+                  console.error("Error processing image:", error);
+                  alert(`שגיאה בעיבוד תמונה ${i + 1}: ${error.message}`);
+                }
+              }
+            }
+
+            if (imagesData.length > 0) {
+              return true;
+            } else {
+              alert("לא נמצאו תמונות תקינות");
+              return false;
+            }
+          } catch (error) {
+            console.error("Error in updatePreview:", error);
+            alert("שגיאה בעדכון התצוגה המקדימה: " + error.message);
+            return false;
+          }
+        }
+
+        // Generate HTML
+        function createGalleryHTML(title, images, bgImage) {
+          try {
+            const imagesHTML = images
+              .map(
+                (img, index) => `
+            <div class="panel ${
+              index === 0 ? "active" : ""
+            }" style="background-image: url('${img.image}')">
+              <h3>${img.caption}</h3>
+            </div>
+          `
+              )
+              .join("\n");
+
+            return `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>${title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Rubik', sans-serif;
+    }
+
+    body {
+      ${
+        bgImage
+          ? `background-image: url('${bgImage}');`
+          : "background-color: #f5f5f5;"
+      }
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      touch-action: manipulation;
+    }
+
+    h1 {
+      font-size: 42px;
+      color: #4b3bff;
+      text-shadow: 0 6px 4px rgba(0, 0, 0, 0.8);
+      text-align: center;
+      margin: 20px 0;
+      width: 100%;
+    }
+
+    .panels-container {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      max-width: 1200px;
+      gap: 10px;
+      height: 80vh;
+      justify-content: center;
+    }
+
+    .panel {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      height: 80vh;
+      border-radius: 20px;
+      color: #01ff62;
+      cursor: pointer;
+      flex: 0.5;
+      position: relative;
+      transition: all 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+    }
+
+    .panel h3 {
+      font-size: 28px;
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      right: 30px;
+      margin: 0;
+      opacity: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      padding: 12px 16px;
+      border-radius: 10px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .panel.active {
+      flex: 5;
+    }
+
+    .panel.active h3 {
+      opacity: 1;
+    }
+
+    .panel:hover {
+      transform: translateY(-5px);
+    }
+
+    @media (max-width: 768px) {
+      .panels-container {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+      }
+      
+      .panel {
+        height: 60px;
+        width: 100%;
+        flex: none;
+        margin-bottom: 10px;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+      }
+      
+      .panel.active {
+        flex: none;
+        height: 350px;
+        opacity: 1;
+      }
+      
+      .panel h3 {
+        font-size: 18px;
+        bottom: 15px;
+        left: 15px;
+        right: 15px;
+      }
+      
+      h1 {
+        font-size: 28px;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>${title}</h1>
+
+  <div class="panels-container">
+    ${imagesHTML}
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const panels = document.querySelectorAll(".panel");
+      const isMobile = window.innerWidth <= 768;
+      
+      // Start with first panel active
+      if (panels.length > 0) {
+        panels[0].classList.add("active");
+      }
+
+      function removeActiveClasses() {
+        panels.forEach(panel => {
+          panel.classList.remove("active");
+        });
+      }
+
+      panels.forEach(panel => {
+        panel.addEventListener("click", function() {
+          removeActiveClasses();
+          this.classList.add("active");
+          
+          // Scroll to active element on mobile
+          if (isMobile) {
+            this.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+
+        panel.addEventListener("touchend", function(e) {
+          e.preventDefault();
+          removeActiveClasses();
+          this.classList.add("active");
+        });
+      });
+
+      // Handle screen orientation change
+      window.addEventListener("orientationchange", function() {
+        setTimeout(function() {
+          const activePanel = document.querySelector(".panel.active");
+          if (activePanel) {
+            activePanel.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        }, 300);
+      });
+      
+      // Handle window resize
+      window.addEventListener("resize", function() {
+        const isMobileNow = window.innerWidth <= 768;
+        if (isMobile !== isMobileNow) {
+          location.reload();
+        }
+      });
+    });
+  <\/script>
+</body>
+</html>`;
+          } catch (error) {
+            console.error("Error generating HTML:", error);
+            alert("שגיאה ביצירת קובץ HTML: " + error.message);
+            return null;
+          }
+        }
+
+        // Generate and download HTML file
+        function generateHTMLFile() {
+          try {
+            const title = galleryTitleInput.value.trim();
+            const htmlContent = createGalleryHTML(
+              title,
+              imagesData,
+              bgImageData
+            );
+
+            if (!htmlContent) {
+              return;
+            }
+
+            const blob = new Blob([htmlContent], { type: "text/html" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${title.replace(/[^a-z0-9א-ת]/gi, "_")}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error("Error in generateHTMLFile:", error);
+            alert("שגיאה בהורדת הקובץ: " + error.message);
+          }
+        }
+
+        // Preview button click handler
+        previewBtn.addEventListener("click", async function () {
+          try {
+            if (await validateInputs()) {
+              const success = await updatePreview();
+              if (success) {
+                previewContainer.style.display = "block";
+                previewContainer.scrollIntoView({ behavior: "smooth" });
+              }
+            }
+          } catch (error) {
+            console.error("Error in preview button click:", error);
+            alert("שגיאה בתצוגה המקדימה: " + error.message);
+          }
+        });
+
+        // Download button click handler
+        downloadBtn.addEventListener("click", async function () {
+          try {
+            if (await validateInputs()) {
+              const success = await updatePreview();
+              if (success) {
+                generateHTMLFile();
+              }
+            }
+          } catch (error) {
+            console.error("Error in download button click:", error);
+            alert("שגיאה בהורדת הקובץ: " + error.message);
+          }
+        });
+
+        // Background image change handler
+        bgImageInput.addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            const btn = e.target.previousElementSibling;
+            btn.textContent = file.name;
+
+            readFileAsDataURL(file)
+              .then((data) => {
+                bgImageData = data;
+              })
+              .catch((error) => {
+                console.error("Error reading background image:", error);
+                alert("שגיאה בקריאת תמונת הרקע: " + error.message);
+              });
+          } else {
+            const btn = e.target.previousElementSibling;
+            btn.textContent = "בחר תמונה";
+            bgImageData = null;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
