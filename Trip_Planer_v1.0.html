@@ -2,10 +2,8 @@
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="application-name" content=" מה קרוב אלי">
     <link rel="icon" href="around_me.png" type="image/png" />
     <link rel="apple-touch-icon" href="around_me.png" />
     <title>מה קרוב אלי</title>
@@ -1036,7 +1034,6 @@ body.dark-mode #useCurrentLocation:hover {
       </div>
       <div class="controls">
         <div>
-          <label for="from">נקודת מוצא:</label>
           <div class="custom-select-wrapper">
             <div class="custom-select" id="customFromSelect">
               <div class="custom-select-selected">
@@ -1050,7 +1047,7 @@ body.dark-mode #useCurrentLocation:hover {
           <input type="hidden" id="from" value="" />
 
           <div class="button-container">
-            <button id="showRoute" class="route-button">הצג מסלול</button>
+            <button id="showRoute" class="route-button">הצגת המסלול</button>
             <button id="clearRouteBtn" class="route-button">נקה מסלולים</button>
             <button id="useCurrentLocation" class="route-button">מיקומי הנוכחי</button>
           </div>
@@ -1785,22 +1782,41 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     
       // פונקציה לייצוא המקומות לקובץ JSON
+      function downloadFile(content, fileName, contentType) {
+  const blob = new Blob([content], { type: contentType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+}
+
       function exportToJSON() {
-        showSpinner(true);
-        setTimeout(() => {
-          const dataStr = JSON.stringify(places, null, 2);
-          const dataUri =
-            "data:application/json;charset=utf-8," +
-            encodeURIComponent(dataStr);
-          const exportFileDefaultName = "places.json";
-          const linkElement = document.createElement("a");
-          linkElement.setAttribute("href", dataUri);
-          linkElement.setAttribute("download", exportFileDefaultName);
-          linkElement.click();
-          showSpinner(false);
-          showToast("המקומות יוצאו בהצלחה", "success");
-        }, 500);
-      }
+  showSpinner(true);
+  setTimeout(() => {
+    const dataStr = JSON.stringify(places, null, 2);
+    const defaultName = `places_${new Date().toISOString().slice(0, 10)}.json`;
+    
+    // בקשה מהמשתמש להזין שם קובץ
+    const fileName = prompt('הזן שם לקובץ הייצוא:', defaultName);
+    
+    if (fileName) {
+      // הוספת סיומת .json אם חסרה
+      const finalFileName = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
+      downloadFile(dataStr, finalFileName, 'application/json');
+      showToast("המקומות יוצאו בהצלחה", "success");
+    } else {
+      showToast("ייצוא בוטל", "warning");
+    }
+    
+    showSpinner(false);
+  }, 500);
+}
     
       // פונקציה לייבוא מקומות מקובץ JSON
       function importFromJSON(event) {
