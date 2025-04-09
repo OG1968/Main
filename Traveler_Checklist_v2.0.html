@@ -880,13 +880,30 @@
         const dataUri =
           "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-        const exportFileDefaultName = `traveler-checklist-${new Date()
+        // יצירת שם קובץ ברירת מחדל
+        const defaultName = `traveler-checklist-${new Date()
           .toISOString()
           .slice(0, 10)}.json`;
 
+        // בקשת שם קובץ מהמשתמש
+        const fileName = prompt(
+          currentLanguage === "he"
+            ? "הכנס שם לקובץ הייצוא:"
+            : "Enter export file name:",
+          defaultName
+        );
+
+        // אם המשתמש ביטל, לא נעשה כלום
+        if (!fileName) return;
+
+        // הוספת סיומת .json אם חסרה
+        const finalName = fileName.endsWith(".json")
+          ? fileName
+          : `${fileName}.json`;
+
         const linkElement = document.createElement("a");
         linkElement.setAttribute("href", dataUri);
-        linkElement.setAttribute("download", exportFileDefaultName);
+        linkElement.setAttribute("download", finalName);
         linkElement.click();
 
         showToast(languages[currentLanguage].exportSuccess);
