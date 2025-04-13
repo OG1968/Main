@@ -9,7 +9,7 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 20px;
-        background-color: #f5f5f5;
+        background-color: #cef1ff;
       }
 
       h1,
@@ -19,32 +19,39 @@
       }
 
       .container {
-        max-width: 1200px;
+        max-width: 800px;
         margin: 0 auto;
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--card-color);
+        padding: 30px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
       }
 
       .form-group {
-        margin-bottom: 20px;
-        padding: 40px;
+        margin-bottom: 25px;
+        padding: 30px;
+        background-color: rgba(108, 92, 231, 0.05);
+        border-radius: var(--border-radius);
+        border: 1px solid rgba(108, 92, 231, 0.1);
       }
 
       .form-group label {
         display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-        color: #333;
+        margin-bottom: 10px;
+        font-weight: 500;
+        color: var(--primary-color);
+        font-size: 1.1rem;
       }
 
       .form-group input {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        padding: 12px 5px;
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        border-radius: var(--border-radius);
         font-size: 16px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background-color: rgba(255, 255, 255, 0.8);
       }
 
       .upload-section {
@@ -436,39 +443,39 @@
 
       // פונקציה לעדכון התצוגה המקדימה
       function updatePreview() {
-  const screenWidth = window.innerWidth;
-  let translateZ = 400; // ערך ברירת מחדל למסכים גדולים
-  
-  if (screenWidth <= 768) {
-    translateZ = 200; // ערך למסכים בינוניים
-  }
-  
-  if (screenWidth <= 480) {
-    translateZ = 150; // ערך למסכים קטנים
-  }
+        const screenWidth = window.innerWidth;
+        let translateZ = 400; // ערך ברירת מחדל למסכים גדולים
 
-  // עדכון כל התמונות במרחק המתאים
-  document.querySelectorAll('.preview-container span').forEach(span => {
-    const i = span.style.getPropertyValue('--i');
-    span.style.transform = `rotateY(calc(${i} * 45deg)) translateZ(${translateZ}px)`;
-  });
+        if (screenWidth <= 768) {
+          translateZ = 200; // ערך למסכים בינוניים
+        }
 
-  previewContainer.style.transform = `perspective(1000px) rotateY(${x}deg)`;
-  
-  timer = setTimeout(() => {
-    x = x - 45;
-    updatePreview();
-  }, 3000);
-}
+        if (screenWidth <= 480) {
+          translateZ = 150; // ערך למסכים קטנים
+        }
 
-// הוספת אירוע resize לעדכון דינמי
-window.addEventListener('resize', () => {
-  clearTimeout(timer);
-  updatePreview();
-});
+        // עדכון כל התמונות במרחק המתאים
+        document.querySelectorAll(".preview-container span").forEach((span) => {
+          const i = span.style.getPropertyValue("--i");
+          span.style.transform = `rotateY(calc(${i} * 45deg)) translateZ(${translateZ}px)`;
+        });
 
-// קריאה ראשונית לפונקציה
-updatePreview();
+        previewContainer.style.transform = `perspective(1000px) rotateY(${x}deg)`;
+
+        timer = setTimeout(() => {
+          x = x - 45;
+          updatePreview();
+        }, 3000);
+      }
+
+      // הוספת אירוע resize לעדכון דינמי
+      window.addEventListener("resize", () => {
+        clearTimeout(timer);
+        updatePreview();
+      });
+
+      // קריאה ראשונית לפונקציה
+      updatePreview();
 
       // אירועי העלאת תמונות
       document.querySelectorAll(".image-slot input").forEach((input) => {
