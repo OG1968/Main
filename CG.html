@@ -532,6 +532,79 @@
         updatePreview();
       });
 
+      // פונקציה לכיווץ תמונה
+      function compressImage(dataURL, maxWidth, maxHeight, quality) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = function () {
+            // חישוב היחס לשמירה על פרופורציות
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height = (maxWidth / width) * height;
+              width = maxWidth;
+            }
+
+            if (height > maxHeight) {
+              width = (maxHeight / height) * width;
+              height = maxHeight;
+            }
+
+            // יצירת canvas לציור התמונה המכווצת
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            // ציור התמונה המוקטנת
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // המרה חזרה ל-data URL עם דחיסה
+            const compressedDataURL = canvas.toDataURL("image/jpeg", quality);
+            resolve(compressedDataURL);
+          };
+
+          img.src = dataURL;
+        });
+      }
+
+      // פונקציה לכיווץ כל התמונות במערך
+      async function compressAllImages(imagesObj) {
+        const maxWidth = 800; // רוחב מקסימלי
+        const maxHeight = 800; // גובה מקסימלי
+        const quality = 0.7; // איכות התמונה (0-1)
+
+        const compressedImages = {};
+
+        for (const key in imagesObj) {
+          if (imagesObj[key]) {
+            compressedImages[key] = await compressImage(
+              imagesObj[key],
+              maxWidth,
+              maxHeight,
+              quality
+            );
+          } else {
+            compressedImages[key] = null;
+          }
+        }
+
+        return compressedImages;
+      }
+
+      // פונקציה להצגת גודל הקובץ בצורה נוחה
+      function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + " bytes";
+        else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
+        else return (bytes / 1048576).toFixed(2) + " MB";
+      }
+
+      // פונקציה לחישוב גודל משוער של המחרוזת
+      function estimateSize(str) {
+        return new Blob([str]).size;
+      }
+
       // פונקציה לעדכון התצוגה המקדימה
       function updatePreview() {
         const screenWidth = window.innerWidth;
@@ -569,47 +642,110 @@
       updatePreview();
 
       // אירועי העלאת תמונות
+      // אירועי העלאת תמונות - עדכון הפונקציה
       document.querySelectorAll(".image-slot input").forEach((input) => {
-        input.addEventListener("change", function (e) {
+        input.addEventListener("change", async function (e) {
           const file = e.target.files[0];
           const slotNumber = this.dataset.slot;
 
           if (file) {
-            const reader = new FileReader();
-            reader.onload = function (event) {
-              // שמירת התמונה שהועלתה
-              uploadedImages[slotNumber] = event.target.result;
+            // הצגת הודעת טעינה בסלוט
+            const slot = document.getElementById(`slot-${slotNumber}`);
+            while (slot.firstChild) {
+              slot.removeChild(slot.firstChild);
+            }
 
-              // עדכון תצוגת הסלוט
-              const slot = document.getElementById(`slot-${slotNumber}`);
+            const loadingText = document.createElement("p");
+            loadingText.textContent = "מכווץ תמונה...";
+
+            const numberSpan = document.createElement("span");
+            numberSpan.className = "slot-number";
+            numberSpan.textContent = slotNumber;
+
+            slot.appendChild(loadingText);
+            slot.appendChild(numberSpan);
+            slot.appendChild(input);
+
+            try {
+              const reader = new FileReader();
+              reader.onload = async function (event) {
+                // שמירת התמונה המקורית שהועלתה
+                const originalImage = event.target.result;
+
+                // כיווץ התמונה
+                const compressedImage = await compressImage(
+                  originalImage,
+                  800,
+                  800,
+                  0.7
+                );
+                uploadedImages[slotNumber] = compressedImage;
+
+                // חישוב החיסכון בנפח
+                const originalSize = estimateSize(originalImage);
+                const compressedSize = estimateSize(compressedImage);
+                const savedPercent = Math.round(
+                  (1 - compressedSize / originalSize) * 100
+                );
+
+                // עדכון תצוגת הסלוט
+                while (slot.firstChild) {
+                  slot.removeChild(slot.firstChild);
+                }
+
+                const img = document.createElement("img");
+                img.src = compressedImage;
+
+                const infoText = document.createElement("p");
+                infoText.textContent = `חיסכון: ${savedPercent}%`;
+                infoText.style.position = "absolute";
+                infoText.style.bottom = "5px";
+                infoText.style.left = "0";
+                infoText.style.right = "0";
+                infoText.style.backgroundColor = "rgba(0,0,0,0.5)";
+                infoText.style.color = "white";
+                infoText.style.margin = "0";
+                infoText.style.padding = "2px";
+                infoText.style.fontSize = "12px";
+
+                slot.appendChild(img);
+                slot.appendChild(infoText);
+                slot.appendChild(numberSpan);
+                slot.appendChild(input);
+
+                // עדכון התצוגה המקדימה של הקרוסלה
+                const previewImg = previewContainer.querySelector(
+                  `span[style*="--i: ${slotNumber}"] img`
+                );
+                previewImg.src = compressedImage;
+              };
+              reader.readAsDataURL(file);
+            } catch (error) {
+              console.error("שגיאה בהעלאת התמונה:", error);
+
+              // במקרה של שגיאה, חזרה לתצוגה הרגילה
               while (slot.firstChild) {
                 slot.removeChild(slot.firstChild);
               }
 
-              const img = document.createElement("img");
-              img.src = event.target.result;
+              const errorText = document.createElement("p");
+              errorText.textContent = "שגיאה בהעלאה";
 
-              const numberSpan = document.createElement("span");
-              numberSpan.className = "slot-number";
-              numberSpan.textContent = slotNumber;
-
-              slot.appendChild(img);
+              slot.appendChild(errorText);
               slot.appendChild(numberSpan);
               slot.appendChild(input);
-
-              // עדכון התצוגה המקדימה של הקרוסלה
-              const previewImg = previewContainer.querySelector(
-                `span[style*="--i: ${slotNumber}"] img`
-              );
-              previewImg.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
+            }
           }
         });
       });
 
       // פונקציה ליצירת והורדת קובץ HTML
-      generateBtn.addEventListener("click", function () {
+      // אירוע לחיצה על כפתור היצירה וההורדה
+      generateBtn.addEventListener("click", async function () {
+        // הצגת הודעת טעינה
+        statusEl.textContent = "מכווץ תמונות...";
+        statusEl.style.opacity = "1";
+
         // בדיקה אם כל התמונות הועלו
         const allUploaded = Object.values(uploadedImages).every(
           (img) => img !== null
@@ -617,19 +753,29 @@
 
         if (!allUploaded) {
           alert("יש להעלות את כל 8 התמונות לפני יצירת הקובץ");
+          statusEl.style.opacity = "0";
           return;
         }
 
-        // קבלת הכותרת שהוזנה
-        const galleryTitle = titleInput.value || "גלריית תמונות מסתובבת";
+        try {
+          // דחיסת התמונות
+          const compressedImages = await compressAllImages(uploadedImages);
 
-        // שם הקובץ על בסיס הכותרת (תוך הסרת תווים בעייתיים)
-        const fileName = `${galleryTitle
-          .replace(/[^\w\u0590-\u05FF\s]/g, "")
-          .replace(/\s+/g, "-")}.html`;
+          // חישוב החיסכון בנפח
+          const originalSize = estimateSize(JSON.stringify(uploadedImages));
+          const compressedSize = estimateSize(JSON.stringify(compressedImages));
+          const savedSize = originalSize - compressedSize;
 
-        // יצירת תוכן ה-HTML
-        const template = `<!DOCTYPE html>
+          // קבלת הכותרת שהוזנה
+          const galleryTitle = titleInput.value || "גלריית תמונות מסתובבת";
+
+          // שם הקובץ על בסיס הכותרת (תוך הסרת תווים בעייתיים)
+          const fileName = `${galleryTitle
+            .replace(/[^\w\u0590-\u05FF\s]/g, "")
+            .replace(/\s+/g, "-")}.html`;
+
+          // יצירת תוכן ה-HTML
+          const template = `<!DOCTYPE html>
 <html lang="he">
   <head>
     <meta charset="UTF-8" />
@@ -712,28 +858,28 @@
     <h1>${galleryTitle}</h1>
     <div class="image-container">
       <span style="--i: 1">
-        <img src="${uploadedImages[1]}" />
+        <img src="${compressedImages[1]}" />
       </span>
       <span style="--i: 2">
-        <img src="${uploadedImages[2]}" />
+        <img src="${compressedImages[2]}" />
       </span>
       <span style="--i: 3">
-        <img src="${uploadedImages[3]}" />
+        <img src="${compressedImages[3]}" />
       </span>
       <span style="--i: 4">
-        <img src="${uploadedImages[4]}" />
+        <img src="${compressedImages[4]}" />
       </span>
       <span style="--i: 5">
-        <img src="${uploadedImages[5]}" />
+        <img src="${compressedImages[5]}" />
       </span>
       <span style="--i: 6">
-        <img src="${uploadedImages[6]}" />
+        <img src="${compressedImages[6]}" />
       </span>
       <span style="--i: 7">
-        <img src="${uploadedImages[7]}" />
+        <img src="${compressedImages[7]}" />
       </span>
       <span style="--i: 8">
-        <img src="${uploadedImages[8]}" />
+        <img src="${compressedImages[8]}" />
       </span>
     </div>
     <div class="btn-container">
@@ -773,29 +919,40 @@
   </body>
 </html>`;
 
-        // יצירת קובץ להורדה
-        const blob = new Blob([template], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
+          // יצירת קובץ להורדה
+          const blob = new Blob([template], { type: "text/html" });
+          const url = URL.createObjectURL(blob);
 
-        // יצירת אלמנט <a> להורדה
-        const downloadLink = document.createElement("a");
-        downloadLink.href = url;
-        downloadLink.download = fileName;
+          // יצירת אלמנט <a> להורדה
+          const downloadLink = document.createElement("a");
+          downloadLink.href = url;
+          downloadLink.download = fileName;
 
-        // הוספת האלמנט לעמוד והפעלת לחיצה אוטומטית
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
+          // הוספת האלמנט לעמוד והפעלת לחיצה אוטומטית
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
 
-        // הסרת האלמנט לאחר ההורדה
-        document.body.removeChild(downloadLink);
+          // הסרת האלמנט לאחר ההורדה
+          document.body.removeChild(downloadLink);
 
-        // הצגת הודעת סטטוס
-        statusEl.textContent = `הקובץ "${fileName}" נוצר והורד בהצלחה!`;
-        statusEl.style.opacity = "1";
+          // הצגת הודעת סטטוס על הצלחה עם מידע על החיסכון בנפח
+          statusEl.textContent = `הקובץ "${fileName}" נוצר והורד בהצלחה! נחסכו ${formatFileSize(
+            savedSize
+          )} (${Math.round((savedSize / originalSize) * 100)}%)`;
+          statusEl.style.opacity = "1";
 
-        setTimeout(() => {
-          statusEl.style.opacity = "0";
-        }, 3000);
+          setTimeout(() => {
+            statusEl.style.opacity = "0";
+          }, 5000);
+        } catch (error) {
+          statusEl.textContent = "אירעה שגיאה בזמן יצירת הקובץ";
+          statusEl.style.opacity = "1";
+          console.error("שגיאה בכיווץ התמונות:", error);
+
+          setTimeout(() => {
+            statusEl.style.opacity = "0";
+          }, 3000);
+        }
       });
     </script>
   </body>
