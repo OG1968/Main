@@ -636,30 +636,61 @@
       // אירועי העלאת קבצים
       imageUpload.addEventListener("change", handleFileSelect);
 
-      // אירועי drag and drop
-      previewContainer.addEventListener("dragover", (e) => {
+      // אירועי drag and drop מתוקנים
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        previewContainer.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
         e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        previewContainer.addEventListener(eventName, highlight, false);
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        previewContainer.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight() {
         previewContainer.classList.add("active");
-      });
+      }
 
-      previewContainer.addEventListener("dragleave", () => {
+      function unhighlight() {
         previewContainer.classList.remove("active");
-      });
+      }
 
-      previewContainer.addEventListener("drop", (e) => {
-        e.preventDefault();
-        previewContainer.classList.remove("active");
+      previewContainer.addEventListener("drop", handleDrop, false);
 
-        if (e.dataTransfer.files.length) {
-          imageUpload.files = e.dataTransfer.files;
-          handleFileSelect(e);
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length) {
+          // בדיקה שהקובץ הוא תמונה
+          const file = files[0];
+          if (!file.type.match("image.*")) {
+            alert("אנא גרור קובץ תמונה בלבד");
+            return;
+          }
+
+          // יצירת FileList חדש והשמה ל-input
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          imageUpload.files = dataTransfer.files;
+
+          // טיפול בקובץ
+          handleFileSelect({ target: imageUpload });
         }
-      });
+      }
 
       dropArea.addEventListener("click", () => {
         imageUpload.click();
       });
 
+      // שאר הפונקציות נשארות כפי שהיו...
       // אירועי כפתורים
       downloadBtn.addEventListener("click", downloadImage);
       resetBtn.addEventListener("click", resetChanges);
@@ -694,8 +725,8 @@
 
       // פונקציה לטיפול בבחירת קובץ
       function handleFileSelect(e) {
-        const file = e.target.files[0] || e.dataTransfer.files[0];
-        if (!file || !file.type.startsWith("image/")) return;
+        const file = e.target.files[0];
+        if (!file || !file.type.match("image.*")) return;
 
         const reader = new FileReader();
         reader.onload = function (event) {
