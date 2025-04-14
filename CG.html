@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>יוצר גלריית קרוסלה</title>
+    <title>מייצר גלריית קרוסלה</title>
     <style>
       :root {
         --primary-color: #6c5ce7;
@@ -98,19 +98,21 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 20px;
-        margin-bottom: 40px;
+        row-gap: 40px;
+        margin-bottom: 60px;
       }
 
       .image-slot {
         position: relative;
         border: 2px dashed var(--secondary-color);
-        height: 140px;
+        height: 200px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
+        padding-top: 15px;
         cursor: pointer;
-        overflow: hidden;
+        overflow: visible;
         background-color: rgba(162, 155, 254, 0.05);
         border-radius: var(--border-radius);
         transition: all 0.3s ease;
@@ -124,15 +126,16 @@
 
       .image-slot img {
         max-width: 100%;
-        max-height: 100%;
+        max-height: 100px;
         object-fit: contain;
         border-radius: 8px;
       }
 
-      .image-slot input {
+      .image-slot input[type="file"] {
         position: absolute;
         width: 100%;
-        height: 100%;
+        height: 80%;
+        top: 0;
         opacity: 0;
         cursor: pointer;
       }
@@ -142,6 +145,20 @@
         font-size: 0.9rem;
         margin-top: 8px;
         text-align: center;
+      }
+
+      .image-slot .image-caption {
+        width: 90%;
+        padding: 5px;
+        margin-top: 10px;
+        border: 1px solid rgba(108, 92, 231, 0.3);
+        border-radius: 4px;
+        font-size: 12px;
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8);
+        position: absolute;
+        bottom: -0px;
+        z-index: 10;
       }
 
       .slot-number {
@@ -214,6 +231,18 @@
         object-fit: cover;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .preview-container span p {
+        position: absolute;
+        bottom: -20px;
+        left: 0;
+        right: 0;
+        color: var(--text-color);
+        font-size: 14px;
+        text-align: center;
+        margin: 15px 0 0;
+        width: 100%;
       }
 
       .preview-buttons {
@@ -326,7 +355,7 @@
         }
 
         .image-slot {
-          height: 160px;
+          height: 180px;
         }
 
         .preview-container {
@@ -372,7 +401,7 @@
   </head>
   <body>
     <div class="container">
-      <h1>יוצר גלריית קרוסלה</h1>
+      <h1>מייצר גלריית קרוסלה</h1>
 
       <div class="form-group">
         <label for="gallery-title-input">כותרת הגלריה:</label>
@@ -391,41 +420,89 @@
           <span class="slot-number">1</span>
           <p>לחץ להעלאת תמונה</p>
           <input type="file" accept="image/*" data-slot="1" />
+          <input
+            type="text"
+            class="image-caption"
+            data-slot="1"
+            placeholder="כותרת לתמונה"
+          />
         </div>
         <div class="image-slot" id="slot-2">
           <span class="slot-number">2</span>
           <p>לחץ להעלאת תמונה</p>
           <input type="file" accept="image/*" data-slot="2" />
+          <input
+            type="text"
+            class="image-caption"
+            data-slot="2"
+            placeholder="כותרת לתמונה"
+          />
         </div>
         <div class="image-slot" id="slot-3">
           <span class="slot-number">3</span>
           <p>לחץ להעלאת תמונה</p>
           <input type="file" accept="image/*" data-slot="3" />
+          <input
+            type="text"
+            class="image-caption"
+            data-slot="3"
+            placeholder="כותרת לתמונה"
+          />
         </div>
         <div class="image-slot" id="slot-4">
           <span class="slot-number">4</span>
           <p>לחץ להעלאת תמונה</p>
           <input type="file" accept="image/*" data-slot="4" />
+          <input
+            type="text"
+            class="image-caption"
+            data-slot="4"
+            placeholder="כותרת לתמונה"
+          />
         </div>
         <div class="image-slot" id="slot-5">
           <span class="slot-number">5</span>
           <p>לחץ להעלאת תמונה</p>
           <input type="file" accept="image/*" data-slot="5" />
+          <input
+            type="text"
+            class="image-caption"
+            data-slot="5"
+            placeholder="כותרת לתמונה"
+          />
         </div>
         <div class="image-slot" id="slot-6">
           <span class="slot-number">6</span>
           <p>לחץ להעלאת תמונה</p>
           <input type="file" accept="image/*" data-slot="6" />
+          <input
+            type="text"
+            class="image-caption"
+            data-slot="6"
+            placeholder="כותרת לתמונה"
+          />
         </div>
         <div class="image-slot" id="slot-7">
           <span class="slot-number">7</span>
           <p>לחץ להעלאת תמונה</p>
           <input type="file" accept="image/*" data-slot="7" />
+          <input
+            type="text"
+            class="image-caption"
+            data-slot="7"
+            placeholder="כותרת לתמונה"
+          />
         </div>
         <div class="image-slot" id="slot-8">
           <span class="slot-number">8</span>
           <p>לחץ להעלאת תמונה</p>
           <input type="file" accept="image/*" data-slot="8" />
+          <input
+            type="text"
+            class="image-caption"
+            data-slot="8"
+            placeholder="כותרת לתמונה"
+          />
         </div>
       </div>
 
@@ -434,46 +511,62 @@
       <div class="preview-section">
         <h2 class="gallery-title" id="preview-title">גלריית תמונות מסתובבת</h2>
         <div class="preview-container">
-          <span style="--i: 1"
-            ><img
+          <span style="--i: 1">
+            <img
               src="https://logowik.com/content/uploads/images/738_mickeymouse.jpg"
               alt="תמונה 1"
-          /></span>
-          <span style="--i: 2"
-            ><img
+            />
+            <p>כותרת לדוגמה 1</p>
+          </span>
+          <span style="--i: 2">
+            <img
               src="https://logowik.com/content/uploads/images/738_mickeymouse.jpg"
               alt="תמונה 2"
-          /></span>
-          <span style="--i: 3"
-            ><img
+            />
+            <p>כותרת לדוגמה 2</p>
+          </span>
+          <span style="--i: 3">
+            <img
               src="https://logowik.com/content/uploads/images/738_mickeymouse.jpg"
               alt="תמונה 3"
-          /></span>
-          <span style="--i: 4"
-            ><img
+            />
+            <p>כותרת לדוגמה 3</p>
+          </span>
+          <span style="--i: 4">
+            <img
               src="https://logowik.com/content/uploads/images/738_mickeymouse.jpg"
               alt="תמונה 4"
-          /></span>
-          <span style="--i: 5"
-            ><img
+            />
+            <p>כותרת לדוגמה 4</p>
+          </span>
+          <span style="--i: 5">
+            <img
               src="https://logowik.com/content/uploads/images/738_mickeymouse.jpg"
               alt="תמונה 5"
-          /></span>
-          <span style="--i: 6"
-            ><img
+            />
+            <p>כותרת לדוגמה 5</p>
+          </span>
+          <span style="--i: 6">
+            <img
               src="https://logowik.com/content/uploads/images/738_mickeymouse.jpg"
               alt="תמונה 6"
-          /></span>
-          <span style="--i: 7"
-            ><img
+            />
+            <p>כותרת לדוגמה 6</p>
+          </span>
+          <span style="--i: 7">
+            <img
               src="https://logowik.com/content/uploads/images/738_mickeymouse.jpg"
               alt="תמונה 7"
-          /></span>
-          <span style="--i: 8"
-            ><img
+            />
+            <p>כותרת לדוגמה 7</p>
+          </span>
+          <span style="--i: 8">
+            <img
               src="https://logowik.com/content/uploads/images/738_mickeymouse.jpg"
               alt="תמונה 8"
-          /></span>
+            />
+            <p>כותרת לדוגמה 8</p>
+          </span>
         </div>
 
         <div class="preview-buttons">
@@ -490,16 +583,16 @@
     </div>
 
     <script>
-      // מערך לשמירת התמונות שהועלו
+      // מערך לשמירת התמונות והכותרות שהועלו
       const uploadedImages = {
-        1: null,
-        2: null,
-        3: null,
-        4: null,
-        5: null,
-        6: null,
-        7: null,
-        8: null,
+        1: { image: null, caption: "" },
+        2: { image: null, caption: "" },
+        3: { image: null, caption: "" },
+        4: { image: null, caption: "" },
+        5: { image: null, caption: "" },
+        6: { image: null, caption: "" },
+        7: { image: null, caption: "" },
+        8: { image: null, caption: "" },
       };
 
       // התצוגה המקדימה של הקרוסלה
@@ -517,6 +610,22 @@
       // עדכון הכותרת בתצוגה המקדימה בזמן אמת
       titleInput.addEventListener("input", function () {
         previewTitle.textContent = this.value || "גלריית תמונות מסתובבת";
+      });
+
+      // אירועי עדכון כותרות תמונות
+      document.querySelectorAll(".image-caption").forEach((input) => {
+        input.addEventListener("input", function () {
+          const slotNumber = this.dataset.slot;
+          uploadedImages[slotNumber].caption = this.value;
+
+          // עדכון התצוגה המקדימה
+          const previewSpan = previewContainer.querySelector(
+            `span[style*="--i: ${slotNumber}"] p`
+          );
+          if (previewSpan) {
+            previewSpan.textContent = this.value || `כותרת ${slotNumber}`;
+          }
+        });
       });
 
       // אירועי לחיצה על כפתורי התצוגה המקדימה
@@ -572,21 +681,27 @@
       // פונקציה לכיווץ כל התמונות במערך
       async function compressAllImages(imagesObj) {
         const maxWidth = 800; // רוחב מקסימלי
-        const maxHeight = 800; // גובה מקסימלי
-        const quality = 0.7; // איכות התמונה (0-1)
+        const maxHeight = 600; // גובה מקסימלי
+        const quality = 0.8; // איכות התמונה (0-1)
 
         const compressedImages = {};
 
         for (const key in imagesObj) {
-          if (imagesObj[key]) {
-            compressedImages[key] = await compressImage(
-              imagesObj[key],
-              maxWidth,
-              maxHeight,
-              quality
-            );
+          if (imagesObj[key].image) {
+            compressedImages[key] = {
+              image: await compressImage(
+                imagesObj[key].image,
+                maxWidth,
+                maxHeight,
+                quality
+              ),
+              caption: imagesObj[key].caption || `כותרת ${key}`,
+            };
           } else {
-            compressedImages[key] = null;
+            compressedImages[key] = {
+              image: null,
+              caption: imagesObj[key].caption || `כותרת ${key}`,
+            };
           }
         }
 
@@ -608,26 +723,55 @@
       // פונקציה לעדכון התצוגה המקדימה
       function updatePreview() {
         const screenWidth = window.innerWidth;
-        let translateZ = 400; // ערך ברירת מחדל למסכים גדולים
+        let translateZ = 300;
 
         if (screenWidth <= 768) {
-          translateZ = 200; // ערך למסכים בינוניים
+          translateZ = 220;
         }
-
         if (screenWidth <= 480) {
-          translateZ = 150; // ערך למסכים קטנים
+          translateZ = 180;
         }
 
-        // עדכון כל התמונות במרחק המתאים
-        document.querySelectorAll(".preview-container span").forEach((span) => {
-          const i = span.style.getPropertyValue("--i");
+        // איפוס תצוגה קודמת
+        previewContainer.innerHTML = "";
+
+        for (let i = 1; i <= 8; i++) {
+          const data = uploadedImages[i];
+
+          const span = document.createElement("span");
+          span.style.setProperty("--i", i);
           span.style.transform = `rotateY(calc(${i} * 45deg)) translateZ(${translateZ}px)`;
-        });
+
+          const img = document.createElement("img");
+          img.src =
+            data.image ||
+            "https://logowik.com/content/uploads/images/738_mickeymouse.jpg";
+          img.alt = `תמונה ${i}`;
+          img.style.width = "100%";
+          img.style.maxHeight = "180px";
+          img.style.display = "block";
+          img.style.objectFit = "contain";
+
+          const caption = document.createElement("p");
+          caption.textContent = data.caption || `כותרת ${i}`;
+          caption.style.marginTop = "10px";
+          caption.style.display = "block";
+          caption.style.width = "100%";
+          caption.style.textAlign = "center";
+          caption.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
+          caption.style.padding = "5px 0";
+          caption.style.borderRadius = "3px";
+
+          span.appendChild(img);
+          span.appendChild(caption);
+          previewContainer.appendChild(span);
+        }
 
         previewContainer.style.transform = `perspective(1000px) rotateY(${x}deg)`;
 
+        clearTimeout(timer);
         timer = setTimeout(() => {
-          x = x - 45;
+          x -= 45;
           updatePreview();
         }, 3000);
       }
@@ -642,104 +786,213 @@
       updatePreview();
 
       // אירועי העלאת תמונות
-      // אירועי העלאת תמונות - עדכון הפונקציה
-      document.querySelectorAll(".image-slot input").forEach((input) => {
-        input.addEventListener("change", async function (e) {
-          const file = e.target.files[0];
-          const slotNumber = this.dataset.slot;
+      document
+        .querySelectorAll(".image-slot input[type='file']")
+        .forEach((input) => {
+          input.addEventListener("change", async function (e) {
+            const file = e.target.files[0];
+            const slotNumber = this.dataset.slot;
 
-          if (file) {
-            // הצגת הודעת טעינה בסלוט
-            const slot = document.getElementById(`slot-${slotNumber}`);
-            while (slot.firstChild) {
-              slot.removeChild(slot.firstChild);
-            }
+            if (file) {
+              // שמירת ערך הכותרת הנוכחי לפני ניקוי הסלוט
+              const slot = document.getElementById(`slot-${slotNumber}`);
+              const existingCaption = uploadedImages[slotNumber].caption || "";
 
-            const loadingText = document.createElement("p");
-            loadingText.textContent = "מכווץ תמונה...";
+              // שמירת שדה הקלט של הקובץ לפני ניקוי
+              const fileInput = this;
 
-            const numberSpan = document.createElement("span");
-            numberSpan.className = "slot-number";
-            numberSpan.textContent = slotNumber;
-
-            slot.appendChild(loadingText);
-            slot.appendChild(numberSpan);
-            slot.appendChild(input);
-
-            try {
-              const reader = new FileReader();
-              reader.onload = async function (event) {
-                // שמירת התמונה המקורית שהועלתה
-                const originalImage = event.target.result;
-
-                // כיווץ התמונה
-                const compressedImage = await compressImage(
-                  originalImage,
-                  800,
-                  800,
-                  0.7
-                );
-                uploadedImages[slotNumber] = compressedImage;
-
-                // חישוב החיסכון בנפח
-                const originalSize = estimateSize(originalImage);
-                const compressedSize = estimateSize(compressedImage);
-                const savedPercent = Math.round(
-                  (1 - compressedSize / originalSize) * 100
-                );
-
-                // עדכון תצוגת הסלוט
-                while (slot.firstChild) {
-                  slot.removeChild(slot.firstChild);
-                }
-
-                const img = document.createElement("img");
-                img.src = compressedImage;
-
-                const infoText = document.createElement("p");
-                infoText.textContent = `חיסכון: ${savedPercent}%`;
-                infoText.style.position = "absolute";
-                infoText.style.bottom = "5px";
-                infoText.style.left = "0";
-                infoText.style.right = "0";
-                infoText.style.backgroundColor = "rgba(0,0,0,0.5)";
-                infoText.style.color = "white";
-                infoText.style.margin = "0";
-                infoText.style.padding = "2px";
-                infoText.style.fontSize = "12px";
-
-                slot.appendChild(img);
-                slot.appendChild(infoText);
-                slot.appendChild(numberSpan);
-                slot.appendChild(input);
-
-                // עדכון התצוגה המקדימה של הקרוסלה
-                const previewImg = previewContainer.querySelector(
-                  `span[style*="--i: ${slotNumber}"] img`
-                );
-                previewImg.src = compressedImage;
-              };
-              reader.readAsDataURL(file);
-            } catch (error) {
-              console.error("שגיאה בהעלאת התמונה:", error);
-
-              // במקרה של שגיאה, חזרה לתצוגה הרגילה
+              // ניקוי הסלוט
               while (slot.firstChild) {
                 slot.removeChild(slot.firstChild);
               }
 
-              const errorText = document.createElement("p");
-              errorText.textContent = "שגיאה בהעלאה";
+              // יצירת מסגרת לתצוגת התמונה
+              const imageWrapper = document.createElement("div");
+              imageWrapper.className = "image-wrapper";
+              imageWrapper.style.height = "75%";
+              imageWrapper.style.width = "100%";
+              imageWrapper.style.display = "flex";
+              imageWrapper.style.alignItems = "center";
+              imageWrapper.style.justifyContent = "center";
 
-              slot.appendChild(errorText);
+              const loadingText = document.createElement("p");
+              loadingText.textContent = "מכווץ תמונה...";
+              imageWrapper.appendChild(loadingText);
+
+              // יצירת מסגרת לשדה הכותרת
+              const captionWrapper = document.createElement("div");
+              captionWrapper.className = "caption-wrapper";
+              captionWrapper.style.height = "25%";
+              captionWrapper.style.width = "100%";
+              captionWrapper.style.position = "absolute";
+              captionWrapper.style.bottom = "0";
+              captionWrapper.style.display = "flex";
+              captionWrapper.style.alignItems = "center";
+              captionWrapper.style.justifyContent = "center";
+              captionWrapper.style.zIndex = "30";
+
+              const captionInput = document.createElement("input");
+              captionInput.type = "text";
+              captionInput.className = "image-caption";
+              captionInput.dataset.slot = slotNumber;
+              captionInput.placeholder = "כותרת לתמונה";
+              captionInput.value = existingCaption;
+              captionInput.style.width = "90%";
+              captionInput.style.padding = "8px";
+              captionInput.style.border = "1px solid rgba(108, 92, 231, 0.5)";
+              captionInput.style.borderRadius = "4px";
+              captionInput.style.backgroundColor = "white";
+              captionInput.style.zIndex = "30";
+
+              captionWrapper.appendChild(captionInput);
+
+              const numberSpan = document.createElement("span");
+              numberSpan.className = "slot-number";
+              numberSpan.textContent = slotNumber;
+
+              // סידור האלמנטים בסלוט
+              slot.appendChild(imageWrapper);
+              slot.appendChild(captionWrapper);
               slot.appendChild(numberSpan);
-              slot.appendChild(input);
-            }
-          }
-        });
-      });
+              slot.appendChild(fileInput); // החזרת שדה הקלט של הקובץ
 
-      // פונקציה ליצירת והורדת קובץ HTML
+              // הוספת אירוע לשמירת הכותרת
+              captionInput.addEventListener("input", function () {
+                const slotNum = this.dataset.slot;
+                uploadedImages[slotNum].caption = this.value;
+
+                // עדכון התצוגה המקדימה
+                const previewSpan = previewContainer.querySelector(
+                  `span[style*="--i: ${slotNum}"] p`
+                );
+                if (previewSpan) {
+                  previewSpan.textContent = this.value || `כותרת ${slotNum}`;
+                }
+              });
+
+              try {
+                const reader = new FileReader();
+                reader.onload = async function (event) {
+                  // שמירת התמונה המקורית שהועלתה
+                  const originalImage = event.target.result;
+
+                  // כיווץ התמונה
+                  const compressedImage = await compressImage(
+                    originalImage,
+                    800,
+                    600,
+                    0.8
+                  );
+                  uploadedImages[slotNumber].image = compressedImage;
+
+                  // חישוב החיסכון בנפח
+                  const originalSize = estimateSize(originalImage);
+                  const compressedSize = estimateSize(compressedImage);
+                  const savedPercent = Math.round(
+                    (1 - compressedSize / originalSize) * 100
+                  );
+
+                  // עדכון תצוגת הסלוט
+                  while (slot.firstChild) {
+                    slot.removeChild(slot.firstChild);
+                  }
+
+                  // יצירת מיכל כללי לשמירה על מבנה נכון
+                  const slotContent = document.createElement("div");
+                  slotContent.style.position = "relative";
+                  slotContent.style.width = "100%";
+                  slotContent.style.height = "100%";
+
+                  // יצירת מיכל תמונה
+                  const img = document.createElement("img");
+                  img.src = compressedImage;
+                  img.style.maxHeight = "70%";
+                  img.style.maxWidth = "90%";
+                  img.style.objectFit = "contain";
+
+                  const imgWrapper = document.createElement("div");
+                  imgWrapper.style.height = "70%";
+                  imgWrapper.style.width = "100%";
+                  imgWrapper.style.display = "flex";
+                  imgWrapper.style.alignItems = "center";
+                  imgWrapper.style.justifyContent = "center";
+                  imgWrapper.appendChild(img);
+
+                  // יצירת מיכל לכותרת
+                  const captionWrapper = document.createElement("div");
+                  captionWrapper.style.position = "absolute";
+                  captionWrapper.style.bottom = "-35px";
+                  captionWrapper.style.left = "0";
+                  captionWrapper.style.width = "100%";
+                  captionWrapper.appendChild(captionInput);
+
+                  const infoText = document.createElement("p");
+                  infoText.textContent = `חיסכון: ${savedPercent}%`;
+                  infoText.style.fontSize = "12px";
+                  infoText.style.color = "var(--light-text)";
+                  infoText.style.marginTop = "5px";
+                  infoText.style.textAlign = "center";
+
+                  // סידור אלמנטים בסדר הנכון
+                  slotContent.appendChild(imgWrapper);
+                  slotContent.appendChild(infoText);
+                  slotContent.appendChild(numberSpan);
+                  slotContent.appendChild(captionWrapper);
+
+                  // הוספה לסלוט
+                  slot.appendChild(slotContent);
+                  slot.appendChild(this); // שדה הקלט של הקובץ
+
+                  // עדכון התצוגה המקדימה של הקרוסלה
+                  let currentSpan = previewContainer.querySelector(
+                    `span[style*="--i: ${slotNumber}"]`
+                  );
+                  if (!currentSpan) {
+                    currentSpan = document.createElement("span");
+                    currentSpan.style.setProperty("--i", slotNumber);
+                    const img = document.createElement("img");
+                    const p = document.createElement("p");
+                    currentSpan.appendChild(img);
+                    currentSpan.appendChild(p);
+                    previewContainer.appendChild(currentSpan);
+                  }
+                  if (currentSpan) {
+                    const img = currentSpan.querySelector("img");
+                    const p = currentSpan.querySelector("p");
+
+                    img.src = uploadedImages[slotNumber].image;
+                    img.alt = `תמונה ${slotNumber}`;
+                    p.textContent =
+                      uploadedImages[slotNumber].caption ||
+                      `כותרת ${slotNumber}`;
+                  }
+
+                  // איפוס הסיבוב והתחלת התצוגה מחדש
+                  x = 0;
+                  clearTimeout(timer);
+                  updatePreview();
+                };
+                reader.readAsDataURL(file);
+              } catch (error) {
+                console.error("שגיאה בהעלאת התמונה:", error);
+
+                // במקרה של שגיאה, חזרה לתצוגה הרגילה
+                while (slot.firstChild) {
+                  slot.removeChild(slot.firstChild);
+                }
+
+                const errorText = document.createElement("p");
+                errorText.textContent = "שגיאה בהעלאה";
+
+                slot.appendChild(errorText);
+                slot.appendChild(numberSpan);
+                slot.appendChild(this);
+                slot.appendChild(captionInput);
+              }
+            }
+          });
+        });
+
       // אירוע לחיצה על כפתור היצירה וההורדה
       generateBtn.addEventListener("click", async function () {
         // הצגת הודעת טעינה
@@ -748,7 +1001,7 @@
 
         // בדיקה אם כל התמונות הועלו
         const allUploaded = Object.values(uploadedImages).every(
-          (img) => img !== null
+          (imgObj) => imgObj.image !== null
         );
 
         if (!allUploaded) {
@@ -773,6 +1026,26 @@
           const fileName = `${galleryTitle
             .replace(/[^\w\u0590-\u05FF\s]/g, "")
             .replace(/\s+/g, "-")}.html`;
+
+          function updatePreviewContainerSize() {
+            // בדיקה אם יש תמונות שהועלו
+            let hasImages = false;
+            for (const key in uploadedImages) {
+              if (uploadedImages[key].image) {
+                hasImages = true;
+                break;
+              }
+            }
+
+            // עדכון גודל התצוגה המקדימה בהתאם
+            if (hasImages) {
+              document.querySelector(".preview-section").style.minHeight =
+                "550px";
+            }
+          }
+
+          // קריאה לפונקציה בכל פעם שמעלים תמונה
+          updatePreviewContainerSize();
 
           // יצירת תוכן ה-HTML
           const template = `<!DOCTYPE html>
@@ -801,14 +1074,14 @@
         margin-bottom: 100px;
       }
 
-      .image-container {
-        position: relative;
-        width: 200px;
-        height: 200px;
-        transform-style: preserve-3d;
-        transform: perspective(1000px) rotateY(0deg);
-        transition: transform 0.7s;
-      }
+.image-container {
+  position: relative;
+  width: 200px;
+  height: 240px;
+  transform-style: preserve-3d;
+  transform: perspective(1000px) rotateY(0deg);
+  transition: transform 0.7s;
+}
 
       .image-container span {
         position: absolute;
@@ -818,28 +1091,42 @@
         transform: rotateY(calc(var(--i) * 45deg)) translateZ(400px);
       }
 
-      .image-container span img {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-      }
+.image-container span img {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.image-container span p {
+  position: relative;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 0;
+  border-radius: 5px;
+  margin: 0;
+}
 
       .btn-container {
         position: relative;
         width: 80%;
       }
 
-      .btn {
-        position: absolute;
-        bottom: -80px;
-        background-color: slateblue;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-      }
+.btn {
+  position: absolute;
+  bottom: -100px;
+  background-color: slateblue;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
       .btn:hover {
         filter: brightness(1.5);
@@ -858,28 +1145,36 @@
     <h1>${galleryTitle}</h1>
     <div class="image-container">
       <span style="--i: 1">
-        <img src="${compressedImages[1]}" />
+        <img src="${compressedImages[1].image}" />
+        <p>${compressedImages[1].caption}</p>
       </span>
       <span style="--i: 2">
-        <img src="${compressedImages[2]}" />
+        <img src="${compressedImages[2].image}" />
+        <p>${compressedImages[2].caption}</p>
       </span>
       <span style="--i: 3">
-        <img src="${compressedImages[3]}" />
+        <img src="${compressedImages[3].image}" />
+        <p>${compressedImages[3].caption}</p>
       </span>
       <span style="--i: 4">
-        <img src="${compressedImages[4]}" />
+        <img src="${compressedImages[4].image}" />
+        <p>${compressedImages[4].caption}</p>
       </span>
       <span style="--i: 5">
-        <img src="${compressedImages[5]}" />
+        <img src="${compressedImages[5].image}" />
+        <p>${compressedImages[5].caption}</p>
       </span>
       <span style="--i: 6">
-        <img src="${compressedImages[6]}" />
+        <img src="${compressedImages[6].image}" />
+        <p>${compressedImages[6].caption}</p>
       </span>
       <span style="--i: 7">
-        <img src="${compressedImages[7]}" />
+        <img src="${compressedImages[7].image}" />
+        <p>${compressedImages[7].caption}</p>
       </span>
       <span style="--i: 8">
-        <img src="${compressedImages[8]}" />
+        <img src="${compressedImages[8].image}" />
+        <p>${compressedImages[8].caption}</p>
       </span>
     </div>
     <div class="btn-container">
