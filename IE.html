@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>המרת והתאמת תמונות</title>
+    <style>
+      :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --primary-light: #bec9ff;
+        --secondary: #3f37c9;
+        --accent: #4cc9f0;
+        --success: #4ade80;
+        --warning: #fb8500;
+        --danger: #ef476f;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray-100: #f8f9fa;
+        --gray-200: #e9ecef;
+        --gray-300: #dee2e6;
+        --gray-400: #ced4da;
+        --gray-500: #adb5bd;
+        --gray-600: #6c757d;
+        --gray-700: #495057;
+        --gray-800: #343a40;
+        --gray-900: #212529;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #cbcaff;
+        color: var(--gray-800);
+        line-height: 1.6;
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .app-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background-color: rgba(255, 255, 255, 0.521);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+        overflow: hidden;
+      }
+
+      header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 15px 30px;
+        text-align: center;
+        position: relative;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 34px;
+        font-weight: 700;
+      }
+
+      .main-content {
+        padding: 10px;
+      }
+
+      .card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+        margin-bottom: 24px;
+        overflow: hidden;
+      }
+
+      .card-header {
+        background-color: var(--primary-light);
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--gray-700);
+        font-weight: 600;
+        color: var(--gray-900);
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+      }
+
+      .card-header i {
+        margin-left: 10px;
+        color: var(--primary);
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+
+      .file-upload {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .file-upload input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 2;
+      }
+
+      .upload-btn {
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 30px;
+        background-color: var(--primary);
+        color: white;
+        border-radius: 8px;
+        font-weight: 500;
+        margin-bottom: 15px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+      }
+
+      .upload-btn:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .upload-btn i {
+        margin-left: 8px;
+      }
+
+      .preview-container {
+        width: 100%;
+        min-height: 300px;
+        border: 2px dashed var(--gray-300);
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        transition: all 0.3s ease;
+        background-color: var(--gray-100);
+        overflow: hidden;
+      }
+
+      .preview-container.active {
+        border-color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.05);
+      }
+
+      #imagePreview {
+        max-width: 100%;
+        max-height: 400px;
+        display: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      #dropArea {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        box-sizing: border-box;
+        text-align: center;
+        color: var(--gray-600);
+      }
+
+      #dropArea i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: var(--gray-600);
+      }
+
+      .controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .rotate-buttons,
+      .flip-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .control-group label {
+        margin-bottom: 8px;
+        color: var(--gray-700);
+        font-weight: 500;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        border: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background-color: var(--primary-light);
+        color: var(--gray-900);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--gray-300);
+        transform: translateY(-2px);
+      }
+
+      .btn-success {
+        background-color: var(--success);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background-color: #3db672;
+        transform: translateY(-2px);
+      }
+
+      .btn-danger {
+        background-color: var(--danger);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background-color: #d63e69;
+        transform: translateY(-2px);
+      }
+
+      .btn-icon {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-icon i {
+        font-size: 18px;
+      }
+
+      .aspect-ratio-btn {
+        padding: 10px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        background-color: var(--primary-light);
+        color: var(--gray-900);
+        font-weight: 500;
+        border: none;
+        transition: all 0.3s ease;
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+
+      .aspect-ratio-btn:hover {
+        background-color: var(--gray-300);
+        transform: translateY(-2px);
+      }
+
+      .aspect-ratio-btn.active {
+        background-color: var(--primary);
+        color: white;
+      }
+
+      select,
+      input[type="range"] {
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--gray-300);
+        font-size: 16px;
+        background-color: white;
+        transition: all 0.3s ease;
+      }
+
+      select:focus,
+      input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      }
+
+      select {
+        cursor: pointer;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 30px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: left 10px center;
+        background-size: 16px;
+        padding-left: 35px;
+      }
+
+      .range-container {
+        display: flex;
+        align-items: center;
+      }
+
+      input[type="range"] {
+        flex: 1;
+        height: 8px;
+        padding: 0;
+        background: var(--gray-300);
+        border-radius: 4px;
+        -webkit-appearance: none;
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary);
+        cursor: pointer;
+        border: none;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary);
+        cursor: pointer;
+        border: none;
+      }
+
+      #qualityValue {
+        width: 50px;
+        text-align: center;
+        background-color: white;
+        padding: 6px 0;
+        border-radius: 6px;
+        margin-right: 10px;
+        font-weight: 500;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .loading {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.8);
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        border-radius: 12px;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(67, 97, 238, 0.1);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spinner 0.8s linear infinite;
+      }
+
+      @keyframes spinner {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .btn-group {
+        justify-content: center;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .btn-with-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn-with-icon i {
+        margin-left: 8px;
+      }
+
+      @media (max-width: 768px) {
+        .main-content {
+          padding: 15px;
+        }
+
+        .card-header {
+          padding: 12px 15px;
+        }
+
+        .card-body {
+          padding: 15px;
+        }
+
+        .control-group {
+          min-width: 100%;
+        }
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 20px;
+        color: var(--primary-dark);
+        font-size: 16px;
+        border-top: 1px solid var(--gray-200);
+      }
+    </style>
+    <!-- Font Awesome icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <h1>המרת והתאמת תמונות</h1>
+      </header>
+
+      <div class="main-content">
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-cloud-upload-alt"></i>
+            העלאת תמונה
+          </div>
+          <div class="card-body">
+            <div class="file-upload">
+              <button class="upload-btn">
+                <i class="fas fa-plus"></i>
+                בחר תמונה
+              </button>
+              <input type="file" id="imageUpload" accept="image/*" />
+            </div>
+            <div class="preview-container">
+              <div id="dropArea">
+                <i class="fas fa-images"></i>
+                <p>גרור ושחרר תמונה כאן</p>
+                <p style="font-size: 14px; color: var(--gray-500)">
+                  או לחץ על "בחר תמונה" לעיל
+                </p>
+              </div>
+              <img id="imagePreview" alt="תצוגה מקדימה" />
+              <div class="loading">
+                <div class="spinner"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-crop-alt"></i>
+            יחס רוחב-גובה
+          </div>
+          <div class="card-body">
+            <div class="btn-group">
+              <button class="aspect-ratio-btn" data-ratio="16:9">16:9</button>
+              <button class="aspect-ratio-btn" data-ratio="9:16">9:16</button>
+              <button class="aspect-ratio-btn" data-ratio="4:3">4:3</button>
+              <button class="aspect-ratio-btn" data-ratio="3:4">3:4</button>
+              <button class="aspect-ratio-btn" data-ratio="1:1">1:1</button>
+              <button class="aspect-ratio-btn active" data-ratio="original">
+                מקורי
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-sync-alt"></i>
+            סיבוב והיפוך
+          </div>
+          <div class="card-body">
+            <div class="controls">
+              <div class="rotate-buttons">
+                <button id="rotateLeft" class="btn btn-secondary btn-with-icon">
+                  <i class="fas fa-undo"></i>
+                  סובב 45° שמאלה
+                </button>
+                <button
+                  id="rotateRight"
+                  class="btn btn-secondary btn-with-icon"
+                >
+                  <i class="fas fa-redo"></i>
+                  סובב 45° ימינה
+                </button>
+              </div>
+              <div class="flip-buttons">
+                <button
+                  id="flipVertical"
+                  class="btn btn-secondary btn-with-icon"
+                >
+                  <i class="fas fa-arrows-alt-v"></i>
+                  היפוך אנכי
+                </button>
+                <button
+                  id="flipHorizontal"
+                  class="btn btn-secondary btn-with-icon"
+                >
+                  <i class="fas fa-arrows-alt-h"></i>
+                  היפוך אופקי
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <i class="fas fa-file-export"></i>
+            פורמט וכיווץ
+          </div>
+          <div class="card-body">
+            <div class="controls">
+              <div class="control-group">
+                <label for="formatSelect">פורמט:</label>
+                <select id="formatSelect">
+                  <option value="jpeg">JPEG</option>
+                  <option value="png">PNG</option>
+                  <option value="webp">WebP</option>
+                  <option value="gif">GIF</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label for="qualitySlider">איכות:</label>
+                <div class="range-container">
+                  <input
+                    type="range"
+                    id="qualitySlider"
+                    min="1"
+                    max="100"
+                    value="90"
+                  />
+                  <span id="qualityValue">90%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="downloadBtn" class="btn btn-primary btn-with-icon">
+            <i class="fas fa-download"></i>
+            הורד תמונה
+          </button>
+          <button id="resetBtn" class="btn btn-danger btn-with-icon">
+            <i class="fas fa-undo-alt"></i>
+            אפס שינויים
+          </button>
+        </div>
+      </div>
+
+      <footer>&copy; 2025 כל הזכויות שמורות OG</footer>
+    </div>
+
+    <script>
+      // משתנים גלובליים
+      let originalImage = null;
+      let currentImage = null;
+      let currentRotation = 0;
+      let isFlippedHorizontal = false;
+      let isFlippedVertical = false;
+      let selectedAspectRatio = "original";
+
+      // יסודות DOM
+      const imageUpload = document.getElementById("imageUpload");
+      const imagePreview = document.getElementById("imagePreview");
+      const dropArea = document.getElementById("dropArea");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const rotateLeftBtn = document.getElementById("rotateLeft");
+      const rotateRightBtn = document.getElementById("rotateRight");
+      const flipVerticalBtn = document.getElementById("flipVertical");
+      const flipHorizontalBtn = document.getElementById("flipHorizontal");
+      const formatSelect = document.getElementById("formatSelect");
+      const qualitySlider = document.getElementById("qualitySlider");
+      const qualityValue = document.getElementById("qualityValue");
+      const aspectRatioBtns = document.querySelectorAll(".aspect-ratio-btn");
+      const loading = document.querySelector(".loading");
+      const previewContainer = document.querySelector(".preview-container");
+
+      // אירועי העלאת קבצים
+      imageUpload.addEventListener("change", handleFileSelect);
+
+      // אירועי drag and drop
+      previewContainer.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        previewContainer.classList.add("active");
+      });
+
+      previewContainer.addEventListener("dragleave", () => {
+        previewContainer.classList.remove("active");
+      });
+
+      previewContainer.addEventListener("drop", (e) => {
+        e.preventDefault();
+        previewContainer.classList.remove("active");
+
+        if (e.dataTransfer.files.length) {
+          imageUpload.files = e.dataTransfer.files;
+          handleFileSelect(e);
+        }
+      });
+
+      dropArea.addEventListener("click", () => {
+        imageUpload.click();
+      });
+
+      // אירועי כפתורים
+      downloadBtn.addEventListener("click", downloadImage);
+      resetBtn.addEventListener("click", resetChanges);
+      rotateLeftBtn.addEventListener("click", () => rotateImage(-45));
+      rotateRightBtn.addEventListener("click", () => rotateImage(45));
+      flipVerticalBtn.addEventListener("click", flipVertical);
+      flipHorizontalBtn.addEventListener("click", flipHorizontal);
+
+      // אירועי שינוי איכות
+      qualitySlider.addEventListener("input", () => {
+        qualityValue.textContent = qualitySlider.value + "%";
+        applyChanges();
+      });
+
+      // אירועי פורמט
+      formatSelect.addEventListener("change", applyChanges);
+
+      // אירועי יחס מסך
+      aspectRatioBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          aspectRatioBtns.forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          selectedAspectRatio = btn.dataset.ratio;
+          applyChanges();
+        });
+      });
+
+      // כפתור העלאה
+      document.querySelector(".upload-btn").addEventListener("click", () => {
+        imageUpload.click();
+      });
+
+      // פונקציה לטיפול בבחירת קובץ
+      function handleFileSelect(e) {
+        const file = e.target.files[0] || e.dataTransfer.files[0];
+        if (!file || !file.type.startsWith("image/")) return;
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const img = new Image();
+          img.onload = function () {
+            originalImage = img;
+            resetChanges();
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // פונקציה לאיפוס שינויים
+      function resetChanges() {
+        if (!originalImage) return;
+
+        currentRotation = 0;
+        isFlippedHorizontal = false;
+        isFlippedVertical = false;
+        qualitySlider.value = 90;
+        qualityValue.textContent = "90%";
+
+        // איפוס יחס גובה-רוחב
+        aspectRatioBtns.forEach((btn) => btn.classList.remove("active"));
+        document
+          .querySelector('[data-ratio="original"]')
+          .classList.add("active");
+        selectedAspectRatio = "original";
+
+        applyChanges();
+      }
+
+      // פונקציה לסיבוב התמונה
+      function rotateImage(degrees) {
+        if (!originalImage) return;
+
+        currentRotation = (currentRotation + degrees) % 360;
+        applyChanges();
+      }
+
+      // פונקציה להיפוך אנכי
+      function flipVertical() {
+        if (!originalImage) return;
+
+        isFlippedVertical = !isFlippedVertical;
+        applyChanges();
+      }
+
+      // פונקציה להיפוך אופקי
+      function flipHorizontal() {
+        if (!originalImage) return;
+
+        isFlippedHorizontal = !isFlippedHorizontal;
+        applyChanges();
+      }
+
+      // פונקציה להחלת השינויים על התמונה
+      function applyChanges() {
+        if (!originalImage) return;
+
+        loading.style.display = "flex";
+
+        setTimeout(() => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          // חישוב מידות לפי יחס מסך
+          let width = originalImage.width;
+          let height = originalImage.height;
+
+          if (selectedAspectRatio !== "original") {
+            const [widthRatio, heightRatio] = selectedAspectRatio
+              .split(":")
+              .map(Number);
+
+            if (width / height > widthRatio / heightRatio) {
+              width = height * (widthRatio / heightRatio);
+            } else {
+              height = width * (heightRatio / widthRatio);
+            }
+          }
+
+          // התאם את גודל הקנבס בהתאם לסיבוב
+          if (currentRotation % 180 === 0) {
+            canvas.width = width;
+            canvas.height = height;
+          } else {
+            // כאשר מסובבים ב-90 או 270 מעלות יש להחליף בין רוחב וגובה
+            canvas.width = height;
+            canvas.height = width;
+          }
+
+          // העבר את המקור לאמצע הקנבס
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+
+          // סיבוב
+          ctx.rotate((currentRotation * Math.PI) / 180);
+
+          // היפוך
+          ctx.scale(isFlippedHorizontal ? -1 : 1, isFlippedVertical ? -1 : 1);
+
+          // ציור התמונה במרכז
+          ctx.drawImage(originalImage, -width / 2, -height / 2, width, height);
+
+          // המרה לפורמט הנבחר
+          const quality = qualitySlider.value / 100;
+          const format = formatSelect.value;
+          let mimeType;
+
+          switch (format) {
+            case "jpeg":
+              mimeType = "image/jpeg";
+              break;
+            case "png":
+              mimeType = "image/png";
+              break;
+            case "webp":
+              mimeType = "image/webp";
+              break;
+            case "gif":
+              mimeType = "image/gif";
+              break;
+            default:
+              mimeType = "image/jpeg";
+          }
+
+          // עדכון התצוגה המקדימה
+          const dataURL = canvas.toDataURL(mimeType, quality);
+          imagePreview.src = dataURL;
+          imagePreview.style.display = "block";
+          dropArea.style.display = "none";
+          currentImage = dataURL;
+
+          loading.style.display = "none";
+        }, 50); // מעט השהיה כדי לאפשר הצגת ה-loading
+      }
+
+      // פונקציה להורדת התמונה
+      function downloadImage() {
+        if (!currentImage) return;
+
+        const format = formatSelect.value;
+        const link = document.createElement("a");
+        link.download = `edited_image.${format}`;
+        link.href = currentImage;
+        link.click();
+      }
+
+      // הפעלת הנפשות כפתורים בעת לחיצה
+      const allButtons = document.querySelectorAll(".btn, .aspect-ratio-btn");
+      allButtons.forEach((button) => {
+        button.addEventListener("mousedown", function () {
+          this.style.transform = "scale(0.95)";
+        });
+
+        button.addEventListener("mouseup", function () {
+          this.style.transform = "";
+        });
+
+        button.addEventListener("mouseleave", function () {
+          this.style.transform = "";
+        });
+      });
+    </script>
+  </body>
+</html>
