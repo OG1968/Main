@@ -53,7 +53,8 @@
       }
 
       input[type="text"],
-      select {
+      select,
+      input[type="range"] {
         width: 100%;
         padding: 5px;
         border: 1px solid #ddd;
@@ -217,6 +218,27 @@
         max-width: 200px;
       }
 
+      .quality-container {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+      }
+
+      .range-value-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+      }
+
+      .file-size-indicator {
+        margin-top: 10px;
+        padding: 8px;
+        background-color: #f1f1f1;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+      }
+
       @media (max-width: 768px) {
         .preview-item {
           width: calc(50% - 8px);
@@ -285,6 +307,37 @@
       </div>
 
       <div class="form-group">
+        <label>איכות כיווץ התמונות:</label>
+        <div class="quality-container">
+          <input
+            type="range"
+            id="image-quality"
+            min="30"
+            max="100"
+            value="80"
+          />
+          <div class="range-value-container">
+            <span>דחיסה מרבית</span>
+            <span id="quality-value">80%</span>
+            <span>איכות מרבית</span>
+          </div>
+        </div>
+        <div id="file-size-indicator" class="file-size-indicator">
+          גודל משוער של הקובץ: מחושב...
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>רזולוציית תמונות מקסימלית:</label>
+        <select id="max-resolution">
+          <option value="800">קטן - 800px</option>
+          <option value="1200" selected>בינוני - 1200px</option>
+          <option value="1600">גדול - 1600px</option>
+          <option value="0">מקורי - ללא שינוי</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label>תמונות הגלריה (3-10 תמונות):</label>
         <div id="image-inputs-container">
           <!-- Dynamic inputs will be added here -->
@@ -322,10 +375,32 @@
         const imagePreview = document.getElementById("image-preview");
         const galleryTitleInput = document.getElementById("gallery-title");
         const bgImageInput = document.getElementById("bg-image");
+        const imageQualitySlider = document.getElementById("image-quality");
+        const qualityValueDisplay = document.getElementById("quality-value");
+        const maxResolutionSelect = document.getElementById("max-resolution");
+        const fileSizeIndicator = document.getElementById(
+          "file-size-indicator"
+        );
 
         // Initialize data arrays
         let imagesData = [];
+        let originalImagesData = [];
         let bgImageData = null;
+        let originalBgImageData = null;
+        let totalOriginalSize = 0;
+        let totalCompressedSize = 0;
+
+        // Display initial quality value
+        qualityValueDisplay.textContent = `${imageQualitySlider.value}%`;
+
+        // Update quality value display when slider changes
+        imageQualitySlider.addEventListener("input", function () {
+          qualityValueDisplay.textContent = `${this.value}%`;
+          updateFileSizeEstimate();
+        });
+
+        // Update size estimate when max resolution changes
+        maxResolutionSelect.addEventListener("change", updateFileSizeEstimate);
 
         // Initialize with 3 image inputs
         for (let i = 0; i < 3; i++) {
@@ -368,6 +443,7 @@
           removeBtn.addEventListener("click", function () {
             if (imageInputsContainer.children.length > 3) {
               imageInputsContainer.removeChild(group);
+              updateFileSizeEstimate();
             } else {
               alert("חובה לבחור לפחות 3 תמונות");
             }
@@ -378,12 +454,14 @@
           group.appendChild(removeBtn);
           imageInputsContainer.appendChild(group);
 
-          // Update button text when file is selected
+          // Update button text and file size when file is selected
           fileInput.addEventListener("change", function () {
             if (this.files && this.files[0]) {
               fileInputBtn.textContent = this.files[0].name;
+              updateFileSizeEstimate();
             } else {
               fileInputBtn.textContent = "בחר תמונה";
+              updateFileSizeEstimate();
             }
           });
         }
@@ -404,6 +482,117 @@
             reader.onload = () => resolve(reader.result);
             reader.onerror = () => reject(new Error("בעיה בקריאת הקובץ"));
             reader.readAsDataURL(file);
+          });
+        }
+
+        // Estimate file size
+        function updateFileSizeEstimate() {
+          try {
+            const inputs =
+              imageInputsContainer.querySelectorAll(".image-input-group");
+            let totalFiles = 0;
+            let totalSize = 0;
+
+            // Count selected files and their sizes
+            inputs.forEach((input) => {
+              const fileInput = input.querySelector('input[type="file"]');
+              if (fileInput.files && fileInput.files[0]) {
+                totalFiles++;
+                totalSize += fileInput.files[0].size;
+              }
+            });
+
+            // Add background image size if selected
+            if (bgImageInput.files && bgImageInput.files[0]) {
+              totalSize += bgImageInput.files[0].size;
+              totalFiles++;
+            }
+
+            // No files selected yet
+            if (totalFiles === 0) {
+              fileSizeIndicator.textContent =
+                "גודל משוער של הקובץ: לא נבחרו תמונות";
+              return;
+            }
+
+            // Get compression settings
+            const quality = imageQualitySlider.value / 100;
+            const maxResolution = parseInt(maxResolutionSelect.value);
+
+            // Estimate compression ratio based on quality and resolution
+            let compressionRatio = quality;
+
+            // Additional reduction if resizing is enabled
+            if (maxResolution > 0) {
+              // Rough estimate: assume original images are twice the selected resolution on average
+              compressionRatio *= 0.7;
+            }
+
+            totalOriginalSize = totalSize;
+            totalCompressedSize = Math.round(totalSize * compressionRatio);
+
+            // Format sizes
+            const originalSizeFormatted = formatFileSize(totalOriginalSize);
+            const compressedSizeFormatted = formatFileSize(totalCompressedSize);
+            const savingsPercent = Math.round((1 - compressionRatio) * 100);
+
+            fileSizeIndicator.textContent =
+              `גודל מקורי: ${originalSizeFormatted} | ` +
+              `גודל לאחר כיווץ: ${compressedSizeFormatted} | ` +
+              `חיסכון: ${savingsPercent}%`;
+          } catch (error) {
+            console.error("Error updating file size estimate:", error);
+            fileSizeIndicator.textContent = "שגיאה בחישוב גודל הקובץ";
+          }
+        }
+
+        // Format file size in KB/MB
+        function formatFileSize(bytes) {
+          if (bytes < 1024) {
+            return bytes + " B";
+          } else if (bytes < 1024 * 1024) {
+            return (bytes / 1024).toFixed(1) + " KB";
+          } else {
+            return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+          }
+        }
+
+        // Compress image with canvas
+        function compressImage(src, quality, maxSize) {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = function () {
+              let width = img.width;
+              let height = img.height;
+
+              // Resize if maxSize is specified and image is larger
+              if (maxSize > 0 && (width > maxSize || height > maxSize)) {
+                if (width > height) {
+                  height = Math.round(height * (maxSize / width));
+                  width = maxSize;
+                } else {
+                  width = Math.round(width * (maxSize / height));
+                  height = maxSize;
+                }
+              }
+
+              const canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // Get compressed image as data URL
+              const compressedDataURL = canvas.toDataURL("image/jpeg", quality);
+              resolve(compressedDataURL);
+            };
+
+            img.onerror = function () {
+              reject(new Error("שגיאה בטעינת התמונה"));
+            };
+
+            img.src = src;
           });
         }
 
@@ -448,10 +637,22 @@
           try {
             imagePreview.innerHTML = "";
             imagesData = [];
+            originalImagesData = [];
+
+            // Get compression settings
+            const quality = imageQualitySlider.value / 100;
+            const maxSize = parseInt(maxResolutionSelect.value);
 
             // Process background image if selected
             if (bgImageInput.files && bgImageInput.files[0]) {
-              bgImageData = await readFileAsDataURL(bgImageInput.files[0]);
+              originalBgImageData = await readFileAsDataURL(
+                bgImageInput.files[0]
+              );
+              bgImageData = await compressImage(
+                originalBgImageData,
+                quality,
+                maxSize
+              );
             }
 
             const inputs =
@@ -465,11 +666,24 @@
 
               if (fileInput.files && fileInput.files[0]) {
                 try {
-                  const imageData = await readFileAsDataURL(fileInput.files[0]);
+                  const originalImageData = await readFileAsDataURL(
+                    fileInput.files[0]
+                  );
+                  // Compress the image
+                  const compressedImageData = await compressImage(
+                    originalImageData,
+                    quality,
+                    maxSize
+                  );
                   const caption = captionInput.value.trim();
 
+                  originalImagesData.push({
+                    image: originalImageData,
+                    caption: caption,
+                  });
+
                   imagesData.push({
-                    image: imageData,
+                    image: compressedImageData,
                     caption: caption,
                   });
 
@@ -477,7 +691,7 @@
                   previewItem.className = "preview-item";
 
                   const img = document.createElement("img");
-                  img.src = imageData;
+                  img.src = compressedImageData; // Show compressed version in preview
                   img.alt = caption;
 
                   const captionDiv = document.createElement("div");
@@ -495,6 +709,8 @@
             }
 
             if (imagesData.length > 0) {
+              // Calculate and update actual file sizes for better accuracy
+              calculateActualFileSize();
               return true;
             } else {
               alert("לא נמצאו תמונות תקינות");
@@ -504,6 +720,48 @@
             console.error("Error in updatePreview:", error);
             alert("שגיאה בעדכון התצוגה המקדימה: " + error.message);
             return false;
+          }
+        }
+
+        // Calculate actual file size after compression
+        function calculateActualFileSize() {
+          try {
+            // Utility to calculate size of data URL in bytes
+            function getDataUrlSize(dataUrl) {
+              // Base64 size calculation
+              const base64 = dataUrl.split(",")[1];
+              const paddingCount = (base64.match(/=/g) || []).length;
+              return Math.floor(((base64.length - paddingCount) * 3) / 4);
+            }
+
+            let originalSize = 0;
+            let compressedSize = 0;
+
+            // Add background image size
+            if (originalBgImageData) {
+              originalSize += getDataUrlSize(originalBgImageData);
+              compressedSize += getDataUrlSize(bgImageData);
+            }
+
+            // Add gallery images sizes
+            for (let i = 0; i < imagesData.length; i++) {
+              originalSize += getDataUrlSize(originalImagesData[i].image);
+              compressedSize += getDataUrlSize(imagesData[i].image);
+            }
+
+            // Update the size indicator
+            const originalSizeFormatted = formatFileSize(originalSize);
+            const compressedSizeFormatted = formatFileSize(compressedSize);
+            const savingsPercent = Math.round(
+              (1 - compressedSize / originalSize) * 100
+            );
+
+            fileSizeIndicator.textContent =
+              `גודל מקורי: ${originalSizeFormatted} | ` +
+              `גודל לאחר כיווץ: ${compressedSizeFormatted} | ` +
+              `חיסכון: ${savingsPercent}%`;
+          } catch (error) {
+            console.error("Error calculating actual file size:", error);
           }
         }
 
