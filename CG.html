@@ -10,11 +10,11 @@
         --secondary-color: hsl(244, 100%, 74%);
         --accent-color: #ff639a;
         --background-color: #a3d1ff;
-        --card-color: #fffcf5;
+        --card-color: #fcf3dd;
         --text-color: #000000;
         --light-text: #636e72;
         --border-radius: 20px;
-        --box-shadow: 0 8px 24px rgba(0, 0, 0, 1);
+        --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
       }
 
       body {
@@ -30,10 +30,12 @@
         text-align: center;
         color: var(--primary-color);
         margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), -1px -1px 0 #000,
+          1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
       }
 
       h1 {
-        font-size: 2.2rem;
+        font-size: 2.6rem;
         font-weight: 700;
         background: linear-gradient(
           45deg,
@@ -42,14 +44,21 @@
         );
         -webkit-background-clip: text;
         background-clip: text;
-        color: transparent;
-        margin-bottom: 0.5rem;
+        color: -var(--accent-color);
+        margin-bottom: 2.5rem;
       }
 
       h2 {
-        font-size: 1.6rem;
-        font-weight: 500;
+        font-size: 2.5rem;
+        font-weight: 700;
         color: var(--primary-color);
+      }
+
+      h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        text-align: center;
       }
 
       .container {
@@ -96,7 +105,7 @@
         font-size: 16px;
         text-align: center;
         transition: all 0.3s ease;
-        background-color: rgba(209, 228, 255, 0.8);
+        background-color: rgba(156, 197, 255, 0.8);
       }
 
       .form-group input:focus {
@@ -115,7 +124,7 @@
 
       .image-slot {
         position: relative;
-        border: 2px dashed var(--secondary-color);
+        border: 4px dashed var(--secondary-color);
         height: 200px;
         display: flex;
         flex-direction: column;
@@ -176,7 +185,7 @@
         position: absolute;
         top: 8px;
         right: 8px;
-        background-color: var(--accent-color);
+        background-color: var(--primary-color);
         color: white;
         border-radius: 50%;
         width: 24px;
@@ -209,7 +218,7 @@
       .gallery-title {
         color: var(--primary-color);
         margin-bottom: 30px;
-        font-size: 1.8rem;
+        font-size: 2.4rem;
         font-weight: 600;
         margin-top: 20px;
       }
@@ -272,14 +281,15 @@
         cursor: pointer;
         transition: all 0.3s ease;
         font-size: 1rem;
-        font-weight: 500;
+        font-weight: 600;
         box-shadow: 0 4px 8px rgba(108, 92, 231, 0.3);
       }
 
       .preview-buttons button:hover {
         background-color: var(--secondary-color);
         transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(108, 92, 231, 0.4);
+        background-color: #8957ff;
+        box-shadow: 0 4px 6px rgba(108, 92, 231, 0.9);
       }
 
       .btn-container {
@@ -294,20 +304,20 @@
           var(--accent-color)
         );
         color: white;
-        font-size: 1.1rem;
+        font-size: 1.4rem;
         padding: 15px 30px;
         border: none;
         border-radius: var(--border-radius);
         cursor: pointer;
         transition: all 0.3s ease;
-        font-weight: 500;
+        font-weight: 600;
         box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
         letter-spacing: 0.5px;
       }
 
       #generate-btn:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 16px rgba(108, 92, 231, 0.4);
+        box-shadow: 0 8px 16px rgb(85, 45, 76);
       }
 
       .status {
@@ -320,21 +330,20 @@
         font-weight: 500;
       }
 
-      /* סגנון לתמונת רקע */
       .background-image-section {
         display: flex;
         flex-direction: column;
         align-items: center;
         margin-left: 0px;
-        margin-top: 50px;
+        margin-top: 90px;
         padding-right: 40px;
       }
 
       .background-image-container {
         position: relative;
         width: 150px;
-        height: 100px;
-        border: 2px dashed var(--secondary-color);
+        height: 120px;
+        border: 4px dashed var(--secondary-color);
         border-radius: var(--border-radius);
         display: flex;
         flex-direction: column;
@@ -346,7 +355,7 @@
       }
 
       .background-image-container:hover {
-        border-color: var(--primary-color);
+        border-color: var(--accent-color);
       }
 
       .background-image-container img {
@@ -379,7 +388,7 @@
       }
 
       .delete-bg-btn {
-        background-color: #ff4757;
+        background-color: #ff0015;
         color: white;
         border: none;
         padding: 8px 16px;
@@ -505,7 +514,7 @@
         position: absolute;
         top: 8px;
         left: 8px;
-        background-color: #ff4757;
+        background-color: #ff0015;
         color: white;
         border: none;
         border-radius: 50%;
@@ -562,7 +571,7 @@
         </div>
       </div>
 
-      <p>העלה 8 תמונות שברצונך להציג בגלריית הקרוסלה</p>
+      <h3>העלה 8 תמונות שברצונך להציג בגלריית הקרוסלה</h3>
 
       <div class="upload-section">
         <div class="image-slot" id="slot-1">
@@ -1291,11 +1300,17 @@
         font-family: Arial, sans-serif;
       }
       
-      h1 {
-        color: #895ffc;
-        margin-bottom: 100px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-      }
+    h1 {
+      color: #FFD700; /* צהוב זהב */
+      text-shadow: 
+      2px 2px 4px rgba(0, 0, 0, 0.9), /* צל כהה לשיפור הקריאות */
+      -1px -1px 0 #000, /* מסגרת שחורה דקה */
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      1px 1px 0 #000;        
+      margin-bottom: 100px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
 
     .image-container {
       position: relative;
