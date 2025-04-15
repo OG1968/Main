@@ -397,6 +397,33 @@
       .image-slot {
         transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       }
+
+      /* סגנון משופר לכפתור המחיקה */
+      .delete-btn {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background-color: #ff4757;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 20;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .delete-btn:hover {
+        background-color: #ff6b81;
+        transform: scale(1.1);
+      }
     </style>
   </head>
   <body>
@@ -776,6 +803,119 @@
         }, 3000);
       }
 
+      // פונקציה לאיפוס סלוט למצב התחלתי
+      function resetSlot(slotNumber) {
+        // איפוס הנתונים במערך
+        uploadedImages[slotNumber] = { image: null, caption: "" };
+
+        // קבלת אלמנט הסלוט
+        const slot = document.getElementById(`slot-${slotNumber}`);
+
+        // ניקוי הסלוט
+        slot.innerHTML = "";
+
+        // יצירת הסלוט מחדש
+        const slotHTML = `
+      <span class="slot-number">${slotNumber}</span>
+      <p>לחץ להעלאת תמונה</p>
+      <input type="file" accept="image/*" data-slot="${slotNumber}" />
+      <input type="text" class="image-caption" data-slot="${slotNumber}" placeholder="כותרת לתמונה" />
+    `;
+
+        slot.innerHTML = slotHTML;
+
+        // הוספת אירוע שינוי לשדה הקובץ החדש
+        slot
+          .querySelector('input[type="file"]')
+          .addEventListener("change", function (e) {
+            handleImageUpload(e, slotNumber);
+          });
+
+        // עדכון התצוגה המקדימה
+        updatePreview();
+      }
+
+      // פונקציה לטיפול בהעלאת תמונה
+      function handleImageUpload(e, slotNumber) {
+        const file = e.target.files[0];
+        const slot = document.getElementById(`slot-${slotNumber}`);
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async function (event) {
+            try {
+              // כיווץ התמונה
+              const compressedImage = await compressImage(
+                event.target.result,
+                800,
+                600,
+                0.8
+              );
+
+              // שמירת הנתונים
+              uploadedImages[slotNumber] = {
+                image: compressedImage,
+                caption: uploadedImages[slotNumber].caption || "",
+              };
+
+              // עדכון תצוגת הסלוט
+              updateSlotView(slotNumber, compressedImage);
+
+              // עדכון התצוגה המקדימה
+              updatePreview();
+            } catch (error) {
+              console.error("שגיאה בעיבוד התמונה:", error);
+              alert("אירעה שגיאה בעיבוד התמונה");
+              resetSlot(slotNumber);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      // פונקציה לעדכון תצוגת הסלוט לאחר העלאת תמונה
+      function updateSlotView(slotNumber, imageSrc) {
+        const slot = document.getElementById(`slot-${slotNumber}`);
+        const caption = uploadedImages[slotNumber].caption || "";
+
+        slot.innerHTML = `
+      <div style="position:relative; width:100%; height:100%">
+        <button class="delete-btn" onclick="resetSlot(${slotNumber})">&times;</button>
+        <div style="height:70%; display:flex; align-items:center; justify-content:center">
+          <img src="${imageSrc}" style="max-height:100%; max-width:90%; object-fit:contain" />
+        </div>
+        <input type="text" class="image-caption" data-slot="${slotNumber}" 
+               value="${caption}" placeholder="כותרת לתמונה" 
+               style="position:absolute; bottom:0; width:90%; left:5%; padding:8px; border:1px solid rgba(108,92,231,0.5); border-radius:4px; background:white; z-index:30" />
+        <span class="slot-number">${slotNumber}</span>
+      </div>
+      <input type="file" accept="image/*" data-slot="${slotNumber}" style="display:none" />
+    `;
+
+        // הוספת אירוע לכיתוב
+        slot
+          .querySelector(".image-caption")
+          .addEventListener("input", function () {
+            uploadedImages[slotNumber].caption = this.value;
+            updatePreview();
+          });
+
+        // שמירת הפניה לשדה הקובץ
+        const fileInput = slot.querySelector('input[type="file"]');
+        fileInput.addEventListener("change", function (e) {
+          handleImageUpload(e, slotNumber);
+        });
+      }
+
+      // הוספת אירועי העלאת תמונות ראשוניים
+      document
+        .querySelectorAll('.image-slot input[type="file"]')
+        .forEach((input) => {
+          input.addEventListener("change", function (e) {
+            handleImageUpload(e, this.dataset.slot);
+          });
+        });
+
       // הוספת אירוע resize לעדכון דינמי
       window.addEventListener("resize", () => {
         clearTimeout(timer);
@@ -784,214 +924,6 @@
 
       // קריאה ראשונית לפונקציה
       updatePreview();
-
-      // אירועי העלאת תמונות
-      document
-        .querySelectorAll(".image-slot input[type='file']")
-        .forEach((input) => {
-          input.addEventListener("change", async function (e) {
-            const file = e.target.files[0];
-            const slotNumber = this.dataset.slot;
-
-            if (file) {
-              // שמירת ערך הכותרת הנוכחי לפני ניקוי הסלוט
-              const slot = document.getElementById(`slot-${slotNumber}`);
-              const existingCaption = uploadedImages[slotNumber].caption || "";
-
-              // שמירת שדה הקלט של הקובץ לפני ניקוי
-              const fileInput = this;
-
-              // ניקוי הסלוט
-              while (slot.firstChild) {
-                slot.removeChild(slot.firstChild);
-              }
-
-              // יצירת מסגרת לתצוגת התמונה
-              const imageWrapper = document.createElement("div");
-              imageWrapper.className = "image-wrapper";
-              imageWrapper.style.height = "75%";
-              imageWrapper.style.width = "100%";
-              imageWrapper.style.display = "flex";
-              imageWrapper.style.alignItems = "center";
-              imageWrapper.style.justifyContent = "center";
-
-              const loadingText = document.createElement("p");
-              loadingText.textContent = "מכווץ תמונה...";
-              imageWrapper.appendChild(loadingText);
-
-              // יצירת מסגרת לשדה הכותרת
-              const captionWrapper = document.createElement("div");
-              captionWrapper.className = "caption-wrapper";
-              captionWrapper.style.height = "25%";
-              captionWrapper.style.width = "100%";
-              captionWrapper.style.position = "absolute";
-              captionWrapper.style.bottom = "0";
-              captionWrapper.style.display = "flex";
-              captionWrapper.style.alignItems = "center";
-              captionWrapper.style.justifyContent = "center";
-              captionWrapper.style.zIndex = "30";
-
-              const captionInput = document.createElement("input");
-              captionInput.type = "text";
-              captionInput.className = "image-caption";
-              captionInput.dataset.slot = slotNumber;
-              captionInput.placeholder = "כותרת לתמונה";
-              captionInput.value = existingCaption;
-              captionInput.style.width = "90%";
-              captionInput.style.padding = "8px";
-              captionInput.style.border = "1px solid rgba(108, 92, 231, 0.5)";
-              captionInput.style.borderRadius = "4px";
-              captionInput.style.backgroundColor = "white";
-              captionInput.style.zIndex = "30";
-
-              captionWrapper.appendChild(captionInput);
-
-              const numberSpan = document.createElement("span");
-              numberSpan.className = "slot-number";
-              numberSpan.textContent = slotNumber;
-
-              // סידור האלמנטים בסלוט
-              slot.appendChild(imageWrapper);
-              slot.appendChild(captionWrapper);
-              slot.appendChild(numberSpan);
-              slot.appendChild(fileInput); // החזרת שדה הקלט של הקובץ
-
-              // הוספת אירוע לשמירת הכותרת
-              captionInput.addEventListener("input", function () {
-                const slotNum = this.dataset.slot;
-                uploadedImages[slotNum].caption = this.value;
-
-                // עדכון התצוגה המקדימה
-                const previewSpan = previewContainer.querySelector(
-                  `span[style*="--i: ${slotNum}"] p`
-                );
-                if (previewSpan) {
-                  previewSpan.textContent = this.value || `כותרת ${slotNum}`;
-                }
-              });
-
-              try {
-                const reader = new FileReader();
-                reader.onload = async function (event) {
-                  // שמירת התמונה המקורית שהועלתה
-                  const originalImage = event.target.result;
-
-                  // כיווץ התמונה
-                  const compressedImage = await compressImage(
-                    originalImage,
-                    800,
-                    600,
-                    0.8
-                  );
-                  uploadedImages[slotNumber].image = compressedImage;
-
-                  // חישוב החיסכון בנפח
-                  const originalSize = estimateSize(originalImage);
-                  const compressedSize = estimateSize(compressedImage);
-                  const savedPercent = Math.round(
-                    (1 - compressedSize / originalSize) * 100
-                  );
-
-                  // עדכון תצוגת הסלוט
-                  while (slot.firstChild) {
-                    slot.removeChild(slot.firstChild);
-                  }
-
-                  // יצירת מיכל כללי לשמירה על מבנה נכון
-                  const slotContent = document.createElement("div");
-                  slotContent.style.position = "relative";
-                  slotContent.style.width = "100%";
-                  slotContent.style.height = "100%";
-
-                  // יצירת מיכל תמונה
-                  const img = document.createElement("img");
-                  img.src = compressedImage;
-                  img.style.maxHeight = "70%";
-                  img.style.maxWidth = "90%";
-                  img.style.objectFit = "contain";
-
-                  const imgWrapper = document.createElement("div");
-                  imgWrapper.style.height = "70%";
-                  imgWrapper.style.width = "100%";
-                  imgWrapper.style.display = "flex";
-                  imgWrapper.style.alignItems = "center";
-                  imgWrapper.style.justifyContent = "center";
-                  imgWrapper.appendChild(img);
-
-                  // יצירת מיכל לכותרת
-                  const captionWrapper = document.createElement("div");
-                  captionWrapper.style.position = "absolute";
-                  captionWrapper.style.bottom = "-35px";
-                  captionWrapper.style.left = "0";
-                  captionWrapper.style.width = "100%";
-                  captionWrapper.appendChild(captionInput);
-
-                  const infoText = document.createElement("p");
-                  infoText.textContent = `חיסכון: ${savedPercent}%`;
-                  infoText.style.fontSize = "12px";
-                  infoText.style.color = "var(--light-text)";
-                  infoText.style.marginTop = "5px";
-                  infoText.style.textAlign = "center";
-
-                  // סידור אלמנטים בסדר הנכון
-                  slotContent.appendChild(imgWrapper);
-                  slotContent.appendChild(infoText);
-                  slotContent.appendChild(numberSpan);
-                  slotContent.appendChild(captionWrapper);
-
-                  // הוספה לסלוט
-                  slot.appendChild(slotContent);
-                  slot.appendChild(this); // שדה הקלט של הקובץ
-
-                  // עדכון התצוגה המקדימה של הקרוסלה
-                  let currentSpan = previewContainer.querySelector(
-                    `span[style*="--i: ${slotNumber}"]`
-                  );
-                  if (!currentSpan) {
-                    currentSpan = document.createElement("span");
-                    currentSpan.style.setProperty("--i", slotNumber);
-                    const img = document.createElement("img");
-                    const p = document.createElement("p");
-                    currentSpan.appendChild(img);
-                    currentSpan.appendChild(p);
-                    previewContainer.appendChild(currentSpan);
-                  }
-                  if (currentSpan) {
-                    const img = currentSpan.querySelector("img");
-                    const p = currentSpan.querySelector("p");
-
-                    img.src = uploadedImages[slotNumber].image;
-                    img.alt = `תמונה ${slotNumber}`;
-                    p.textContent =
-                      uploadedImages[slotNumber].caption ||
-                      `כותרת ${slotNumber}`;
-                  }
-
-                  // איפוס הסיבוב והתחלת התצוגה מחדש
-                  x = 0;
-                  clearTimeout(timer);
-                  updatePreview();
-                };
-                reader.readAsDataURL(file);
-              } catch (error) {
-                console.error("שגיאה בהעלאת התמונה:", error);
-
-                // במקרה של שגיאה, חזרה לתצוגה הרגילה
-                while (slot.firstChild) {
-                  slot.removeChild(slot.firstChild);
-                }
-
-                const errorText = document.createElement("p");
-                errorText.textContent = "שגיאה בהעלאה";
-
-                slot.appendChild(errorText);
-                slot.appendChild(numberSpan);
-                slot.appendChild(this);
-                slot.appendChild(captionInput);
-              }
-            }
-          });
-        });
 
       // אירוע לחיצה על כפתור היצירה וההורדה
       generateBtn.addEventListener("click", async function () {
