@@ -61,6 +61,17 @@
         box-shadow: var(--box-shadow);
       }
 
+      .title-and-bg-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+      }
+
+      .title-wrapper {
+        flex: 1;
+      }
+
       .form-group {
         margin-bottom: 25px;
         padding: 30px;
@@ -309,9 +320,100 @@
         font-weight: 500;
       }
 
+      /* סגנון לתמונת רקע */
+      .background-image-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-left: 0px;
+        margin-top: 50px;
+        padding-right: 40px;
+      }
+
+      .background-image-container {
+        position: relative;
+        width: 150px;
+        height: 100px;
+        border: 2px dashed var(--secondary-color);
+        border-radius: var(--border-radius);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        overflow: hidden;
+        background-color: rgba(162, 155, 254, 0.05);
+      }
+
+      .background-image-container:hover {
+        border-color: var(--primary-color);
+      }
+
+      .background-image-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+      }
+
+      .background-image-container p {
+        color: var(--light-text);
+        font-size: 0.8rem;
+        margin-top: 5px;
+        text-align: center;
+      }
+
+      .background-image-container input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .background-image-label {
+        font-weight: 500;
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+      }
+
+      .delete-bg-btn {
+        background-color: #ff4757;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        margin-top: 8px;
+        width: 100%;
+      }
+
+      .delete-bg-btn:hover {
+        background-color: #ff6b81;
+      }
+
       @media (max-width: 768px) {
         .container {
           padding: 20px;
+        }
+
+        .title-and-bg-section {
+          flex-direction: column;
+        }
+
+        .background-image-section {
+          padding-left: 40px;
+          margin-left: 0;
+          margin-top: 20px;
+          width: 100%;
+        }
+
+        .background-image-container {
+          width: 100%;
+          height: 120px;
         }
 
         .form-group {
@@ -428,16 +530,36 @@
   </head>
   <body>
     <div class="container">
-      <h1>יוצר גלריית קרוסלה</h1>
+      <div class="title-and-bg-section">
+        <div class="title-wrapper">
+          <h1>יוצר גלריית קרוסלה</h1>
 
-      <div class="form-group">
-        <label for="gallery-title-input">כותרת הגלריה:</label>
-        <input
-          type="text"
-          id="gallery-title-input"
-          placeholder="הזן כותרת לגלריה שלך"
-          value="גלריית תמונות מסתובבת"
-        />
+          <div class="form-group">
+            <label for="gallery-title-input">כותרת הגלריה:</label>
+            <input
+              type="text"
+              id="gallery-title-input"
+              placeholder="הזן כותרת לגלריה שלך"
+              value="גלריית תמונות מסתובבת"
+            />
+          </div>
+        </div>
+
+        <!-- סקציית תמונת רקע -->
+        <div class="background-image-section">
+          <span class="background-image-label">תמונת רקע לגלריה</span>
+          <div class="background-image-container" id="background-image-slot">
+            <p>לחץ להעלאת תמונת רקע</p>
+            <input type="file" accept="image/*" id="background-image-input" />
+          </div>
+          <button
+            class="delete-bg-btn"
+            id="delete-bg-btn"
+            style="display: none"
+          >
+            מחק תמונת רקע
+          </button>
+        </div>
       </div>
 
       <p>העלה 8 תמונות שברצונך להציג בגלריית הקרוסלה</p>
@@ -535,7 +657,7 @@
 
       <h2>תצוגה מקדימה</h2>
 
-      <div class="preview-section">
+      <div class="preview-section" id="preview-section">
         <h2 class="gallery-title" id="preview-title">גלריית תמונות מסתובבת</h2>
         <div class="preview-container">
           <span style="--i: 1">
@@ -622,6 +744,55 @@
         8: { image: null, caption: "" },
       };
 
+      // פונקציה לטיפול בהעלאת תמונת רקע
+      function handleBackgroundImageUpload(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async function (event) {
+            try {
+              const compressedImage = await compressImage(
+                event.target.result,
+                1920,
+                1080,
+                0.7
+              );
+              backgroundImage = compressedImage;
+              updateBackgroundImagePreview(compressedImage);
+              deleteBgBtn.style.display = "block";
+            } catch (error) {
+              console.error("שגיאה בעיבוד תמונת הרקע:", error);
+              resetBackgroundImage();
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      // מחבר את האירוע בהתחלה
+      document
+        .getElementById("background-image-input")
+        .addEventListener("change", handleBackgroundImageUpload);
+
+      // עדכון פונקציית resetBackgroundImage
+      function resetBackgroundImage() {
+        backgroundImage = null;
+        backgroundImageSlot.innerHTML = `
+        <p>לחץ להעלאת תמונת רקע</p>
+        <input type="file" accept="image/*" id="background-image-input" />
+    `;
+        deleteBgBtn.style.display = "none";
+
+        // מחבר את האירוע מחדש לאחר איפוס
+        document
+          .getElementById("background-image-input")
+          .addEventListener("change", handleBackgroundImageUpload);
+      }
+
+      // שמירת תמונת הרקע
+      let backgroundImage = null;
+      let lastBackgroundImage = null; // שמירת התמונה האחרונה למקרה של ביטול מחיקה
+
       // התצוגה המקדימה של הקרוסלה
       const previewContainer = document.querySelector(".preview-container");
       const prevBtn = document.getElementById("prev-btn");
@@ -630,6 +801,14 @@
       const statusEl = document.getElementById("status");
       const titleInput = document.getElementById("gallery-title-input");
       const previewTitle = document.getElementById("preview-title");
+      const previewSection = document.getElementById("preview-section");
+      const backgroundImageInput = document.getElementById(
+        "background-image-input"
+      );
+      const backgroundImageSlot = document.getElementById(
+        "background-image-slot"
+      );
+      const deleteBgBtn = document.getElementById("delete-bg-btn");
 
       let x = 0;
       let timer;
@@ -654,6 +833,89 @@
           }
         });
       });
+
+      // טיפול בהעלאת תמונת רקע
+      async function handleBackgroundImageUpload(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async function (event) {
+            try {
+              const compressedImage = await compressImage(
+                event.target.result,
+                1920,
+                1080,
+                0.7
+              );
+
+              backgroundImage = compressedImage;
+              lastBackgroundImage = compressedImage;
+              updateBackgroundImagePreview(compressedImage);
+              deleteBgBtn.style.display = "block";
+            } catch (error) {
+              console.error("שגיאה בעיבוד תמונת הרקע:", error);
+              alert("אירעה שגיאה בעיבוד תמונת הרקע");
+              resetBackgroundImage();
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      // טיפול במחיקת תמונת רקע
+      deleteBgBtn.addEventListener("click", function () {
+        // שמירת התמונה הנוכחית למקרה של ביטול
+        const currentBg = backgroundImage;
+        backgroundImage = null;
+
+        // הצגת דיאלוג אישור
+        if (confirm("האם אתה בטוח שברצונך למחוק את תמונת הרקע?")) {
+          // המשך במחיקה
+          resetBackgroundImage();
+          lastBackgroundImage = null;
+        } else {
+          // ביטול המחיקה - החזרת התמונה הקודמת
+          backgroundImage = currentBg;
+          if (backgroundImage) {
+            updateBackgroundImagePreview(backgroundImage);
+            deleteBgBtn.style.display = "block";
+          }
+        }
+      });
+
+      // פונקציה לאיפוס תמונת הרקע
+      function resetBackgroundImage() {
+        backgroundImage = null;
+        backgroundImageSlot.innerHTML = `
+        <p>לחץ להעלאת תמונת רקע</p>
+        <input type="file" accept="image/*" id="background-image-input" />
+    `;
+        deleteBgBtn.style.display = "none";
+
+        // עדכון תצוגה מקדימה
+        previewSection.style.backgroundImage = "";
+        previewSection.style.background =
+          "linear-gradient(135deg, rgba(108, 92, 231, 0.1), rgba(253, 121, 168, 0.1))";
+
+        // הוספת אירוע מחדש
+        document
+          .getElementById("background-image-input")
+          .addEventListener("change", handleBackgroundImageUpload);
+      }
+
+      // פונקציה לעדכון תצוגת תמונת הרקע
+      function updateBackgroundImagePreview(imageSrc) {
+        backgroundImageSlot.innerHTML = `
+          <img src="${imageSrc}" style="width:100%; height:100%; object-fit:cover" />
+          <input type="file" accept="image/*" id="background-image-input" style="display:none" />
+        `;
+
+        // עדכון תצוגה מקדימה
+        previewSection.style.backgroundImage = `url(${imageSrc})`;
+        previewSection.style.backgroundSize = "cover";
+        previewSection.style.backgroundPosition = "center";
+        previewSection.style.backgroundRepeat = "no-repeat";
+      }
 
       // אירועי לחיצה על כפתורי התצוגה המקדימה
       prevBtn.addEventListener("click", () => {
@@ -945,10 +1207,32 @@
         try {
           // דחיסת התמונות
           const compressedImages = await compressAllImages(uploadedImages);
+          let compressedBackground = null;
+
+          if (backgroundImage) {
+            compressedBackground = await compressImage(
+              backgroundImage,
+              1920,
+              1080,
+              0.7
+            );
+          }
 
           // חישוב החיסכון בנפח
-          const originalSize = estimateSize(JSON.stringify(uploadedImages));
-          const compressedSize = estimateSize(JSON.stringify(compressedImages));
+          const originalSize = estimateSize(
+            JSON.stringify({
+              ...uploadedImages,
+              background: backgroundImage,
+            })
+          );
+
+          const compressedSize = estimateSize(
+            JSON.stringify({
+              ...compressedImages,
+              background: compressedBackground,
+            })
+          );
+
           const savedSize = originalSize - compressedSize;
 
           // קבלת הכותרת שהוזנה
@@ -996,7 +1280,14 @@
         text-align: center;
         height: 100vh;
         justify-content: center;
-        background-color: black;
+        ${
+          backgroundImage
+            ? `background-image: url(${compressedBackground});`
+            : "background-color: black;"
+        }
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         overflow: hidden;
         font-family: Arial, sans-serif;
       }
@@ -1004,6 +1295,7 @@
       h1 {
         color: #895ffc;
         margin-bottom: 100px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
       }
 
 .image-container {
@@ -1030,6 +1322,8 @@
   object-fit: cover;
   display: block;
   margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .image-container span p {
@@ -1038,7 +1332,7 @@
   font-size: 14px;
   text-align: center;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   padding: 5px 0;
   border-radius: 5px;
   margin: 0;
@@ -1058,6 +1352,7 @@
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
       .btn:hover {
