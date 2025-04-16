@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="carousel.png" />
+    <meta name="application-name" content="יוצר גלריית שקופיות" />
+    <title>יוצר גלריית שקופיות</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 10px;
+        background-color: #fddfb1;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: rgb(204, 234, 253);
+        padding: 10px;
+        border-radius: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+      }
+      h1 {
+        font-size: 36px;
+        text-align: center;
+        color: #0026ff;
+        margin-bottom: 5px;
+      }
+      .form-group {
+        margin-bottom: 10px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #838383;
+        border-radius: 4px;
+      }
+      .settings-row {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 20px;
+      }
+      .settings-option {
+        flex: 1;
+      }
+      .background-tabs {
+        display: flex;
+        margin-bottom: 0px;
+      }
+      .background-tab {
+        width: 120px;
+        font-weight: 700;
+        text-align: center;
+        padding: 8px 15px;
+        background-color: #e4e4e4;
+        border: 1px solid #ccc;
+        border-radius: 20px 20px 0 0;
+        cursor: pointer;
+      }
+      .background-tab.active {
+        background-color: #a2dcfd;
+        border-bottom: none;
+      }
+      .background-content {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 0 4px 4px 4px;
+        background-color: #fff;
+      }
+      .color-preview {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      input[type="color"] {
+        width: 50%;
+        height: 40px;
+        border: 1px solid #838383;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .custom-file-input {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+      }
+      .custom-file-input input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        z-index: 2;
+      }
+      .file-input-label {
+        display: block;
+        padding: 10px;
+        background-color: #2196f3;
+        color: white;
+        text-align: center;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-weight: 700;
+      }
+      .file-input-label:hover {
+        background-color: #003e70;
+      }
+      .file-name {
+        margin-bottom: 5px;
+        font-size: 18px;
+        color: #555;
+      }
+      .background-preview {
+        width: 100%;
+        height: 56px;
+        object-fit: cover;
+        background-color: #eee;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+      }
+      .images-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      .image-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid #838383;
+        border-radius: 4px;
+        background-color: #e4faff;
+      }
+      .image-preview {
+        width: 175px;
+        height: 100px;
+        object-fit: cover;
+        background-color: #eee;
+      }
+      .image-caption {
+        flex-grow: 1;
+      }
+      .buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      button {
+        padding: 10px 10px;
+        cursor: pointer;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 22px;
+        font-weight: 700;
+      }
+      button:hover {
+        background-color: #245326;
+      }
+      button.secondary {
+        background-color: #2196f3;
+      }
+      button.secondary:hover {
+        background-color: #07599c;
+      }
+      button.danger {
+        background-color: #ff4437;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+      }
+      button.danger:hover {
+        background-color: #d80e00;
+      }
+      .preview-container {
+        margin-top: 30px;
+        border-top: 1px solid #eee;
+        border: 0px solid #ddd;
+        padding-top: 20px;
+      }
+      #previewFrame {
+        width: 100%;
+        height: 700px;
+        border-radius: 4px;
+      }
+      .hidden {
+        display: none;
+      }
+      .aspect-ratio-info {
+        background-color: #f0f8ff;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        border-left: 4px solid #2196f3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>יוצר גלריית שקופיות</h1>
+
+      <div class="form-group">
+        <label for="galleryName">שם הגלריה:</label>
+        <input type="text" id="galleryName" value="הגלריה שלי" />
+      </div>
+
+      <!-- שורת ההגדרות המעודכנת -->
+      <div class="settings-row">
+        <!-- צבע/תמונת רקע -->
+        <div class="settings-option">
+          <label>רקע הגלריה:</label>
+          <div class="background-tabs">
+            <div
+              class="background-tab active"
+              id="colorTab"
+              onclick="switchBackgroundTab('color')"
+            >
+              צבע רקע
+            </div>
+            <div
+              class="background-tab"
+              id="imageTab"
+              onclick="switchBackgroundTab('image')"
+            >
+              תמונת רקע
+            </div>
+          </div>
+
+          <div class="background-content" id="colorContent">
+            <div class="color-group">
+              <label for="backgroundColor">בחר צבע רקע:</label>
+              <div class="color-preview">
+                <div class="color-box" id="backgroundColorPreview"></div>
+                <span id="backgroundColorValue">#000000</span>
+              </div>
+              <input
+                type="color"
+                id="backgroundColor"
+                value="#000000"
+                onchange="updateColorPreview('backgroundColor')"
+              />
+            </div>
+          </div>
+
+          <div class="background-content hidden" id="imageContent">
+            <div class="custom-file-input">
+              <input
+                type="file"
+                id="backgroundImage"
+                accept="image/*"
+                onchange="previewBackgroundImage()"
+              />
+              <label class="file-input-label" for="backgroundImage"
+                >בחר תמונת רקע</label
+              >
+              <div class="file-name" id="background-filename">לא נבחר קובץ</div>
+            </div>
+            <img
+              class="background-preview"
+              id="background-preview"
+              src="buckground.png"
+              alt="תמונת רקע"
+            />
+          </div>
+        </div>
+
+        <!-- צבע כיתוב -->
+        <div class="settings-option">
+          <label for="captionColor">צבע כיתוב:</label>
+          <div class="color-preview">
+            <div class="color-box" id="captionColorPreview"></div>
+            <span id="captionColorValue">#00d636</span>
+          </div>
+          <input
+            type="color"
+            id="captionColor"
+            value="#00d636"
+            onchange="updateColorPreview('captionColor')"
+          />
+        </div>
+      </div>
+
+      <p>
+        <strong>הערה:</strong> התמונות יותאמו אוטומטית ליחס של 16:9 ויעברו
+        כיווץ.
+      </p>
+      <div class="form-group">
+        <label>העלה תמונות:</label>
+        <div class="images-container" id="imagesContainer"></div>
+        <button type="button" class="secondary" id="addImageBtn">
+          הוסף תמונה
+        </button>
+      </div>
+
+      <div class="buttons">
+        <button type="button" id="previewBtn">תצוגה מקדימה</button>
+        <button type="button" id="exportBtn">ייצא ל HTML</button>
+      </div>
+
+      <div class="preview-container hidden" id="previewContainer">
+        <h2>תצוגה מקדימה:</h2>
+        <iframe id="previewFrame"></iframe>
+      </div>
+    </div>
+
+    <script>
+      // הגדרת משתנים גלובליים
+      let imageCounter = 0;
+      let useBackgroundImage = false;
+      const imagesContainer = document.getElementById("imagesContainer");
+      const addImageBtn = document.getElementById("addImageBtn");
+      const previewBtn = document.getElementById("previewBtn");
+      const exportBtn = document.getElementById("exportBtn");
+      const previewContainer = document.getElementById("previewContainer");
+      const previewFrame = document.getElementById("previewFrame");
+      const galleryNameInput = document.getElementById("galleryName");
+      const backgroundColorInput = document.getElementById("backgroundColor");
+      const captionColorInput = document.getElementById("captionColor");
+      const backgroundPreview = document.getElementById("background-preview");
+
+      // המידות הסטנדרטיות לתמונות ביחס 16:9
+      const TARGET_WIDTH = 1280;
+      const TARGET_HEIGHT = 720;
+      const ASPECT_RATIO = 16 / 9;
+      const MAX_FILE_SIZE = 1024 * 1024; // 1MB בבתים
+
+      // פונקציה למעבר בין מצב צבע רקע לתמונת רקע
+      function switchBackgroundTab(tab) {
+        // עדכון הכפתורים
+        document.getElementById("colorTab").classList.remove("active");
+        document.getElementById("imageTab").classList.remove("active");
+        document.getElementById(tab + "Tab").classList.add("active");
+
+        // עדכון התוכן המוצג
+        document.getElementById("colorContent").classList.add("hidden");
+        document.getElementById("imageContent").classList.add("hidden");
+        document.getElementById(tab + "Content").classList.remove("hidden");
+
+        // שמירת המצב הנוכחי
+        useBackgroundImage = tab === "image";
+      }
+
+      // פונקציה לעדכון תצוגת צבע
+      function updateColorPreview(colorType) {
+        const input = document.getElementById(colorType);
+        const preview = document.getElementById(colorType + "Preview");
+        const value = document.getElementById(colorType + "Value");
+
+        preview.style.backgroundColor = input.value;
+        value.textContent = input.value;
+      }
+
+      // פונקציה לטיפול בתמונת רקע
+      function previewBackgroundImage() {
+        const fileInput = document.getElementById("backgroundImage");
+        const fileNameDisplay = document.getElementById("background-filename");
+        const preview = document.getElementById("background-preview");
+
+        const file = fileInput.files[0];
+        if (file) {
+          fileNameDisplay.textContent = file.name;
+
+          // עיבוד התמונה ליחס 16:9 וכיווץ
+          processImage(file, function (dataUrl) {
+            preview.src = dataUrl;
+            // שמירת הנתונים כתכונה של אלמנט התצוגה המקדימה
+            preview.setAttribute("data-processed-image", dataUrl);
+          });
+        }
+      }
+
+      // עדכון תצוגת הצבעים בטעינה ראשונית
+      function initColorPreviews() {
+        updateColorPreview("backgroundColor");
+        updateColorPreview("captionColor");
+      }
+
+      // פונקציה להוספת תמונה חדשה
+      function addImageRow() {
+        imageCounter++;
+        const row = document.createElement("div");
+        row.className = "image-row";
+        row.id = `image-row-${imageCounter}`;
+
+        row.innerHTML = `
+  <img class="image-preview" id="preview-${imageCounter}" src="upload.png" alt="תמונה ${imageCounter}">
+  <div class="image-caption">
+    <div class="custom-file-input">
+      <input type="file" id="image-${imageCounter}" accept="image/*" onchange="previewImage(${imageCounter})">
+      <label class="file-input-label" for="image-${imageCounter}">בחר קובץ</label>
+      <div class="file-name" id="filename-${imageCounter}">לא נבחר קובץ</div>
+    </div>
+    <input type="text" id="caption-${imageCounter}" placeholder="כיתוב לתמונה" value="תמונה ${imageCounter}">
+  </div>
+  <button type="button" class="danger" onclick="removeImage(${imageCounter})">הסר</button>
+`;
+
+        imagesContainer.appendChild(row);
+      }
+
+      // פונקציה לעיבוד התמונה ליחס 16:9 וכיווץ נפח הקובץ
+      function processImage(file, callback) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            // יצירת קנבס לעיבוד התמונה
+            const canvas = document.createElement("canvas");
+            let width = img.width;
+            let height = img.height;
+
+            // חישוב המידות החדשות לפי יחס 16:9
+            if (width / height > ASPECT_RATIO) {
+              // תמונה רחבה מדי - צריך לחתוך מהצדדים
+              width = height * ASPECT_RATIO;
+            } else if (width / height < ASPECT_RATIO) {
+              // תמונה גבוהה מדי - צריך לחתוך מלמעלה ומלמטה
+              height = width / ASPECT_RATIO;
+            }
+
+            // הגדרת גודל הקנבס לתמונה הסופית
+            canvas.width = TARGET_WIDTH;
+            canvas.height = TARGET_HEIGHT;
+
+            // מרכוז התמונה על הקנבס
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // חישוב הפרשי הגודל והפוזיציה
+            const sourceX = (img.width - width) / 2;
+            const sourceY = (img.height - height) / 2;
+
+            // ציור התמונה בקנבס
+            ctx.drawImage(
+              img,
+              sourceX,
+              sourceY,
+              width,
+              height,
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+
+            // המרה לקובץ תמונה עם דחיסה
+            let quality = 0.9;
+            let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+            // כיווץ הדרגתי עד שמגיעים לגודל הרצוי
+            while (dataUrl.length > MAX_FILE_SIZE && quality > 0.1) {
+              quality -= 0.1;
+              dataUrl = canvas.toDataURL("image/jpeg", quality);
+            }
+
+            callback(dataUrl);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // פונקציה להצגת התמונה שנבחרה
+      function previewImage(id) {
+        const fileInput = document.getElementById(`image-${id}`);
+        const preview = document.getElementById(`preview-${id}`);
+        const fileNameDisplay = document.getElementById(`filename-${id}`);
+
+        const file = fileInput.files[0];
+        if (file) {
+          fileNameDisplay.textContent = file.name;
+
+          // עיבוד התמונה ליחס 16:9 וכיווץ
+          processImage(file, function (dataUrl) {
+            preview.src = dataUrl;
+            // שמירת הנתונים כתכונה של אלמנט התצוגה המקדימה
+            preview.setAttribute("data-processed-image", dataUrl);
+          });
+        }
+      }
+
+      // פונקציה להסרת תמונה
+      function removeImage(id) {
+        const row = document.getElementById(`image-row-${id}`);
+        row.remove();
+      }
+
+      // יצירת תצוגה מקדימה
+      function createPreview() {
+        const galleryHTML = generateGalleryHTML();
+
+        if (galleryHTML) {
+          previewContainer.classList.remove("hidden");
+          const doc =
+            previewFrame.contentDocument || previewFrame.contentWindow.document;
+          doc.open();
+          doc.write(galleryHTML);
+          doc.close();
+
+          // גלילה לתצוגה המקדימה
+          previewContainer.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+
+      // יצוא קובץ HTML
+      function exportHTML() {
+        const galleryHTML = generateGalleryHTML();
+
+        if (galleryHTML) {
+          const galleryName = galleryNameInput.value || "gallery";
+          const blob = new Blob([galleryHTML], { type: "text/html" });
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${galleryName}.html`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      }
+
+      // יצירת קוד HTML של הגלריה
+      function generateGalleryHTML() {
+        const galleryName = galleryNameInput.value || "הגלריה שלי";
+        const backgroundColor = backgroundColorInput.value;
+        const captionColor = captionColorInput.value;
+
+        // איסוף כל התמונות שיש להן קובץ
+        const images = [];
+        const rows = imagesContainer.querySelectorAll(".image-row");
+
+        rows.forEach((row) => {
+          const id = row.id.split("-").pop();
+          const preview = document.getElementById(`preview-${id}`);
+          const caption =
+            document.getElementById(`caption-${id}`).value || `תמונה ${id}`;
+
+          // נוודא שיש תמונה תקינה (לא תמונת ברירת מחדל)
+          if (
+            preview.hasAttribute("data-processed-image") &&
+            !preview.src.includes("/api/placeholder/")
+          ) {
+            images.push({
+              src: preview.getAttribute("data-processed-image"),
+              caption: caption,
+            });
+          }
+        });
+
+        // אם אין תמונות, נציג הודעה
+        if (images.length === 0) {
+          alert("יש להוסיף לפחות תמונה אחת לגלריה");
+          return null;
+        }
+
+        // יצירת קוד HTML
+        let thumbsHTML = "";
+        images.forEach((img, index) => {
+          const selected = index === 0 ? 'class="selected"' : "";
+          thumbsHTML += `<img src="${img.src}" data-caption="${img.caption}" ${selected} />`;
+        });
+
+        // נקבע אם יש תמונת רקע או צבע רקע
+        let backgroundStyle = "";
+        if (
+          useBackgroundImage &&
+          backgroundPreview.hasAttribute("data-processed-image")
+        ) {
+          // יש תמונת רקע
+          const bgImage = backgroundPreview.getAttribute(
+            "data-processed-image"
+          );
+          backgroundStyle = `
+      background-image: url('${bgImage}');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;`;
+        } else {
+          // יש צבע רקע
+          backgroundStyle = `background-color: ${backgroundColor};`;
+        }
+
+        const html = `<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>${galleryName}</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      ${backgroundStyle}
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    #mainContainer {
+      margin: 10px auto;
+      text-align: center;
+      max-width: 800px;
+    }
+    #galleryTitle {
+      color: ${captionColor};
+      font-size: 32px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      text-shadow: 1px 1px #000;
+    }
+    #thumbContainer {
+      white-space: nowrap;
+      overflow-x: auto;
+      padding: 10px;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+    }
+    #thumbContainer img {
+      height: 90px;
+      width: 160px;
+      margin-right: 10px;
+      opacity: 0.5;
+      cursor: pointer;
+      transition: opacity 0.3s;
+      object-fit: cover;
+    }
+    #thumbContainer img.selected {
+      opacity: 1;
+      border: 2px solid #ccc;
+    }
+    #previewContainer {
+      width: 100%;
+      height: 0;
+      padding-bottom: 56.25%;
+      position: relative;
+      margin: 0 auto 10px;
+    }
+    #preview {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      max-height: 720px;
+    }
+    .caption {
+      color: ${captionColor};
+      font-size: 20px;
+      margin-top: 10px;
+      text-shadow: 1px 1px #000;
+      padding: 5px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="mainContainer">
+    <h1 id="galleryTitle">${galleryName}</h1>
+    <div id="previewContainer">
+      <img id="preview" src="${images[0].src}" alt="Preview" />
+    </div>
+    <div class="caption" id="caption">${images[0].caption}</div>
+    <div id="thumbContainer">
+      ${thumbsHTML}
+    </div>
+  </div>
+
+  <script>
+    const preview = document.getElementById("preview");
+    const caption = document.getElementById("caption");
+    const thumbs = document.querySelectorAll("#thumbContainer img");
+
+    thumbs.forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        preview.src = thumb.src;
+        caption.textContent = thumb.dataset.caption;
+
+        thumbs.forEach((t) => t.classList.remove("selected"));
+        thumb.classList.add("selected");
+      });
+    });
+  <\/script>
+</body>
+</html>`;
+
+        return html;
+      }
+
+      // הוספת מאזיני אירועים
+      addImageBtn.addEventListener("click", addImageRow);
+      previewBtn.addEventListener("click", createPreview);
+      exportBtn.addEventListener("click", exportHTML);
+
+      // הוספת תמונה ראשונה בטעינה והפעלת אתחול תצוגת הצבע
+      window.onload = function () {
+        initColorPreviews();
+        addImageRow();
+      };
+    </script>
+  </body>
+</html>
