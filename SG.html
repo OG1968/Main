@@ -12,7 +12,6 @@
         font-family: Arial, sans-serif;
       }
       body {
-        margin: 0;
         padding: 10px;
         background-color: #fddfb1;
       }
@@ -61,6 +60,7 @@
         display: flex;
         gap: 30px;
         margin-bottom: 20px;
+        font-size: 15px;
       }
       .settings-option {
         flex: 1;
@@ -139,11 +139,13 @@
         z-index: 2;
       }
       .file-input-label {
+        margin-left: 5px;
         display: block;
         padding: 10px;
         background-color: #2196f3;
         color: white;
         text-align: center;
+        height: 40px;
         border-radius: 20px;
         cursor: pointer;
         transition: background-color 0.3s;
@@ -187,23 +189,25 @@
         background-color: #e4faff;
       }
       .image-preview {
-        width: 175px;
-        height: 100px;
+        width: 144px;
+        height: 80px;
         object-fit: cover;
         background-color: #eee;
       }
       .image-caption {
         flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
       }
       .buttons {
         display: flex;
         gap: 10px;
         justify-content: center;
-        margin-top: 20px;
+        margin-top: 00px;
       }
       button {
         width: 200px;
-
         padding: 10px 10px;
         cursor: pointer;
         background-color: #4caf50;
@@ -223,9 +227,14 @@
         background-color: #07599c;
       }
       button.danger {
+        margin-right: -10px;
+
+        margin-top: -30px;
+        font-size: 15px;
+        text-align: center;
         background-color: #ff4437;
-        width: 60px;
-        height: 60px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
       }
       button.danger:hover {
@@ -471,15 +480,17 @@
         row.innerHTML = `
   <img class="image-preview" id="preview-${imageCounter}" src="upload.png" alt="תמונה ${imageCounter}">
   <div class="image-caption">
-    <div class="custom-file-input">
-      <input type="file" id="image-${imageCounter}" accept="image/*" onchange="previewImage(${imageCounter})">
-      <label class="file-input-label" for="image-${imageCounter}">בחר קובץ</label>
-      <div class="file-name" id="filename-${imageCounter}">לא נבחר קובץ</div>
-    </div>
-    <input type="text" id="caption-${imageCounter}" placeholder="כיתוב לתמונה" value="כותרת תמונה ${imageCounter}">
-  </div>
-  <button type="button" class="danger" onclick="removeImage(${imageCounter})">הסר</button>
-`;
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="custom-file-input">
+                    <input type="file" id="image-${imageCounter}" accept="image/*" onchange="previewImage(${imageCounter})">
+                    <label class="file-input-label" for="image-${imageCounter}">בחר קובץ</label>
+                    <div class="file-name" id="filename-${imageCounter}">לא נבחר קובץ</div>
+                </div>
+                <button type="button" class="danger" onclick="removeImage(${imageCounter})">🗑️</button>
+            </div>
+            <input type="text" id="caption-${imageCounter}" placeholder="כיתוב לתמונה" value="כותרת תמונה ${imageCounter}">
+        </div>
+    `;
 
         imagesContainer.appendChild(row);
       }
