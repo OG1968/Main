@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>תיקיה מוגן בסיסמה</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+        direction: rtl;
+      }
+      .container {
+        border: 1px solid #bbb;
+        background-color: rgb(164, 255, 255);
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 40px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      }
+      input {
+        padding: 10px;
+        margin: 10px 0;
+        width: 80%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        background-color: #0062ff;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        padding: 10px 20px;
+        margin-top: 10px;
+        border-radius: 20px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #003ab6;
+      }
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+      #result {
+        margin-top: 20px;
+        padding: 10px;
+      }
+      .hidden {
+        display: none;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+      .warning {
+        color: #ff6600;
+      }
+      #countdown {
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+      #timer {
+        font-weight: bold;
+        color: #ff6600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>תיקיה מוגנת בסיסמה</h2>
+      <p>הזן את הסיסמה כדי לגשת לקישור</p>
+      <p id="attempts-info" class="warning hidden"></p>
+
+      <div id="password-form">
+        <input type="password" id="passwordInput" placeholder="הקלד סיסמה" />
+        <button id="submitBtn" onclick="checkPassword()">הכנס סיסמה</button>
+      </div>
+
+      <div id="result" class="hidden"></div>
+    </div>
+
+    <script>
+      // הסיסמה המוצפנת בקידוד base64
+      const encodedPassword = "T3Jlbkdv";
+
+      // חלקי הקישור המוצפן
+      const encryptedParts = [
+        "aHR0cHM6",
+        "Ly9vZzE5N",
+        "jguZ2l0a",
+        "HViLmlvL1R",
+        "lc3QvT",
+        "0dDVjEu",
+        "cGRm",
+      ];
+
+      // משתנים להגבלת נסיונות
+      const maxAttempts = 3;
+      const lockoutTime = 10 * 60; // 10 דקות בשניות
+
+      // בדיקה אם המשתמש נחסם בעבר
+      let attemptCount = 0;
+      let lockoutEndTime = 0;
+
+      // בדיקה אם יש מידע קיים באחסון המקומי
+      function initializeLockoutData() {
+        const savedLockoutData = localStorage.getItem("passwordLockout");
+        if (savedLockoutData) {
+          const data = JSON.parse(savedLockoutData);
+          lockoutEndTime = data.lockoutEndTime || 0;
+          attemptCount = data.attemptCount || 0;
+
+          // בדיקה אם עדיין בזמן חסימה
+          const currentTime = Math.floor(Date.now() / 1000);
+          if (lockoutEndTime > currentTime) {
+            lockoutUser(lockoutEndTime - currentTime);
+          } else if (lockoutEndTime > 0) {
+            // אם החסימה הסתיימה, איפוס הנתונים
+            resetLockout();
+          } else {
+            // עדכון ההודעה של מספר הנסיונות שנותרו
+            updateAttemptsMessage();
+          }
+        }
+      }
+
+      // שמירת נתוני החסימה באחסון המקומי
+      function saveLockoutData() {
+        const data = {
+          lockoutEndTime: lockoutEndTime,
+          attemptCount: attemptCount,
+        };
+        localStorage.setItem("passwordLockout", JSON.stringify(data));
+      }
+
+      // עדכון הודעת מספר נסיונות
+      function updateAttemptsMessage() {
+        const attemptsInfo = document.getElementById("attempts-info");
+        if (attemptCount > 0) {
+          attemptsInfo.textContent = `שים לב: נותרו לך ${
+            maxAttempts - attemptCount
+          } נסיונות לפני חסימה`;
+          attemptsInfo.classList.remove("hidden");
+        } else {
+          attemptsInfo.classList.add("hidden");
+        }
+      }
+
+      // חסימת המשתמש
+      function lockoutUser(remainingSeconds) {
+        const passwordForm = document.getElementById("password-form");
+        const resultDiv = document.getElementById("result");
+        const attemptsInfo = document.getElementById("attempts-info");
+
+        passwordForm.innerHTML = `<p>הגעת למספר הנסיונות המקסימלי. הגישה נחסמה ל-10 דקות.</p>
+                                      <p>זמן שנותר: <span id="timer">...</span></p>`;
+
+        attemptsInfo.classList.add("hidden");
+
+        // עדכון טיימר
+        updateTimer(remainingSeconds);
+      }
+
+      // עדכון הטיימר
+      function updateTimer(remainingSeconds) {
+        const timerElement = document.getElementById("timer");
+
+        function formatTime(seconds) {
+          const minutes = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${minutes}:${secs.toString().padStart(2, "0")}`;
+        }
+
+        timerElement.textContent = formatTime(remainingSeconds);
+
+        if (remainingSeconds > 0) {
+          setTimeout(() => updateTimer(remainingSeconds - 1), 1000);
+        } else {
+          resetLockout();
+          location.reload(); // רענון הדף לאחר סיום החסימה
+        }
+      }
+
+      // איפוס החסימה
+      function resetLockout() {
+        lockoutEndTime = 0;
+        attemptCount = 0;
+        saveLockoutData();
+      }
+
+      function checkPassword() {
+        const enteredPassword = document.getElementById("passwordInput").value;
+        const resultDiv = document.getElementById("result");
+
+        // המרת הסיסמה שהוקלדה לbase64
+        const encodedInput = btoa(enteredPassword);
+
+        // בדיקה אם הסיסמה נכונה
+        if (encodedInput === encodedPassword) {
+          // איפוס מספר הנסיונות בהצלחה
+          resetLockout();
+
+          // פענוח הקישור
+          const decodedLink = atob(encryptedParts.join(""));
+
+          // הודעת הצלחה עם ספירה לאחור
+          resultDiv.innerHTML = `
+                    <p class="success">סיסמה נכונה!</p>
+                    <p>מעביר אותך לקישור בעוד <span id="countdown">3</span> שניות...</p>
+                `;
+          resultDiv.classList.remove("hidden");
+          resultDiv.classList.remove("error");
+          resultDiv.classList.add("success");
+
+          // ספירה לאחור והפניה
+          let seconds = 3;
+          const countdownElement = document.getElementById("countdown");
+
+          const interval = setInterval(() => {
+            seconds--;
+            countdownElement.textContent = seconds;
+
+            if (seconds <= 0) {
+              clearInterval(interval);
+              // הפניה אוטומטית לקישור
+              window.location.href = decodedLink;
+            }
+          }, 1000);
+        } else {
+          // הגדלת מספר הנסיונות השגויים
+          attemptCount++;
+
+          // בדיקה אם הגיע למקסימום הנסיונות
+          if (attemptCount >= maxAttempts) {
+            // חסימה ל-10 דקות
+            const currentTime = Math.floor(Date.now() / 1000);
+            lockoutEndTime = currentTime + lockoutTime;
+            saveLockoutData();
+            lockoutUser(lockoutTime);
+          } else {
+            // עדכון הודעה
+            resultDiv.innerHTML = `<p class="error">סיסמה שגויה, נסה שוב.</p>`;
+            resultDiv.classList.remove("hidden");
+            resultDiv.classList.remove("success");
+            resultDiv.classList.add("error");
+
+            // עדכון מספר הנסיונות שנותרו
+            saveLockoutData();
+            updateAttemptsMessage();
+          }
+        }
+      }
+
+      // אפשר להזין סיסמה עם הקשה על Enter
+      document
+        .getElementById("passwordInput")
+        .addEventListener("keyup", function (event) {
+          if (event.key === "Enter") {
+            checkPassword();
+          }
+        });
+
+      // אתחול נתוני החסימה בטעינת הדף
+      window.onload = initializeLockoutData;
+    </script>
+  </body>
+</html>
