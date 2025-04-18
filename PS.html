@@ -547,10 +547,16 @@
         document.getElementById("confirmationDialog").style.display = "none";
       }
 
-      // פונקציה לניקוי כל התמונות
       function clearAllImages() {
         // איפוס המערך ל-9 תאים ריקים
         galleryData = Array(9).fill(null);
+
+        // ניקוי תמונת הרקע מה-localStorage
+        localStorage.removeItem("backgroundImage");
+
+        // איפוס תמונת הרקע בממשק המשתמש
+        document.body.style.backgroundImage = "";
+
         saveGalleryToDB();
         renderGallery();
         hideConfirmationDialog();
@@ -964,25 +970,6 @@
         localStorage.removeItem("galleryTitle");
         localStorage.removeItem("backgroundImage");
         localStorage.removeItem("galleryData");
-
-        function clearAllImages() {
-          // איפוס הגלריה
-          galleryData = Array(9).fill(null);
-
-          // איפוס כותרת הגלריה
-          const galleryTitle = document.getElementById("galleryTitle");
-          galleryTitle.textContent = "כותרת הגלריה - לחץ לעריכה";
-          localStorage.removeItem("galleryTitle");
-
-          // איפוס רקע
-          document.body.style.backgroundImage = "";
-          localStorage.removeItem("backgroundImage");
-
-          // שמירה וניקוי
-          saveGalleryToDB();
-          renderGallery();
-          hideConfirmationDialog();
-        }
 
         // ניקוי IndexedDB (אם קיים)
         const request = indexedDB.deleteDatabase("GalleryDB");
