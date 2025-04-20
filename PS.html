@@ -3,979 +3,1069 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="photolabel.png" />
-
-    <title>גלריית תמונות</title>
+    <title>גלריית תמונות עם אפקט ריחוף</title>
     <style>
-      @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Poppins", sans-serif;
-      }
       body {
-        background: #a5c5ff;
-        min-height: 100vh;
-        padding: 30px 20px;
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-      }
-      .header {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .header h1 {
-        font-size: 3em;
-        color: #005512;
-        margin-bottom: 10px;
-        text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.7);
-      }
-      .upload-container {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .upload-btn,
-      .download-btn,
-      .clear-btn,
-      .bg-btn {
-        background: #004879;
-        color: white;
-        padding: 6px 1px;
-        border: none;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 1.2em;
-        transition: 0.3s;
-        font-weight: 700;
-        margin: 4px 4px 4px 4px;
-        width: 180px;
-      }
-      .upload-btn:hover,
-      .download-btn:hover,
-      .bg-btn:hover {
-        background: #006eb8;
-      }
-      .download-btn {
-        background: #005512;
-      }
-      .download-btn:hover {
-        background: #007a1a;
-      }
-      .clear-btn {
-        background: #b30000;
-      }
-      .clear-btn:hover {
-        background: #ff0000;
-      }
-      .bg-btn {
-        background: #7a2ab8;
-      }
-      .bg-btn:hover {
-        background: #9c3ee6;
-      }
-      #fileInput,
-      #bgImageInput {
-        display: none;
-      }
-      .gallery {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-      .card {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16/9;
-        background: #000;
+        margin: 0;
+        padding-left: 20px;
         display: flex;
-        box-shadow: 0 15px 45px rgba(4, 0, 211, 0.5);
-        overflow: hidden;
-        transition: 0.5s ease-in-out;
-      }
-      .card:hover {
-        transform: translateY(-10px);
-      }
-      .card .imgBx {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        background: #fff7d4;
-        display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        z-index: 10;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        background-color: #a9c9ff;
+        background-image: linear-gradient(180deg, #a9c9ff 0%, #ffbbec 100%);
       }
-      .card .imgBx img {
+
+      .gallery-header {
+        text-align: center;
+        margin-bottom: 10px;
+        margin-top: 0px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      }
+
+      .gallery-header h1 {
+        font-size: 2.4rem;
+        margin-bottom: 5px;
+        background-color: #4e3aff;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .gallery-header h1[contenteditable="true"].editable {
+        outline: 2px dashed rgba(255, 255, 255, 0.7);
+        padding: 0px;
+      }
+
+      /* עיצוב הכפתורים ושטח ההעלאה */
+      .upload-section {
+        height: 30px;
+        margin-bottom: 30px;
+        padding: 10px;
+        width: 100%;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        width: 80%;
+        margin: 0 auto;
+        padding-right: 10px;
+        justify-content: center;
+      }
+
+      /* עיצוב משותף לכל הכפתורים */
+      .file-input-label,
+      .nav-btn {
+        flex: 1;
+        min-width: 120px;
+        height: 36px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        border: none;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 15px;
+      }
+
+      /* צבעים ספציפיים לכפתורים */
+      .file-input-label {
+        background-color: #0059ff;
+      }
+
+      .clear-all-btn {
+        background-color: #db1a00;
+      }
+
+      .export-btn {
+        background-color: #1b6100;
+      }
+
+      /* הסתרת קלט הקובץ האמיתי */
+      .upload-section input[type="file"] {
+        display: none;
+      }
+
+      /* אנימציית hover לכפתורים */
+      .file-input-label:hover,
+      .nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      /* עיצוב הקונטיינר הראשי לגלריה */
+      .container {
+        max-width: 1200px;
+        width: calc(100% - 10px); /* רוחב מלא פחות פאדינג מימין ומשמאל */
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 20px;
+        margin: 0 auto; /* מירכוז */
+        padding: 40px 20px; /* פאדינג עליון ותחתון 40, ימין ושמאל 20 */
+        box-sizing: border-box;
+      }
+
+      /* עיצוב כרטיסי התמונה */
+      .card {
+        position: relative;
+        margin: 0 auto;
+        border-radius: 15px;
+        box-shadow: 0 15px 60px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        padding: 3px;
+        transition: all 0.3s ease;
+        background-image: linear-gradient(
+          40deg,
+          #00fffc 0%,
+          #fc00ff 45%,
+          #fffc00 100%
+        );
+        aspect-ratio: 16/10;
+      }
+
+      .card-inner {
+        background: #000;
+        height: 100%;
+        width: 100%;
+        border-radius: 13px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .face.face2 {
+        width: 100%;
+        flex: 1;
+        display: block;
+        overflow: hidden;
+        order: 1;
+      }
+
+      .face.face2 img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: 0.5s ease-in-out;
-      }
-      .card:hover .imgBx img {
-        transform: scale(1.1);
-      }
-      .card .details {
-        position: absolute;
-        left: 0;
-        bottom: -100%;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 119, 199, 0.99);
-        display: flex;
-        justify-content: center;
-        padding: 20px;
-        flex-direction: column;
-        transition: 0.5s ease-in-out;
-        z-index: 11;
-        text-align: center;
-      }
-      .card:hover .details {
-        bottom: 0;
-      }
-      .card .details h3 {
-        color: #fff;
-        text-transform: uppercase;
-        font-weight: 600;
-        font-size: 1.2em;
-        line-height: 1em;
-        margin-bottom: 10px;
-        text-align: center;
-      }
-      .card .details h3 span {
-        font-size: 0.65em;
-        font-weight: 300;
-        text-transform: none;
+        object-position: center center;
         display: block;
+        transition: transform 0.5s ease;
+      }
+
+      .face.face1 {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
         text-align: center;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        order: 2;
+        height: 15%;
+        min-height: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.5s ease;
       }
-      .card .details p {
+
+      .face.face1 h2 {
+        font-size: clamp(24px, 1.5vw, 32px);
+        margin: 0;
+        padding: 0;
+        background-image: linear-gradient(
+          40deg,
+          #fffc00 0%,
+          #fc00ff 45%,
+          #00fffc 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .face.face1 h2.editable {
+        outline: 2px dashed rgba(255, 255, 255, 0.5);
+      }
+
+      .face.face1 h3 {
+        font-size: clamp(14px, 1.5vw, 20px);
+        margin-bottom: -90px;
+        padding: 10px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .face.face1 h3.editable {
+        outline: 2px dashed rgba(255, 255, 255, 0.5);
+      }
+
+      .face.face1 p {
+        margin: 15px 0 0;
+        padding: 0;
         color: #fff;
-        font-size: 0.8em;
-        margin-bottom: 15px;
-        text-align: right;
-        direction: rtl;
+        opacity: 0;
+        max-height: 0;
+        transition: all 0.5s ease;
+        overflow: hidden;
+        font-size: clamp(12px, 1vw, 16px);
+        cursor: pointer;
       }
-      .remove-btn {
+
+      .face.face1 p.editable {
+        outline: 2px dashed rgba(255, 255, 255, 0.5);
+      }
+
+      /* מצב hover (עכבר) */
+      .card:hover .face.face1,
+      /* מצב פעיל (מגע) */
+      .card.touch-active .face.face1 {
         position: absolute;
-        top: 5px;
-        left: 5px;
-        background: red;
+        bottom: 0;
+        left: 0;
+        height: auto;
+        min-height: 100%;
+        border-radius: 15px;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 3;
+        padding: 20px;
+      }
+
+      .card:hover .face.face1 h2,
+      .card.touch-active .face.face1 h2 {
+        font-size: clamp(24px, 2.5vw, 32px);
+        margin-bottom: 20px;
+      }
+
+      .card:hover .face.face1 h3,
+      .card.touch-active .face.face1 h3 {
+        font-size: clamp(14px, 2.5vw, 20px);
+        margin-bottom: -5px;
+      }
+
+      .card:hover .face.face1 p,
+      .card.touch-active .face.face1 p {
+        opacity: 1;
+        max-height: 150px;
+      }
+
+      .card:hover .face.face2,
+      .card.touch-active .face.face2 {
+        filter: brightness(0.7);
+      }
+
+      .delete-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #db1a00;
         color: white;
         border: none;
         border-radius: 50%;
-        width: 25px;
-        height: 25px;
+        width: 30px;
+        height: 30px;
+        font-weight: bold;
         cursor: pointer;
-        z-index: 12;
-        display: none;
+        z-index: 4;
+        opacity: 0;
+        transition: opacity 0.3s;
       }
-      .card:hover .remove-btn {
-        display: block;
+
+      .card:hover .delete-btn,
+      .card.touch-active .delete-btn {
+        opacity: 1;
       }
-      .confirmation-dialog {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border-radius: 5px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        z-index: 100;
-        text-align: center;
-        display: none;
+
+      .delete-btn:hover {
+        background: #8b0000;
       }
-      .confirmation-dialog h3 {
-        margin-bottom: 15px;
-      }
-      .confirmation-dialog button {
-        margin: 0 10px;
-        padding: 8px 15px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-      .confirm-yes {
-        background: #b30000;
-        color: white;
-      }
-      .confirm-no {
-        background: #004879;
-        color: white;
-      }
-      .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 99;
-        display: none;
-      }
-      @media (max-width: 800px) {
-        .gallery {
-          grid-template-columns: repeat(2, 1fr);
+
+      /* התאמה לתצוגות במסכים שונים */
+      @media (max-width: 1200px) {
+        .container {
+          grid-template-columns: repeat(3, 1fr);
+          max-width: 1000px;
         }
       }
+
+      @media (max-width: 1000px) {
+        .container {
+          grid-template-columns: repeat(3, 1fr);
+          max-width: 800px;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .container {
+          grid-template-columns: repeat(2, 1fr);
+          max-width: 600px;
+        }
+      }
+
       @media (max-width: 500px) {
-        .gallery {
+        .container {
           grid-template-columns: 1fr;
+          max-width: 350px;
+          /* שומר על פאדינג 20px גם במסכים קטנים */
+          padding: 20px 20px;
+        }
+      }
+
+      /* התאמות למסך קטן */
+      @media (max-width: 600px) {
+        .button-group {
+          width: 100%;
+          flex-wrap: nowrap;
+        }
+
+        .file-input-label,
+        .nav-btn {
+          font-size: 14px;
+          min-width: 0;
+          flex: 1 1 33.33%;
+          padding: 8px 5px;
+        }
+
+        .gallery-header h1 {
+          font-size: 2rem;
         }
       }
     </style>
   </head>
   <body>
-    <div class="header">
-      <h1 id="galleryTitle" contenteditable="true">
-        כותרת הגלריה - לחץ לעריכה
-      </h1>
+    <div class="gallery-header">
+      <h1 contenteditable="true">גלריית התמונות שלי</h1>
     </div>
 
-    <div class="upload-container">
-      <input type="file" id="fileInput" accept="image/*" multiple />
-      <input type="file" id="bgImageInput" accept="image/*" />
-      <button
-        class="upload-btn"
-        onclick="document.getElementById('fileInput').click()"
-      >
-        העלאת תמונות
-      </button>
-      <button class="download-btn" onclick="downloadGallery()">
-        הורדת הגלריה
-      </button>
-      <button class="clear-btn" onclick="showConfirmationDialog()">
-        ניקוי התמונות
-      </button>
-      <button
-        class="bg-btn"
-        onclick="document.getElementById('bgImageInput').click()"
-      >
-        בחירת תמונת רקע
-      </button>
+    <div class="upload-section">
+      <div class="button-group">
+        <label for="image-upload" class="file-input-label">בחר תמונות</label>
+        <input type="file" id="image-upload" accept="image/*" multiple />
+        <button id="clear-all-btn" class="clear-all-btn nav-btn">
+          נקה תמונות
+        </button>
+        <button id="export-btn" class="export-btn nav-btn">ייצא גלריה</button>
+      </div>
     </div>
 
-    <div class="gallery" id="galleryContainer">
-      <!-- כרטיסים ייווספו כאן באופן דינמי -->
-    </div>
-
-    <!-- דיאלוג אישור למחיקת כל התמונות -->
-    <div class="overlay" id="overlay"></div>
-    <div class="confirmation-dialog" id="confirmationDialog">
-      <h3>האם אתה בטוח שברצונך למחוק את כל התמונות?</h3>
-      <button class="confirm-yes" onclick="clearAllImages()">
-        כן, מחק הכל
-      </button>
-      <button class="confirm-no" onclick="hideConfirmationDialog()">
-        לא, בטל
-      </button>
+    <div class="container" id="gallery-container">
+      <!-- Cards will be added here dynamically -->
     </div>
 
     <script>
-      // הגדרות
-      const MAX_IMAGES = 30; // הגבלת כמות התמונות
-      const IMAGE_QUALITY = 0.8; // איכות דחיסת התמונה (0.7-0.9)
-      const MAX_IMAGE_SIZE = 1000000; // 1MB - גודל מקסימלי לתמונה לאחר דחיסה
+      document.addEventListener("DOMContentLoaded", function () {
+        const clearAllBtn = document.getElementById("clear-all-btn");
+        const exportBtn = document.getElementById("export-btn");
+        const imageUpload = document.getElementById("image-upload");
+        const galleryContainer = document.getElementById("gallery-container");
+        const galleryTitle = document.querySelector(".gallery-header h1");
 
-      // שמירת הכותרת ב-localStorage
-      const galleryTitle = document.getElementById("galleryTitle");
-
-      // טעינת הכותרת מהזיכרון המקומי אם קיימת
-      if (localStorage.getItem("galleryTitle")) {
-        galleryTitle.textContent = localStorage.getItem("galleryTitle");
-      }
-
-      // שמירת הכותרת בעת שינוי
-      galleryTitle.addEventListener("input", function () {
-        localStorage.setItem("galleryTitle", this.textContent);
-      });
-
-      // אתחול מסד הנתונים IndexedDB
-      let db;
-      const request = indexedDB.open("GalleryDB", 1);
-
-      request.onupgradeneeded = function (event) {
-        db = event.target.result;
-        if (!db.objectStoreNames.contains("gallery")) {
-          db.createObjectStore("gallery", { keyPath: "id" });
+        // מספר התמונות שיוצגו בתור ברירת מחדל
+        const DEFAULT_IMAGES_COUNT = 9;
+        // מערך לאחסון תמונות ברירת המחדל (מספרים שיזינו את הפלייסהולדר)
+        const defaultImageUrls = [];
+        for (let i = 1; i <= DEFAULT_IMAGES_COUNT; i++) {
+          defaultImageUrls.push(`upload.png`);
         }
-      };
 
-      request.onsuccess = function (event) {
-        db = event.target.result;
-        loadGalleryFromDB();
-      };
+        // Make gallery title editable
+        galleryTitle.addEventListener("focus", function () {
+          this.classList.add("editable");
+        });
 
-      request.onerror = function (event) {
-        console.error("IndexedDB error:", event.target.error);
-        // אם יש שגיאה ב-IndexedDB, נשתמש ב-localStorage כגיבוי
-        loadGalleryFromLocalStorage();
-      };
+        galleryTitle.addEventListener("blur", function () {
+          this.classList.remove("editable");
+          // Save title to IndexedDB
+          saveGalleryTitleToDb(this.textContent);
+        });
 
-      // מערך לשמירת הנתונים של הגלריה
-      let galleryData = Array(9).fill(null);
+        // Export gallery to HTML file
+        exportBtn.addEventListener("click", function () {
+          exportGalleryToHtml();
+        });
 
-      // טעינת תמונת רקע אם קיימת
-      if (localStorage.getItem("backgroundImage")) {
-        document.body.style.backgroundImage = `url(${localStorage.getItem(
-          "backgroundImage"
-        )})`;
-      }
+        function exportGalleryToHtml() {
+          // Get all images and their data
+          const cards = document.querySelectorAll(".card");
+          let imagesData = [];
 
-      // פונקציה לטעינת הגלריה מ-IndexedDB
-      function loadGalleryFromDB() {
-        const transaction = db.transaction(["gallery"], "readonly");
-        const store = transaction.objectStore("gallery");
-        const request = store.get(1);
+          // ערכי ברירת מחדל לבדיקה
+          const defaultTitles = [
+            "תמונה 1",
+            "תמונה 2",
+            "תמונה 3",
+            "תמונה 4",
+            "תמונה 5",
+            "תמונה 6",
+            "תמונה 7",
+            "תמונה 8",
+            "תמונה 9",
+          ];
+          const defaultDescription = "תיאור קצר של התמונה";
+          const defaultDetails =
+            "כאן יופיעו פרטים נוספים על התמונה. לחץ כדי לערוך את הטקסט. תוכל להוסיף פרטים על מקום, זמן, אירוע או כל מידע אחר שתרצה.";
 
-        request.onsuccess = function (event) {
-          if (request.result) {
-            galleryData = request.result.data;
-            renderGallery();
-          } else {
-            // אם אין נתונים ב-IndexedDB, נטען מ-localStorage
-            loadGalleryFromLocalStorage();
+          cards.forEach((card) => {
+            const title = card.querySelector("h2").textContent;
+            const description = card.querySelector("h3").textContent;
+            const details = card.querySelector("p").textContent;
+            const imageUrl = card.querySelector("img").src;
+
+            // בדיקה האם זו תמונת ברירת מחדל
+            const isDefaultImage = card.hasAttribute("data-default");
+
+            // בדיקה האם התוכן הוא ברירת מחדל
+            const isTitleDefault =
+              defaultTitles.includes(title) || title === "כותרת לעריכה";
+            const isDescriptionDefault =
+              description === defaultDescription ||
+              description === "לחץ כדי לערוך את התיאור";
+            const isDetailsDefault =
+              details === defaultDetails ||
+              details === "לחץ כדי להוסיף פרטים נוספים";
+
+            imagesData.push({
+              title: isTitleDefault ? "" : title,
+              description: isDescriptionDefault ? "" : description,
+              details: isDetailsDefault ? "" : details,
+              imageUrl,
+              isDefaultImage,
+            });
+          });
+
+          // יש לסנן תמונות ברירת מחדל מהייצוא
+          imagesData = imagesData.filter((image) => !image.isDefaultImage);
+
+          // Create HTML file content
+          const galleryName = galleryTitle.textContent;
+
+          let htmlContent = `
+  <!DOCTYPE html>
+  <html lang="he" dir="rtl">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>${galleryName}</title>
+      <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #a9c9ff;
+          background-image: linear-gradient(180deg, #a9c9ff 0%, #ffbbec 100%);
+          padding: 20px;
+          min-height: 100vh;
+          margin: 0;
+        }
+        .gallery-header {
+          text-align: center;
+          margin-bottom: 30px;
+          color: white;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .gallery-header h1 {
+          font-size: 2.5rem;
+          margin-bottom: 10px;
+          background-image: linear-gradient(40deg, #fffc00 0%, #fc00ff 45%, #00fffc 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .container {
+          max-width: 1200px;
+          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          grid-gap: 20px;
+          margin: 0 auto;
+          padding: 40px 20px;
+        }
+        @media (max-width: 1200px) {
+          .container {
+            grid-template-columns: repeat(3, 1fr);
+            max-width: 1000px;
           }
-        };
-
-        request.onerror = function (event) {
-          console.error(
-            "Error loading gallery from IndexedDB:",
-            event.target.error
-          );
-          loadGalleryFromLocalStorage();
-        };
-      }
-
-      // פונקציה לטעינת הגלריה מ-localStorage (גיבוי)
-      function loadGalleryFromLocalStorage() {
-        if (localStorage.getItem("galleryData")) {
-          try {
-            galleryData =
-              JSON.parse(localStorage.getItem("galleryData")) ||
-              Array(9).fill(null);
-            renderGallery();
-          } catch (e) {
-            console.error("Error parsing gallery data from localStorage:", e);
-            galleryData = Array(9).fill(null);
-            renderGallery();
+        }
+        @media (max-width: 800px) {
+          .container {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 700px;
           }
-        } else {
-          renderGallery();
         }
-      }
+        @media (max-width: 500px) {
+          .container {
+            grid-template-columns: 1fr;
+            max-width: 350px;
+          }
+        }
+        .card {
+          position: relative;
+          margin: 0 auto;
+          border-radius: 15px;
+          box-shadow: 0 15px 60px rgba(0, 0, 0, 0.5);
+          width: 100%;
+          padding: 3px;
+          transition: all 0.3s ease;
+          background-image: linear-gradient(40deg, #00fffc 0%, #fc00ff 45%, #fffc00 100%);
+          aspect-ratio: 16/10;
+        }
+        .card-inner {
+          background: #000;
+          height: 100%;
+          width: 100%;
+          border-radius: 13px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+        .face {
+          position: relative;
+        }
+        .face.face2 {
+          width: 100%;
+          flex: 1;
+          display: block;
+          overflow: hidden;
+          order: 1;
+        }
+        .face.face2 img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center center;
+          display: block;
+          transition: transform 0.5s ease;
+        }
+        .face.face1 {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 10px;
+          text-align: center;
+          background: rgba(0, 0, 0, 0.8);
+          color: white;
+          order: 2;
+          height: 15%;
+          min-height: 60px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.5s ease;
+        }
+        .face.face1 h2 {
+          font-size: clamp(24px, 1.5vw, 32px);
+          margin: 0;
+          padding: 0;
+          background-image: linear-gradient(40deg, #fffc00 0%, #fc00ff 45%, #00fffc 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          line-height: 1;
+        }
+        .face.face1 h3 {
+          font-size: clamp(14px, 1.5vw, 20px);
+          margin-bottom: -90px;
+          padding: 10px;
+          line-height: 1;
+        }
+        .face.face1 p {
+          margin: 15px 0 0;
+          padding: 0;
+          color: #fff;
+          opacity: 0;
+          max-height: 0;
+          transition: all 0.5s ease;
+          overflow: hidden;
+          font-size: clamp(12px, 1vw, 16px);
+        }
+        
+        /* מצב hover (עכבר) */
+        .card:hover .face.face1,
+        /* מצב פעיל (מגע) */
+        .card.touch-active .face.face1 {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          height: auto;
+          min-height: 100%;
+          border-radius: 15px;
+          background: rgba(0, 0, 0, 0.9);
+          z-index: 3;
+          padding: 20px;
+        }
+        
+        .card:hover .face.face1 h2,
+        .card.touch-active .face.face1 h2 {
+          font-size: clamp(24px, 2.5vw, 32px);
+          margin-bottom: 20px;
+        }
+        
+        .card:hover .face.face1 h3,
+        .card.touch-active .face.face1 h3 {
+          font-size: clamp(14px, 2.5vw, 20px);
+          margin-bottom: -5px;
+        }
+        
+        .card:hover .face.face1 p,
+        .card.touch-active .face.face1 p {
+          opacity: 1;
+          max-height: 150px;
+        }
+        
+        .card:hover .face.face2,
+        .card.touch-active .face.face2 {
+          filter: brightness(0.7);
+        }
+      </style>
+    </head>
+    <body>
+      <div class="gallery-header">
+        <h1>${galleryName}</h1>
+      </div>
+      <div class="container">
+  `;
 
-      // פונקציה לשמירת הגלריה ב-IndexedDB
-      function saveGalleryToDB() {
-        if (!db) {
-          saveGalleryToLocalStorage();
-          return;
+          // Add each image card to the HTML
+          imagesData.forEach((image) => {
+            // רק אם יש תמונה אמיתית (לא תמונת placeholder)
+            htmlContent += `
+        <div class="card">
+          <div class="card-inner">
+            <div class="face face1">
+              <div class="content">
+                ${image.title ? `<h2>${image.title}</h2>` : ""}
+                ${image.description ? `<h3>${image.description}</h3>` : ""}
+                ${image.details ? `<p>${image.details}</p>` : ""}
+              </div>
+            </div>
+            <div class="face face2">
+              <img src="${image.imageUrl}" alt="${
+              image.title || "תמונה בגלריה"
+            }" />
+            </div>
+          </div>
+        </div>
+    `;
+          });
+
+          // Close the HTML file with touch events script
+          htmlContent += `
+      </div>
+      <script>
+        // הוספת תמיכה באירועי מגע
+        document.addEventListener('DOMContentLoaded', function() {
+          const cards = document.querySelectorAll('.card');
+          
+          // פונקציה להוספת מאזיני אירועים לכרטיסים
+          function addTouchListeners() {
+            cards.forEach(card => {
+              // מאזין לתחילת מגע
+              card.addEventListener('touchstart', function(e) {
+                e.preventDefault(); // מניעת גלילה במכשירי מגע
+                this.classList.add('touch-active');
+              });
+              
+              // מאזין לסיום מגע
+              card.addEventListener('touchend', function() {
+                this.classList.remove('touch-active');
+              });
+              
+              // מאזין ליציאה מהאלמנט תוך כדי מגע
+              card.addEventListener('touchcancel', function() {
+                this.classList.remove('touch-active');
+              });
+            });
+          }
+          
+          // הפעלת הפונקציה
+          addTouchListeners();
+        });
+      <\/script>
+    </body>
+  </html>
+  `;
+
+          // Create and download the file
+          const blob = new Blob([htmlContent], { type: "text/html" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = `${galleryName.replace(/\s+/g, "-")}.html`;
+          link.click();
+
+          // Clean up
+          URL.revokeObjectURL(link.href);
         }
 
-        const transaction = db.transaction(["gallery"], "readwrite");
-        const store = transaction.objectStore("gallery");
-        const request = store.put({ id: 1, data: galleryData });
+        // IndexedDB setup
+        let db;
+        const dbName = "galleryDB";
+        const dbVersion = 1;
 
-        request.onsuccess = function () {
-          console.log("Gallery data saved to IndexedDB");
+        const initDB = () => {
+          return new Promise((resolve, reject) => {
+            const request = indexedDB.open(dbName, dbVersion);
+
+            request.onupgradeneeded = function (event) {
+              db = event.target.result;
+
+              // Create object stores if they don't exist
+              if (!db.objectStoreNames.contains("images")) {
+                db.createObjectStore("images", {
+                  keyPath: "id",
+                  autoIncrement: true,
+                });
+              }
+
+              if (!db.objectStoreNames.contains("settings")) {
+                db.createObjectStore("settings", { keyPath: "name" });
+              }
+            };
+
+            request.onsuccess = function (event) {
+              db = event.target.result;
+              console.log("Database opened successfully");
+              resolve(db);
+            };
+
+            request.onerror = function (event) {
+              console.error("Database error:", event.target.error);
+              reject(event.target.error);
+            };
+          });
         };
 
-        request.onerror = function (event) {
-          console.error(
-            "Error saving gallery to IndexedDB:",
-            event.target.error
-          );
-          // אם יש שגיאה, נשתמש ב-localStorage כגיבוי
-          saveGalleryToLocalStorage();
-        };
-      }
+        // Initialize DB and load saved content
+        initDB()
+          .then(() => {
+            loadGalleryTitleFromDb();
+            loadImagesFromDb();
+          })
+          .catch((error) => {
+            console.error("Failed to initialize database:", error);
+            // Fall back to adding default cards if DB fails
+            addDefaultCards();
+          });
 
-      // פונקציה לשמירת הגלריה ב-localStorage (גיבוי)
-      function saveGalleryToLocalStorage() {
-        try {
-          localStorage.setItem("galleryData", JSON.stringify(galleryData));
-        } catch (e) {
-          console.error("Failed to save to localStorage:", e);
-          alert("אין מספיק מקום לאחסון. אנא מחק חלק מהתמונות הקיימות.");
+        // Save gallery title to DB
+        function saveGalleryTitleToDb(title) {
+          const transaction = db.transaction(["settings"], "readwrite");
+          const store = transaction.objectStore("settings");
+          store.put({ name: "galleryTitle", value: title });
         }
-      }
 
-      // פונקציה להצגת הגלריה
-      function renderGallery() {
-        const galleryContainer = document.getElementById("galleryContainer");
-        galleryContainer.innerHTML = "";
+        // Load gallery title from DB
+        function loadGalleryTitleFromDb() {
+          const transaction = db.transaction(["settings"], "readonly");
+          const store = transaction.objectStore("settings");
+          const request = store.get("galleryTitle");
 
-        // יצירת 9 הכרטיסים הראשונים (עם placeholder אם אין תמונה)
-        for (let i = 0; i < 9; i++) {
+          request.onsuccess = function (event) {
+            if (request.result) {
+              galleryTitle.textContent = request.result.value;
+            }
+          };
+        }
+
+        // Save image to DB
+        function saveImageToDb(imageData) {
+          const transaction = db.transaction(["images"], "readwrite");
+          const store = transaction.objectStore("images");
+          const request = store.add(imageData);
+
+          request.onsuccess = function (event) {
+            console.log("Image saved to DB with ID:", event.target.result);
+            imageData.id = event.target.result; // Update with generated ID
+          };
+
+          request.onerror = function (event) {
+            console.error("Error saving image to DB:", event.target.error);
+          };
+
+          return request;
+        }
+
+        // Update image in DB
+        function updateImageInDb(imageData) {
+          const transaction = db.transaction(["images"], "readwrite");
+          const store = transaction.objectStore("images");
+          const request = store.put(imageData);
+
+          request.onerror = function (event) {
+            console.error("Error updating image in DB:", event.target.error);
+          };
+        }
+
+        // Delete image from DB
+        function deleteImageFromDb(imageId) {
+          const transaction = db.transaction(["images"], "readwrite");
+          const store = transaction.objectStore("images");
+          const request = store.delete(imageId);
+
+          request.onerror = function (event) {
+            console.error("Error deleting image from DB:", event.target.error);
+          };
+        }
+
+        // Load all images from DB
+        function loadImagesFromDb() {
+          const transaction = db.transaction(["images"], "readonly");
+          const store = transaction.objectStore("images");
+          const request = store.getAll();
+
+          request.onsuccess = function (event) {
+            const images = request.result;
+            console.log("Loaded images from DB:", images.length);
+
+            if (images.length > 0) {
+              // Clear any default images
+              galleryContainer.innerHTML = "";
+
+              // Add each image from the database
+              images.forEach((imageData) => {
+                addCardToGallery(
+                  imageData.url,
+                  imageData.title,
+                  imageData.description,
+                  imageData.details,
+                  imageData.id
+                );
+              });
+            } else {
+              // If no images in DB, add defaults
+              addDefaultCards();
+            }
+          };
+          request.onerror = function (event) {
+            console.error("Error loading images from DB:", event.target.error);
+            // If there's an error loading from DB, add default cards
+            addDefaultCards();
+          };
+        }
+
+        // Clear all images
+        clearAllBtn.addEventListener("click", function () {
+          if (confirm("האם אתה בטוח שברצונך למחוק את כל התמונות?")) {
+            // Clear gallery container
+            galleryContainer.innerHTML = "";
+
+            // Clear images from DB
+            const transaction = db.transaction(["images"], "readwrite");
+            const store = transaction.objectStore("images");
+            const request = store.clear();
+
+            request.onsuccess = function () {
+              console.log("All images cleared from DB");
+              // איפוס הכותרת לברירת המחדל
+              galleryTitle.textContent = "גלריית התמונות שלי"; // תוכן ברירת המחדל מהקוד המקורי
+              saveGalleryTitleToDb(galleryTitle.textContent); // שמירה ב-DB כדי לשמור על עקביות
+              // Add default cards after clearing
+              addDefaultCards();
+            };
+
+            request.onerror = function (event) {
+              console.error(
+                "Error clearing images from DB:",
+                event.target.error
+              );
+            };
+          }
+        });
+
+        // Add default placeholder cards
+        function addDefaultCards() {
+          galleryContainer.innerHTML = "";
+
+          defaultImageUrls.forEach((url, index) => {
+            const title = `תמונה ${index + 1}`;
+            const description = "תיאור קצר של התמונה";
+            const details =
+              "כאן יופיעו פרטים נוספים על התמונה. לחץ כדי לערוך את הטקסט. תוכל להוסיף פרטים על מקום, זמן, אירוע או כל מידע אחר שתרצה.";
+
+            // Create card with default placeholder image
+            const card = createCard(url, title, description, details);
+            // Mark this card as a default card
+            card.setAttribute("data-default", "true");
+            galleryContainer.appendChild(card);
+          });
+        }
+
+        // Handle image uploads
+        imageUpload.addEventListener("change", function (e) {
+          const files = e.target.files;
+
+          if (files.length > 0) {
+            // Clear default cards when adding real images
+            const hasDefaultCards = document.querySelector(
+              '.card[data-default="true"]'
+            );
+            if (hasDefaultCards) {
+              galleryContainer.innerHTML = "";
+            }
+
+            // Process each uploaded file
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+
+              if (file.type.match("image.*")) {
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+                  const imageUrl = event.target.result;
+                  const title = "כותרת לעריכה";
+                  const description = "לחץ כדי לערוך את התיאור";
+                  const details = "לחץ כדי להוסיף פרטים נוספים";
+
+                  // Save image to DB and add to gallery
+                  const imageData = {
+                    url: imageUrl,
+                    title: title,
+                    description: description,
+                    details: details,
+                  };
+
+                  const saveRequest = saveImageToDb(imageData);
+
+                  saveRequest.onsuccess = function (event) {
+                    const imageId = event.target.result;
+                    addCardToGallery(
+                      imageUrl,
+                      title,
+                      description,
+                      details,
+                      imageId
+                    );
+                  };
+                };
+
+                reader.readAsDataURL(file);
+              }
+            }
+          }
+
+          // Reset file input to allow re-uploading the same files
+          this.value = "";
+        });
+
+        // Create card element
+        function createCard(imageUrl, title, description, details, imageId) {
           const card = document.createElement("div");
           card.className = "card";
 
-          if (galleryData[i]) {
-            // אם יש תמונה במיקום הזה - הצג אותה
-            card.innerHTML = `
-              <div class="imgBx">
-                <img src="${galleryData[i].imageSrc}" alt="תמונה ${i + 1}" />
-              </div>
-              <div class="details">
-                <h3 contenteditable="true">${
-                  galleryData[i].title || "כותרת תמונה " + (i + 1)
-                }</h3>
-                <span contenteditable="true">${
-                  galleryData[i].subtitle || "תת כותרת"
-                }</span>
-                <p contenteditable="true">
-                  ${
-                    galleryData[i].description ||
-                    "לחץ כדי לערוך את הטקסט. הטקסט הזה מיושר לימין בעוד הכותרות ממורכזות. ניתן להזין כאן תיאור מפורט של התמונה."
-                  }
-                </p>
-              </div>
-              <button class="remove-btn" onclick="removeImage(${i})">×</button>
-            `;
-          } else {
-            // אם אין תמונה - הצג placeholder
-            card.innerHTML = `
-              <div class="imgBx">
-                <img src="upload.png" alt="placeholder ${i + 1}" />
-              </div>
-              <div class="details">
-                <h3>כותרת תמונה ${i + 1}</h3>
-                <span><b>כותרת משנה</b></span>
-                <p>
-                  כתוב פה הסבר קצר המספר על התמונה .<br>
-                  התמונה תותאם אוטומטית ליחס 16:9.
-                </p>
-              </div>
-            `;
+          if (imageId) {
+            card.setAttribute("data-id", imageId);
           }
 
+          card.innerHTML = `
+        <div class="card-inner">
+          <div class="face face1">
+            <div class="content">
+              <h2 contenteditable="true">${title}</h2>
+              <h3 contenteditable="true">${description}</h3>
+              <p contenteditable="true">${details}</p>
+            </div>
+          </div>
+          <div class="face face2">
+            <img src="${imageUrl}" alt="${title}">
+          </div>
+        </div>
+        <button class="delete-btn">×</button>
+      `;
+
+          // Setup content editable handlers
+          setupEditableHandlers(card);
+
+          // Setup delete button
+          const deleteBtn = card.querySelector(".delete-btn");
+          deleteBtn.addEventListener("click", function () {
+            if (confirm("האם אתה בטוח שברצונך למחוק את התמונה הזו?")) {
+              // Remove from DOM
+              card.remove();
+
+              // Remove from DB if it has an ID
+              const imageId = card.getAttribute("data-id");
+              if (imageId) {
+                deleteImageFromDb(parseInt(imageId));
+              }
+
+              // If gallery is empty, add default cards
+              if (galleryContainer.children.length === 0) {
+                addDefaultCards();
+              }
+            }
+          });
+
+          // Add touch support for mobile devices
+          card.addEventListener("touchstart", function (e) {
+            this.classList.add("touch-active");
+          });
+
+          card.addEventListener("touchend", function () {
+            this.classList.remove("touch-active");
+          });
+
+          card.addEventListener("touchcancel", function () {
+            this.classList.remove("touch-active");
+          });
+
+          return card;
+        }
+
+        // Add card to gallery
+        function addCardToGallery(
+          imageUrl,
+          title,
+          description,
+          details,
+          imageId
+        ) {
+          const card = createCard(
+            imageUrl,
+            title,
+            description,
+            details,
+            imageId
+          );
           galleryContainer.appendChild(card);
         }
 
-        // יצירת כרטיסים עבור תמונות נוספות מעבר ל-9 (ללא placeholder)
-        for (let i = 9; i < galleryData.length; i++) {
-          if (galleryData[i]) {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
-              <div class="imgBx">
-                <img src="${galleryData[i].imageSrc}" alt="תמונה ${i + 1}" />
-              </div>
-              <div class="details">
-                <h3 contenteditable="true">${
-                  galleryData[i].title || "כותרת תמונה " + (i + 1)
-                }</h3>
-                <span contenteditable="true">${
-                  galleryData[i].subtitle || "תת כותרת"
-                }</span>
-                <p contenteditable="true">
-                  ${
-                    galleryData[i].description ||
-                    "לחץ כדי לערוך את הטקסט. הטקסט הזה מיושר לימין בעוד הכותרות ממורכזות. ניתן להזין כאן תיאור מפורט של התמונה."
-                  }
-                </p>
-              </div>
-              <button class="remove-btn" onclick="removeImage(${i})">×</button>
-            `;
-            galleryContainer.appendChild(card);
-          }
-        }
+        // Setup editable content handlers
+        function setupEditableHandlers(card) {
+          const editableElements = card.querySelectorAll("[contenteditable]");
 
-        // הוספת מאזיני אירועים לעריכת תוכן
-        addContentEditableListeners();
-      }
+          editableElements.forEach((element) => {
+            // Add visual cue when editing
+            element.addEventListener("focus", function () {
+              this.classList.add("editable");
+            });
 
-      // פונקציה להוספת מאזיני אירועים לתוכן הניתן לעריכה
-      function addContentEditableListeners() {
-        document
-          .querySelectorAll('[contenteditable="true"]')
-          .forEach((element) => {
-            element.addEventListener("input", function () {
-              const cardIndex = Array.from(
-                this.closest(".card").parentNode.children
-              ).indexOf(this.closest(".card"));
-              const fieldType = this.tagName.toLowerCase();
+            element.addEventListener("blur", function () {
+              this.classList.remove("editable");
 
-              if (!galleryData[cardIndex]) {
-                galleryData[cardIndex] = {
-                  imageSrc: "",
-                  title: "",
-                  subtitle: "",
-                  description: "",
+              // Save changes to DB if this card has an ID
+              const imageId = card.getAttribute("data-id");
+              if (imageId) {
+                const imageData = {
+                  id: parseInt(imageId),
+                  url: card.querySelector("img").src,
+                  title: card.querySelector("h2").textContent,
+                  description: card.querySelector("h3").textContent,
+                  details: card.querySelector("p").textContent,
                 };
-              }
 
-              if (fieldType === "h3") {
-                galleryData[cardIndex].title = this.textContent;
-              } else if (fieldType === "span") {
-                galleryData[cardIndex].subtitle = this.textContent;
-              } else if (fieldType === "p") {
-                galleryData[cardIndex].description = this.textContent;
+                updateImageInDb(imageData);
               }
-
-              saveGalleryToDB();
             });
           });
-      }
-
-      // פונקציה להסרת תמונה
-      function removeImage(index) {
-        if (index < 9) {
-          // אם זו אחת מ-9 התמונות הראשונות - החזר placeholder
-          galleryData[index] = null;
-        } else {
-          // אם זו תמונה נוספת - מחק אותה מהמערך
-          galleryData.splice(index, 1);
         }
-        saveGalleryToDB();
-        renderGallery();
-      }
-
-      // פונקציה להצגת דיאלוג האישור למחיקת כל התמונות
-      function showConfirmationDialog() {
-        document.getElementById("overlay").style.display = "block";
-        document.getElementById("confirmationDialog").style.display = "block";
-      }
-
-      // פונקציה להסתרת דיאלוג האישור
-      function hideConfirmationDialog() {
-        document.getElementById("overlay").style.display = "none";
-        document.getElementById("confirmationDialog").style.display = "none";
-      }
-
-      function clearAllImages() {
-        // איפוס המערך ל-9 תאים ריקים
-        galleryData = Array(9).fill(null);
-
-        // ניקוי תמונת הרקע מה-localStorage
-        localStorage.removeItem("backgroundImage");
-
-        // איפוס תמונת הרקע בממשק המשתמש
-        document.body.style.backgroundImage = "";
-
-        saveGalleryToDB();
-        renderGallery();
-        hideConfirmationDialog();
-      }
-
-      // פונקציה לדחיסת תמונה תוך שמירה על איכות מירבית
-      function compressImage(file, callback) {
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-          const img = new Image();
-
-          img.onload = function () {
-            // קביעת גודל קנבס בהתאם לגודל המקורי אך עם מקסימום מוגדר
-            const MAX_WIDTH = 1200;
-            const MAX_HEIGHT = 800;
-            let width = img.width;
-            let height = img.height;
-
-            // אם התמונה גדולה מדי, נשנה את המידות תוך שמירה על היחס
-            if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-              const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
-              width = Math.floor(width * ratio);
-              height = Math.floor(height * ratio);
-            }
-
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, width, height);
-
-            // ניסיון דחיסה באיכות גבוהה
-            let quality = IMAGE_QUALITY;
-            let compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-
-            // אם עדיין גדול מדי, נפחית את האיכות בהדרגה
-            while (compressedDataUrl.length > MAX_IMAGE_SIZE && quality > 0.5) {
-              quality -= 0.1;
-              compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-            }
-
-            callback(compressedDataUrl);
-          };
-
-          img.src = event.target.result;
-        };
-
-        reader.readAsDataURL(file);
-      }
-
-      // טיפול בהעלאת תמונות
-      document
-        .getElementById("fileInput")
-        .addEventListener("change", function (e) {
-          const files = e.target.files;
-
-          if (galleryData.length >= MAX_IMAGES) {
-            alert(
-              `תוכל להעלות עד ${MAX_IMAGES} תמונות. מחק חלק מהתמונות הקיימות כדי להעלות חדשות.`
-            );
-            this.value = "";
-            return;
-          }
-
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-
-            if (file.type.match("image.*")) {
-              compressImage(file, function (compressedImage) {
-                // חיפוש מקום פנוי בקפידה ב-9 המיקומים הראשונים
-                let emptySlot = -1;
-                for (let i = 0; i < 9; i++) {
-                  if (galleryData[i] === null) {
-                    emptySlot = i;
-                    break;
-                  }
-                }
-
-                if (emptySlot === -1) {
-                  // אם אין מקום פנוי ב-9 הראשונות, הוסף לסוף המערך
-                  emptySlot = galleryData.length;
-                }
-
-                // הוספת הנתונים למערך
-                const newImage = {
-                  imageSrc: compressedImage,
-                  title: "כותרת תמונה " + (emptySlot + 1),
-                  subtitle: "תת כותרת",
-                  description:
-                    "לחץ כדי לערוך את הטקסט. הטקסט הזה מיושר לימין בעוד הכותרות ממורכזות. ניתן להזין כאן תיאור מפורט של התמונה.",
-                };
-
-                if (emptySlot < galleryData.length) {
-                  galleryData[emptySlot] = newImage;
-                } else {
-                  galleryData.push(newImage);
-                }
-
-                saveGalleryToDB();
-                renderGallery();
-              });
-            }
-          }
-
-          // איפוס ערך הקלט כדי לאפשר העלאת אותה תמונה שוב
-          this.value = "";
-        });
-
-      // טיפול בהעלאת תמונת רקע
-      document
-        .getElementById("bgImageInput")
-        .addEventListener("change", function (e) {
-          const file = e.target.files[0];
-          if (file && file.type.match("image.*")) {
-            compressImage(file, function (compressedImage) {
-              localStorage.setItem("backgroundImage", compressedImage);
-              document.body.style.backgroundImage = `url(${compressedImage})`;
-            });
-          }
-          this.value = "";
-        });
-
-      // פונקציית הורדת הגלריה כקובץ HTML עצמאי
-      function downloadGallery() {
-        // קבלת כותרת הגלריה לשימוש כשם הקובץ
-        const galleryTitleText =
-          document.getElementById("galleryTitle").textContent;
-        // יצירת שם קובץ תקין מכותרת הגלריה - הסרת תווים אסורים
-        const validFileName =
-          galleryTitleText
-            .replace(/[\/\\:*?"<>|]/g, "") // הסרת תווים אסורים בשם קובץ
-            .trim() || "gallery"; // אם אין טקסט תקין, השתמש ב-'gallery'
-
-        // קביעת רקע (אם יש)
-        let backgroundStyle = "";
-        if (localStorage.getItem("backgroundImage")) {
-          backgroundStyle = `
-    body {
-      background-image: url(${localStorage.getItem("backgroundImage")});
-    }`;
-        }
-
-        // יצירת קובץ HTML חדש עם תוכן הגלריה
-        let htmlContent = `<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${galleryTitleText}</title>
-  <style>
-    @import url("https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap");
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Poppins", sans-serif;
-    }
-    body {
-      background: #a5c5ff;
-      min-height: 100vh;
-      padding: 30px 20px;
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-    }${backgroundStyle}
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .header h1 {
-      font-size: 3em;
-      color: #005512;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.7);
-    }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .card {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #000;
-      display: flex;
-      box-shadow: 0 15px 45px rgba(4, 0, 211, 0.5);
-      overflow: hidden;
-      transition: 0.5s ease-in-out;
-    }
-    .card:hover {
-      transform: translateY(-10px);
-    }
-    .card .imgBx {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #fff7d4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-    }
-    .card .imgBx img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: 0.5s ease-in-out;
-    }
-    .card:hover .imgBx img {
-      transform: scale(1.1);
-    }
-    .card .details {
-      position: absolute;
-      left: 0;
-      bottom: -100%;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 119, 199, 0.99);
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-      flex-direction: column;
-      transition: 0.5s ease-in-out;
-      z-index: 11;
-      text-align: center;
-    }
-    .card:hover .details {
-      bottom: 0;
-    }
-    .card .details h3 {
-      color: #fff;
-      text-transform: uppercase;
-      font-weight: 600;
-      font-size: 1.2em;
-      line-height: 1em;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-    .card .details h3 span {
-      font-size: 0.65em;
-      font-weight: 300;
-      text-transform: none;
-      display: block;
-      text-align: center;
-    }
-    .card .details p {
-      color: #fff;
-      font-size: 0.8em;
-      margin-bottom: 15px;
-      text-align: right;
-      direction: rtl;
-    }
-    @media (max-width: 800px) {
-      .gallery {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (max-width: 500px) {
-      .gallery {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>${galleryTitleText}</h1>
-  </div>
-
-  <div class="gallery" id="galleryContainer">`;
-
-        // קבע את הטקסטים ברירת המחדל שנרצה לסנן
-        const defaultTexts = {
-          title: /^כותרת תמונה \d+$/,
-          subtitle: /^תת כותרת$/,
-          description:
-            /^לחץ כדי לערוך את הטקסט\.|כתוב פה הסבר קצר|התמונה תותאם אוטומטית/,
-        };
-
-        // יצירת 9 הכרטיסים הראשונים
-        for (let i = 0; i < 9; i++) {
-          htmlContent += `
-    <div class="card">`;
-
-          if (galleryData[i]) {
-            // אם יש תמונה במיקום הזה - הטמע אותה בקוד
-            let cardContent = `
-      <div class="imgBx">
-        <img src="${galleryData[i].imageSrc}" alt="תמונה ${i + 1}" />
-      </div>
-      <div class="details">`;
-
-            // בדוק את כל אחד מהשדות - אם הוא לא ערך ברירת מחדל, הוסף אותו
-            const title = galleryData[i].title || "";
-            const subtitle = galleryData[i].subtitle || "";
-            const description = galleryData[i].description || "";
-
-            // הוסף כותרת רק אם היא לא ברירת מחדל
-            if (title && !defaultTexts.title.test(title)) {
-              cardContent += `
-        <h3>${title}</h3>`;
-            }
-
-            // הוסף כותרת משנה רק אם היא לא ברירת מחדל
-            if (subtitle && !defaultTexts.subtitle.test(subtitle)) {
-              cardContent += `
-        <span>${subtitle}</span>`;
-            }
-
-            // הוסף תיאור רק אם הוא לא ברירת מחדל
-            if (description && !defaultTexts.description.test(description)) {
-              cardContent += `
-        <p>
-          ${description}
-        </p>`;
-            }
-
-            cardContent += `
-      </div>`;
-
-            htmlContent += cardContent;
-          } else {
-            // אם אין תמונה - השתמש בקישור לשרת עבור ה-placeholder
-            htmlContent += `
-      <div class="imgBx">
-        <img src="upload.png" alt="placeholder ${i + 1}" />
-      </div>
-      <div class="details">
-      </div>`;
-          }
-
-          htmlContent += `
-    </div>`;
-        }
-
-        // הוספת כרטיסים עבור תמונות נוספות מעבר ל-9
-        for (let i = 9; i < galleryData.length; i++) {
-          if (galleryData[i]) {
-            let cardContent = `
-    <div class="card">
-      <div class="imgBx">
-        <img src="${galleryData[i].imageSrc}" alt="תמונה ${i + 1}" />
-      </div>
-      <div class="details">`;
-
-            // בדוק את כל אחד מהשדות - אם הוא לא ערך ברירת מחדל, הוסף אותו
-            const title = galleryData[i].title || "";
-            const subtitle = galleryData[i].subtitle || "";
-            const description = galleryData[i].description || "";
-
-            // הוסף כותרת רק אם היא לא ברירת מחדל
-            if (title && !defaultTexts.title.test(title)) {
-              cardContent += `
-        <h3>${title}</h3>`;
-            }
-
-            // הוסף כותרת משנה רק אם היא לא ברירת מחדל
-            if (subtitle && !defaultTexts.subtitle.test(subtitle)) {
-              cardContent += `
-        <span>${subtitle}</span>`;
-            }
-
-            // הוסף תיאור רק אם הוא לא ברירת מחדל
-            if (description && !defaultTexts.description.test(description)) {
-              cardContent += `
-        <p>
-          ${description}
-        </p>`;
-            }
-
-            cardContent += `
-      </div>
-    </div>`;
-
-            htmlContent += cardContent;
-          }
-        }
-
-        // סיום הקובץ
-        htmlContent += `
-  </div>
-</body>
-</html>`;
-
-        // יצירת קישור להורדה עם שם הקובץ המבוסס על כותרת הגלריה
-        const downloadLink = document.createElement("a");
-        downloadLink.href =
-          "data:text/html;charset=utf-8," + encodeURIComponent(htmlContent);
-        downloadLink.download = validFileName + ".html";
-
-        // הורדה אוטומטית
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-      }
-
-      // טעינת הגלריה הראשונית
-      if (db) {
-        loadGalleryFromDB();
-      } else {
-        loadGalleryFromLocalStorage();
-      }
-
-      window.addEventListener("beforeunload", function () {
-        // מחיקה מהזיכרון המקומי
-        localStorage.removeItem("galleryTitle");
-        localStorage.removeItem("backgroundImage");
-        localStorage.removeItem("galleryData");
-
-        // ניקוי IndexedDB (אם קיים)
-        const request = indexedDB.deleteDatabase("GalleryDB");
-        request.onsuccess = function () {
-          console.log("GalleryDB נמחק בהצלחה בעת יציאה.");
-        };
       });
     </script>
   </body>
