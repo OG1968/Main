@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>גלריית תמונות עם אפקט ריחוף</title>
+    <link rel="icon" type="image/x-icon" href="photolabel.png" />
+    <title>גלריית תמונות עם בחירת רקע</title>
     <style>
       body {
         margin: 0;
@@ -14,8 +15,10 @@
         align-items: center;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         min-height: 100vh;
-        background-color: #a9c9ff;
-        background-image: linear-gradient(180deg, #a9c9ff 0%, #ffbbec 100%);
+        background-image: url("default-bg.jpg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
       }
 
       .gallery-header {
@@ -84,6 +87,10 @@
         background-color: #0059ff;
       }
 
+      .background-btn {
+        background-color: #8a2be2;
+      }
+
       .clear-all-btn {
         background-color: #db1a00;
       }
@@ -107,12 +114,12 @@
       /* עיצוב הקונטיינר הראשי לגלריה */
       .container {
         max-width: 1200px;
-        width: calc(100% - 10px); /* רוחב מלא פחות פאדינג מימין ומשמאל */
+        width: calc(100% - 10px);
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         grid-gap: 20px;
-        margin: 0 auto; /* מירכוז */
-        padding: 40px 20px; /* פאדינג עליון ותחתון 40, ימין ושמאל 20 */
+        margin: 0 auto;
+        padding: 40px 20px;
         box-sizing: border-box;
       }
 
@@ -317,7 +324,6 @@
         .container {
           grid-template-columns: 1fr;
           max-width: 350px;
-          /* שומר על פאדינג 20px גם במסכים קטנים */
           padding: 20px 20px;
         }
       }
@@ -352,8 +358,12 @@
       <div class="button-group">
         <label for="image-upload" class="file-input-label">בחר תמונות</label>
         <input type="file" id="image-upload" accept="image/*" multiple />
+        <label for="background-upload" class="background-btn nav-btn"
+          >בחירת רקע</label
+        >
+        <input type="file" id="background-upload" accept="image/*" />
         <button id="clear-all-btn" class="clear-all-btn nav-btn">
-          נקה תמונות
+          נקה הכל
         </button>
         <button id="export-btn" class="export-btn nav-btn">ייצא גלריה</button>
       </div>
@@ -368,6 +378,7 @@
         const clearAllBtn = document.getElementById("clear-all-btn");
         const exportBtn = document.getElementById("export-btn");
         const imageUpload = document.getElementById("image-upload");
+        const backgroundUpload = document.getElementById("background-upload");
         const galleryContainer = document.getElementById("gallery-container");
         const galleryTitle = document.querySelector(".gallery-header h1");
 
@@ -377,6 +388,12 @@
         const defaultImageUrls = [];
         for (let i = 1; i <= DEFAULT_IMAGES_COUNT; i++) {
           defaultImageUrls.push(`upload.png`);
+        }
+
+        // טעינת רקע שמור מ-localStorage
+        const savedBackground = localStorage.getItem("galleryBackground");
+        if (savedBackground) {
+          document.body.style.backgroundImage = `url('${savedBackground}')`;
         }
 
         // Make gallery title editable
@@ -393,6 +410,87 @@
         // Export gallery to HTML file
         exportBtn.addEventListener("click", function () {
           exportGalleryToHtml();
+        });
+
+        // Clear all images and background
+        clearAllBtn.addEventListener("click", function () {
+          if (confirm("האם אתה בטוח שברצונך למחוק את כל התמונות ואת הרקע?")) {
+            // Clear gallery container
+            galleryContainer.innerHTML = "";
+
+            // Clear background - תיקון: החזרת רקע ברירת מחדל עם הצלבת נתיב
+            document.body.style.backgroundImage = "url('default-bg.jpg')";
+            localStorage.removeItem("galleryBackground");
+
+            // Clear images from DB
+            const transaction = db.transaction(["images"], "readwrite");
+            const store = transaction.objectStore("images");
+            const request = store.clear();
+
+            request.onsuccess = function () {
+              console.log("All images cleared from DB");
+              // איפוס הכותרת לברירת המחדל
+              galleryTitle.textContent = "גלריית התמונות שלי";
+              saveGalleryTitleToDb(galleryTitle.textContent);
+              // Add default cards after clearing
+              addDefaultCards();
+            };
+
+            request.onerror = function (event) {
+              console.error(
+                "Error clearing images from DB:",
+                event.target.error
+              );
+            };
+          }
+        });
+
+        // Handle background upload with compression
+        backgroundUpload.addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file && file.type.match("image.*")) {
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+              const img = new Image();
+              img.src = event.target.result;
+
+              img.onload = function () {
+                // Create canvas for compression
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+
+                // Set canvas dimensions (max width 1920px while maintaining aspect ratio)
+                const MAX_WIDTH = 1920;
+                const scaleFactor = MAX_WIDTH / img.width;
+                canvas.width = MAX_WIDTH;
+                canvas.height = img.height * scaleFactor;
+
+                // Draw image on canvas with new dimensions
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // Convert to JPEG with quality 0.8
+                canvas.toBlob(
+                  function (blob) {
+                    const compressedReader = new FileReader();
+                    compressedReader.onload = function (e) {
+                      const bgUrl = e.target.result;
+                      document.body.style.backgroundImage = `url('${bgUrl}')`;
+                      localStorage.setItem("galleryBackground", bgUrl);
+                    };
+                    compressedReader.readAsDataURL(blob);
+                  },
+                  "image/jpeg",
+                  0.8
+                );
+              };
+            };
+
+            reader.readAsDataURL(file);
+          }
+
+          // Reset file input
+          this.value = "";
         });
 
         function exportGalleryToHtml() {
@@ -449,6 +547,8 @@
 
           // Create HTML file content
           const galleryName = galleryTitle.textContent;
+          const currentBg =
+            localStorage.getItem("galleryBackground") || "default-bg.jpg";
 
           let htmlContent = `
   <!DOCTYPE html>
@@ -456,12 +556,15 @@
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <link rel="icon" type="image/x-icon" href="photolabel.png" />
       <title>${galleryName}</title>
       <style>
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background-color: #a9c9ff;
-          background-image: linear-gradient(180deg, #a9c9ff 0%, #ffbbec 100%);
+          background-image: url('${currentBg}');
+          background-size: cover;
+          background-position: center;
+          background-attachment: fixed;
           padding: 20px;
           min-height: 100vh;
           margin: 0;
@@ -851,35 +954,6 @@
           };
         }
 
-        // Clear all images
-        clearAllBtn.addEventListener("click", function () {
-          if (confirm("האם אתה בטוח שברצונך למחוק את כל התמונות?")) {
-            // Clear gallery container
-            galleryContainer.innerHTML = "";
-
-            // Clear images from DB
-            const transaction = db.transaction(["images"], "readwrite");
-            const store = transaction.objectStore("images");
-            const request = store.clear();
-
-            request.onsuccess = function () {
-              console.log("All images cleared from DB");
-              // איפוס הכותרת לברירת המחדל
-              galleryTitle.textContent = "גלריית התמונות שלי"; // תוכן ברירת המחדל מהקוד המקורי
-              saveGalleryTitleToDb(galleryTitle.textContent); // שמירה ב-DB כדי לשמור על עקביות
-              // Add default cards after clearing
-              addDefaultCards();
-            };
-
-            request.onerror = function (event) {
-              console.error(
-                "Error clearing images from DB:",
-                event.target.error
-              );
-            };
-          }
-        });
-
         // Add default placeholder cards
         function addDefaultCards() {
           galleryContainer.innerHTML = "";
@@ -919,29 +993,58 @@
                 const reader = new FileReader();
 
                 reader.onload = function (event) {
-                  const imageUrl = event.target.result;
-                  const title = "כותרת לעריכה";
-                  const description = "לחץ כדי לערוך את התיאור";
-                  const details = "לחץ כדי להוסיף פרטים נוספים";
+                  const img = new Image();
+                  img.src = event.target.result;
 
-                  // Save image to DB and add to gallery
-                  const imageData = {
-                    url: imageUrl,
-                    title: title,
-                    description: description,
-                    details: details,
-                  };
+                  img.onload = function () {
+                    // Create canvas for compression
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
 
-                  const saveRequest = saveImageToDb(imageData);
+                    // Set canvas dimensions (max width 800px while maintaining aspect ratio)
+                    const MAX_WIDTH = 800;
+                    const scaleFactor = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleFactor;
 
-                  saveRequest.onsuccess = function (event) {
-                    const imageId = event.target.result;
-                    addCardToGallery(
-                      imageUrl,
-                      title,
-                      description,
-                      details,
-                      imageId
+                    // Draw image on canvas with new dimensions
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // Convert to JPEG with quality 0.8
+                    canvas.toBlob(
+                      function (blob) {
+                        const compressedReader = new FileReader();
+                        compressedReader.onload = function (e) {
+                          const imageUrl = e.target.result;
+                          const title = "כותרת לעריכה";
+                          const description = "לחץ כדי לערוך את התיאור";
+                          const details = "לחץ כדי להוסיף פרטים נוספים";
+
+                          // Save image to DB and add to gallery
+                          const imageData = {
+                            url: imageUrl,
+                            title: title,
+                            description: description,
+                            details: details,
+                          };
+
+                          const saveRequest = saveImageToDb(imageData);
+
+                          saveRequest.onsuccess = function (event) {
+                            const imageId = event.target.result;
+                            addCardToGallery(
+                              imageUrl,
+                              title,
+                              description,
+                              details,
+                              imageId
+                            );
+                          };
+                        };
+                        compressedReader.readAsDataURL(blob);
+                      },
+                      "image/jpeg",
+                      0.8
                     );
                   };
                 };
@@ -984,22 +1087,21 @@
           setupEditableHandlers(card);
 
           // Setup delete button
+          // Setup delete button
           const deleteBtn = card.querySelector(".delete-btn");
           deleteBtn.addEventListener("click", function () {
-            if (confirm("האם אתה בטוח שברצונך למחוק את התמונה הזו?")) {
-              // Remove from DOM
-              card.remove();
+            // Remove from DOM
+            card.remove();
 
-              // Remove from DB if it has an ID
-              const imageId = card.getAttribute("data-id");
-              if (imageId) {
-                deleteImageFromDb(parseInt(imageId));
-              }
+            // Remove from DB if it has an ID
+            const imageId = card.getAttribute("data-id");
+            if (imageId) {
+              deleteImageFromDb(parseInt(imageId));
+            }
 
-              // If gallery is empty, add default cards
-              if (galleryContainer.children.length === 0) {
-                addDefaultCards();
-              }
+            // If gallery is empty, add default cards
+            if (galleryContainer.children.length === 0) {
+              addDefaultCards();
             }
           });
 
