@@ -419,7 +419,7 @@
             galleryContainer.innerHTML = "";
 
             // Clear background - תיקון: החזרת רקע ברירת מחדל עם הצלבת נתיב
-            document.body.style.backgroundImage = "url('default-bg.jpg')";
+            document.body.style.backgroundImage = "url('buckground.png')";
             localStorage.removeItem("galleryBackground");
 
             // Clear images from DB
@@ -548,7 +548,7 @@
           // Create HTML file content
           const galleryName = galleryTitle.textContent;
           const currentBg =
-            localStorage.getItem("galleryBackground") || "default-bg.jpg";
+            localStorage.getItem("galleryBackground") || "buckground.png";
 
           let htmlContent = `
   <!DOCTYPE html>
