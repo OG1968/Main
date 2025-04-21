@@ -23,7 +23,8 @@
 
       .gallery-header {
         text-align: center;
-        margin-bottom: 10px;
+        padding-right: 20px;
+        margin-bottom: 5px;
         margin-top: 0px;
       }
 
@@ -76,24 +77,27 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: 15px;
       }
 
       /* צבעים ספציפיים לכפתורים */
       .file-input-label {
         background-color: #1667fd;
+        font-size: 16px;
       }
 
       .background-btn {
         background-color: #8400ff;
+        font-size: 16px;
       }
 
       .clear-all-btn {
         background-color: #db1a00;
+        font-size: 16px;
       }
 
       .export-btn {
         background-color: #1b6100;
+        font-size: 16px;
       }
 
       /* הסתרת קלט הקובץ האמיתי */
@@ -330,6 +334,12 @@
         }
       }
 
+      @media (max-width: 600px) {
+        .export-btn {
+          margin-left: -100%;
+        }
+      }
+
       /* התאמות למסך קטן */
       @media (max-width: 600px) {
         .button-group {
@@ -527,18 +537,7 @@
 
           // Define default texts to exclude
           const DEFAULT_TEXTS = {
-            title: [
-              "כותרת לעריכה",
-              "תמונה 1",
-              "תמונה 2",
-              "תמונה 3",
-              "תמונה 4",
-              "תמונה 5",
-              "תמונה 6",
-              "תמונה 7",
-              "תמונה 8",
-              "תמונה 9",
-            ],
+            title: ["כותרת לעריכה"],
             description: ["לחץ כדי לערוך את התיאור", "תיאור קצר של התמונה"],
             details: [
               "לחץ כדי להוסיף פרטים נוספים",
@@ -783,7 +782,7 @@
           galleryContainer.innerHTML = "";
 
           defaultImageUrls.forEach((url, index) => {
-            const title = `תמונה ${index + 1}`;
+            const title = `כותרת לעריכה ${index + 1}`;
             const description = "תיאור קצר של התמונה";
             const details =
               "כאן יופיעו פרטים נוספים על התמונה. לחץ כדי לערוך את הטקסט. תוכל להוסיף פרטים על מקום, זמן, אירוע או כל מידע אחר שתרצה.";
