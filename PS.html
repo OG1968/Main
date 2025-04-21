@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="photolabel.png" />
-    <title>גלריית תמונות עם בחירת רקע</title>
+    <title>גלריית תיאור</title>
     <style>
       body {
         margin: 0;
@@ -340,12 +340,11 @@
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
       }
-      
     </style>
   </head>
   <body>
     <div class="gallery-header">
-      <h1 contenteditable="true">גלריית התמונות שלי</h1>
+      <h1 contenteditable="true">גלרייה עם תיאור</h1>
     </div>
 
     <div class="button-group">
@@ -458,7 +457,7 @@
             request.onsuccess = function () {
               console.log("All images cleared from DB");
               // איפוס הכותרת לברירת המחדל
-              galleryTitle.textContent = "גלריית התמונות שלי";
+              galleryTitle.textContent = "גלרייה עם תיאור";
               saveGalleryTitleToDb(galleryTitle.textContent);
               // Add default cards after clearing
               addDefaultCards();
