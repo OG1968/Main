@@ -30,6 +30,7 @@
 
       .gallery-header h1 {
         font-size: 2.4rem;
+        font-weight: 900;
         margin-bottom: 5px;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -656,6 +657,45 @@
             }
           });
         });
+
+        // Disable hover effects on touch devices
+        const style = document.createElement('style');
+        style.textContent = \`
+          @media (hover: none) {
+            .card:hover .face.face1,
+            .card:hover .face.face2 {
+              display: none !important;
+            }
+            .card.touch-active .face.face1 {
+              display: flex !important;
+              position: absolute !important;
+              bottom: 0 !important;
+              left: 0 !important;
+              height: auto !important;
+              min-height: 100% !important;
+              border-radius: 15px !important;
+              background: rgba(0, 0, 0, 0.9) !important;
+              z-index: 3 !important;
+              padding: 20px !important;
+            }
+            .card.touch-active .face.face1 h2 {
+              font-size: clamp(24px, 2.5vw, 32px) !important;
+              margin-bottom: 20px !important;
+            }
+            .card.touch-active .face.face1 h3 {
+              font-size: clamp(14px, 2.5vw, 20px) !important;
+              margin-bottom: -5px !important;
+            }
+            .card.touch-active .face.face1 p {
+              opacity: 1 !important;
+              max-height: 150px !important;
+            }
+            .card.touch-active .face.face2 {
+              filter: brightness(0.7) !important;
+            }
+          }
+        \`;
+        document.head.appendChild(style);
       });
     `;
 
@@ -976,33 +1016,13 @@
             }
           });
 
-          // Add touch support for mobile devices
-          card.addEventListener("touchstart", function (e) {
+          // Add hover support for desktop
+          card.addEventListener("mouseenter", function () {
             this.classList.add("touch-active");
-            e.preventDefault(); // Prevent default touch behavior
           });
 
-          card.addEventListener("touchend", function () {
+          card.addEventListener("mouseleave", function () {
             this.classList.remove("touch-active");
-          });
-
-          card.addEventListener("touchcancel", function () {
-            this.classList.remove("touch-active");
-          });
-
-          card.addEventListener("touchmove", function (e) {
-            const touch = e.touches[0];
-            const cardRect = this.getBoundingClientRect();
-
-            // Check if touch is outside card bounds
-            if (
-              touch.clientX < cardRect.left ||
-              touch.clientX > cardRect.right ||
-              touch.clientY < cardRect.top ||
-              touch.clientY > cardRect.bottom
-            ) {
-              this.classList.remove("touch-active");
-            }
           });
 
           return card;
