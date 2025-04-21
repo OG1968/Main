@@ -55,6 +55,7 @@
         padding-right: 10px;
         justify-content: center;
         flex-wrap: wrap;
+        padding-right: 20px;
       }
 
       /* עיצוב משותף לכל הכפתורים */
@@ -135,10 +136,12 @@
         background-image: linear-gradient(
           40deg,
           #00fffc 0%,
-          #fc00ff 45%,
+          #ffa600 25%,
+          #fc00ff 50%,
+          #03ffc0 75%,
           #fffc00 100%
         );
-        aspect-ratio: 16/10;
+        aspect-ratio: 4/3;
       }
 
       .card-inner {
@@ -191,9 +194,11 @@
         padding: 0;
         background-image: linear-gradient(
           40deg,
-          #fffc00 0%,
-          #fc00ff 45%,
-          #00fffc 100%
+          #00fffc 0%,
+          #ffa600 25%,
+          #fc00ff 50%,
+          #03ffc0 75%,
+          #fffc00 100%
         );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -611,8 +616,52 @@
             cloneContainer.appendChild(cardClone);
           });
 
-          // Update styles and other elements as before
-          // ... (קוד העדכון של הסגנונות והרקע שנמצא בתשובה הקודמת)
+          // הוספת סקריפט לטיפול נכון באירועי מגע בקובץ המיוצא
+          const touchScript = document.createElement("script");
+          touchScript.textContent = `
+      document.addEventListener("DOMContentLoaded", function() {
+        // Setup touch events for all cards
+        const cards = document.querySelectorAll(".card");
+        
+        cards.forEach(card => {
+          // Touch start - activate overlay
+          card.addEventListener("touchstart", function(e) {
+            this.classList.add("touch-active");
+            e.preventDefault(); // Prevent default touch behavior
+          });
+          
+          // Touch end - remove overlay
+          card.addEventListener("touchend", function() {
+            this.classList.remove("touch-active");
+          });
+          
+          // Touch cancel - remove overlay
+          card.addEventListener("touchcancel", function() {
+            this.classList.remove("touch-active");
+          });
+          
+          // Touch move out of bounds - remove overlay
+          card.addEventListener("touchmove", function(e) {
+            const touch = e.touches[0];
+            const cardRect = this.getBoundingClientRect();
+            
+            // Check if touch is outside card bounds
+            if (
+              touch.clientX < cardRect.left || 
+              touch.clientX > cardRect.right || 
+              touch.clientY < cardRect.top || 
+              touch.clientY > cardRect.bottom
+            ) {
+              this.classList.remove("touch-active");
+            }
+          });
+        });
+      });
+    `;
+
+          // הוספת הסקריפט לתחתית ה-body
+          const bodyElement = docClone.querySelector("body");
+          bodyElement.appendChild(touchScript);
 
           // Create HTML string
           const htmlContent = `<!DOCTYPE html>${docClone.documentElement.outerHTML}`;
@@ -891,25 +940,24 @@
           }
 
           card.innerHTML = `
-        <div class="card-inner">
-          <div class="face face1">
-            <div class="content">
-              <h2 contenteditable="true">${title}</h2>
-              <h3 contenteditable="true">${description}</h3>
-              <p contenteditable="true">${details}</p>
-            </div>
-          </div>
-          <div class="face face2">
-            <img src="${imageUrl}" alt="${title}">
+      <div class="card-inner">
+        <div class="face face1">
+          <div class="content">
+            <h2 contenteditable="true">${title}</h2>
+            <h3 contenteditable="true">${description}</h3>
+            <p contenteditable="true">${details}</p>
           </div>
         </div>
-        <button class="delete-btn">🗑️</button>
-      `;
+        <div class="face face2">
+          <img src="${imageUrl}" alt="${title}">
+        </div>
+      </div>
+      <button class="delete-btn">🗑️</button>
+    `;
 
           // Setup content editable handlers
           setupEditableHandlers(card);
 
-          // Setup delete button
           // Setup delete button
           const deleteBtn = card.querySelector(".delete-btn");
           deleteBtn.addEventListener("click", function () {
@@ -931,6 +979,7 @@
           // Add touch support for mobile devices
           card.addEventListener("touchstart", function (e) {
             this.classList.add("touch-active");
+            e.preventDefault(); // Prevent default touch behavior
           });
 
           card.addEventListener("touchend", function () {
@@ -939,6 +988,21 @@
 
           card.addEventListener("touchcancel", function () {
             this.classList.remove("touch-active");
+          });
+
+          card.addEventListener("touchmove", function (e) {
+            const touch = e.touches[0];
+            const cardRect = this.getBoundingClientRect();
+
+            // Check if touch is outside card bounds
+            if (
+              touch.clientX < cardRect.left ||
+              touch.clientX > cardRect.right ||
+              touch.clientY < cardRect.top ||
+              touch.clientY > cardRect.bottom
+            ) {
+              this.classList.remove("touch-active");
+            }
           });
 
           return card;
