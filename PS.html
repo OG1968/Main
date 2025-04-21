@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="photolabel.png" />
-    <title>גלריית תיאור</title>
+    <title>גלרית תיאור</title>
     <style>
       body {
         margin: 0;
@@ -30,7 +30,6 @@
       .gallery-header h1 {
         font-size: 2.4rem;
         margin-bottom: 5px;
-        background-color: #4e3aff;
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
@@ -49,8 +48,8 @@
 
       .button-group {
         display: flex;
-        gap: 10px;
-        width: 80%;
+        gap: 5px;
+        width: 90%;
         margin: 0 auto;
         padding-right: 10px;
         justify-content: center;
@@ -61,7 +60,6 @@
       .file-input-label,
       .nav-btn {
         flex: 1;
-        min-width: 40px;
         height: 36px;
         padding: 8px 12px;
         border-radius: 20px;
@@ -122,7 +120,6 @@
         box-sizing: border-box;
       }
 
-      /* עיצוב כרטיסי התמונה */
       .card {
         position: relative;
         margin: 0 auto;
@@ -344,7 +341,7 @@
   </head>
   <body>
     <div class="gallery-header">
-      <h1 contenteditable="true">גלרייה עם תיאור</h1>
+      <h1 contenteditable="true">גלריה עם תיאור</h1>
     </div>
 
     <div class="button-group">
@@ -457,7 +454,7 @@
             request.onsuccess = function () {
               console.log("All images cleared from DB");
               // איפוס הכותרת לברירת המחדל
-              galleryTitle.textContent = "גלרייה עם תיאור";
+              galleryTitle.textContent = "גלריה עם תיאור";
               saveGalleryTitleToDb(galleryTitle.textContent);
               // Add default cards after clearing
               addDefaultCards();
