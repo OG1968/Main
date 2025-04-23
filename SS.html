@@ -32,6 +32,7 @@
         color: #000;
         text-align: center;
         margin-top: 15px;
+        margin-bottom: 15px;
         -webkit-text-stroke-width: 2px;
         -webkit-text-stroke-color: rgb(255, 255, 0);
       }
@@ -45,8 +46,8 @@
       h3 {
         color: #000;
         text-align: center;
-        margin-bottom: 10px;
-        margin-top: -10px;
+        margin-bottom: -10px;
+        margin-top: -20px;
       }
 
       .controls {
@@ -86,7 +87,6 @@
         background-color: #4caf50;
         border-radius: 20px;
         color: white;
-        border: none;
         cursor: pointer;
         transition: all 0.3s;
         position: relative;
@@ -96,41 +96,7 @@
       button:hover {
         background-color: #45a049;
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
-
-      button:active {
-        transform: translateY(1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      }
-
-      button::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 5px;
-        height: 5px;
-        background: rgba(255, 255, 255, 0.5);
-        opacity: 0;
-        border-radius: 100%;
-        transform: scale(1, 1) translate(-50%, -50%);
-        transform-origin: 50% 50%;
-      }
-
-      button:focus:not(:active)::after {
-        animation: ripple 0.6s ease-out;
-      }
-
-      @keyframes ripple {
-        0% {
-          transform: scale(0, 0);
-          opacity: 0.5;
-        }
-        100% {
-          transform: scale(20, 20);
-          opacity: 0;
-        }
+        box-shadow: 0 0px 8px rgb(0, 0, 0);
       }
 
       #preview {
@@ -199,21 +165,6 @@
         text-align: center;
       }
 
-      #export-btn {
-        width: 100%;
-        background-color: #2196f3;
-        border-radius: 20px;
-        padding: 12px 24px;
-        font-size: 22px;
-        font-weight: 700;
-        margin-top: 10px;
-        margin-bottom: -10px;
-      }
-
-      #export-btn:hover {
-        background-color: #075ca1;
-      }
-
       #download-link {
         display: none;
         margin-top: 20px;
@@ -280,13 +231,13 @@
         width: 100%;
         margin: auto;
         margin-bottom: 20px;
+        margin-top: -5px;
         border-radius: 20px;
         text-align: center;
         line-height: 20px;
         color: white;
       }
 
-      /* סגנונות חדשים לכפתורי העלאת קבצים */
       .file-input-wrapper {
         position: relative;
         overflow: hidden;
@@ -393,7 +344,6 @@
 
         .image-item .delete-image-btn {
           margin: auto;
-
           grid-area: delete;
           width: 40px;
           height: 40px;
@@ -487,6 +437,8 @@
 
       .delete-image-btn:hover {
         background-color: #d32f2f;
+        transform: translateY(-2px);
+        box-shadow: 0 0px 8px rgb(0, 0, 0);
       }
 
       #export-section {
@@ -511,6 +463,8 @@
 
       #refresh-btn:hover {
         background-color: #d32f2f;
+        transform: translateY(-2px);
+        box-shadow: 0 0px 8px rgb(0, 0, 0);
       }
 
       #export-btn {
@@ -526,9 +480,23 @@
 
       #export-btn:hover {
         background-color: #075ca1;
+        transform: translateY(-2px);
+        box-shadow: 0 0px 8px rgb(0, 0, 0);
       }
 
       /* כל אנימציות המעבר */
+
+      @keyframes ripple {
+        0% {
+          transform: scale(0, 0);
+          opacity: 0.5;
+        }
+        100% {
+          transform: scale(20, 20);
+          opacity: 0;
+        }
+      }
+
       @keyframes blurOut {
         from {
           filter: blur(0);
@@ -568,24 +536,6 @@
         }
         to {
           transform: rotate(0);
-          opacity: 1;
-        }
-      }
-
-      @keyframes dissolveOut {
-        from {
-          opacity: 1;
-        }
-        to {
-          opacity: 0;
-        }
-      }
-
-      @keyframes dissolveIn {
-        from {
-          opacity: 0;
-        }
-        to {
           opacity: 1;
         }
       }
@@ -666,24 +616,6 @@
         }
       }
 
-      @keyframes morphOut {
-        from {
-          filter: opacity(1);
-        }
-        to {
-          filter: opacity(0);
-        }
-      }
-
-      @keyframes morphIn {
-        from {
-          filter: opacity(0);
-        }
-        to {
-          filter: opacity(1);
-        }
-      }
-
       @keyframes rainOut {
         from {
           transform: translateY(0);
@@ -703,108 +635,6 @@
         to {
           transform: translateY(0);
           opacity: 1;
-        }
-      }
-
-      @keyframes shatterOut {
-        from {
-          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-        }
-        to {
-          clip-path: polygon(
-            0 0,
-            5% 5%,
-            10% 0,
-            15% 5%,
-            20% 0,
-            25% 5%,
-            30% 0,
-            35% 5%,
-            40% 0,
-            45% 5%,
-            50% 0,
-            55% 5%,
-            60% 0,
-            65% 5%,
-            70% 0,
-            75% 5%,
-            80% 0,
-            85% 5%,
-            90% 0,
-            95% 5%,
-            100% 0,
-            95% 95%,
-            90% 100%,
-            85% 95%,
-            80% 100%,
-            75% 95%,
-            70% 100%,
-            65% 95%,
-            60% 100%,
-            55% 95%,
-            50% 100%,
-            45% 95%,
-            40% 100%,
-            35% 95%,
-            30% 100%,
-            25% 95%,
-            20% 100%,
-            15% 95%,
-            10% 100%,
-            5% 95%,
-            0% 100%
-          );
-        }
-      }
-
-      @keyframes shatterIn {
-        from {
-          clip-path: polygon(
-            0 0,
-            5% 5%,
-            10% 0,
-            15% 5%,
-            20% 0,
-            25% 5%,
-            30% 0,
-            35% 5%,
-            40% 0,
-            45% 5%,
-            50% 0,
-            55% 5%,
-            60% 0,
-            65% 5%,
-            70% 0,
-            75% 5%,
-            80% 0,
-            85% 5%,
-            90% 0,
-            95% 5%,
-            100% 0,
-            95% 95%,
-            90% 100%,
-            85% 95%,
-            80% 100%,
-            75% 95%,
-            70% 100%,
-            65% 95%,
-            60% 100%,
-            55% 95%,
-            50% 100%,
-            45% 95%,
-            40% 100%,
-            35% 95%,
-            30% 100%,
-            25% 95%,
-            20% 100%,
-            15% 95%,
-            10% 100%,
-            5% 95%,
-            0% 100%
-          );
-        }
-        to {
-          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
         }
       }
 
@@ -926,27 +756,6 @@
         }
         to {
           transform: rotateY(0);
-          opacity: 1;
-        }
-      }
-
-      @keyframes cubeOut {
-        from {
-          transform: rotateY(0) translateZ(0);
-        }
-        to {
-          transform: rotateY(-90deg) translateZ(200px);
-          opacity: 0;
-        }
-      }
-
-      @keyframes cubeIn {
-        from {
-          transform: rotateY(90deg) translateZ(200px);
-          opacity: 0;
-        }
-        to {
-          transform: rotateY(0) translateZ(0);
           opacity: 1;
         }
       }
@@ -1077,6 +886,457 @@
           opacity: 1;
         }
       }
+
+      /* ציפה */
+      @keyframes floatOut {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-100px) scale(0.8);
+          opacity: 0;
+        }
+      }
+
+      @keyframes floatIn {
+        from {
+          transform: translateY(100px) scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+      }
+
+      /* התכווצות */
+      @keyframes shrinkOut {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(0);
+          opacity: 0;
+        }
+      }
+
+      @keyframes shrinkIn {
+        from {
+          transform: scale(1.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      /* התרחבות */
+      @keyframes expandOut {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      @keyframes expandIn {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes opacityIn {
+        from {
+          opacity: 0.3;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* אנימציית ספר */
+      @keyframes pageFlipOut {
+        from {
+          transform: rotateY(0);
+        }
+        to {
+          transform: rotateY(-180deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes pageFlipIn {
+        from {
+          transform: rotateY(180deg);
+          opacity: 0;
+        }
+        to {
+          transform: rotateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* מערבולת */
+      @keyframes vortexOut {
+        from {
+          transform: scale(1) rotate(0);
+        }
+        to {
+          transform: scale(0) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes vortexIn {
+        from {
+          transform: scale(0) rotate(-720deg);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
+      }
+
+      /* החלקה אלכסונית */
+      @keyframes slideDiagonalOut {
+        from {
+          transform: translate(0, 0);
+        }
+        to {
+          transform: translate(100%, 100%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes slideDiagonalIn {
+        from {
+          transform: translate(-100%, -100%);
+          opacity: 0;
+        }
+        to {
+          transform: translate(0, 0);
+          opacity: 1;
+        }
+      }
+
+      /* פיקסלציה */
+      @keyframes pixelateOut {
+        from {
+          filter: blur(0);
+        }
+        to {
+          filter: blur(10px) contrast(200%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes pixelateIn {
+        from {
+          filter: blur(10px) contrast(200%);
+          opacity: 0;
+        }
+        to {
+          filter: blur(0) contrast(100%);
+          opacity: 1;
+        }
+      }
+
+      /* החלפת צבע */
+      @keyframes colorShiftOut {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(180deg) brightness(2);
+          opacity: 0;
+        }
+      }
+
+      @keyframes colorShiftIn {
+        from {
+          filter: hue-rotate(-180deg) brightness(2);
+          opacity: 0;
+        }
+        to {
+          filter: hue-rotate(0) brightness(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes curtainOut {
+        from {
+          clip-path: inset(0 0 0 0);
+        }
+        to {
+          clip-path: inset(0 50% 0 50%);
+        }
+      }
+
+      @keyframes curtainIn {
+        from {
+          clip-path: inset(0 50% 0 50%);
+        }
+        to {
+          clip-path: inset(0 0 0 0);
+        }
+      }
+
+      /* התפוצצות */
+      @keyframes explodeOut {
+        from {
+          clip-path: circle(100%);
+        }
+        to {
+          clip-path: circle(0%);
+          transform: scale(1.5);
+        }
+      }
+
+      @keyframes explodeIn {
+        from {
+          clip-path: circle(0%);
+          transform: scale(1.5);
+        }
+        to {
+          clip-path: circle(100%);
+          transform: scale(1);
+        }
+      }
+
+      /* התאבכות */
+      @keyframes warpOut {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.2) skew(20deg, 20deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes warpIn {
+        from {
+          transform: scale(0.8) skew(-20deg, -20deg);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) skew(0, 0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes jigsawIn {
+        from {
+          clip-path: polygon(
+            0 0,
+            50% 0,
+            50% 50%,
+            0 50%,
+            0 50%,
+            50% 50%,
+            50% 100%,
+            0 100%,
+            50% 0,
+            100% 0,
+            100% 50%,
+            50% 50%,
+            50% 50%,
+            100% 50%,
+            100% 100%,
+            50% 100%
+          );
+        }
+        to {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+      }
+
+      @keyframes flashIn {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes thunderOut {
+        0% {
+          opacity: 1;
+          filter: brightness(1);
+        }
+        10% {
+          filter: brightness(3);
+        }
+        20% {
+          filter: brightness(1);
+        }
+        30% {
+          filter: brightness(4);
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes thunderIn {
+        0% {
+          opacity: 0;
+          filter: brightness(4);
+        }
+        70% {
+          filter: brightness(1);
+        }
+        80% {
+          filter: brightness(3);
+        }
+        90% {
+          filter: brightness(1);
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes smokeOut {
+        from {
+          filter: blur(0) opacity(1);
+        }
+        to {
+          filter: blur(20px) opacity(0);
+          transform: translateY(-50px);
+        }
+      }
+
+      @keyframes smokeIn {
+        from {
+          filter: blur(20px) opacity(0);
+          transform: translateY(50px);
+        }
+        to {
+          filter: blur(0) opacity(1);
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes hourglassOut {
+        from {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%);
+        }
+      }
+
+      @keyframes hourglassIn {
+        from {
+          clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%);
+        }
+        to {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+      }
+
+      @keyframes heartbeatIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.5);
+        }
+        25% {
+          transform: scale(0.6);
+        }
+        50% {
+          transform: scale(0.5);
+        }
+        75% {
+          transform: scale(0.4);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes starsOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.8),
+            0 0 10px 10px rgba(255, 255, 255, 0.6),
+            0 0 15px 15px rgba(255, 255, 255, 0.4);
+        }
+      }
+
+      @keyframes starsIn {
+        from {
+          opacity: 0;
+          box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.8),
+            0 0 10px 10px rgba(255, 255, 255, 0.6),
+            0 0 15px 15px rgba(255, 255, 255, 0.4);
+        }
+        to {
+          opacity: 1;
+          box-shadow: none;
+        }
+      }
+
+      @keyframes gridOut {
+        from {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(
+            0 0,
+            33% 0,
+            33% 33%,
+            0 33%,
+            0 33%,
+            33% 33%,
+            33% 66%,
+            0 66%,
+            0 66%,
+            33% 66%,
+            33% 100%,
+            0 100%,
+            33% 0,
+            66% 0,
+            66% 33%,
+            33% 33%,
+            33% 33%,
+            66% 33%,
+            66% 66%,
+            33% 66%,
+            33% 66%,
+            66% 66%,
+            66% 100%,
+            33% 100%,
+            66% 0,
+            100% 0,
+            100% 33%,
+            66% 33%,
+            66% 33%,
+            100% 33%,
+            100% 66%,
+            66% 66%,
+            66% 66%,
+            100% 66%,
+            100% 100%,
+            66% 100%
+          );
+        }
+      }
     </style>
   </head>
   <body>
@@ -1175,7 +1435,7 @@
           </div>
         </div>
 
-        <div id="image-captions-container" style="display: none">
+        <div id="image-captions-container">
           <h3>כותרות ומעברים לתמונות:</h3>
           <div class="image-list" id="image-list">
             <!-- כאן יופיעו התמונות והטקסטים -->
@@ -1187,7 +1447,6 @@
         </div>
 
         <div id="preview">
-          <h3>תצוגה מקדימה:</h3>
           <div id="slideshow-container">
             <div id="title-display">כותרת המצגת</div>
             <!-- כאן יופיעו התמונות -->
@@ -1351,30 +1610,41 @@
                 transitionSelect.dataset.index = startIndex + i;
                 transitionSelect.className = "transition-select";
                 transitionSelect.innerHTML = `
-                  <option value="fade">עמעום</option>
-                  <option value="slide">החלקה</option>
-                  <option value="zoom">תקריב</option>
-                  <option value="rotate">סיבוב</option>
-                  <option value="flip">היפוך</option>
-                  <option value="cube">קובייה </option>
-                  <option value="glow">נצנוץ</option>
-                  <option value="bounce">קפיצה</option>
-                  <option value="flipX">היפוך אופקי</option>
-                  <option value="flipY">היפוך אנכי</option>
-                  <option value="lightSpeed">מהירות אור</option>
-                  <option value="roll">גלגול</option>
-                  <option value="blur">טשטוש</option>
-                  <option value="swing">נדנוד</option>
-                  <option value="dissolve">התמוססות</option>
-                  <option value="wipe">ניגוב</option>
-                  <option value="split">פיצול</option>
-                  <option value="ripple">גלים</option>
-                  <option value="blinds">תריסים</option>
-                  <option value="morph">מורפינג</option>
-                  <option value="rain">גשם</option>
-                  <option value="shatterOut">התרסקות</option>
-                  <option value="pulse">פעימה</option>
-                  <option value="fireWorks">זיקוקים</option>
+                <option value="fade">עמעום</option>
+                <option value="slide">החלקה</option>
+                <option value="zoom">תקריב</option>
+                <option value="rotate">סיבוב</option>
+                <option value="flip">היפוך</option>
+                <option value="glow">נצנוץ</option>
+                <option value="bounce">קפיצה</option>
+                <option value="flipX">היפוך אופקי</option>
+                <option value="flipY">היפוך אנכי</option>
+                <option value="lightSpeed">מהירות אור</option>
+                <option value="roll">גלגול</option>
+                <option value="blur">טשטוש</option>
+                <option value="swing">נדנוד</option>
+                <option value="wipe">ניגוב</option>
+                <option value="split">פיצול</option>
+                <option value="ripple">גלים</option>
+                <option value="blinds">תריסים</option>
+                <option value="rain">גשם</option>
+                <option value="pulse">פעימה</option>
+                <option value="fireWorks">זיקוקים</option>
+                <option value="float">ציפה</option>
+                <option value="shrink">התכווצות</option>
+                <option value="expand">התרחבות</option>
+                <option value="pageFlip">אנימציית ספר</option>
+                <option value="vortex">מערבולת</option>
+                <option value="slideDiagonal">החלקה אלכסונית</option>
+                <option value="pixelate">פיקסלציה</option>
+                <option value="colorShift">החלפת צבע</option>
+                <option value="curtain">הורדת מסך</option>
+                <option value="explode">התפוצצות</option>
+                <option value="warp">התאבכות</option>
+                <option value="thunder">רעם</option>
+                <option value="smoke">עשן</option>
+                <option value="hourglass">שעון חול</option>
+                <option value="stars">כוכבים</option>
                 `;
                 transitionSelect.value = defaultTransition;
                 transitionSelect.addEventListener("change", updateTransition);
@@ -1595,10 +1865,6 @@
               current.style.animation = "flipOut 2s forwards";
               next.style.animation = "flipIn 2s forwards";
               break;
-            case "cube":
-              current.style.animation = "cubeOut 2s forwards";
-              next.style.animation = "cubeIn 2s forwards";
-              break;
             case "glow":
               current.style.animation = "glowOut 2s forwards";
               next.style.animation = "glowIn 2s forwards";
@@ -1631,10 +1897,6 @@
               current.style.animation = "swingOut 2s forwards";
               next.style.animation = "swingIn 2s forwards";
               break;
-            case "dissolve":
-              current.style.animation = "dissolveOut 2s forwards";
-              next.style.animation = "dissolveIn 2s forwards";
-              break;
             case "wipe":
               current.style.animation = "wipeOut 2s forwards";
               next.style.animation = "wipeIn 2s forwards";
@@ -1651,17 +1913,9 @@
               current.style.animation = "blindsOut 2s forwards";
               next.style.animation = "blindsIn 2s forwards";
               break;
-            case "morph":
-              current.style.animation = "morphOut 2s forwards";
-              next.style.animation = "morphIn 2s forwards";
-              break;
             case "rain":
               current.style.animation = "rainOut 2s forwards";
               next.style.animation = "rainIn 2s forwards";
-              break;
-            case "shatterOut":
-              current.style.animation = "shatterOut 2s forwards";
-              next.style.animation = "shatterIn 2s forwards";
               break;
             case "pulse":
               current.style.animation = "pulseOut 2s forwards";
@@ -1670,6 +1924,71 @@
             case "fireWorks":
               current.style.animation = "fireWorksOut 2s forwards";
               next.style.animation = "fireWorksIn 2s forwards";
+              break;
+            case "float":
+              current.style.animation = "floatOut 2s forwards";
+              next.style.animation = "floatIn 2s forwards";
+              break;
+            case "shrink":
+              current.style.animation = "shrinkOut 2s forwards";
+              next.style.animation = "shrinkIn 2s forwards";
+              break;
+            case "expand":
+              current.style.animation = "expandOut 2s forwards";
+              next.style.animation = "expandIn 2s forwards";
+              break;
+
+            case "pageFlip":
+              current.style.animation = "pageFlipOut 2s forwards";
+              next.style.animation = "pageFlipIn 2s forwards";
+              break;
+            case "vortex":
+              current.style.animation = "vortexOut 2s forwards";
+              next.style.animation = "vortexIn 2s forwards";
+              break;
+            case "slideDiagonal":
+              current.style.animation = "slideDiagonalOut 2s forwards";
+              next.style.animation = "slideDiagonalIn 2s forwards";
+              break;
+            case "pixelate":
+              current.style.animation = "pixelateOut 2s forwards";
+              next.style.animation = "pixelateIn 2s forwards";
+              break;
+            case "colorShift":
+              current.style.animation = "colorShiftOut 2s forwards";
+              next.style.animation = "colorShiftIn 2s forwards";
+              break;
+            case "curtain":
+              current.style.animation = "curtainOut 2s forwards";
+              next.style.animation = "curtainIn 2s forwards";
+              break;
+            case "explode":
+              current.style.animation = "explodeOut 2s forwards";
+              next.style.animation = "explodeIn 2s forwards";
+              break;
+            case "warp":
+              current.style.animation = "warpOut 2s forwards";
+              next.style.animation = "warpIn 2s forwards";
+              break;
+            case "jigsaw":
+              current.style.animation = "jigsawOut 2s forwards";
+              next.style.animation = "jigsawIn 2s forwards";
+              break;
+            case "thunder":
+              current.style.animation = "thunderOut 2s forwards";
+              next.style.animation = "thunderIn 2s forwards";
+              break;
+            case "smoke":
+              current.style.animation = "smokeOut 2s forwards";
+              next.style.animation = "smokeIn 2s forwards";
+              break;
+            case "hourglass":
+              current.style.animation = "hourglassOut 2s forwards";
+              next.style.animation = "hourglassIn 2s forwards";
+              break;
+            case "stars":
+              current.style.animation = "starsOut 2s forwards";
+              next.style.animation = "starsIn 2s forwards";
               break;
           }
         }
@@ -1798,16 +2117,6 @@
             to { transform: rotateY(0); opacity: 1; }
         }
         
-        @keyframes cubeOut {
-            from { transform: rotateY(0) translateZ(0); }
-            to { transform: rotateY(-90deg) translateZ(200px); opacity: 0; }
-        }
-        
-        @keyframes cubeIn {
-            from { transform: rotateY(90deg) translateZ(200px); opacity: 0; }
-            to { transform: rotateY(0) translateZ(0); opacity: 1; }
-        }
-        
         @keyframes glowOut {
             from { opacity: 1; filter: brightness(1); }
             to { opacity: 0; filter: brightness(3); }
@@ -1888,16 +2197,6 @@
             to { transform: rotate(0); opacity: 1; }
         }
         
-        @keyframes dissolveOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
-        @keyframes dissolveIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
         @keyframes wipeOut {
             from { clip-path: inset(0 0 0 0); }
             to { clip-path: inset(0 100% 0 0); }
@@ -1946,16 +2245,6 @@
             to { clip-path: inset(0 0 0 0); }
         }
         
-        @keyframes morphOut {
-            from { filter: opacity(1); }
-            to { filter: opacity(0); }
-        }
-        
-        @keyframes morphIn {
-            from { filter: opacity(0); }
-            to { filter: opacity(1); }
-        }
-        
         @keyframes rainOut {
             from { transform: translateY(0); opacity: 1; }
             to { transform: translateY(100%); opacity: 0; }
@@ -1964,32 +2253,6 @@
         @keyframes rainIn {
             from { transform: translateY(-100%); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @keyframes shatterOut {
-            from { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-            to { 
-              clip-path: polygon(
-                0 0, 5% 5%, 10% 0, 15% 5%, 20% 0, 25% 5%, 30% 0, 35% 5%, 40% 0, 45% 5%, 
-                50% 0, 55% 5%, 60% 0, 65% 5%, 70% 0, 75% 5%, 80% 0, 85% 5%, 90% 0, 95% 5%, 
-                100% 0, 95% 95%, 90% 100%, 85% 95%, 80% 100%, 75% 95%, 70% 100%, 65% 95%, 
-                60% 100%, 55% 95%, 50% 100%, 45% 95%, 40% 100%, 35% 95%, 30% 100%, 25% 95%, 
-                20% 100%, 15% 95%, 10% 100%, 5% 95%, 0% 100%
-              );
-            }
-        }
-        
-        @keyframes shatterIn {
-            from { 
-              clip-path: polygon(
-                0 0, 5% 5%, 10% 0, 15% 5%, 20% 0, 25% 5%, 30% 0, 35% 5%, 40% 0, 45% 5%, 
-                50% 0, 55% 5%, 60% 0, 65% 5%, 70% 0, 75% 5%, 80% 0, 85% 5%, 90% 0, 95% 5%, 
-                100% 0, 95% 95%, 90% 100%, 85% 95%, 80% 100%, 75% 95%, 70% 100%, 65% 95%, 
-                60% 100%, 55% 95%, 50% 100%, 45% 95%, 40% 100%, 35% 95%, 30% 100%, 25% 95%, 
-                20% 100%, 15% 95%, 10% 100%, 5% 95%, 0% 100%
-              );
-            }
-            to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
         }
         
         @keyframes pulseOut {
@@ -2180,10 +2443,6 @@
                     current.style.animation = 'flipOut 2s forwards';
                     next.style.animation = 'flipIn 2s forwards';
                     break;
-                case 'cube':
-                    current.style.animation = 'cubeOut 2s forwards';
-                    next.style.animation = 'cubeIn 2s forwards';
-                    break;
                 case 'glow':
                     current.style.animation = 'glowOut 2s forwards';
                     next.style.animation = 'glowIn 2s forwards';
@@ -2216,10 +2475,6 @@
                     current.style.animation = 'swingOut 2s forwards';
                     next.style.animation = 'swingIn 2s forwards';
                     break;
-                case 'dissolve':
-                    current.style.animation = 'dissolveOut 2s forwards';
-                    next.style.animation = 'dissolveIn 2s forwards';
-                    break;
                 case 'wipe':
                     current.style.animation = 'wipeOut 2s forwards';
                     next.style.animation = 'wipeIn 2s forwards';
@@ -2236,17 +2491,9 @@
                     current.style.animation = 'blindsOut 2s forwards';
                     next.style.animation = 'blindsIn 2s forwards';
                     break;
-                case 'morph':
-                    current.style.animation = 'morphOut 2s forwards';
-                    next.style.animation = 'morphIn 2s forwards';
-                    break;
                 case 'rain':
                     current.style.animation = 'rainOut 2s forwards';
                     next.style.animation = 'rainIn 2s forwards';
-                    break;
-                case 'shatterOut':
-                    current.style.animation = 'shatterOut 2s forwards';
-                    next.style.animation = 'shatterIn 2s forwards';
                     break;
                 case 'pulse':
                     current.style.animation = 'pulseOut 2s forwards';
