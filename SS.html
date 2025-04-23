@@ -373,6 +373,73 @@
         .interval-group {
           order: 0;
         }
+        .image-item .caption-input {
+          grid-area: caption;
+          margin-left: 0;
+          width: 100%;
+        }
+        .image-item .transition-select {
+          grid-area: transition;
+          width: 100px;
+          margin-left: 0;
+          margin-bottom: 0;
+        }
+        .image-item img {
+          grid-area: preview;
+          width: 40px;
+          height: 40px;
+          margin-left: 0;
+        }
+
+        .image-item .delete-image-btn {
+          margin: auto;
+
+          grid-area: delete;
+          width: 40px;
+          height: 40px;
+          margin-left: 0;
+        }
+      }
+
+      /* הוסף את זה בחלק ה-CSS */
+      @media (max-width: 500px) {
+        .image-item {
+          display: grid;
+          grid-template-columns: 1fr auto auto;
+          grid-template-areas:
+            "caption caption caption"
+            "transition preview delete";
+          gap: 5px;
+          padding: 5px;
+          margin-bottom: 8px;
+        }
+
+        .image-item .caption-input {
+          grid-area: caption;
+          margin-left: 0;
+          width: 100%;
+        }
+
+        .image-item .transition-select {
+          grid-area: transition;
+          width: 100px;
+          margin-left: 0;
+          margin-bottom: 0;
+        }
+
+        .image-item img {
+          grid-area: preview;
+          width: 40px;
+          height: 40px;
+          margin-left: 0;
+        }
+
+        .image-item .delete-image-btn {
+          grid-area: delete;
+          width: 40px;
+          height: 40px;
+          margin-left: 0;
+        }
       }
 
       /*      scrollbar          */
@@ -404,12 +471,13 @@
       }
 
       .delete-image-btn {
+        margin: auto;
         background-color: #f44336;
         color: white;
         border: none;
         border-radius: 3px;
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         cursor: pointer;
         margin-left: 5px;
         padding: 0;
