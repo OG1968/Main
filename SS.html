@@ -26,11 +26,12 @@
       }
 
       h1 {
+        line-height: 1rem;
         font-size: 3.5rem;
         font-weight: 700;
         color: #000;
         text-align: center;
-        margin-top: 0px;
+        margin-top: 15px;
         -webkit-text-stroke-width: 2px;
         -webkit-text-stroke-color: rgb(255, 255, 0);
       }
@@ -87,11 +88,49 @@
         color: white;
         border: none;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
       }
 
       button:hover {
         background-color: #45a049;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      button::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%, -50%);
+        transform-origin: 50% 50%;
+      }
+
+      button:focus:not(:active)::after {
+        animation: ripple 0.6s ease-out;
+      }
+
+      @keyframes ripple {
+        0% {
+          transform: scale(0, 0);
+          opacity: 0.5;
+        }
+        100% {
+          transform: scale(20, 20);
+          opacity: 0;
+        }
       }
 
       #preview {
@@ -253,7 +292,7 @@
         overflow: hidden;
         display: inline-block;
         width: 100%;
-        margin-bottom: 15px;
+        margin-bottom: -0px;
       }
 
       .file-input-button {
@@ -291,9 +330,11 @@
         direction: rtl;
       }
 
+      /* התאמה למסכים צרים */
       .title-interval-row {
         padding-right: 15px;
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         gap: 15px;
       }
@@ -304,18 +345,34 @@
       }
 
       #presentation-title {
-        flex: 1;
+        flex: 1 1 100%;
         min-width: 40px;
+        order: 1;
       }
 
       .interval-group {
         display: flex;
         align-items: center;
-        gap: 2px;
+        gap: 0px;
+        order: 2;
       }
 
       #interval {
-        width: 30px;
+        width: 25px;
+      }
+
+      /* במסכים רחבים נסדר את השורה בצורה אופקית */
+      @media (min-width: 768px) {
+        .title-interval-row {
+          flex-wrap: nowrap;
+        }
+        #presentation-title {
+          flex: 1;
+          order: 0;
+        }
+        .interval-group {
+          order: 0;
+        }
       }
 
       /*      scrollbar          */
@@ -347,7 +404,7 @@
       }
 
       .delete-image-btn {
-        background-color: #f44336 !important;
+        background-color: #f44336;
         color: white;
         border: none;
         border-radius: 3px;
@@ -361,7 +418,7 @@
       }
 
       .delete-image-btn:hover {
-        background-color: #d32f2f !important;
+        background-color: #d32f2f;
       }
 
       #export-section {
@@ -730,7 +787,6 @@
         }
       }
 
-      /* אנימציות נוספות שהיו חסרות */
       @keyframes slideOut {
         from {
           transform: translateX(0);
@@ -968,18 +1024,17 @@
               placeholder="כותרת המצגת"
             />
             <div class="interval-group">
-              <label for="interval">צבע <br />כותרת:</label>
-              <input type="color" id="title-color" value="#FF0000" />
-            </div>
-
-            <div class="interval-group">
               <label for="interval">מרווח <br />בשניות:</label>
               <input type="number" id="interval" value="3" min="1" max="10" />
+            </div>
+            <div class="interval-group">
+              <label for="title-color">צבע <br />כותרת:</label>
+              <input type="color" id="title-color" value="#FF0000" />
             </div>
           </div>
 
           <div class="control-group">
-            <label>בחירת תמונות (ניתן לבחור כמה):</label>
+            <label>בחירת תמונות:</label>
             <div class="file-input-wrapper">
               <button class="file-input-button">בחר קבצי תמונות</button>
               <input
@@ -993,7 +1048,9 @@
             <div id="images-filename" class="file-input-filename"></div>
 
             <div class="compression-options">
-              <label for="image-quality">איכות תמונות (1-100):</label>
+              <label for="image-quality"
+                >איכות תמונות (באחוזים):<span id="quality-value"> 80%</span>
+              </label>
               <input
                 type="range"
                 id="image-quality"
@@ -1001,9 +1058,7 @@
                 max="100"
                 value="80"
               />
-              <span id="quality-value">80%</span>
-
-              <label for="resize-width">רוחב מקסימלי (פיקסלים):</label>
+              <label for="resize-width">רוחב מקסימלי (בפיקסלים):</label>
               <input
                 type="number"
                 id="resize-width"
@@ -1026,7 +1081,9 @@
             <div id="background-filename" class="file-input-filename"></div>
 
             <div class="compression-options">
-              <label for="bg-quality">איכות רקע (1-100):</label>
+              <label for="bg-quality"
+                >איכות רקע (באחוזים): <span id="bg-quality-value">80%</span>
+              </label>
               <input
                 type="range"
                 id="bg-quality"
@@ -1034,7 +1091,6 @@
                 max="100"
                 value="80"
               />
-              <span id="bg-quality-value">80%</span>
             </div>
 
             <label>מוסיקה רקע (אופציונלי):</label>
@@ -1096,8 +1152,6 @@
         );
         const progressBar = document.getElementById("progress-bar");
         const progress = document.getElementById("progress");
-
-        // אלמנטים חדשים לתצוגת שמות קבצים
         const imagesFilename = document.getElementById("images-filename");
         const backgroundFilename = document.getElementById(
           "background-filename"
@@ -1234,7 +1288,7 @@
                   <option value="zoom">תקריב</option>
                   <option value="rotate">סיבוב</option>
                   <option value="flip">היפוך</option>
-                  <option value="cube">קובייה תלת מימדית</option>
+                  <option value="cube">קובייה </option>
                   <option value="glow">נצנוץ</option>
                   <option value="bounce">קפיצה</option>
                   <option value="flipX">היפוך אופקי</option>
@@ -1567,6 +1621,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="slide.png" />
     <title>${titleInput.value || "מצגת תמונות"}</title>
     <style>
         body {
