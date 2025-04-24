@@ -1511,8 +1511,9 @@
           titleDisplay.style.color = this.value;
         });
 
-// שמירת התמונות המקוריות
-let originalImages = []; 
+        // שמירת התמונות המקוריות
+        let originalImages = [];
+        let imageUrls = []; // לשמירת ה-URLs של התמונות לתצוגה מקדימה
 
         // עדכון תצוגת שמות קבצים
         imagesInput.addEventListener("change", function (e) {
@@ -1545,7 +1546,6 @@ let originalImages = [];
         let backgroundImage = "";
         let musicFile = null;
         let imageCaptions = [];
-        let compressedImages = [];
         let transitions = [];
 
         // עדכון כותרת בזמן אמת
@@ -1553,155 +1553,154 @@ let originalImages = [];
           titleDisplay.textContent = this.value;
         });
 
-        // טעינת תמונות
-        imagesInput.addEventListener("change", async function (e) {
-  const files = e.target.files;
-  if (slides.length === 0) {
-    slideshowContainer.innerHTML =
-      '<div id="title-display" style="color: ' +
-      titleColorInput.value +
-      '">' +
-      titleDisplay.textContent +
-      "</div>";
-  }
+        // טעינת תמונות - ללא דחיסה
+        imagesInput.addEventListener("change", function (e) {
+          const files = e.target.files;
+          if (slides.length === 0) {
+            slideshowContainer.innerHTML =
+              '<div id="title-display" style="color: ' +
+              titleColorInput.value +
+              '">' +
+              titleDisplay.textContent +
+              "</div>";
+          }
 
-  imageCaptionsContainer.style.display = "block";
+          imageCaptionsContainer.style.display = "block";
 
-  if (files.length > 0) {
-    progressBar.style.display = "block";
-    progress.style.width = "0%";
-    progress.textContent = "0%";
+          if (files.length > 0) {
+            progressBar.style.display = "block";
+            progress.style.width = "0%";
+            progress.textContent = "0%";
 
-    const startIndex = slides.length;
+            const startIndex = slides.length;
 
-    for (let i = 0; i < files.length; i++) {
-      try {
-        progress.style.width = `${
-          ((startIndex + i) / (startIndex + files.length)) * 100
-        }%`;
-        progress.textContent = `${Math.round(
-          ((startIndex + i) / (startIndex + files.length)) * 100
-        )}%`;
+            for (let i = 0; i < files.length; i++) {
+              try {
+                progress.style.width = `${((i + 1) / files.length) * 100}%`;
+                progress.textContent = `${Math.round(
+                  ((i + 1) / files.length) * 100
+                )}%`;
 
-        // שמירת התמונה המקורית
-        originalImages.push(files[i]);
+                // שמירת התמונה המקורית
+                originalImages.push(files[i]);
 
-        const compressedImg = await compressImage(
-          files[i],
-          imageQuality.value,
-          resizeWidth.value
-        );
-        compressedImages.push(compressedImg);
+                // יצירת URL לתצוגה מקדימה מהקובץ המקורי
+                const imgUrl = URL.createObjectURL(files[i]);
+                imageUrls.push(imgUrl);
 
-        const imageItem = document.createElement("div");
-        imageItem.className = "image-item";
+                const imageItem = document.createElement("div");
+                imageItem.className = "image-item";
 
-        const imgPreview = document.createElement("img");
-        imgPreview.src = compressedImg;
+                const imgPreview = document.createElement("img");
+                imgPreview.src = imgUrl;
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "🗑️";
-        deleteBtn.className = "delete-image-btn";
-        deleteBtn.dataset.index = startIndex + i;
-        deleteBtn.addEventListener("click", function () {
-          removeImage(parseInt(this.dataset.index));
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "🗑️";
+                deleteBtn.className = "delete-image-btn";
+                deleteBtn.dataset.index = startIndex + i;
+                deleteBtn.addEventListener("click", function () {
+                  removeImage(parseInt(this.dataset.index));
+                });
+
+                const captionInput = document.createElement("input");
+                captionInput.type = "text";
+                captionInput.placeholder = "כותרת לתמונה זו";
+                captionInput.dataset.index = startIndex + i;
+                captionInput.className = "caption-input";
+                captionInput.addEventListener("input", updateCaption);
+
+                const transitionSelect = document.createElement("select");
+                transitionSelect.dataset.index = startIndex + i;
+                transitionSelect.className = "transition-select";
+                transitionSelect.innerHTML = `
+                  <option value="fade">עמעום</option>
+                  <option value="slide">החלקה</option>
+                  <option value="zoom">תקריב</option>
+                  <option value="rotate">סיבוב</option>
+                  <option value="flip">היפוך</option>
+                  <option value="glow">נצנוץ</option>
+                  <option value="bounce">קפיצה</option>
+                  <option value="flipX">היפוך אופקי</option>
+                  <option value="flipY">היפוך אנכי</option>
+                  <option value="lightSpeed">מהירות אור</option>
+                  <option value="roll">גלגול</option>
+                  <option value="blur">טשטוש</option>
+                  <option value="swing">נדנוד</option>
+                  <option value="wipe">ניגוב</option>
+                  <option value="split">פיצול</option>
+                  <option value="ripple">גלים</option>
+                  <option value="blinds">תריסים</option>
+                  <option value="rain">גשם</option>
+                  <option value="pulse">פעימה</option>
+                  <option value="fireWorks">זיקוקים</option>
+                  <option value="float">ציפה</option>
+                  <option value="shrink">התכווצות</option>
+                  <option value="expand">התרחבות</option>
+                  <option value="pageFlip">אנימציית ספר</option>
+                  <option value="vortex">מערבולת</option>
+                  <option value="slideDiagonal">החלקה אלכסונית</option>
+                  <option value="pixelate">פיקסלציה</option>
+                  <option value="colorShift">החלפת צבע</option>
+                  <option value="curtain">הורדת מסך</option>
+                  <option value="explode">התפוצצות</option>
+                  <option value="warp">התאבכות</option>
+                  <option value="thunder">רעם</option>
+                  <option value="smoke">עשן</option>
+                  <option value="hourglass">שעון חול</option>
+                  <option value="stars">כוכבים</option>
+                `;
+                transitionSelect.value = defaultTransition;
+                transitionSelect.addEventListener("change", updateTransition);
+
+                imageItem.appendChild(captionInput);
+                imageItem.appendChild(transitionSelect);
+                imageItem.appendChild(imgPreview);
+                imageItem.appendChild(deleteBtn);
+                imageList.appendChild(imageItem);
+
+                const slide = document.createElement("div");
+                slide.className = "slide";
+                slide.style.backgroundImage = `url(${imgUrl})`;
+
+                const caption = document.createElement("div");
+                caption.className = "image-caption";
+                caption.textContent = "";
+                caption.id = `caption-${startIndex + i}`;
+                slide.appendChild(caption);
+
+                slideshowContainer.appendChild(slide);
+                slides.push(slide);
+                transitions.push(defaultTransition);
+                imageCaptions.push("");
+
+                if (slides.length === 1) {
+                  slide.classList.add("active");
+                }
+              } catch (error) {
+                console.error("Error processing image:", error);
+              }
+            }
+
+            progress.style.width = "100%";
+            progress.textContent = "100%";
+            setTimeout(() => (progressBar.style.display = "none"), 1000);
+
+            startSlideshow();
+          }
         });
-
-        const captionInput = document.createElement("input");
-        captionInput.type = "text";
-        captionInput.placeholder = "כותרת לתמונה זו";
-        captionInput.dataset.index = startIndex + i;
-        captionInput.className = "caption-input";
-        captionInput.addEventListener("input", updateCaption);
-
-        const transitionSelect = document.createElement("select");
-        transitionSelect.dataset.index = startIndex + i;
-        transitionSelect.className = "transition-select";
-        transitionSelect.innerHTML = `
-        <option value="fade">עמעום</option>
-        <option value="slide">החלקה</option>
-        <option value="zoom">תקריב</option>
-        <option value="rotate">סיבוב</option>
-        <option value="flip">היפוך</option>
-        <option value="glow">נצנוץ</option>
-        <option value="bounce">קפיצה</option>
-        <option value="flipX">היפוך אופקי</option>
-        <option value="flipY">היפוך אנכי</option>
-        <option value="lightSpeed">מהירות אור</option>
-        <option value="roll">גלגול</option>
-        <option value="blur">טשטוש</option>
-        <option value="swing">נדנוד</option>
-        <option value="wipe">ניגוב</option>
-        <option value="split">פיצול</option>
-        <option value="ripple">גלים</option>
-        <option value="blinds">תריסים</option>
-        <option value="rain">גשם</option>
-        <option value="pulse">פעימה</option>
-        <option value="fireWorks">זיקוקים</option>
-        <option value="float">ציפה</option>
-        <option value="shrink">התכווצות</option>
-        <option value="expand">התרחבות</option>
-        <option value="pageFlip">אנימציית ספר</option>
-        <option value="vortex">מערבולת</option>
-        <option value="slideDiagonal">החלקה אלכסונית</option>
-        <option value="pixelate">פיקסלציה</option>
-        <option value="colorShift">החלפת צבע</option>
-        <option value="curtain">הורדת מסך</option>
-        <option value="explode">התפוצצות</option>
-        <option value="warp">התאבכות</option>
-        <option value="thunder">רעם</option>
-        <option value="smoke">עשן</option>
-        <option value="hourglass">שעון חול</option>
-        <option value="stars">כוכבים</option>
-        `;
-        transitionSelect.value = defaultTransition;
-        transitionSelect.addEventListener("change", updateTransition);
-
-        imageItem.appendChild(captionInput);
-        imageItem.appendChild(transitionSelect);
-        imageItem.appendChild(imgPreview);
-        imageItem.appendChild(deleteBtn);
-        imageList.appendChild(imageItem);
-
-        const slide = document.createElement("div");
-        slide.className = "slide";
-        slide.style.backgroundImage = `url(${compressedImg})`;
-
-        const caption = document.createElement("div");
-        caption.className = "image-caption";
-        caption.textContent = "";
-        caption.id = `caption-${startIndex + i}`;
-        slide.appendChild(caption);
-
-        slideshowContainer.appendChild(slide);
-        slides.push(slide);
-        transitions.push(defaultTransition);
-        imageCaptions.push("");
-
-        if (slides.length === 1) {
-          slide.classList.add("active");
-        }
-      } catch (error) {
-        console.error("Error processing image:", error);
-      }
-    }
-
-    progress.style.width = "100%";
-    progress.textContent = "100%";
-    setTimeout(() => (progressBar.style.display = "none"), 1000);
-
-    startSlideshow();
-  }
-});
 
         function removeImage(index) {
           // הסרת האלמנטים מהדף
           slides[index].remove();
           imageList.children[index].remove();
 
+          // שחרור ה-URL של התמונה
+          URL.revokeObjectURL(imageUrls[index]);
+
           // עדכון המערכים
           slides.splice(index, 1);
-          compressedImages.splice(index, 1);
+          originalImages.splice(index, 1);
+          imageUrls.splice(index, 1);
           imageCaptions.splice(index, 1);
           transitions.splice(index, 1);
 
@@ -1945,7 +1944,6 @@ let originalImages = [];
               current.style.animation = "expandOut 2s forwards";
               next.style.animation = "expandIn 2s forwards";
               break;
-
             case "pageFlip":
               current.style.animation = "pageFlipOut 2s forwards";
               next.style.animation = "pageFlipIn 2s forwards";
@@ -2002,544 +2000,576 @@ let originalImages = [];
         }
 
         refreshBtn.addEventListener("click", function () {
+          // שחרור כל ה-URLs של התמונות לפני רענון הדף
+          imageUrls.forEach((url) => URL.revokeObjectURL(url));
           location.reload();
         });
 
-        exportBtn.addEventListener("click", function () {
+        exportBtn.addEventListener("click", async function () {
           if (slides.length === 0) {
             alert("אנא העלה לפחות תמונה אחת לפני היצוא");
             return;
           }
 
-          let htmlContent = `<!DOCTYPE html>
-<html lang="he">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="slide.png" />
-    <title>${titleInput.value || "מצגת תמונות"}</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            direction: rtl;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        
-        #slideshow-container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            overflow: hidden;
-            ${
-              backgroundImage
-                ? `background-image: url(${backgroundImage}); background-size: cover;`
-                : ""
-            }
-        }
-        
-        .slide {
-            position: absolute;
-            width: 80%;
-            height: 80%;
-            opacity: 0;
-            transition: opacity 1s;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            top: 10%;
-            left: 10%;
-        }
-        
-        .slide.active {
-            opacity: 1;
-        }
-        
-        #title-display {
-            position: absolute;
-            top: 20px;
-            left: 25%;
-            right: 25%;
-            text-align: center;
-            color: ${titleColorInput.value};
-            font-size: 3.5rem;
-            z-index: 10;
-            -webkit-text-stroke-width: 1px;
-            -webkit-text-stroke-color: rgb(255, 255, 0);
-        }
-        
-        .image-caption {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            color: white;
-            -webkit-text-stroke-width: 2px;
-            -webkit-text-stroke-color: rgb(0, 0, 0);
-            font-size: 40px;
-            z-index: 10;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        
-        /* כל אנימציות המעבר */
-        @keyframes slideOut {
-            from { transform: translateX(0); }
-            to { transform: translateX(-100%); }
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-        
-        @keyframes zoomOut {
-            from { transform: scale(1); }
-            to { transform: scale(0); }
-        }
-        
-        @keyframes zoomIn {
-            from { transform: scale(2); }
-            to { transform: scale(1); }
-        }
-        
-        @keyframes rotateOut {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(180deg) scale(0); }
-        }
-        
-        @keyframes rotateIn {
-            from { transform: rotate(-180deg) scale(0); }
-            to { transform: rotate(0deg) scale(1); }
-        }
-        
-        @keyframes flipOut {
-            from { transform: rotateY(0); }
-            to { transform: rotateY(90deg); opacity: 0; }
-        }
-        
-        @keyframes flipIn {
-            from { transform: rotateY(-90deg); opacity: 0; }
-            to { transform: rotateY(0); opacity: 1; }
-        }
-        
-        @keyframes glowOut {
-            from { opacity: 1; filter: brightness(1); }
-            to { opacity: 0; filter: brightness(3); }
-        }
-        
-        @keyframes glowIn {
-            from { opacity: 0; filter: brightness(3); }
-            to { opacity: 1; filter: brightness(1); }
-        }
-        
-        @keyframes bounceOut {
-            from { transform: scale(1); }
-            to { transform: scale(0.5) translateY(100%); opacity: 0; }
-        }
-        
-        @keyframes bounceIn {
-            from { transform: scale(0.5) translateY(-100%); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes flipXOut {
-            from { transform: rotateX(0); }
-            to { transform: rotateX(90deg); opacity: 0; }
-        }
-        
-        @keyframes flipXIn {
-            from { transform: rotateX(-90deg); opacity: 0; }
-            to { transform: rotateX(0); opacity: 1; }
-        }
-        
-        @keyframes flipYOut {
-            from { transform: rotateY(0); }
-            to { transform: rotateY(90deg); opacity: 0; }
-        }
-        
-        @keyframes flipYIn {
-            from { transform: rotateY(-90deg); opacity: 0; }
-            to { transform: rotateY(0); opacity: 1; }
-        }
-        
-        @keyframes lightSpeedOut {
-            from { transform: translateX(0) skewX(0); }
-            to { transform: translateX(100%) skewX(-30deg); opacity: 0; }
-        }
-        
-        @keyframes lightSpeedIn {
-            from { transform: translateX(-100%) skewX(30deg); opacity: 0; }
-            to { transform: translateX(0) skewX(0); opacity: 1; }
-        }
-        
-        @keyframes rollOut {
-            from { transform: translateX(0) rotate(0); }
-            to { transform: translateX(100%) rotate(120deg); opacity: 0; }
-        }
-        
-        @keyframes rollIn {
-            from { transform: translateX(-100%) rotate(-120deg); opacity: 0; }
-            to { transform: translateX(0) rotate(0); opacity: 1; }
-        }
-        
-        @keyframes blurOut {
-            from { filter: blur(0); opacity: 1; }
-            to { filter: blur(5px); opacity: 0; }
-        }
-        
-        @keyframes blurIn {
-            from { filter: blur(5px); opacity: 0; }
-            to { filter: blur(0); opacity: 1; }
-        }
-        
-        @keyframes swingOut {
-            from { transform: rotate(0); }
-            to { transform: rotate(15deg) translateX(100%); opacity: 0; }
-        }
-        
-        @keyframes swingIn {
-            from { transform: rotate(-15deg) translateX(-100%); opacity: 0; }
-            to { transform: rotate(0); opacity: 1; }
-        }
-        
-        @keyframes wipeOut {
-            from { clip-path: inset(0 0 0 0); }
-            to { clip-path: inset(0 100% 0 0); }
-        }
-        
-        @keyframes wipeIn {
-            from { clip-path: inset(0 0 0 100%); }
-            to { clip-path: inset(0 0 0 0); }
-        }
-        
-        @keyframes splitOut {
-            from { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-            to { 
-              clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%),
-                         polygon(50% 0, 100% 0, 100% 100%, 50% 100%); 
-              transform: translateX(-50%) translateX(50%);
-            }
-        }
-        
-        @keyframes splitIn {
-            from { 
-              clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%),
-                         polygon(50% 0, 100% 0, 100% 100%, 50% 100%); 
-              transform: translateX(-50%) translateX(50%);
-            }
-            to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-        }
-        
-        @keyframes rippleOut {
-            from { clip-path: circle(100%); }
-            to { clip-path: circle(0%); }
-        }
-        
-        @keyframes rippleIn {
-            from { clip-path: circle(0%); }
-            to { clip-path: circle(100%); }
-        }
-        
-        @keyframes blindsOut {
-            from { clip-path: inset(0 0 0 0); }
-            to { clip-path: inset(0 0 100% 0); }
-        }
-        
-        @keyframes blindsIn {
-            from { clip-path: inset(100% 0 0 0); }
-            to { clip-path: inset(0 0 0 0); }
-        }
-        
-        @keyframes rainOut {
-            from { transform: translateY(0); opacity: 1; }
-            to { transform: translateY(100%); opacity: 0; }
-        }
-        
-        @keyframes rainIn {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @keyframes pulseOut {
-            from { transform: scale(1); opacity: 1; }
-            to { transform: scale(1.5); opacity: 0; }
-        }
-        
-        @keyframes pulseIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes fireWorksOut {
-            from { opacity: 1; }
-            to { 
-              opacity: 0; 
-              box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.8),
-                          0 0 10px 10px rgba(255, 0, 0, 0.6),
-                          0 0 15px 15px rgba(0, 255, 0, 0.4);
-            }
-        }
-        
-        @keyframes fireWorksIn {
-            from { 
-              opacity: 0; 
-              box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.8),
-                          0 0 10px 10px rgba(255, 0, 0, 0.6),
-                          0 0 15px 15px rgba(0, 255, 0, 0.4);
-            }
-            to { 
-              opacity: 1; 
-              box-shadow: none;
-            }
-        }
-        
-        #music-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-        }
-        
-        #play-music-btn, #pause-music-btn {
-            padding: 10px 15px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        #pause-music-btn {
-            background: #f44336;
-        }
-    </style>
-</head>
-<body>
-    <div id="slideshow-container">
-        <div id="title-display" style="color: ${titleColorInput.value}">${
-    titleInput.value || "כותרת המצגת"
-  }</div>`;
+          progressBar.style.display = "block";
+          progress.style.width = "0%";
+          progress.textContent = "0%";
 
-  for (let i = 0; i < exportImages.length; i++) {
-    const imgUrl = exportImages[i];
-    const caption = imageCaptions[i] || "";
-    htmlContent += `
-<div class="slide${
-      i === 0 ? " active" : ""
-    }" style="background-image: url(${imgUrl})">
-    <div class="image-caption">${caption}</div>
-</div>`;
-  }
+          try {
+            // דחיסת התמונות לפי הפרמטרים שנבחרו
+            const exportImages = [];
+            for (let i = 0; i < originalImages.length; i++) {
+              progress.style.width = `${
+                ((i + 1) / originalImages.length) * 100
+              }%`;
+              progress.textContent = `${Math.round(
+                ((i + 1) / originalImages.length) * 100
+              )}%`;
 
-  htmlContent += `
-        </div>
-        
-        ${
-          musicFile
-            ? `<audio id="bg-music" loop autoplay><source src="${musicFile}" type="audio/mpeg"></audio>
-            <div id="music-controls">
-                <button id="play-music-btn">הפעל מוסיקה</button>
-                <button id="pause-music-btn">השתק מוסיקה</button>
-            </div>`
-            : ""
-        }
-        
-        <script>
-        const slides = document.querySelectorAll('.slide');
-        let currentSlideIndex = 0;
-        const interval = ${intervalInput.value * 1000};
-        const transitions = ${JSON.stringify(transitions)};
-        let musicPlaying = false;
-        
-        window.onload = function() {
-            if (slides.length > 0) {
-                slides[0].classList.add('active');
+              const compressedImg = await compressImage(
+                originalImages[i],
+                imageQuality.value,
+                resizeWidth.value
+              );
+              exportImages.push(compressedImg);
             }
-            
-            const bgMusic = document.getElementById('bg-music');
-            const playBtn = document.getElementById('play-music-btn');
-            const pauseBtn = document.getElementById('pause-music-btn');
-            
-            if (bgMusic) {
-                bgMusic.play().then(() => {
-                    musicPlaying = true;
-                    playBtn.style.display = 'none';
-                    pauseBtn.style.display = 'block';
-                }).catch(e => {
-                    console.log('הפעלה אוטומטית נכשלה (מגבלות דפדפן):', e);
-                });
-                
-                document.addEventListener('click', function playOnFirstInteraction() {
-                    if (!musicPlaying) {
-                        bgMusic.play().then(() => {
-                            musicPlaying = true;
-                            playBtn.style.display = 'none';
-                            pauseBtn.style.display = 'block';
-                        }).catch(e => {
-                            console.log('הפעלת מוסיקה נכשלה:', e);
-                        });
-                        document.removeEventListener('click', playOnFirstInteraction);
-                    }
-                }, { once: true });
-                
-                document.addEventListener('keydown', function playOnFirstKey() {
-                    if (!musicPlaying) {
-                        bgMusic.play().then(() => {
-                            musicPlaying = true;
-                            playBtn.style.display = 'none';
-                            pauseBtn.style.display = 'block';
-                        }).catch(e => {
-                            console.log('הפעלת מוסיקה נכשלה:', e);
-                        });
-                        document.removeEventListener('keydown', playOnFirstKey);
-                    }
-                }, { once: true });
-                
-                playBtn.addEventListener('click', function() {
-                    bgMusic.play();
-                    musicPlaying = true;
-                    playBtn.style.display = 'none';
-                    pauseBtn.style.display = 'block';
-                });
-                
-                pauseBtn.addEventListener('click', function() {
-                    bgMusic.pause();
-                    musicPlaying = false;
-                    playBtn.style.display = 'block';
-                    pauseBtn.style.display = 'none';
-                });
+
+            // יצירת קובץ ה-HTML עם התמונות הדחוסות
+            let htmlContent = `<!DOCTYPE html>
+      <html lang="he">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <link rel="icon" type="image/x-icon" href="slide.png" />
+          <title>${titleInput.value || "מצגת תמונות"}</title>
+          <style>
+              body {
+                  font-family: 'Arial', sans-serif;
+                  direction: rtl;
+                  margin: 0;
+                  padding: 0;
+                  overflow: hidden;
+              }
+              
+              #slideshow-container {
+                  width: 100vw;
+                  height: 100vh;
+                  position: relative;
+                  overflow: hidden;
+                  ${
+                    backgroundImage
+                      ? `background-image: url(${backgroundImage}); background-size: cover;`
+                      : ""
+                  }
+              }
+              
+              .slide {
+                  position: absolute;
+                  width: 80%;
+                  height: 80%;
+                  opacity: 0;
+                  transition: opacity 1s;
+                  background-size: contain;
+                  background-position: center;
+                  background-repeat: no-repeat;
+                  top: 10%;
+                  left: 10%;
+              }
+              
+              .slide.active {
+                  opacity: 1;
+              }
+              
+              #title-display {
+                  position: absolute;
+                  top: 20px;
+                  left: 25%;
+                  right: 25%;
+                  text-align: center;
+                  color: ${titleColorInput.value};
+                  font-size: 3.5rem;
+                  z-index: 10;
+                  -webkit-text-stroke-width: 1px;
+                  -webkit-text-stroke-color: rgb(255, 255, 0);
+              }
+              
+              .image-caption {
+                  position: absolute;
+                  bottom: 20px;
+                  left: 0;
+                  right: 0;
+                  text-align: center;
+                  color: white;
+                  -webkit-text-stroke-width: 2px;
+                  -webkit-text-stroke-color: rgb(0, 0, 0);
+                  font-size: 40px;
+                  z-index: 10;
+                  padding: 10px;
+                  border-radius: 5px;
+              }
+              
+              /* כל אנימציות המעבר */
+              @keyframes slideOut {
+                  from { transform: translateX(0); }
+                  to { transform: translateX(-100%); }
+              }
+              
+              @keyframes slideIn {
+                  from { transform: translateX(100%); }
+                  to { transform: translateX(0); }
+              }
+              
+              @keyframes zoomOut {
+                  from { transform: scale(1); }
+                  to { transform: scale(0); }
+              }
+              
+              @keyframes zoomIn {
+                  from { transform: scale(2); }
+                  to { transform: scale(1); }
+              }
+              
+              @keyframes rotateOut {
+                  from { transform: rotate(0deg); }
+                  to { transform: rotate(180deg) scale(0); }
+              }
+              
+              @keyframes rotateIn {
+                  from { transform: rotate(-180deg) scale(0); }
+                  to { transform: rotate(0deg) scale(1); }
+              }
+              
+              @keyframes flipOut {
+                  from { transform: rotateY(0); }
+                  to { transform: rotateY(90deg); opacity: 0; }
+              }
+              
+              @keyframes flipIn {
+                  from { transform: rotateY(-90deg); opacity: 0; }
+                  to { transform: rotateY(0); opacity: 1; }
+              }
+              
+              @keyframes glowOut {
+                  from { opacity: 1; filter: brightness(1); }
+                  to { opacity: 0; filter: brightness(3); }
+              }
+              
+              @keyframes glowIn {
+                  from { opacity: 0; filter: brightness(3); }
+                  to { opacity: 1; filter: brightness(1); }
+              }
+              
+              @keyframes bounceOut {
+                  from { transform: scale(1); }
+                  to { transform: scale(0.5) translateY(100%); opacity: 0; }
+              }
+              
+              @keyframes bounceIn {
+                  from { transform: scale(0.5) translateY(-100%); opacity: 0; }
+                  to { transform: scale(1); opacity: 1; }
+              }
+              
+              @keyframes flipXOut {
+                  from { transform: rotateX(0); }
+                  to { transform: rotateX(90deg); opacity: 0; }
+              }
+              
+              @keyframes flipXIn {
+                  from { transform: rotateX(-90deg); opacity: 0; }
+                  to { transform: rotateX(0); opacity: 1; }
+              }
+              
+              @keyframes flipYOut {
+                  from { transform: rotateY(0); }
+                  to { transform: rotateY(90deg); opacity: 0; }
+              }
+              
+              @keyframes flipYIn {
+                  from { transform: rotateY(-90deg); opacity: 0; }
+                  to { transform: rotateY(0); opacity: 1; }
+              }
+              
+              @keyframes lightSpeedOut {
+                  from { transform: translateX(0) skewX(0); }
+                  to { transform: translateX(100%) skewX(-30deg); opacity: 0; }
+              }
+              
+              @keyframes lightSpeedIn {
+                  from { transform: translateX(-100%) skewX(30deg); opacity: 0; }
+                  to { transform: translateX(0) skewX(0); opacity: 1; }
+              }
+              
+              @keyframes rollOut {
+                  from { transform: translateX(0) rotate(0); }
+                  to { transform: translateX(100%) rotate(120deg); opacity: 0; }
+              }
+              
+              @keyframes rollIn {
+                  from { transform: translateX(-100%) rotate(-120deg); opacity: 0; }
+                  to { transform: translateX(0) rotate(0); opacity: 1; }
+              }
+              
+              @keyframes blurOut {
+                  from { filter: blur(0); opacity: 1; }
+                  to { filter: blur(5px); opacity: 0; }
+              }
+              
+              @keyframes blurIn {
+                  from { filter: blur(5px); opacity: 0; }
+                  to { filter: blur(0); opacity: 1; }
+              }
+              
+              @keyframes swingOut {
+                  from { transform: rotate(0); }
+                  to { transform: rotate(15deg) translateX(100%); opacity: 0; }
+              }
+              
+              @keyframes swingIn {
+                  from { transform: rotate(-15deg) translateX(-100%); opacity: 0; }
+                  to { transform: rotate(0); opacity: 1; }
+              }
+              
+              @keyframes wipeOut {
+                  from { clip-path: inset(0 0 0 0); }
+                  to { clip-path: inset(0 100% 0 0); }
+              }
+              
+              @keyframes wipeIn {
+                  from { clip-path: inset(0 0 0 100%); }
+                  to { clip-path: inset(0 0 0 0); }
+              }
+              
+              @keyframes splitOut {
+                  from { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+                  to { 
+                    clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%),
+                               polygon(50% 0, 100% 0, 100% 100%, 50% 100%); 
+                    transform: translateX(-50%) translateX(50%);
+                  }
+              }
+              
+              @keyframes splitIn {
+                  from { 
+                    clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%),
+                               polygon(50% 0, 100% 0, 100% 100%, 50% 100%); 
+                    transform: translateX(-50%) translateX(50%);
+                  }
+                  to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+              }
+              
+              @keyframes rippleOut {
+                  from { clip-path: circle(100%); }
+                  to { clip-path: circle(0%); }
+              }
+              
+              @keyframes rippleIn {
+                  from { clip-path: circle(0%); }
+                  to { clip-path: circle(100%); }
+              }
+              
+              @keyframes blindsOut {
+                  from { clip-path: inset(0 0 0 0); }
+                  to { clip-path: inset(0 0 100% 0); }
+              }
+              
+              @keyframes blindsIn {
+                  from { clip-path: inset(100% 0 0 0); }
+                  to { clip-path: inset(0 0 0 0); }
+              }
+              
+              @keyframes rainOut {
+                  from { transform: translateY(0); opacity: 1; }
+                  to { transform: translateY(100%); opacity: 0; }
+              }
+              
+              @keyframes rainIn {
+                  from { transform: translateY(-100%); opacity: 0; }
+                  to { transform: translateY(0); opacity: 1; }
+              }
+              
+              @keyframes pulseOut {
+                  from { transform: scale(1); opacity: 1; }
+                  to { transform: scale(1.5); opacity: 0; }
+              }
+              
+              @keyframes pulseIn {
+                  from { transform: scale(0.5); opacity: 0; }
+                  to { transform: scale(1); opacity: 1; }
+              }
+              
+              @keyframes fireWorksOut {
+                  from { opacity: 1; }
+                  to { 
+                    opacity: 0; 
+                    box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.8),
+                                0 0 10px 10px rgba(255, 0, 0, 0.6),
+                                0 0 15px 15px rgba(0, 255, 0, 0.4);
+                  }
+              }
+              
+              @keyframes fireWorksIn {
+                  from { 
+                    opacity: 0; 
+                    box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.8),
+                                0 0 10px 10px rgba(255, 0, 0, 0.6),
+                                0 0 15px 15px rgba(0, 255, 0, 0.4);
+                  }
+                  to { 
+                    opacity: 1; 
+                    box-shadow: none;
+                  }
+              }
+              
+              #music-controls {
+                  position: fixed;
+                  bottom: 20px;
+                  right: 20px;
+                  z-index: 1000;
+                  display: flex;
+                  gap: 10px;
+              }
+              
+              #play-music-btn, #pause-music-btn {
+                  padding: 10px 15px;
+                  background: #4CAF50;
+                  color: white;
+                  border: none;
+                  border-radius: 5px;
+                  cursor: pointer;
+              }
+              
+              #pause-music-btn {
+                  background: #f44336;
+              }
+          </style>
+      </head>
+      <body>
+          <div id="slideshow-container">
+              <div id="title-display" style="color: ${titleColorInput.value}">${
+              titleInput.value || "כותרת המצגת"
+            }</div>`;
+
+            // הוספת התמונות הדחוסות לקובץ ה-HTML
+            for (let i = 0; i < exportImages.length; i++) {
+              const imgUrl = exportImages[i];
+              const caption = imageCaptions[i] || "";
+              htmlContent += `
+              <div class="slide${
+                i === 0 ? " active" : ""
+              }" style="background-image: url(${imgUrl})">
+                  <div class="image-caption">${caption}</div>
+              </div>`;
             }
-        };
-        
-        function nextSlide() {
-            const currentSlide = slides[currentSlideIndex];
-            currentSlide.classList.remove('active');
-            
-            currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-            const nextSlide = slides[currentSlideIndex];
-            nextSlide.classList.add('active');
-            
-            const transition = transitions[currentSlideIndex] || 'fade';
-            applyTransition(currentSlide, nextSlide, transition);
-        }
-        
-        function applyTransition(current, next, transition) {
-            current.style.animation = '';
-            next.style.animation = '';
-            
-            switch (transition) {
-                case 'fade':
-                    break;
-                case 'slide':
-                    current.style.animation = 'slideOut 2s forwards';
-                    next.style.animation = 'slideIn 2s forwards';
-                    break;
-                case 'zoom':
-                    current.style.animation = 'zoomOut 2s forwards';
-                    next.style.animation = 'zoomIn 2s forwards';
-                    break;
-                case 'rotate':
-                    current.style.animation = 'rotateOut 2s forwards';
-                    next.style.animation = 'rotateIn 2s forwards';
-                    break;
-                case 'flip':
-                    current.style.animation = 'flipOut 2s forwards';
-                    next.style.animation = 'flipIn 2s forwards';
-                    break;
-                case 'glow':
-                    current.style.animation = 'glowOut 2s forwards';
-                    next.style.animation = 'glowIn 2s forwards';
-                    break;
-                case 'bounce':
-                    current.style.animation = 'bounceOut 2s forwards';
-                    next.style.animation = 'bounceIn 2s forwards';
-                    break;
-                case 'flipX':
-                    current.style.animation = 'flipXOut 2s forwards';
-                    next.style.animation = 'flipXIn 2s forwards';
-                    break;
-                case 'flipY':
-                    current.style.animation = 'flipYOut 2s forwards';
-                    next.style.animation = 'flipYIn 2s forwards';
-                    break;
-                case 'lightSpeed':
-                    current.style.animation = 'lightSpeedOut 2s forwards';
-                    next.style.animation = 'lightSpeedIn 2s forwards';
-                    break;
-                case 'roll':
-                    current.style.animation = 'rollOut 2s forwards';
-                    next.style.animation = 'rollIn 2s forwards';
-                    break;
-                case 'blur':
-                    current.style.animation = 'blurOut 2s forwards';
-                    next.style.animation = 'blurIn 2s forwards';
-                    break;
-                case 'swing':
-                    current.style.animation = 'swingOut 2s forwards';
-                    next.style.animation = 'swingIn 2s forwards';
-                    break;
-                case 'wipe':
-                    current.style.animation = 'wipeOut 2s forwards';
-                    next.style.animation = 'wipeIn 2s forwards';
-                    break;
-                case 'split':
-                    current.style.animation = 'splitOut 2s forwards';
-                    next.style.animation = 'splitIn 2s forwards';
-                    break;
-                case 'ripple':
-                    current.style.animation = 'rippleOut 2s forwards';
-                    next.style.animation = 'rippleIn 2s forwards';
-                    break;
-                case 'blinds':
-                    current.style.animation = 'blindsOut 2s forwards';
-                    next.style.animation = 'blindsIn 2s forwards';
-                    break;
-                case 'rain':
-                    current.style.animation = 'rainOut 2s forwards';
-                    next.style.animation = 'rainIn 2s forwards';
-                    break;
-                case 'pulse':
-                    current.style.animation = 'pulseOut 2s forwards';
-                    next.style.animation = 'pulseIn 2s forwards';
-                    break;
-                case 'fireWorks':
-                    current.style.animation = 'fireWorksOut 2s forwards';
-                    next.style.animation = 'fireWorksIn 2s forwards';
-                    break;
+
+            htmlContent += `
+          </div>
+          
+          ${
+            musicFile
+              ? `<audio id="bg-music" loop autoplay><source src="${musicFile}" type="audio/mpeg"></audio>
+              <div id="music-controls">
+                  <button id="play-music-btn">הפעל מוסיקה</button>
+                  <button id="pause-music-btn">השתק מוסיקה</button>
+              </div>`
+              : ""
+          }
+          
+          <script>
+          const slides = document.querySelectorAll('.slide');
+          let currentSlideIndex = 0;
+          const interval = ${intervalInput.value * 1000};
+          const transitions = ${JSON.stringify(transitions)};
+          let musicPlaying = false;
+          
+          window.onload = function() {
+              if (slides.length > 0) {
+                  slides[0].classList.add('active');
+              }
+              
+              const bgMusic = document.getElementById('bg-music');
+              const playBtn = document.getElementById('play-music-btn');
+              const pauseBtn = document.getElementById('pause-music-btn');
+              
+              if (bgMusic) {
+                  bgMusic.play().then(() => {
+                      musicPlaying = true;
+                      playBtn.style.display = 'none';
+                      pauseBtn.style.display = 'block';
+                  }).catch(e => {
+                      console.log('הפעלה אוטומטית נכשלה (מגבלות דפדפן):', e);
+                  });
+                  
+                  document.addEventListener('click', function playOnFirstInteraction() {
+                      if (!musicPlaying) {
+                          bgMusic.play().then(() => {
+                              musicPlaying = true;
+                              playBtn.style.display = 'none';
+                              pauseBtn.style.display = 'block';
+                          }).catch(e => {
+                              console.log('הפעלת מוסיקה נכשלה:', e);
+                          });
+                          document.removeEventListener('click', playOnFirstInteraction);
+                      }
+                  }, { once: true });
+                  
+                  document.addEventListener('keydown', function playOnFirstKey() {
+                      if (!musicPlaying) {
+                          bgMusic.play().then(() => {
+                              musicPlaying = true;
+                              playBtn.style.display = 'none';
+                              pauseBtn.style.display = 'block';
+                          }).catch(e => {
+                              console.log('הפעלת מוסיקה נכשלה:', e);
+                          });
+                          document.removeEventListener('keydown', playOnFirstKey);
+                      }
+                  }, { once: true });
+                  
+                  playBtn.addEventListener('click', function() {
+                      bgMusic.play();
+                      musicPlaying = true;
+                      playBtn.style.display = 'none';
+                      pauseBtn.style.display = 'block';
+                  });
+                  
+                  pauseBtn.addEventListener('click', function() {
+                      bgMusic.pause();
+                      musicPlaying = false;
+                      playBtn.style.display = 'block';
+                      pauseBtn.style.display = 'none';
+                  });
+              }
+          };
+          
+          function nextSlide() {
+              const currentSlide = slides[currentSlideIndex];
+              currentSlide.classList.remove('active');
+              
+              currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+              const nextSlide = slides[currentSlideIndex];
+              nextSlide.classList.add('active');
+              
+              const transition = transitions[currentSlideIndex] || 'fade';
+              applyTransition(currentSlide, nextSlide, transition);
+          }
+          
+          function applyTransition(current, next, transition) {
+              current.style.animation = '';
+              next.style.animation = '';
+              
+              switch (transition) {
+                  case 'fade':
+                      break;
+                  case 'slide':
+                      current.style.animation = 'slideOut 2s forwards';
+                      next.style.animation = 'slideIn 2s forwards';
+                      break;
+                  case 'zoom':
+                      current.style.animation = 'zoomOut 2s forwards';
+                      next.style.animation = 'zoomIn 2s forwards';
+                      break;
+                  case 'rotate':
+                      current.style.animation = 'rotateOut 2s forwards';
+                      next.style.animation = 'rotateIn 2s forwards';
+                      break;
+                  case 'flip':
+                      current.style.animation = 'flipOut 2s forwards';
+                      next.style.animation = 'flipIn 2s forwards';
+                      break;
+                  case 'glow':
+                      current.style.animation = 'glowOut 2s forwards';
+                      next.style.animation = 'glowIn 2s forwards';
+                      break;
+                  case 'bounce':
+                      current.style.animation = 'bounceOut 2s forwards';
+                      next.style.animation = 'bounceIn 2s forwards';
+                      break;
+                  case 'flipX':
+                      current.style.animation = 'flipXOut 2s forwards';
+                      next.style.animation = 'flipXIn 2s forwards';
+                      break;
+                  case 'flipY':
+                      current.style.animation = 'flipYOut 2s forwards';
+                      next.style.animation = 'flipYIn 2s forwards';
+                      break;
+                  case 'lightSpeed':
+                      current.style.animation = 'lightSpeedOut 2s forwards';
+                      next.style.animation = 'lightSpeedIn 2s forwards';
+                      break;
+                  case 'roll':
+                      current.style.animation = 'rollOut 2s forwards';
+                      next.style.animation = 'rollIn 2s forwards';
+                      break;
+                  case 'blur':
+                      current.style.animation = 'blurOut 2s forwards';
+                      next.style.animation = 'blurIn 2s forwards';
+                      break;
+                  case 'swing':
+                      current.style.animation = 'swingOut 2s forwards';
+                      next.style.animation = 'swingIn 2s forwards';
+                      break;
+                  case 'wipe':
+                      current.style.animation = 'wipeOut 2s forwards';
+                      next.style.animation = 'wipeIn 2s forwards';
+                      break;
+                  case 'split':
+                      current.style.animation = 'splitOut 2s forwards';
+                      next.style.animation = 'splitIn 2s forwards';
+                      break;
+                  case 'ripple':
+                      current.style.animation = 'rippleOut 2s forwards';
+                      next.style.animation = 'rippleIn 2s forwards';
+                      break;
+                  case 'blinds':
+                      current.style.animation = 'blindsOut 2s forwards';
+                      next.style.animation = 'blindsIn 2s forwards';
+                      break;
+                  case 'rain':
+                      current.style.animation = 'rainOut 2s forwards';
+                      next.style.animation = 'rainIn 2s forwards';
+                      break;
+                  case 'pulse':
+                      current.style.animation = 'pulseOut 2s forwards';
+                      next.style.animation = 'pulseIn 2s forwards';
+                      break;
+                  case 'fireWorks':
+                      current.style.animation = 'fireWorksOut 2s forwards';
+                      next.style.animation = 'fireWorksIn 2s forwards';
+                      break;
+              }
+          }
+          
+          setInterval(nextSlide, interval);
+          <\/script>
+      </body>
+      </html>`;
+
+            try {
+              const blob = new Blob([htmlContent], { type: "text/html" });
+              const url = URL.createObjectURL(blob);
+
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = (titleInput.value || "slideshow") + ".html";
+              document.body.appendChild(a);
+              a.click();
+
+              setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                progressBar.style.display = "none";
+              }, 100);
+            } catch (e) {
+              console.error("שגיאה ביצירת הקובץ:", e);
+              alert("אירעה שגיאה ביצירת הקובץ");
+              progressBar.style.display = "none";
             }
-        }
-        
-        setInterval(nextSlide, interval);
-        <\/script>
-    </body>
-</html>`;
-
-try {
-    const blob = new Blob([htmlContent], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = (titleInput.value || "slideshow") + ".html";
-    document.body.appendChild(a);
-    a.click();
-
-    setTimeout(() => {
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      progressBar.style.display = "none";
-    }, 100);
-  } catch (e) {
-    console.error("שגיאה ביצירת הקובץ:", e);
-    alert("אירעה שגיאה ביצירת הקובץ");
-    progressBar.style.display = "none";
-  }
-});
+          } catch (error) {
+            console.error("שגיאה בעיבוד התמונות:", error);
+            alert("אירעה שגיאה בעיבוד התמונות");
+            progressBar.style.display = "none";
+          }
+        });
       </script>
     </div>
   </body>
