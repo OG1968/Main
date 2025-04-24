@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="he">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1343,7 +1345,82 @@
   </head>
   <body>
     <div class="container">
+      <br /><br />
+
+      <div class="file-input-wrapper" style="margin-top: -40px; width: 160px">
+        <button
+          id="help-btn"
+          class="file-input-button"
+          style="background-color: #005296"
+        >
+          מדריך שימוש
+        </button>
+      </div>
+      <br />
       <h1>יוצר מצגות</h1>
+
+      <!-- הוסף לפני התגית </div> של ה-container -->
+      <div
+        id="help-modal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          z-index: 1000;
+          overflow: auto;
+        "
+      >
+        <div
+          style="
+            background: #c7dbff;
+            margin: 50px auto;
+            padding: 20px;
+            max-width: 500px;
+            border-radius: 10px;
+            direction: rtl;
+          "
+        >
+          <h2 style="text-align: center">מדריך שימוש ליוצר המצגות</h2>
+          <button
+            id="close-help"
+            style="
+              float: left;
+              padding: 5px 10px;
+              background: #f44336;
+              color: white;
+              border: none;
+              border-radius: 20px;
+              cursor: pointer;
+            "
+          >
+            סגור
+          </button>
+          <div style="clear: both"></div>
+          <h3>שלבים ליצירת מצגת:</h3>
+          <ol>
+            <li>הזן כותרת למצגת</li>
+            <li>הגדר מרווח זמן בין שקופיות (ברירת מחדל: 3 שניות)</li>
+            <li>בחר צבע לכותרת המצגת</li>
+            <li>העלה תמונות למצגת באמצעות הכפתור "בחר קבצי תמונות"</li>
+            <li>לכל תמונה ניתן להוסיף כותרת ולבחור אפקט מעבר</li>
+            <li>ניתן לגרור תמונות כדי לשנות את סדר הופעתן במצגת</li>
+            <li>ניתן להעלות תמונת רקע ומוסיקת רקע (אופציונלי)</li>
+            <li>לחץ על "יצא לקובץ HTML" כדי לשמור את המצגת</li>
+          </ol>
+          <br />
+          <h3>טיפים:</h3>
+          <ul>
+            <li>כדי למחוק תמונה - לחץ על הסמל 🗑️</li>
+            <li>ניתן להתאים את איכות התמונות כדי להקטין את גודל הקובץ</li>
+            <li>לצפייה מקדימה במצגת - השתמש באזור התצוגה למעלה</li>
+            <li>לניקוי הכל - לחץ על "ניקוי ורענון"</li>
+          </ul>
+        </div>
+      </div>
 
       <div class="controls">
         <div class="control-group">
@@ -1657,6 +1734,67 @@
                 imageItem.appendChild(imgPreview);
                 imageItem.appendChild(deleteBtn);
                 imageList.appendChild(imageItem);
+                // הפעלת SortableJS אם זו התמונה הראשונה
+                if (slides.length === 1) {
+                  new Sortable(imageList, {
+                    animation: 150,
+                    handle: ".image-item img",
+                    onEnd: function (evt) {
+                      // עדכון המערכים לפי הסדר החדש
+                      const items = Array.from(imageList.children);
+
+                      // יצירת מערכים חדשים לפי הסדר המעודכן
+                      const newOriginalImages = [];
+                      const newImageUrls = [];
+                      const newSlides = [];
+                      const newImageCaptions = [];
+                      const newTransitions = [];
+
+                      items.forEach((item) => {
+                        const index = parseInt(
+                          item.querySelector(".caption-input").dataset.index
+                        );
+                        newOriginalImages.push(originalImages[index]);
+                        newImageUrls.push(imageUrls[index]);
+                        newSlides.push(slides[index]);
+                        newImageCaptions.push(imageCaptions[index]);
+                        newTransitions.push(transitions[index]);
+
+                        // עדכון האינדקסים
+                        item.querySelector(".caption-input").dataset.index =
+                          newOriginalImages.length - 1;
+                        item.querySelector(".transition-select").dataset.index =
+                          newOriginalImages.length - 1;
+                        item.querySelector(".delete-image-btn").dataset.index =
+                          newOriginalImages.length - 1;
+                      });
+
+                      // עדכון המערכים המקוריים
+                      originalImages = newOriginalImages;
+                      imageUrls = newImageUrls;
+                      slides = newSlides;
+                      imageCaptions = newImageCaptions;
+                      transitions = newTransitions;
+
+                      // עדכון הסדר בשקופיות
+                      slideshowContainer.innerHTML =
+                        '<div id="title-display" style="color: ' +
+                        titleColorInput.value +
+                        '">' +
+                        titleDisplay.textContent +
+                        "</div>";
+                      slides.forEach((slide) => {
+                        slideshowContainer.appendChild(slide);
+                      });
+
+                      // הפעלת השקופית הראשונה
+                      if (slides.length > 0) {
+                        slides[0].classList.add("active");
+                        currentSlideIndex = 0;
+                      }
+                    },
+                  });
+                }
 
                 const slide = document.createElement("div");
                 slide.className = "slide";
@@ -2653,6 +2791,27 @@
             progressBar.style.display = "none";
           }
         });
+
+        document
+          .getElementById("help-btn")
+          .addEventListener("click", function () {
+            document.getElementById("help-modal").style.display = "block";
+          });
+
+        document
+          .getElementById("close-help")
+          .addEventListener("click", function () {
+            document.getElementById("help-modal").style.display = "none";
+          });
+
+        // סגירת החלון בלחיצה מחוץ לתוכן
+        document
+          .getElementById("help-modal")
+          .addEventListener("click", function (e) {
+            if (e.target === this) {
+              this.style.display = "none";
+            }
+          });
       </script>
     </div>
   </body>
