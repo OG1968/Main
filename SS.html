@@ -2107,6 +2107,40 @@
                   padding: 10px;
                   border-radius: 5px;
               }
+
+                @media (max-width: 650px) {
+                .image-item {
+                display: grid;
+                grid-template-columns: 1fr auto auto;
+                grid-template-areas:
+                    "caption caption caption"
+                    "transition preview delete";
+                gap: 5px;
+                padding: 5px;
+                margin-bottom: 8px;
+                }
+
+                #title-display {
+                top: -10px;
+                font-size: 2.6rem;
+                font-weight: 700;
+                }
+
+                .image-caption {
+                  position: absolute;
+                  bottom: 50px;
+                  left: 0;
+                  right: 0;
+                  text-align: center;
+                  color: white;
+                  -webkit-text-stroke-width: 2px;
+                  -webkit-text-stroke-color: rgb(0, 0, 0);
+                  font-size: 26px;
+                  z-index: 10;
+                  padding: 10px;
+                  border-radius: 5px;
+              }
+                }
               
               /* כל אנימציות המעבר */
               @keyframes slideOut {
