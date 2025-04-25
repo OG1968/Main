@@ -33,7 +33,7 @@
         font-weight: 700;
         color: #000;
         text-align: center;
-        margin-top: 15px;
+        margin-top: 0px;
         margin-bottom: 15px;
         -webkit-text-stroke-width: 3px;
         -webkit-text-stroke-color: rgb(255, 255, 0);
@@ -96,8 +96,6 @@
 
       .file-input-wrapper:hover button {
         background-color: #2c632f;
-        transform: translateY(0px);
-        box-shadow: 0 0px 2px rgb(0, 0, 0);
       }
 
       #preview {
@@ -120,7 +118,7 @@
 
       .slide {
         position: absolute;
-        width: 100%;
+        width: 90%;
         height: 80%;
         opacity: 0;
         transition: opacity 1s;
@@ -128,8 +126,9 @@
         background-position: center;
         background-repeat: no-repeat;
         top: 10%;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 5%;
+        right: 5%;
+        transform-origin: center center;
       }
 
       .slide.active {
@@ -244,7 +243,7 @@
         position: relative;
         overflow: hidden;
         width: 100%;
-        margin-bottom: -0px;
+        margin-bottom: 0px;
       }
 
       .file-input-button {
@@ -1345,9 +1344,7 @@
   </head>
   <body>
     <div class="container">
-      <br /><br />
-
-      <div class="file-input-wrapper" style="margin-top: -40px; width: 160px">
+      <div class="file-input-wrapper" style="width: 160px">
         <button
           id="help-btn"
           class="file-input-button"
@@ -1391,7 +1388,7 @@
               float: left;
               padding: 5px 10px;
               background: #f44336;
-              color: white;
+              color: rgb(255, 255, 255);
               border: none;
               border-radius: 20px;
               cursor: pointer;
