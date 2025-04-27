@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>שינוי שמות קבצים</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary-color: #003d8d;
+        --secondary-color: #00b14a;
+        --dark-green: #006128;
+        --danger-color: #ff1900;
+        --light-blue: #b8d4ff;
+        --dark-gray: #7f8c8d;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        background: var(--light-blue);
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 2.6rem;
+        color: var(--primary-color);
+        text-align: center;
+        margin-bottom: 10px;
+        margin-top: 0px;
+      }
+
+      h2 {
+        font-size: 1.8rem;
+        color: var(--dark-green);
+        text-align: center;
+        margin-bottom: 5px;
+      }
+
+      h3 {
+        padding-right: 20px;
+        font-size: 1rem;
+        color: var(--primary-color);
+        text-align: right;
+        margin-bottom: 0px;
+        margin-top: 0px;
+      }
+
+      .drop-zone {
+        border: 3px dashed #ccc;
+        padding: 30px;
+        text-align: center;
+        background: white;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .drop-zone.dragover {
+        border-color: var(--dark-green);
+        background: #f1f9f1;
+      }
+
+      .control-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .options-panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .file-list {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+      }
+
+      .file-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: grab;
+        background: white;
+      }
+
+      .file-item.dragging {
+        opacity: 0.5;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transform: scale(1.02);
+      }
+
+      .file-item:last-child {
+        border-bottom: none;
+      }
+
+      .file-preview {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-left: 10px;
+        flex-shrink: 0;
+      }
+
+      .file-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 10px;
+        flex-shrink: 0;
+        color: var(--dark-gray);
+        font-size: 24px;
+      }
+
+      .file-info {
+        flex-grow: 1;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .original-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .new-name {
+        color: var(--dark-green);
+        margin-top: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .file-actions {
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+      }
+
+      input[type="text"],
+      input[type="number"],
+      select {
+        padding: 8px 12px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        margin-left: 10px;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+      }
+
+      .input-group {
+        margin-bottom: 15px;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+
+      button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 0 5px 10px 0;
+        transition: background 0.3s ease;
+        white-space: nowrap;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      button:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+      }
+
+      .remove-btn {
+        background: var(--danger-color);
+      }
+
+      .success-btn {
+        background: var(--secondary-color);
+      }
+
+      .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      @media (max-width: 600px) {
+        .btn-group {
+          flex-direction: column;
+        }
+
+        button {
+          width: 100%;
+          margin: 0 0 10px 0;
+        }
+
+        .control-panel,
+        .options-panel {
+          padding: 15px;
+        }
+
+        .drop-zone {
+          padding: 20px;
+        }
+
+        .file-item {
+          padding: 8px;
+        }
+
+        .file-preview,
+        .file-icon {
+          width: 40px;
+          height: 40px;
+          margin-left: 5px;
+        }
+      }
+
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .checkbox-group input {
+        margin-left: 10px;
+        width: auto;
+      }
+
+      .drag-handle {
+        cursor: move;
+        color: var(--dark-gray);
+        padding: 8px;
+        margin-right: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>שינוי שמות קבצים</h1>
+
+      <div id="dropZone" class="drop-zone">
+        <i
+          class="fas fa-cloud-upload-alt"
+          style="
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+          "
+        ></i>
+        <div>גרור קבצים לכאן או לחץ לבחירת קבצים</div>
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          style="display: none"
+          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+        />
+      </div>
+
+      <div class="options-panel">
+        <div class="input-group">
+          <label for="baseNameInput">שם בסיס לקבצים:</label>
+          <input
+            type="text"
+            id="baseNameInput"
+            placeholder="הכנס שם בסיס לקבצים"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="namingPattern">תבנית שם:</label>
+          <select id="namingPattern">
+            <option value="base_israeli_date">
+              שם בסיס + תאריך (לדוגמה: אירוע 15.05.2023.jpg)
+            </option>
+            <option value="israeli_date_base">
+              תאריך + שם בסיס (לדוגמה: 15.05.2023 אירוע.jpg)
+            </option>
+            <option value="base_number">
+              שם בסיס + מספר (לדוגמה: אירוע 001.jpg)
+            </option>
+            <option value="number_base">
+              מספר + שם בסיס (לדוגמה: 001 אירוע.jpg)
+            </option>
+            <option value="israeli_date">תאריך (לדוגמה: 15.05.2023.jpg)</option>
+
+            <option value="base_number_israeli_date">
+              שם בסיס + מספר + תאריך (לדוגמה: אירוע 001 15.05.2023.jpg)
+            </option>
+            <option value="base_israeli_date_number">
+              שם בסיס + תאריך + מספר (לדוגמה: אירוע 15.05.2023 001.jpg)
+            </option>
+          </select>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="sortByDate" checked />
+          <label for="sortByDate">מיין לפי תאריך</label>
+        </div>
+      </div>
+
+      <div class="control-panel">
+        <div class="btn-group">
+          <button onclick="generateNewNames()">
+            <i class="fas fa-magic"></i> צור שמות חדשים
+          </button>
+          <button
+            id="downloadZipBtn"
+            class="success-btn"
+            onclick="downloadZip()"
+            disabled
+          >
+            <i class="fas fa-file-archive"></i> הורד כקובץ ZIP
+          </button>
+          <button class="remove-btn" onclick="clearAll()">
+            <i class="fas fa-trash"></i> נקה הכל
+          </button>
+        </div>
+      </div>
+      <h2>הקבצים שנבחרו</h2>
+      <h3>הערה: ניתן לגרור קבצים ולשנות את סדר הופעתם</h3>
+      <div id="fileList" class="file-list"></div>
+    </div>
+
+    <script>
+      // משתנים גלובליים
+      let files = [];
+      let draggedIndex = null;
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("fileInput");
+      const baseNameInput = document.getElementById("baseNameInput");
+      const namingPattern = document.getElementById("namingPattern");
+      const sortByDate = document.getElementById("sortByDate");
+      const downloadZipBtn = document.getElementById("downloadZipBtn");
+      const fileList = document.getElementById("fileList");
+
+      // הוספת סגנון CSS לגרירה
+      const styleElement = document.createElement("style");
+      styleElement.textContent = `
+            .file-item.drag-over {
+                border: 2px dashed var(--primary-color);
+                background-color: rgba(52, 152, 219, 0.1);
+            }
+            
+            .file-item.dragging {
+                opacity: 0.5;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            
+            .drag-handle {
+                cursor: grab;
+                color: var(--dark-gray);
+                padding: 8px;
+                margin-right: 5px;
+            }
+        `;
+      document.head.appendChild(styleElement);
+
+      // אירועי גרירת קבצים לאזור השמטה
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+
+      dropZone.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        handleFiles(e.dataTransfer.files);
+      });
+
+      // אירועי בחירת קבצים
+      dropZone.addEventListener("click", () => {
+        fileInput.click();
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        handleFiles(e.target.files);
+      });
+
+      // טיפול בקבצים שנוספו
+      async function handleFiles(fileList) {
+        const newFiles = await Promise.all(
+          Array.from(fileList).map(async (file, index) => {
+            let dateTaken = null;
+            let previewUrl = null;
+
+            if (file.type.startsWith("image/")) {
+              try {
+                dateTaken = await getExifDate(file);
+                previewUrl = await createPreview(file);
+              } catch (e) {
+                console.log("לא ניתן לקרוא נתוני EXIF", e);
+              }
+            } else {
+              previewUrl = getFileIcon(file);
+            }
+
+            return {
+              file: file,
+              originalName: file.name,
+              extension: file.name.split(".").pop().toLowerCase(),
+              id: Date.now() + index,
+              dateTaken: dateTaken || file.lastModified,
+              previewUrl: previewUrl,
+              isImage: file.type.startsWith("image/"),
+            };
+          })
+        );
+
+        files = [...files, ...newFiles];
+
+        if (sortByDate.checked) {
+          files.sort((a, b) => a.dateTaken - b.dateTaken);
+        }
+
+        updateFileList();
+      }
+
+      // יצירת תצוגה מקדימה לקובץ תמונה
+      function createPreview(file) {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // קבלת אייקון מתאים לסוג הקובץ
+      function getFileIcon(file) {
+        const extension = file.name.split(".").pop().toLowerCase();
+        const iconClasses = {
+          pdf: "far fa-file-pdf",
+          doc: "far fa-file-word",
+          docx: "far fa-file-word",
+          xls: "far fa-file-excel",
+          xlsx: "far fa-file-excel",
+          txt: "far fa-file-alt",
+          zip: "far fa-file-archive",
+          rar: "far fa-file-archive",
+          mp3: "far fa-file-audio",
+          mp4: "far fa-file-video",
+          default: "far fa-file",
+        };
+
+        return iconClasses[extension] || iconClasses.default;
+      }
+
+      // קבלת תאריך צילום מנתוני EXIF
+      function getExifDate(file) {
+        return new Promise((resolve) => {
+          EXIF.getData(file, function () {
+            const exifData = EXIF.getAllTags(this);
+            if (exifData.DateTimeOriginal) {
+              const dateStr = exifData.DateTimeOriginal;
+              const parts = dateStr.split(" ");
+              const dateParts = parts[0].split(":");
+              const timeParts = parts[1].split(":");
+
+              const date = new Date(
+                parseInt(dateParts[0]),
+                parseInt(dateParts[1]) - 1,
+                parseInt(dateParts[2]),
+                parseInt(timeParts[0]),
+                parseInt(timeParts[1]),
+                parseInt(timeParts[2])
+              );
+
+              resolve(date.getTime());
+            } else {
+              resolve(file.lastModified);
+            }
+          });
+        });
+      }
+
+      // פונקציה לפורמט תאריך
+      function formatIsraeliDate(date) {
+        const d = new Date(date);
+        const day = d.getDate().toString().padStart(2, "0");
+        const month = (d.getMonth() + 1).toString().padStart(2, "0");
+        const year = d.getFullYear().toString();
+
+        return `${day}.${month}.${year}`;
+      }
+
+      // פונקציה לטיפול בשמות כפולים
+      function handleDuplicateNames(files) {
+        const nameCount = {};
+
+        return files.map((file) => {
+          if (!file.newName) return file;
+
+          let finalName = file.newName;
+          const baseNameWithoutExt = file.newName.replace(/\.[^/.]+$/, "");
+          const extension = file.newName.split(".").pop();
+
+          if (nameCount[baseNameWithoutExt] !== undefined) {
+            nameCount[baseNameWithoutExt]++;
+            finalName = `${baseNameWithoutExt}(${nameCount[baseNameWithoutExt]}).${extension}`;
+          } else {
+            nameCount[baseNameWithoutExt] = 0;
+          }
+
+          return {
+            ...file,
+            newName: finalName,
+          };
+        });
+      }
+
+      // יצירת שמות חדשים לקבצים
+      function generateNewNames() {
+        const baseName = baseNameInput.value.trim();
+        const pattern = namingPattern.value;
+
+        // בדיקה אם שם בסיס נדרש אבל חסר
+        if (
+          (pattern.includes("base") || pattern.includes("name")) &&
+          !baseName
+        ) {
+          alert("נא להזין שם בסיס");
+          return;
+        }
+
+        files = files.map((file, index) => {
+          const now = new Date(file.dateTaken);
+          const israeliDate = formatIsraeliDate(now);
+          const number = (index + 1).toString().padStart(3, "0");
+          let newName = "";
+
+          switch (pattern) {
+            case "base_number":
+              newName = `${baseName} ${number}.${file.extension}`;
+              break;
+            case "number_base":
+              newName = `${number} ${baseName}.${file.extension}`;
+              break;
+            case "israeli_date":
+              newName = `${israeliDate}.${file.extension}`;
+              break;
+            case "base_israeli_date":
+              newName = `${baseName} ${israeliDate}.${file.extension}`;
+              break;
+            case "israeli_date_base":
+              newName = `${israeliDate} ${baseName}.${file.extension}`;
+              break;
+            case "base_number_israeli_date":
+              newName = `${baseName} ${number} ${israeliDate}.${file.extension}`;
+              break;
+            case "base_israeli_date_number":
+              newName = `${baseName} ${israeliDate} ${number}.${file.extension}`;
+              break;
+            default:
+              newName = file.originalName;
+          }
+
+          return {
+            ...file,
+            newName: newName,
+          };
+        });
+
+        files = handleDuplicateNames(files);
+        updateFileList();
+        downloadZipBtn.disabled =
+          files.length === 0 || !files.some((f) => f.newName);
+      }
+
+      // הסרת קובץ מהרשימה
+      function removeFile(id) {
+        files = files.filter((file) => file.id !== id);
+        updateFileList();
+        if (files.length === 0) {
+          downloadZipBtn.disabled = true;
+        }
+      }
+
+      // ניקוי כל הקבצים
+      function clearAll() {
+        files = [];
+        updateFileList();
+        downloadZipBtn.disabled = true;
+        baseNameInput.value = "";
+      }
+
+      // עדכון רשימת הקבצים בממשק
+      function updateFileList() {
+        fileList.innerHTML =
+          files.length === 0
+            ? '<div style="text-align: center; color: var(--dark-gray);">אין קבצים להצגה</div>'
+            : files
+                .map(
+                  (file, index) => `
+                            <div class="file-item" draggable="true" data-index="${index}" data-id="${
+                    file.id
+                  }">
+                                <div class="drag-handle"><i class="fas fa-ellipsis-v"></i><i class="fas fa-ellipsis-v"></i></div>
+                                ${
+                                  file.isImage
+                                    ? `<img src="${file.previewUrl}" class="file-preview" alt="תצוגה מקדימה">`
+                                    : `<div class="file-icon"><i class="${file.previewUrl}"></i></div>`
+                                }
+                                <div class="file-info">
+                                    <div class="original-name" title="${
+                                      file.originalName
+                                    }">${file.originalName}</div>
+                                    ${
+                                      file.newName
+                                        ? `<div class="new-name" title="${file.newName}">${file.newName}</div>`
+                                        : '<div class="new-name" style="color: var(--dark-gray);">(טרם שונה שם)</div>'
+                                    }
+                                </div>
+                                <div class="file-actions">
+                                    <button class="remove-btn" onclick="removeFile(${
+                                      file.id
+                                    })"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        `
+                )
+                .join("");
+
+        // הוספת מאזינים לפריטים
+        setupDragListeners();
+      }
+
+      // הגדרת מאזיני אירועים לגרירת קבצים
+      function setupDragListeners() {
+        const items = document.querySelectorAll(".file-item");
+
+        items.forEach((item) => {
+          // מאזין לתחילת גרירה
+          item.addEventListener("dragstart", function (e) {
+            draggedIndex = parseInt(this.getAttribute("data-index"));
+            this.classList.add("dragging");
+            e.dataTransfer.effectAllowed = "move";
+          });
+
+          // מאזין לסיום גרירה
+          item.addEventListener("dragend", function () {
+            this.classList.remove("dragging");
+            draggedIndex = null;
+          });
+
+          // מאזין לגרירה מעל פריט
+          item.addEventListener("dragover", function (e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+          });
+
+          // מאזין לכניסת גרירה לאזור הפריט
+          item.addEventListener("dragenter", function (e) {
+            e.preventDefault();
+            if (draggedIndex !== parseInt(this.getAttribute("data-index"))) {
+              this.classList.add("drag-over");
+            }
+          });
+
+          // מאזין ליציאת גרירה מאזור הפריט
+          item.addEventListener("dragleave", function () {
+            this.classList.remove("drag-over");
+          });
+
+          // מאזין להשמטת פריט
+          item.addEventListener("drop", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove("drag-over");
+
+            const dropIndex = parseInt(this.getAttribute("data-index"));
+
+            if (draggedIndex !== null && draggedIndex !== dropIndex) {
+              // העברת הפריט במערך
+              const itemToMove = files[draggedIndex];
+              files.splice(draggedIndex, 1);
+              files.splice(dropIndex, 0, itemToMove);
+
+              // עדכון הרשימה המוצגת
+              updateFileList();
+            }
+          });
+        });
+      }
+
+      // הורדת כל הקבצים כקובץ ZIP
+      async function downloadZip() {
+        downloadZipBtn.disabled = true;
+        downloadZipBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> מייצר קובץ ZIP...';
+
+        const zip = new JSZip();
+        const folder = zip.folder("renamed_files");
+
+        files.forEach((file) => {
+          if (!file.newName) return;
+          folder.file(file.newName, file.file);
+        });
+
+        const content = await zip.generateAsync({ type: "blob" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = baseNameInput.value.trim()
+          ? `${baseNameInput.value.trim()}.zip`
+          : "files.zip";
+        link.click();
+        URL.revokeObjectURL(link.href);
+
+        downloadZipBtn.innerHTML =
+          '<i class="fas fa-file-archive"></i> הורד כקובץ ZIP';
+        downloadZipBtn.disabled = false;
+      }
+    </script>
+  </body>
+</html>
