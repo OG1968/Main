@@ -8,17 +8,14 @@
     />
     <link rel="icon" href="checklist.png" type="image/png" />
     <link rel="apple-touch-icon" href="checklist.png" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
     <meta name="application-name" content="צקליסט למטייל" />
+
     <title>צ'קליסט למטייל</title>
+
     <style>
       :root {
         --primary-color: #4caf50;
-        --secondary-color: rgb(41, 41, 41);
-        --background-color: #a0d3fd;
+        --background-color: #1a1a1a;
         --text-color: #ffffff;
         --input-bg: #333;
         --item-bg: #333;
@@ -42,11 +39,6 @@
       .container {
         max-width: 800px;
         margin: 0 auto;
-        background-color: var(--secondary-color);
-        padding: 30px;
-        margin-top: 20px;
-        border-radius: 20px;
-        box-shadow: 0 2px 4px rgba(0, 36, 197, 0.9);
       }
 
       .header {
@@ -54,7 +46,7 @@
         margin-bottom: 0;
         position: sticky;
         top: 0;
-        background-color: var(--secondary-color);
+        background-color: var(--background-color);
         z-index: 1000;
         padding: 10px 0;
       }
@@ -71,7 +63,7 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        background-color: var(--secondary-color);
+        background-color: var(--primary-color);
         border: none;
         color: white;
         z-index: 1001;
@@ -102,13 +94,6 @@
         text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
       }
 
-      h3 {
-        font-size: 0.8rem;
-        margin: 0px;
-        text-align: center;
-        color: rgb(0, 68, 255);
-      }
-
       .neon-text {
         font-size: 16px;
         color: #fff;
@@ -124,7 +109,7 @@
         margin-bottom: 10px;
         position: sticky;
         top: 120px;
-        background-color: var(--secondary-color);
+        background-color: var(--background-color);
         z-index: 1000;
         padding: 2px 0;
       }
@@ -137,11 +122,11 @@
         background: var(--input-bg);
         color: var(--text-color);
         font-size: 16px;
-        text-align: right;
+        text-align: right; /* Default for Hebrew */
       }
 
       [data-language="en"] input[type="text"] {
-        text-align: left;
+        text-align: left; /* Left alignment for English */
       }
 
       [data-theme="light"] input[type="text"] {
@@ -149,41 +134,18 @@
       }
 
       button {
-        text-align: center;
         padding: 8px 16px;
+        background-color: var(--primary-color);
         border: none;
         border-radius: 5px;
         color: white;
         cursor: pointer;
         transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 8px;
       }
 
-      #add-item-btn {
-        background-color: #4caf50;
-      }
-
-      .clear-completed-btn {
-        background-color: #2196f3;
-      }
-
-      .clear-all-btn {
-        background-color: #f44336;
-      }
-
-      .export-btn {
-        background-color: #ff9800;
-      }
-
-      .import-btn {
-        background-color: #9c27b0;
-      }
       button:hover {
         opacity: 0.9;
         transform: translateY(-1px);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       }
 
       .checklist {
@@ -201,18 +163,23 @@
         border-radius: 3px;
         transition: all 0.3s ease;
         animation: fadeIn 0.5s ease;
-        cursor: grab;
-        user-select: none;
-      }
-
-      .checklist-item.dragging {
-        opacity: 0.5;
-        cursor: grabbing;
       }
 
       [data-language="en"] .checklist-item {
         direction: ltr;
         justify-content: flex-start;
+      }
+
+      [data-language="en"] .move-buttons {
+        order: 1;
+      }
+
+      [data-language="en"] .delete-btn {
+        order: 2;
+      }
+
+      [data-language="en"] .item-text {
+        order: 0;
       }
 
       .checklist-item:hover {
@@ -241,7 +208,7 @@
         flex: 1;
         margin: 0 15px;
         text-align: right;
-        cursor: pointer;
+        cursor: pointer; /* Pointer to indicate editability */
       }
 
       [data-language="en"] .item-text {
@@ -274,11 +241,11 @@
         overflow: hidden;
         position: relative;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-        direction: rtl;
+        direction: rtl; /* For Hebrew (right-to-left) */
       }
 
       [data-language="en"] .progress-bar {
-        direction: ltr;
+        direction: ltr; /* For English (left-to-right) */
       }
 
       .progress-fill {
@@ -300,6 +267,35 @@
         z-index: 2;
       }
 
+      .move-buttons {
+        display: flex;
+        gap: 5px;
+        margin-left: 10px;
+      }
+
+      .move-btn {
+        background: #2196f3;
+        padding: 8px 7px;
+        border: none;
+        border-radius: 3px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 20px;
+        width: auto;
+      }
+
+      .move-btn:hover {
+        opacity: 0.9;
+        transform: scale(1.1);
+      }
+
+      .move-btn:disabled {
+        background: #666;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
       .edit-input {
         flex: 1;
         padding: 8px;
@@ -310,11 +306,11 @@
         font-size: 16px;
         margin: 0 15px;
         animation: expandInput 0.3s ease-out;
-        text-align: right;
+        text-align: right; /* Default for Hebrew */
       }
 
       [data-language="en"] .edit-input {
-        text-align: left;
+        text-align: left; /* Left alignment for English */
       }
 
       .editing .item-text {
@@ -323,10 +319,9 @@
 
       [data-theme="light"] {
         --background-color: #ffe4c1;
-        --secondary-color: #ffffff; /* זה המשתנה שמשפיע על ה-container */
         --text-color: #1a1a1a;
         --input-bg: #ffffff;
-        --item-bg: #d1d1d1;
+        --item-bg: #ffffff;
         --progress-bg: #ddd;
       }
 
@@ -344,42 +339,6 @@
         h1 {
           font-size: 22px;
         }
-
-        .button-group button {
-          margin: 0;
-          justify-content: center;
-          padding: 8px 2px;
-          font-size: 14px;
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          min-height: 40px;
-        }
-      }
-
-      @media (max-width: 400px) {
-        .button-group {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-        }
-
-        .button-group button {
-          width: 100%;
-          margin: 0;
-          padding: 8px 2px;
-          font-size: 14px;
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          min-height: 40px;
-        }
-
-        .button-group button i {
-          margin-bottom: 2px; /* מרווח בין האייקון לטקסט */
-        }
       }
 
       @media print {
@@ -393,6 +352,7 @@
         }
 
         .checkbox,
+        .move-btn,
         .delete-btn {
           background-color: white !important;
           color: black !important;
@@ -407,6 +367,7 @@
         .delete-btn,
         .clear-all-btn,
         .clear-completed-btn,
+        .move-buttons,
         .input-group,
         .progress-container,
         .progress-bar,
@@ -421,7 +382,6 @@
           padding: 2px;
           margin-bottom: 1px;
           border-radius: 0;
-          cursor: default !important;
         }
 
         h1 {
@@ -434,21 +394,7 @@
         }
       }
 
-      @media (max-width: 400px) {
-        .button-group {
-          flex-direction: column;
-          gap: 8px;
-        }
-        .button-group button {
-          width: 100%;
-          margin: 0;
-        }
-        .neon-text {
-          padding: 10px;
-          font-size: 14px;
-        }
-      }
-
+      /* סטייל למודל היציאה */
       #exit-modal {
         position: fixed;
         top: 0;
@@ -497,6 +443,7 @@
         color: #000;
       }
 
+      /* סטייל להודעות מערכת */
       .toast {
         position: fixed;
         bottom: 20px;
@@ -519,6 +466,7 @@
   <body>
     <div class="container">
       <div class="header">
+        <!-- כפתור החלפת תצוגה עם תמונות חדשות -->
         <button class="theme-toggle" onclick="toggleTheme()">
           <img
             id="theme-icon"
@@ -528,6 +476,7 @@
           />
         </button>
 
+        <!-- כפתור החלפת שפה עם דגלים -->
         <button
           class="language-toggle"
           onclick="toggleLanguage()"
@@ -581,35 +530,28 @@
           />
           <button onclick="addItem()" id="add-item-btn">הוסף פריט ➕</button>
         </div>
-        <h3>
-          הערה: על מנת לשנות מיקום פריט ברשימה ניתן לגרור אותו ולשחרר במקום
-          הרצוי.
-        </h3>
       </div>
       <ul class="checklist" id="checklist"></ul>
-      <div
-        class="button-group"
-        style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px"
-      >
+      <div style="display: flex; gap: 10px; margin-top: 10px">
         <button
           class="clear-completed-btn"
           onclick="clearCompleted()"
           id="clear-completed-btn"
         >
-          <i class="fas fa-check-circle"></i> נקה שהושלמו
+          נקה שהושלמו
         </button>
         <button class="clear-all-btn" onclick="clearAll()" id="clear-all-btn">
-          <i class="fas fa-trash-alt"></i> מחק הכל
+          מחק הכל
         </button>
         <button class="export-btn" onclick="exportToJSON()" id="export-btn">
-          <i class="fas fa-file-export"></i> ייצא ל-JSON
+          ייצא ל-JSON
         </button>
         <button
           class="import-btn"
           onclick="document.getElementById('import-file').click()"
           id="import-btn"
         >
-          <i class="fas fa-file-import"></i> ייבא מ-JSON
+          ייבא מ-JSON
         </button>
         <input
           type="file"
@@ -622,6 +564,7 @@
       <div class="neon-text">כל הזכויות שמורות G©.</div>
     </div>
 
+    <!-- Exit Confirmation Modal -->
     <div id="exit-modal">
       <div id="exit-modal-content">
         <h3 id="exit-modal-title">האם לצאת?</h3>
@@ -630,16 +573,18 @@
       </div>
     </div>
 
+    <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
     <script>
+      // אתחול הרשימה מ-localStorage
       let items = JSON.parse(localStorage.getItem("checklistItems")) || [];
-      let draggedItem = null;
-      let draggedIndex = -1;
 
+      // שפות
       const languages = {
         he: {
           title: "צ'קליסט למטייל 📋",
+          newItemPlaceholder: "הוסף פריט חדש...",
           addItemBtn: "הוסף פריט ➕",
           clearCompletedBtn: "נקה שהושלמו ✔️",
           clearAllBtn: "מחק הכל 🗑️",
@@ -654,6 +599,7 @@
         },
         en: {
           title: "Traveler Checklist 📋",
+          newItemPlaceholder: "...Add a new item",
           addItemBtn: "Add Item ➕",
           clearCompletedBtn: "Clear Completed ✔️",
           clearAllBtn: "Delete All 🗑️",
@@ -669,17 +615,21 @@
         },
       };
 
+      // טעינת שפה מ-localStorage
       let currentLanguage = localStorage.getItem("checklistLanguage") || "he";
       document.body.setAttribute("data-language", currentLanguage);
 
+      // עדכון תצוגת הדגלים כברירת מחדל
       document.querySelector(".he-flag").style.display =
         currentLanguage === "he" ? "inline" : "none";
       document.querySelector(".en-flag").style.display =
         currentLanguage === "en" ? "inline" : "none";
 
+      // עדכון הטקסטים והתצוגה כברירת מחדל
       updateTexts();
       updateProgress();
 
+      // ניהול מצב הרשימה
       function saveItems() {
         localStorage.setItem("checklistItems", JSON.stringify(items));
         updateProgress();
@@ -735,6 +685,24 @@
         }
       }
 
+      function moveItemUp(id) {
+        const index = items.findIndex((item) => item.id === id);
+        if (index > 0) {
+          [items[index], items[index - 1]] = [items[index - 1], items[index]];
+          renderAllItems();
+          saveItems();
+        }
+      }
+
+      function moveItemDown(id) {
+        const index = items.findIndex((item) => item.id === id);
+        if (index < items.length - 1) {
+          [items[index], items[index + 1]] = [items[index + 1], items[index]];
+          renderAllItems();
+          saveItems();
+        }
+      }
+
       function editItem(id) {
         const li = document.getElementById(`item-${id}`);
         const textSpan = li.querySelector(".item-text");
@@ -779,32 +747,32 @@
         editInput.addEventListener("keydown", handleKeyDown);
       }
 
+      // פונקציות רינדור
       function renderItem(item) {
         const li = document.createElement("li");
         li.className = `checklist-item ${item.completed ? "completed" : ""}`;
         li.id = `item-${item.id}`;
-        li.draggable = true;
+        const index = items.findIndex((i) => i.id === item.id);
 
         li.innerHTML = `
-            <input type="checkbox" class="checkbox" ${
-              item.completed ? "checked" : ""
-            } onchange="toggleComplete(${item.id})">
-            <span class="item-text" ondblclick="editItem(${item.id})">${
+        <input type="checkbox" class="checkbox" ${
+          item.completed ? "checked" : ""
+        } 
+               onchange="toggleComplete(${item.id})">
+        <span class="item-text" ondblclick="editItem(${item.id})">${
           item.text
         }</span>
-            <input type="text" class="edit-input" style="display: none;" />
-            <button class="delete-btn" onclick="deleteItem(${item.id})">${
+        <input type="text" class="edit-input" style="display: none;" />
+        <div class="move-buttons">
+            <button class="move-btn" onclick="moveItemUp(${item.id})" 
+                    ${index === 0 ? "disabled" : ""}>↑</button>
+            <button class="move-btn" onclick="moveItemDown(${item.id})" 
+                    ${index === items.length - 1 ? "disabled" : ""}>↓</button>
+        </div>
+        <button class="delete-btn" onclick="deleteItem(${item.id})">${
           languages[currentLanguage].deleteBtn
         }</button>
-          `;
-
-        // Add drag events
-        li.addEventListener("dragstart", handleDragStart);
-        li.addEventListener("dragover", handleDragOver);
-        li.addEventListener("dragleave", handleDragLeave);
-        li.addEventListener("drop", handleDrop);
-        li.addEventListener("dragend", handleDragEnd);
-
+    `;
         document.getElementById("checklist").appendChild(li);
       }
 
@@ -839,61 +807,7 @@
         }
       }
 
-      // Drag and Drop functions
-      function handleDragStart(e) {
-        draggedItem = this;
-        draggedIndex = [...this.parentNode.children].indexOf(this);
-        e.dataTransfer.effectAllowed = "move";
-        e.dataTransfer.setData("text/html", this.innerHTML);
-        this.classList.add("dragging");
-        setTimeout(() => (this.style.opacity = "0.4"), 0);
-      }
-
-      function handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-        this.classList.add("drag-over");
-      }
-
-      function handleDragLeave() {
-        this.classList.remove("drag-over");
-      }
-
-      function handleDrop(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        this.classList.remove("drag-over");
-
-        if (draggedItem !== this) {
-          const dropIndex = [...this.parentNode.children].indexOf(this);
-          const itemId = parseInt(draggedItem.id.replace("item-", ""));
-          const dropItemId = parseInt(this.id.replace("item-", ""));
-
-          // Find the items in our array
-          const draggedItemObj = items.find((item) => item.id === itemId);
-          const dropItemObj = items.find((item) => item.id === dropItemId);
-
-          if (draggedItemObj && dropItemObj) {
-            // Remove the dragged item
-            items = items.filter((item) => item.id !== itemId);
-            // Insert at new position
-            const dropPosition = items.findIndex(
-              (item) => item.id === dropItemId
-            );
-            items.splice(dropPosition, 0, draggedItemObj);
-
-            // Re-render all items to reflect new order
-            renderAllItems();
-            saveItems();
-          }
-        }
-      }
-
-      function handleDragEnd() {
-        this.classList.remove("dragging");
-        this.style.opacity = "1";
-      }
-
+      // ניהול שפה
       function setLanguage(lang) {
         currentLanguage = lang;
         localStorage.setItem("checklistLanguage", lang);
@@ -935,6 +849,7 @@
         });
       }
 
+      // ניהול ערכת נושא
       function setTheme(theme) {
         document.body.setAttribute("data-theme", theme);
         localStorage.setItem("checklistTheme", theme);
@@ -960,15 +875,18 @@
         }
       }
 
+      // פונקציות ייבוא וייצוא
       function exportToJSON() {
         const dataStr = JSON.stringify(items, null, 2);
         const dataUri =
           "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
+        // יצירת שם קובץ ברירת מחדל
         const defaultName = `traveler-checklist-${new Date()
           .toISOString()
           .slice(0, 10)}.json`;
 
+        // בקשת שם קובץ מהמשתמש
         const fileName = prompt(
           currentLanguage === "he"
             ? "הכנס שם לקובץ הייצוא:"
@@ -976,8 +894,10 @@
           defaultName
         );
 
+        // אם המשתמש ביטל, לא נעשה כלום
         if (!fileName) return;
 
+        // הוספת סיומת .json אם חסרה
         const finalName = fileName.endsWith(".json")
           ? fileName
           : `${fileName}.json`;
@@ -1016,9 +936,11 @@
         };
         reader.readAsText(file);
 
+        // איפוס הערך כדי לאפשר ייבוא של אותו קובץ שוב
         event.target.value = "";
       }
 
+      // פונקציה להצגת הודעות מערכת
       function showToast(message) {
         const toast = document.getElementById("toast");
         toast.textContent = message;
@@ -1029,10 +951,29 @@
         }, 3000);
       }
 
+      // אירועים
+      document.addEventListener("DOMContentLoaded", initApp);
+
+      // טעינת שפה וערכת נושא
+      const savedTheme = localStorage.getItem("checklistTheme") || "dark";
+      setTheme(savedTheme);
+
+      // טעינת תוכן הרשימה
+      updateTexts();
+      renderAllItems();
+      updateProgress();
+
+      // אירוע להוספת פריט חדש עם Enter
+      document.getElementById("newItem").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") addItem();
+      });
+
+      // פונקציה להפניה לדף אחר
       function exitApplication() {
         window.location.href = "index.html";
       }
 
+      // הצגת הדיאלוג הקיים מהקובץ CSS
       function showExitDialog() {
         const exitModal = document.getElementById("exit-modal");
         if (exitModal) {
@@ -1040,6 +981,7 @@
         }
       }
 
+      // הסתרת הדיאלוג
       function hideExitDialog() {
         const exitModal = document.getElementById("exit-modal");
         if (exitModal) {
@@ -1047,6 +989,7 @@
         }
       }
 
+      // אתחול מערכת היציאה מהאפליקציה
       function initExitSystem() {
         history.pushState(null, null, window.location.pathname);
 
@@ -1065,6 +1008,7 @@
         updateExitModalTexts();
       }
 
+      // עדכון טקסטים במודל היציאה לפי השפה הנוכחית
       function updateExitModalTexts() {
         const exitModalTitle = document.getElementById("exit-modal-title");
         const confirmExitBtn = document.getElementById("confirm-exit");
@@ -1080,22 +1024,25 @@
         }
       }
 
+      // עדכון פונקציית האתחול הראשונית
       function initApp() {
+        // טעינת שפה וערכת נושא
         const savedTheme = localStorage.getItem("checklistTheme") || "dark";
         setTheme(savedTheme);
 
+        // טעינת תוכן הרשימה
         updateTexts();
         renderAllItems();
         updateProgress();
 
+        // אירוע להוספת פריט חדש עם Enter
         document.getElementById("newItem").addEventListener("keypress", (e) => {
           if (e.key === "Enter") addItem();
         });
 
+        // אתחול מערכת היציאה
         initExitSystem();
       }
-
-      document.addEventListener("DOMContentLoaded", initApp);
     </script>
   </body>
 </html>
