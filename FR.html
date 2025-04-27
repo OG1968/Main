@@ -20,19 +20,24 @@
         --danger-color: #ff1900;
         --light-blue: #b8d4ff;
         --dark-gray: #7f8c8d;
+        --pastel-yellow: #fff0c0;
       }
 
       body {
         font-family: Arial, sans-serif;
         line-height: 1.6;
         margin: 0;
-        padding: 20px;
+        padding: 10px;
         background: var(--light-blue);
       }
 
       .container {
         max-width: 800px;
         margin: 0 auto;
+        background: var(--pastel-yellow);
+        border-radius: 20px;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.9);
+        padding: 2px;
       }
 
       h1 {
@@ -40,7 +45,7 @@
         color: var(--primary-color);
         text-align: center;
         margin-bottom: 10px;
-        margin-top: 0px;
+        margin-top: -10px;
       }
 
       h2 {
@@ -52,7 +57,7 @@
 
       h3 {
         padding-right: 20px;
-        font-size: 1rem;
+        font-size: 0.9rem;
         color: var(--primary-color);
         text-align: right;
         margin-bottom: 0px;
@@ -60,7 +65,9 @@
       }
 
       .drop-zone {
-        border: 3px dashed #ccc;
+        border: 3px dashed #aaa;
+        margin-left: 20px;
+        margin-right: 20px;
         padding: 30px;
         text-align: center;
         background: white;
@@ -76,6 +83,8 @@
       }
 
       .control-panel {
+        margin-left: 20px;
+        margin-right: 20px;
         background: white;
         padding: 20px;
         border-radius: 10px;
@@ -84,6 +93,8 @@
       }
 
       .options-panel {
+        margin-left: 20px;
+        margin-right: 20px;
         background: white;
         padding: 20px;
         border-radius: 10px;
@@ -92,11 +103,14 @@
       }
 
       .file-list {
+        margin-left: 20px;
+        margin-right: 20px;
         background: white;
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         overflow-x: auto;
+        margin-bottom: 10px;
       }
 
       .file-item {
@@ -671,30 +685,34 @@
       }
 
       // הגדרת מאזיני אירועים לגרירת קבצים
+      // הגדרת מאזיני אירועים לגרירת קבצים
       function setupDragListeners() {
         const items = document.querySelectorAll(".file-item");
 
+        // משתנים לטיפול באירועי מגע
+        let touchStartY = 0;
+        let touchDraggedItem = null;
+        let touchDraggedIndex = null;
+        let originalY = 0;
+
         items.forEach((item) => {
-          // מאזין לתחילת גרירה
+          // מאזיני אירועים למחשב (דסקטופ)
           item.addEventListener("dragstart", function (e) {
             draggedIndex = parseInt(this.getAttribute("data-index"));
             this.classList.add("dragging");
             e.dataTransfer.effectAllowed = "move";
           });
 
-          // מאזין לסיום גרירה
           item.addEventListener("dragend", function () {
             this.classList.remove("dragging");
             draggedIndex = null;
           });
 
-          // מאזין לגרירה מעל פריט
           item.addEventListener("dragover", function (e) {
             e.preventDefault();
             e.dataTransfer.dropEffect = "move";
           });
 
-          // מאזין לכניסת גרירה לאזור הפריט
           item.addEventListener("dragenter", function (e) {
             e.preventDefault();
             if (draggedIndex !== parseInt(this.getAttribute("data-index"))) {
@@ -702,12 +720,10 @@
             }
           });
 
-          // מאזין ליציאת גרירה מאזור הפריט
           item.addEventListener("dragleave", function () {
             this.classList.remove("drag-over");
           });
 
-          // מאזין להשמטת פריט
           item.addEventListener("drop", function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -723,6 +739,114 @@
 
               // עדכון הרשימה המוצגת
               updateFileList();
+            }
+          });
+
+          // מאזיני אירועי מגע למכשירים ניידים
+          item.addEventListener(
+            "touchstart",
+            function (e) {
+              const touch = e.touches[0];
+              touchStartY = touch.clientY;
+              touchDraggedItem = this;
+              touchDraggedIndex = parseInt(this.getAttribute("data-index"));
+              originalY = this.getBoundingClientRect().top;
+
+              // הוספת סגנון גרירה בתחילת המגע על הפריט
+              setTimeout(() => {
+                this.classList.add("dragging");
+              }, 100);
+
+              // מניעת גלילה במסך בזמן גרירה
+              e.preventDefault();
+            },
+            { passive: false }
+          );
+
+          item.addEventListener(
+            "touchmove",
+            function (e) {
+              if (!touchDraggedItem) return;
+
+              const touch = e.touches[0];
+              const currentY = touch.clientY;
+              const deltaY = currentY - touchStartY;
+
+              // הזזת הפריט עם האצבע
+              touchDraggedItem.style.transform = `translateY(${deltaY}px)`;
+              touchDraggedItem.style.zIndex = "1000";
+
+              // בדיקה אם עברנו מעל פריט אחר
+              const elementsAtPoint = document.elementsFromPoint(
+                touch.clientX,
+                touch.clientY
+              );
+              const fileItemAtPoint = elementsAtPoint.find(
+                (el) =>
+                  el.classList.contains("file-item") && el !== touchDraggedItem
+              );
+
+              // הסרת הסימון מכל הפריטים
+              items.forEach((i) => i.classList.remove("drag-over"));
+
+              // הוספת סימון לפריט שנמצא מתחת לאצבע
+              if (fileItemAtPoint) {
+                fileItemAtPoint.classList.add("drag-over");
+              }
+
+              e.preventDefault();
+            },
+            { passive: false }
+          );
+
+          item.addEventListener("touchend", function (e) {
+            if (!touchDraggedItem) return;
+
+            // החזרת הפריט למצב רגיל
+            touchDraggedItem.style.transform = "";
+            touchDraggedItem.style.zIndex = "";
+            touchDraggedItem.classList.remove("dragging");
+
+            // חיפוש הפריט שמסומן כיעד להשמטה
+            const targetItem = document.querySelector(".file-item.drag-over");
+            if (targetItem) {
+              targetItem.classList.remove("drag-over");
+              const dropIndex = parseInt(targetItem.getAttribute("data-index"));
+
+              if (
+                touchDraggedIndex !== null &&
+                touchDraggedIndex !== dropIndex
+              ) {
+                // העברת הפריט במערך
+                const itemToMove = files[touchDraggedIndex];
+                files.splice(touchDraggedIndex, 1);
+                files.splice(dropIndex, 0, itemToMove);
+
+                // עדכון הרשימה המוצגת
+                updateFileList();
+              }
+            }
+
+            // איפוס משתני המגע
+            touchDraggedItem = null;
+            touchDraggedIndex = null;
+            touchStartY = 0;
+          });
+
+          item.addEventListener("touchcancel", function () {
+            if (touchDraggedItem) {
+              // החזרת הפריט למצב רגיל
+              touchDraggedItem.style.transform = "";
+              touchDraggedItem.style.zIndex = "";
+              touchDraggedItem.classList.remove("dragging");
+
+              // הסרת הסימון מכל הפריטים
+              items.forEach((i) => i.classList.remove("drag-over"));
+
+              // איפוס משתני המגע
+              touchDraggedItem = null;
+              touchDraggedIndex = null;
+              touchStartY = 0;
             }
           });
         });
