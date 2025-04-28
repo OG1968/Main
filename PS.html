@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="photolabel.png" />
+    <link rel="icon" type="image/x-icon" href="images/photolabel.png" />
     <title>גלרית תיאור</title>
     <style>
       body {
@@ -15,7 +15,7 @@
         align-items: center;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         min-height: 100vh;
-        background-image: url("buckground.png");
+        background-image: url("images/buckground.png");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -427,7 +427,7 @@
         // מערך לאחסון תמונות ברירת המחדל (מספרים שיזינו את הפלייסהולדר)
         const defaultImageUrls = [];
         for (let i = 1; i <= DEFAULT_IMAGES_COUNT; i++) {
-          defaultImageUrls.push(`upload.png`);
+          defaultImageUrls.push(`images/upload.png`);
         }
 
         // טעינת רקע שמור מ-localStorage
@@ -459,7 +459,8 @@
             galleryContainer.innerHTML = "";
 
             // Clear background - תיקון: החזרת רקע ברירת מחדל עם הצלבת נתיב
-            document.body.style.backgroundImage = "url('buckground.png')";
+            document.body.style.backgroundImage =
+              "url('images/buckground.png')";
             localStorage.removeItem("galleryBackground");
 
             // Clear images from DB
@@ -537,7 +538,8 @@
           // Get gallery data
           const galleryName = galleryTitle.textContent;
           const currentBg =
-            localStorage.getItem("galleryBackground") || "buckground.png";
+            localStorage.getItem("galleryBackground") ||
+            "images/buckground.png";
           const currentTitleColor =
             localStorage.getItem("titleColor") || "#4e3aff";
 
@@ -556,7 +558,7 @@
             (card) => {
               return (
                 !card.hasAttribute("data-default") &&
-                !card.querySelector("img").src.includes("upload.png")
+                !card.querySelector("img").src.includes("images/upload.png")
               );
             }
           );

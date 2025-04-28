@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="recipe.png" type="image/png" />
-    <link rel="apple-touch-icon" href="recipe.png" />
+    <link rel="icon" href="images/recipe.png" type="image/png" />
+    <link rel="apple-touch-icon" href="images/recipe.png" />
     <title>מערכת ניהול מתכונים</title>
     <style>
       :root {
@@ -581,7 +581,8 @@
   </head>
   <body>
     <h1>
-      <img src="recipe.png" alt="לוגו" class="title-logo" />מערכת ניהול מתכונים
+      <img src="images/recipe.png" alt="לוגו" class="title-logo" />מערכת ניהול
+      מתכונים
     </h1>
     <div class="recipe-form">
       <div class="form-group">
@@ -1008,8 +1009,8 @@
             </div>
             ${
               recipe.imageData
-                ? `<img src="${recipe.imageData}" class="recipe-image" alt="${recipe.title}" onerror="this.src='default_image.png'">`
-                : '<img src="default_image.png" class="recipe-image" alt="תמונת ברירת מחדל">'
+                ? `<img src="${recipe.imageData}" class="recipe-image" alt="${recipe.title}" onerror="this.src='images/default_image.png'">`
+                : '<img src="images/default_image.png" class="recipe-image" alt="תמונת ברירת מחדל">'
             }
           `;
 
