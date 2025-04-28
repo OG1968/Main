@@ -134,18 +134,41 @@
       }
 
       button {
+        text-align: center;
         padding: 8px 16px;
-        background-color: var(--primary-color);
         border: none;
         border-radius: 5px;
         color: white;
         cursor: pointer;
         transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
+      #add-item-btn {
+        background-color: #4caf50;
+      }
+
+      .clear-completed-btn {
+        background-color: #2196f3;
+      }
+
+      .clear-all-btn {
+        background-color: #f44336;
+      }
+
+      .export-btn {
+        background-color: #ff9800;
+      }
+
+      .import-btn {
+        background-color: #9c27b0;
+      }
       button:hover {
         opacity: 0.9;
         transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       }
 
       .checklist {
