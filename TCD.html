@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <link rel="icon" href="checklist.png" type="image/png" />
+    <link rel="apple-touch-icon" href="checklist.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- הוספת ספריית SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <meta name="application-name" content="צקליסט למטייל" />
+    <title>צ'קליסט למטייל</title>
+    <style>
+      :root {
+        --primary-color: #4caf50;
+        --secondary-color: rgb(41, 41, 41);
+        --background-color: #a0d3fd;
+        --text-color: #ffffff;
+        --input-bg: #333;
+        --item-bg: #333;
+        --progress-bg: #333;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0 20px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: var(--secondary-color);
+        padding: 30px;
+        margin-top: 20px;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0, 36, 197, 0.9);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 0;
+        position: sticky;
+        top: 0;
+        background-color: var(--secondary-color);
+        z-index: 1000;
+        padding: 40px 0;
+      }
+
+      .theme-toggle,
+      .language-toggle {
+        position: absolute;
+        top: 10px;
+        padding: 5px;
+        border-radius: 35%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        background-color: var(--secondary-color);
+        border: none;
+        color: white;
+        z-index: 1001;
+      }
+
+      .theme-toggle {
+        left: 5px;
+      }
+
+      .language-toggle {
+        left: 45px;
+      }
+
+      h1 {
+        font-family: "Secular One", sans-serif;
+        color: #ffffff;
+        text-shadow: 0 0 5px #0004d4, 0 0 10px #0004d4, 0 0 20px #0004d4,
+          0 0 40px #0004d4, 0 0 80px #0004d4;
+        font-size: 28px;
+        font-weight: 400;
+        line-height: 0.5;
+        text-align: center;
+      }
+
+      h2 {
+        text-align: center;
+        color: rgb(255, 84, 84);
+        text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+      }
+
+      h3 {
+        font-size: 0.8rem;
+        margin: 0px;
+        text-align: center;
+        color: rgb(0, 68, 255);
+        position: absolute;
+      }
+
+      .neon-text {
+        font-size: 16px;
+        color: #fff;
+        text-shadow: 0 0 5px #0004d4, 0 0 10px #0004d4, 0 0 20px #0004d4,
+          0 0 40px #0004d4, 0 0 80px #0004d4;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        position: sticky;
+        top: 120px;
+        background-color: var(--secondary-color);
+        z-index: 1000;
+        padding: 2px 0;
+      }
+
+      input[type="text"] {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid var(--primary-color);
+        border-radius: 5px;
+        background: var(--input-bg);
+        color: var(--text-color);
+        font-size: 16px;
+        text-align: right;
+      }
+
+      [data-language="en"] input[type="text"] {
+        text-align: left;
+      }
+
+      [data-theme="light"] input[type="text"] {
+        color: #000000;
+      }
+
+      button {
+        text-align: center;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #add-item-btn {
+        background-color: #4caf50;
+      }
+
+      .clear-completed-btn {
+        background-color: #2196f3;
+      }
+
+      .clear-all-btn {
+        background-color: #f44336;
+      }
+
+      .export-btn {
+        background-color: #ff9800;
+      }
+
+      .import-btn {
+        background-color: #9c27b0;
+      }
+      button:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .checklist-item {
+        display: flex;
+        align-items: center;
+        padding: 5px;
+        background: var(--item-bg);
+        margin-bottom: 2px;
+        border-radius: 3px;
+        transition: all 0.3s ease;
+        animation: fadeIn 0.5s ease;
+        cursor: grab;
+        user-select: none;
+        touch-action: none; /* הוספתי לתמיכה בטאצ' */
+      }
+
+      .checklist-item.dragging {
+        opacity: 0.5;
+        cursor: grabbing;
+      }
+
+      [data-language="en"] .checklist-item {
+        direction: ltr;
+        justify-content: flex-start;
+      }
+
+      .checklist-item:hover {
+        transform: translateX(5px);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .checkbox {
+        margin-left: 10px;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+
+      .item-text {
+        flex: 1;
+        margin: 0 15px;
+        text-align: right;
+        cursor: pointer;
+      }
+
+      [data-language="en"] .item-text {
+        text-align: left;
+      }
+
+      .completed .item-text {
+        text-decoration: line-through;
+        opacity: 0.7;
+      }
+
+      .delete-btn {
+        background: #ff4444;
+        padding: 6px 8px;
+        width: auto;
+        min-width: 25px;
+        box-sizing: border-box;
+        margin-left: 10px;
+      }
+
+      .progress-container {
+        margin: 2px 0;
+        position: relative;
+      }
+
+      .progress-bar {
+        height: 25px;
+        background: var(--progress-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        direction: rtl;
+      }
+
+      [data-language="en"] .progress-bar {
+        direction: ltr;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 12px;
+        transition: width 0.3s ease;
+        position: relative;
+      }
+
+      .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        z-index: 2;
+      }
+
+      .edit-input {
+        flex: 1;
+        padding: 8px;
+        border: 2px solid var(--primary-color);
+        border-radius: 5px;
+        background: var(--input-bg);
+        color: var(--text-color);
+        font-size: 16px;
+        margin: 0 15px;
+        animation: expandInput 0.3s ease-out;
+        text-align: right;
+      }
+
+      [data-language="en"] .edit-input {
+        text-align: left;
+      }
+
+      .editing .item-text {
+        display: none;
+      }
+
+      [data-theme="light"] {
+        --background-color: #ffe4c1;
+        --secondary-color: #ffffff; /* זה המשתנה שמשפיע על ה-container */
+        --text-color: #1a1a1a;
+        --input-bg: #ffffff;
+        --item-bg: #d1d1d1;
+        --progress-bg: #ddd;
+      }
+
+      [data-theme="light"] .edit-input {
+        border-color: #cccccc;
+      }
+
+      @media (max-width: 600px) {
+        .input-group {
+          flex-direction: column;
+        }
+        button {
+          width: 100%;
+        }
+        h1 {
+          font-size: 22px;
+        }
+
+        .button-group button {
+          margin: 0;
+          justify-content: center;
+          padding: 8px 2px;
+          font-size: 14px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          min-height: 40px;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .button-group {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+
+        .button-group button {
+          width: 100%;
+          margin: 0;
+          padding: 8px 2px;
+          font-size: 14px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 40px;
+        }
+
+        .button-group button i {
+          margin-bottom: 2px; /* מרווח בין האייקון לטקסט */
+        }
+      }
+
+      @media print {
+        body,
+        .checklist-item,
+        .input-group,
+        .header {
+          background-color: white !important;
+          color: black !important;
+          border-color: black !important;
+        }
+
+        .checkbox,
+        .delete-btn {
+          background-color: white !important;
+          color: black !important;
+          border-color: black !important;
+        }
+
+        .completed .item-text {
+          color: black !important;
+        }
+
+        .theme-toggle,
+        .delete-btn,
+        .clear-all-btn,
+        .clear-completed-btn,
+        .input-group,
+        .progress-container,
+        .progress-bar,
+        .language-toggle,
+        .progress-fill,
+        .neon-text,
+        .progress-text {
+          display: none !important;
+        }
+
+        .checklist-item {
+          padding: 2px;
+          margin-bottom: 1px;
+          border-radius: 0;
+          cursor: default !important;
+        }
+
+        h1 {
+          color: black !important;
+          text-shadow: none !important;
+        }
+
+        .edit-input {
+          display: none;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .button-group {
+          flex-direction: column;
+          gap: 8px;
+        }
+        .button-group button {
+          width: 100%;
+          margin: 0;
+        }
+        .neon-text {
+          padding: 10px;
+          font-size: 14px;
+        }
+      }
+
+      #exit-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #exit-modal-content {
+        background-color: #5a8de6;
+        color: #000;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 80%;
+        border: 1px solid var(--primary-color);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      #exit-modal h3 {
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+
+      #exit-modal button {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #confirm-exit {
+        background-color: #ff4444;
+        color: #000;
+      }
+
+      #cancel-exit {
+        background-color: var(--primary-color);
+        color: #000;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <img
+            id="theme-icon"
+            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtpc29sYXRpb246aXNvbGF0ZTt9LmNscy0ye2ZpbGw6I2ZiMDt9LmNscy0ze2ZpbGw6bm9uZTtzdHJva2U6IzAwMDtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLXdpZHRoOjJweDt9LmNscy00e29wYWNpdHk6MC4yNTttaXgtYmxlbmQtbW9kZTptdWx0aXBseTt9LmNscy01LC5jbHMtNnttaXgtYmxlbmQtbW9kZTpvdmVybGF5O30uY2xzLTZ7ZmlsbDojZmZmO308L3N0eWxlPjwvZGVmcz48dGl0bGU+SWNvbiBDb2xvcjwvdGl0bGU+PGcgY2xhc3M9ImNscy0xIj48ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIj48ZyBpZD0iVmVjdG9yIj48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik02MC4yNyw0NC4yNUEyOS42NywyOS42NywwLDAsMSwzNy44OCw2MS4xMUEyOS4yMywyOS4yMywwLDAsMSwzMy4zNiw2MS40NUEyOS42NCwyOS42NCwwLDAsMSwyNi42NCwzYy43LS4xNSwxLjM4LS4yOSwyLjA5LS40QTI5LjY0LDI5LjY0LDAsMCwwLDU1LjY0LDQ0LjYyLDI5LjQyLDI5LjQyLDAsMCwwLDYwLjI3LDQ0LjI1WiIvPjwvZz48ZyBpZD0iTGluZSI+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNNjAuMjcsNDQuMjVBMjkuNjcsMjkuNjcsMCwwLDEsMzcuODgsNjEuMTFBMjkuMjMsMjkuMjMsMCwwLDEsMzMuMzYsNjEuNDVBMjkuNjQsMjkuNjQsMCwwLDEsMjYuNjQsM2MuNy0uMTUsMS4zOC0uMjksMi4wOS0uNEEyOS42NCwyOS42NCwwLDAsMCw1NS42NCw0NC42MkEyOS40MiwyOS40MiwwLDAsMCw2MC4yNyw0NC4yNVoiLz48L2c+PGcgaWQ9IlNoYWRvdyIgY2xhc3M9ImNscy00Ij48cGF0aCBkPSJNOC43MywzMS44MkEyOS42NCwyOS42NCwwLDAsMSwyOC4xLDRjLjE5LS40OS40LTEuNjMtMS40Ny0uNzEuMTEsMS4zOS4yNSwyLjA5LjRBMjkuNjQsMjkuNjQsMCwwLDAsMzMuMzYsNjEuNDVjLjg1LDAsMS43LDAsMi41My0uMTFBMjkuNjQsMjkuNjQsMCwwLDEsOC43MywzMS44MloiLz48L2c+PGcgaWQ9IkhpZ2hsaWdodCIgY2xhc3M9ImNscy01Ij48cGF0aCBjbGFzcz0iY2xzLTYiIGQ9Ik02MC4yNyw0NC4yNUEyOS40MiwyOS40MiwwLDAsMSw1NS42NCw0NC42MmwtLjU1LDBBMjkuNjIsMjkuNjIsMCwwLDEsMzIuODgsNjEuMTFjLS42Ni4xLTEuMzIuMTctMi4yMy44Mi4wNywxLjY0LjExLDIuNDcuMTFBMjkuNDcsMjkuNDcsMCwwLDAsNDguOTgsNTYuMzZBMjkuNzMsMjkuNzMsMCwwLDAsNjAuMjcsNDQuMjVaIi8+PHBhdGggY2xhc3M9ImNscy02IiBkPSJNMjYsMTVBMjkuNTgsMjkuNTgsMCwwLDEsMjguNzMsMi41NWMtLjcxLjExLTEuMzkuMjUtMi4wOS40QTMxLjE4LDMxLjE4LDAsMCwwLDIzLjEsNEEyOS42NCwyOS42NCwwLDAsMCw1MC42NCw0NC42MmMuODUsMCwxLjY4LDAsMi41MS0uMTJBMjkuNjMsMjkuNjMsMCwwLDEsMjYsMTVaIi8+PC9nPjwvZz48L2c+PC9zdmc+"
+            alt="Moon"
+            style="width: 20px; height: 20px"
+          />
+        </button>
+
+        <button
+          class="language-toggle"
+          onclick="toggleLanguage()"
+          style="
+            right: 5px;
+            left: auto;
+            display: flex;
+            align-items: center;
+            border: none;
+            background: none;
+            cursor: pointer;
+          "
+        >
+          <span
+            class="he-flag"
+            style="display: inline; width: 24px; height: 24px"
+          >
+            <img
+              src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWlsIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+DQogIDxkZWZzPg0KICAgIDxjbGlwUGF0aCBpZD0iaWwtYSI+DQogICAgICA8cGF0aCBmaWxsLW9wYWNpdHk9Ii43IiBkPSJNLTg3LjYgMEg1OTV2NTEySC04Ny42eiIvPg0KICAgIDwvY2xpcFBhdGg+DQogIDwvZGVmcz4NCiAgPGcgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXBhdGg9InVybCgjaWwtYSkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDgyLjEpc2NhbGUoLjk0KSI+DQogICAgPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTYxOS40IDUxMkgtMTEyVjBoNzMxLjR6Ii8+DQogICAgPHBhdGggZmlsbD0iIzAwMzhiOCIgZD0iTTYxOS40IDExNS4ySC0xMTJWNDhoNzMxLjR6bTAgMzUwLjVILTExMnYtNjcuMmg3MzEuNHptLTQ4My0yNzUgMTEwLjEgMTkxLjZMMzU5IDE5MS42eiIvPg0KICAgIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Im0yMjUuOCAzMTcuOCAyMC45IDM1LjUgMjEuNC0zNS4zeiIvPg0KICAgIDxwYXRoIGZpbGw9IiMwMDM4YjgiIGQ9Ik0xMzYgMzIwLjYgMjQ2LjIgMTI5bDExMi40IDE5MC44eiIvPg0KICAgIDxwYXRoIGZpbGw9IiNmZmYiIGQ9Im0yMjUuOCAxOTEuNiAyMC45LTM1LjUgMjEuNCAzNS40ek0xODIgMjcxLjFsLTIxLjcgMzYgNDEtLjEtMTkuMy0zNnptLTIxLjMtNjYuNSA0MS4yLjMtMTkuOCAzNi4zem0xNTEuMiA2NyAyMC45IDM1LjUtNDEuNy0uNXptMjAuNS02Ny00MS4yLjMgMTkuOCAzNi4zem0tMTE0LjMgMEwxODkuNyAyNTZsMjguOCA1MC4zIDUyLjggMS4yIDMyLTUxLjUtMjkuNi01MnoiLz4NCiAgPC9nPg0KPC9zdmc+"
+              width="30"
+              height="30"
+              alt="IL Flag"
+            />
+          </span>
+          <span
+            class="en-flag"
+            style="display: inline; width: 24px; height: 24px"
+          >
+            <img
+              src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJmbGFnLWljb25zLWdiIiB2aWV3Qm94PSIwIDAgNjQwIDQ4MCI+DQogIDxwYXRoIGZpbGw9IiMwMTIxNjkiIGQ9Ik0wIDBoNjQwdjQ4MEgweiIvPg0KICA8cGF0aCBmaWxsPSIjRkZGIiBkPSJtNzUgMCAyNDQgMTgxTDU2MiAwaDc4djYyTDQwMCAyNDFsMjQwIDE3OHY2MWgtODBMMzIwIDMwMSA4MSA0ODBIMHYtNjBsMjM5LTE3OEwwIDY0VjB6Ii8+DQogIDxwYXRoIGZpbGw9IiNDODEwMkUiIGQ9Im00MjQgMjgxIDIxNiAxNTl2NDBMMzY5IDI4MXptLTE4NCAyMCA2IDM1TDU0IDQ4MEgweiBNNjQwIDB2M0wzOTEgMTkxIDM5MyAxNDcgNTkwIDB6IE0wIDBsMjM5IDE3NmgtNjBMMCA0MnoiLz4NCiAgPHBhdGggZmlsbD0iI0ZGRiIgZD0iTTI0MSAwdjQ4MGgxNjBWMEgiLz4NCiAgPHBhdGggZmlsbD0iI0ZGRiIgZD0iTTAgMTYwdjE2MGg2NDBWMTYweiIvPg0KICA8cGF0aCBmaWxsPSIjQzgxMDJFIiBkPSJNMCAxOTN2OTZoNjQwdi05NnoiLz4NCiAgPHBhdGggZmlsbD0iI0M4MTAyRSIgZD0iTTI3MyAwdjQ4MGg5NlYweiIvPg0KPC9zdmc+"
+              width="30"
+              height="30"
+              alt="UK Flag"
+            />
+          </span>
+        </button>
+
+        <h1 id="title">צ'קליסט למטייל</h1>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+            <div class="progress-text" id="progress-text">0% הושלמו</div>
+          </div>
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="newItem"
+            placeholder="הוסף פריט חדש..."
+            maxlength="100"
+          />
+          <button onclick="addItem()" id="add-item-btn">הוסף פריט ➕</button>
+        </div>
+        <h3>
+          הערה: על מנת לשנות מיקום פריט ברשימה ניתן לגרור אותו ולשחרר במקום
+          הרצוי.
+        </h3>
+      </div>
+      <ul class="checklist" id="checklist"></ul>
+      <div
+        class="button-group"
+        style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px"
+      >
+        <button
+          class="clear-completed-btn"
+          onclick="clearCompleted()"
+          id="clear-completed-btn"
+        >
+          <i class="fas fa-check-circle"></i> נקה שהושלמו
+        </button>
+        <button class="clear-all-btn" onclick="clearAll()" id="clear-all-btn">
+          <i class="fas fa-trash-alt"></i> מחק הכל
+        </button>
+        <button class="export-btn" onclick="exportToJSON()" id="export-btn">
+          <i class="fas fa-file-export"></i> ייצא ל-JSON
+        </button>
+        <button
+          class="import-btn"
+          onclick="document.getElementById('import-file').click()"
+          id="import-btn"
+        >
+          <i class="fas fa-file-import"></i> ייבא מ-JSON
+        </button>
+        <input
+          type="file"
+          id="import-file"
+          accept=".json"
+          style="display: none"
+          onchange="importFromJSON(event)"
+        />
+      </div>
+      <div class="neon-text">כל הזכויות שמורות G©.</div>
+    </div>
+
+    <div id="exit-modal">
+      <div id="exit-modal-content">
+        <h3 id="exit-modal-title">האם לצאת?</h3>
+        <button id="confirm-exit">יציאה</button>
+        <button id="cancel-exit">ביטול</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+      let items = JSON.parse(localStorage.getItem("checklistItems")) || [];
+      let draggedItem = null;
+      let draggedIndex = -1;
+
+      const languages = {
+        he: {
+          title: "צ'קליסט למטייל 📋",
+          addItemBtn: "הוסף פריט ➕",
+          clearCompletedBtn: "נקה שהושלמו ✔️",
+          clearAllBtn: "מחק הכל 🗑️",
+          progressText: "הושלמו",
+          deleteBtn: "מחק",
+          confirmDelete: "האם אתה בטוח שברצונך למחוק את כל הפריטים?",
+          exportBtn: "ייצא רשימה 📥",
+          importBtn: "ייבא רשימה 📤",
+          exportSuccess: "הרשימה יוצאה בהצלחה!",
+          importSuccess: "הרשימה יובאה בהצלחה!",
+          importError: "שגיאה בייבוא הקובץ. אנא ודא שזה קובץ JSON תקף.",
+        },
+        en: {
+          title: "Traveler Checklist 📋",
+          addItemBtn: "Add Item ➕",
+          clearCompletedBtn: "Clear Completed ✔️",
+          clearAllBtn: "Delete All 🗑️",
+          progressText: "Completed",
+          deleteBtn: "Delete",
+          confirmDelete: "Are you sure you want to delete all items?",
+          exportBtn: "Export File 📥",
+          importBtn: "Import File 📤",
+          exportSuccess: "Checklist exported successfully!",
+          importSuccess: "Checklist imported successfully!",
+          importError:
+            "Error importing file. Please make sure it's a valid JSON file.",
+        },
+      };
+
+      let currentLanguage = localStorage.getItem("checklistLanguage") || "he";
+      document.body.setAttribute("data-language", currentLanguage);
+
+      document.querySelector(".he-flag").style.display =
+        currentLanguage === "he" ? "inline" : "none";
+      document.querySelector(".en-flag").style.display =
+        currentLanguage === "en" ? "inline" : "none";
+
+      updateTexts();
+      updateProgress();
+
+      function saveItems() {
+        localStorage.setItem("checklistItems", JSON.stringify(items));
+        updateProgress();
+      }
+
+      function addItem() {
+        const input = document.getElementById("newItem");
+        const text = input.value.trim();
+
+        if (text) {
+          const newItem = {
+            id: Date.now(),
+            text: text,
+            completed: false,
+          };
+
+          items.push(newItem);
+          renderItem(newItem);
+          input.value = "";
+          saveItems();
+
+          // אתחול מחדש של Sortable לאחר הוספת פריט חדש
+          initSortable();
+        }
+      }
+
+      function toggleComplete(id) {
+        items = items.map((item) =>
+          item.id === id ? { ...item, completed: !item.completed } : item
+        );
+        saveItems();
+        document.getElementById(`item-${id}`).classList.toggle("completed");
+      }
+
+      function deleteItem(id) {
+        items = items.filter((item) => item.id !== id);
+        document.getElementById(`item-${id}`).style.transform =
+          "translateX(100%)";
+        setTimeout(() => {
+          document.getElementById(`item-${id}`).remove();
+          saveItems();
+        }, 300);
+      }
+
+      function clearCompleted() {
+        items = items.filter((item) => !item.completed);
+        renderAllItems();
+        saveItems();
+      }
+
+      function clearAll() {
+        if (confirm(languages[currentLanguage].confirmDelete)) {
+          items = [];
+          document.getElementById("checklist").innerHTML = "";
+          saveItems();
+        }
+      }
+
+      function editItem(id) {
+        const li = document.getElementById(`item-${id}`);
+        const textSpan = li.querySelector(".item-text");
+        const editInput = li.querySelector(".edit-input");
+        const item = items.find((item) => item.id === id);
+
+        if (!item) return;
+
+        li.classList.add("editing");
+        editInput.value = item.text;
+        textSpan.style.display = "none";
+        editInput.style.display = "block";
+        editInput.focus();
+
+        function saveEdit() {
+          const newText = editInput.value.trim();
+          if (newText) {
+            item.text = newText;
+            textSpan.textContent = newText;
+            saveItems();
+          }
+          finishEdit();
+        }
+
+        function handleKeyDown(e) {
+          if (e.key === "Enter") {
+            saveEdit();
+          } else if (e.key === "Escape") {
+            finishEdit();
+          }
+        }
+
+        function finishEdit() {
+          li.classList.remove("editing");
+          textSpan.style.display = "block";
+          editInput.style.display = "none";
+          editInput.removeEventListener("blur", saveEdit);
+          editInput.removeEventListener("keydown", handleKeyDown);
+        }
+
+        editInput.addEventListener("blur", saveEdit);
+        editInput.addEventListener("keydown", handleKeyDown);
+      }
+
+      function renderItem(item) {
+        const li = document.createElement("li");
+        li.className = `checklist-item ${item.completed ? "completed" : ""}`;
+        li.id = `item-${item.id}`;
+        li.draggable = true;
+
+        li.innerHTML = `
+            <input type="checkbox" class="checkbox" ${
+              item.completed ? "checked" : ""
+            } onchange="toggleComplete(${item.id})">
+            <span class="item-text" ondblclick="editItem(${item.id})">${
+          item.text
+        }</span>
+            <input type="text" class="edit-input" style="display: none;" />
+            <button class="delete-btn" onclick="deleteItem(${item.id})">${
+          languages[currentLanguage].deleteBtn
+        }</button>
+          `;
+
+        document.getElementById("checklist").appendChild(li);
+      }
+
+      function renderAllItems() {
+        const checklist = document.getElementById("checklist");
+        checklist.innerHTML = "";
+        items.forEach((item) => renderItem(item));
+        initSortable(); // אתחול מחדש של Sortable לאחר רינדור מחדש
+      }
+
+      function updateProgress() {
+        const completed = items.filter((item) => item.completed).length;
+        const total = items.length;
+        const progress = total > 0 ? (completed / total) * 100 : 0;
+        const progressFill = document.querySelector(".progress-fill");
+        const progressText = document.querySelector(".progress-text");
+
+        progressText.textContent = `${Math.round(progress)}% ${
+          languages[currentLanguage].progressText
+        }`;
+
+        const luminance = progress > 50 ? 255 : 0;
+        progressText.style.textShadow = `1px 1px 2px rgba(${luminance},${luminance},${luminance},0.5)`;
+
+        if (currentLanguage === "he") {
+          progressFill.style.right = "0";
+          progressFill.style.left = "auto";
+          progressFill.style.width = `${progress}%`;
+        } else {
+          progressFill.style.left = "0";
+          progressFill.style.right = "auto";
+          progressFill.style.width = `${progress}%`;
+        }
+      }
+
+      // פונקציה חדשה לאתחול SortableJS
+      function initSortable() {
+        const checklist = document.getElementById("checklist");
+
+        // הסר Sortable קיים אם קיים
+        if (checklist.sortable) {
+          checklist.sortable.destroy();
+        }
+
+        // אתחל Sortable חדש
+        new Sortable(checklist, {
+          animation: 150,
+          ghostClass: "dragging",
+          onEnd: function (evt) {
+            // עדכן את המערך items לפי הסדר החדש
+            const newItems = [];
+            const listItems = checklist.children;
+
+            for (let i = 0; i < listItems.length; i++) {
+              const itemId = parseInt(listItems[i].id.replace("item-", ""));
+              const item = items.find((item) => item.id === itemId);
+              if (item) {
+                newItems.push(item);
+              }
+            }
+
+            items = newItems;
+            saveItems();
+          },
+        });
+      }
+
+      function setLanguage(lang) {
+        currentLanguage = lang;
+        localStorage.setItem("checklistLanguage", lang);
+        document.body.setAttribute("data-language", lang);
+        updateTexts();
+        updateProgress();
+        updateExitModalTexts();
+
+        document.querySelector(".he-flag").style.display =
+          lang === "he" ? "inline" : "none";
+        document.querySelector(".en-flag").style.display =
+          lang === "en" ? "inline" : "none";
+      }
+
+      function toggleLanguage() {
+        setLanguage(currentLanguage === "he" ? "en" : "he");
+      }
+
+      function updateTexts() {
+        document.getElementById("title").textContent =
+          languages[currentLanguage].title;
+        document.getElementById("newItem").placeholder =
+          currentLanguage === "he" ? "הוסף פריט חדש..." : "Add new item...";
+        document.getElementById("add-item-btn").textContent =
+          languages[currentLanguage].addItemBtn;
+        document.getElementById("clear-completed-btn").textContent =
+          languages[currentLanguage].clearCompletedBtn;
+        document.getElementById("clear-all-btn").textContent =
+          languages[currentLanguage].clearAllBtn;
+        document.getElementById("export-btn").textContent =
+          languages[currentLanguage].exportBtn;
+        document.getElementById("import-btn").textContent =
+          languages[currentLanguage].importBtn;
+
+        updateProgress();
+
+        document.querySelectorAll(".delete-btn").forEach((btn) => {
+          btn.textContent = languages[currentLanguage].deleteBtn;
+        });
+      }
+
+      function setTheme(theme) {
+        document.body.setAttribute("data-theme", theme);
+        localStorage.setItem("checklistTheme", theme);
+        updateThemeButton();
+      }
+
+      function toggleTheme() {
+        const currentTheme = document.body.getAttribute("data-theme") || "dark";
+        setTheme(currentTheme === "dark" ? "light" : "dark");
+      }
+
+      function updateThemeButton() {
+        const btn = document.querySelector(".theme-toggle");
+        const currentTheme = document.body.getAttribute("data-theme") || "dark";
+        const themeIcon = document.getElementById("theme-icon");
+
+        if (currentTheme === "dark") {
+          themeIcon.src =
+            "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtpc29sYXRpb246aXNvbGF0ZTt9LmNscy0ye2ZpbGw6I2ZiMDt9LmNscy0ze2ZpbGw6bm9uZTtzdHJva2U6IzAwMDtzdHJva2UtbGluZWNhcDpyb3VuZDtzdHJva2UtbGluZWpvaW46cm91bmQ7c3Ryb2tlLXdpZHRoOjJweDt9LmNscy00e29wYWNpdHk6MC4yNTttaXgtYmxlbmQtbW9kZTptdWx0aXBseTt9LmNscy01LC5jbHMtNnttaXgtYmxlbmQtbW9kZTpvdmVybGF5O30uY2xzLTZ7ZmlsbDojZmZmO308L3N0eWxlPjwvZGVmcz48dGl0bGU+SWNvbiBDb2xvcjwvdGl0bGU+PGcgY2xhc3M9ImNscy0xIj48ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIj48ZyBpZD0iVmVjdG9yIj48cGF0aCBjbGFzcz0iY2xzLTIiIGQ9Ik02MC4yNyw0NC4yNUEyOS42NywyOS42NywwLDAsMSwzNy44OCw2MS4xMUEyOS4yMywyOS4yMywwLDAsMSwzMy4zNiw2MS40NUEyOS42NCwyOS42NCwwLDAsMSwyNi42NCwzYy43LS4xNSwxLjM4LS4yOSwyLjA5LS40QTI5LjY0LDI5LjY0LDAsMCwwLDU1LjY0LDQ0LjYyLDI5LjQyLDI5LjQyLDAsMCwwLDYwLjI3LDQ0LjI1WiIvPjwvZz48ZyBpZD0iTGluZSI+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJNNjAuMjcsNDQuMjVBMjkuNjcsMjkuNjcsMCwwLDEsMzcuODgsNjEuMTFBMjkuMjMsMjkuMjMsMCwwLDEsMzMuMzYsNjEuNDVBMjkuNjQsMjkuNjQsMCwwLDEsMjYuNjQsM2MuNy0uMTUsMS4zOC0uMjksMi4wOS0uNEEyOS42NCwyOS42NCwwLDAsMCw1NS42NCw0NC42MkEyOS40MiwyOS40MiwwLDAsMCw2MC4yNyw0NC4yNVoiLz48L2c+PGcgaWQ9IlNoYWRvdyIgY2xhc3M9ImNscy00Ij48cGF0aCBkPSJNOC43MywzMS44MkEyOS42NCwyOS42NCwwLDAsMSwyOC4xLDRjLjE5LS40OS40LTEuNjMtMS40Ny0uNzEuMTEsMS4zOS4yNSwyLjA5LjRBMjkuNjQsMjkuNjQsMCwwLDAsMzMuMzYsNjEuNDVjLjg1LDAsMS43LDAsMi41My0uMTFBMjkuNjQsMjkuNjQsMCwwLDEsOC43MywzMS44MloiLz48L2c+PGcgaWQ9IkhpZ2hsaWdodCIgY2xhc3M9ImNscy01Ij48cGF0aCBjbGFzcz0iY2xzLTYiIGQ9Ik02MC4yNyw0NC4yNUEyOS40MiwyOS40MiwwLDAsMSw1NS42NCw0NC42MmwtLjU1LDBBMjkuNjIsMjkuNjIsMCwwLDEsMzIuODgsNjEuMTFjLS42Ni4xLTEuMzIuMTctMi4yMy44Mi4wNywxLjY0LjExLDIuNDcuMTFBMjkuNDcsMjkuNDcsMCwwLDAsNDguOTgsNTYuMzZBMjkuNzMsMjkuNzMsMCwwLDAsNjAuMjcsNDQuMjVaIi8+PHBhdGggY2xhc3M9ImNscy02IiBkPSJNMjYsMTVBMjkuNTgsMjkuNTgsMCwwLDEsMjguNzMsMi41NWMtLjcxLjExLTEuMzkuMjUtMi4wOS40QTMxLjE4LDMxLjE4LDAsMCwwLDIzLjEsNEEyOS42NCwyOS42NCwwLDAsMCw1MC42NCw0NC42MmMuODUsMCwxLjY4LDAsMi41MS0uMTJBMjkuNjMsMjkuNjMsMCwwLDEsMjYsMTVaIi8+PC9nPjwvZz48L2c+PC9zdmc+";
+        } else {
+          themeIcon.src =
+            "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBzdHlsZT0iZmlsbDojRkY4QTAwOyIgZD0iTTUwMS41NTQsMjUwLjA2bC01Mi4yNzItMjkuODdsNTUuMzM1LTU1LjMzNmM0LjI0Mi00LjI0MiwxLjM1Ny0xMS41MDMtNC42NC0xMS42NzZsLTgzLjY1NS0yLjQwOGwxNy41MTEtNjQuMjA2YzEuMzkzLTUuMTA3LTMuMjkzLTkuNzkyLTguMzk5LTguMzk5bC01OC4wODMsMTUuODQxVjE1Ljc1YzAtNi4wMDEtNy4xNzQtOS4wOTMtMTEuNTM3LTQuOTc1bC02MC44NTYsNTcuNDUxTDI2MS45NCwxMC40NDVjLTIuNjI2LTQuNTk2LTkuMjUzLTQuNTk2LTExLjg4LDBsLTI5Ljg3LDUyLjI3MkwxNjQuODU0LDcuMzgxYy00LjI0Mi00LjI0Mi0xMS41MDMtMS4zNTctMTEuNjc2LDQuNjRsLTIuNDA4LDgzLjY1NWwtNjQuMjA0LTE3LjUxYy01LjEwNy0xLjM5My05Ljc5MiwzLjI5My04LjM5OSw4LjM5OWwxNS44NDEsNTguMDgzSDE1Ljc1MWMtNi4wMDEsMC05LjA5Myw3LjE3NC00Ljk3NSwxMS41MzdsNTcuNDUxLDYwLjg1NkwxMC40NDUsMjUwLjA2Yy00LjU5NiwyLjYyNi00LjU5Niw5LjI1MywwLDExLjg4bDUyLjI3MiwyOS44N0w3LjM4MSwzNDcuMTQ0Yy00LjI0Miw0LjI0Mi0xLjM1NywxMS41MDMsNC42NCwxMS42NzZsODMuNjU1LDIuNDA4bC0xNy41MTEsNjQuMjA2Yy0xLjM5Myw1LjEwNywzLjI5Myw5Ljc5Miw4LjM5OSw4LjRsNTguMDgzLTE1Ljg0MXY3OC4yNTdjMCw2LjAwMSw3LjE3NCw5LjA5MywxMS41MzcsNC45NzVsNjAuODU2LTUzLjQ1MWwzMy4wMTgsNTcuNzgyYzIuNjI2LDQuNTk2LDkuMjUzLDQuNTk2LDExLjg4LDBsMjkuODctNTIuMjcybDU1LjMzNiw1NS4zMzVjNC4yNDIsNC4yNDIsMTEuNTAzLDEuMzU3LDExLjY3Ni00LjY0bDIuNDA4LTgzLjY1NWw2NC4yMDYsMTcuNTExYzUuMTA3LDEuMzkzLDkuNzkyLTMuMjkzLDguMzk5LTguMzk5bC0xNS44NDEtNTguMDgzaDc4LjI1N2M2LjAwMSwwLDkuMDkzLTcuMTc0LDQuOTc1LTExLjUzN2wtNTcuNDUxLTYwLjg1Nmw1Ny43ODItMzMuMDE4QzUwNi4xNSwyNTkuMzEyLDUwNi4xNSwyNTIuNjg2LDUwMS41NTQsMjUwLjA2eiIvPjwvc3ZnPg==";
+        }
+      }
+
+      function exportToJSON() {
+        const dataStr = JSON.stringify(items, null, 2);
+        const dataUri =
+          "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+        const defaultName = `traveler-checklist-${new Date()
+          .toISOString()
+          .slice(0, 10)}.json`;
+
+        const fileName = prompt(
+          currentLanguage === "he"
+            ? "הכנס שם לקובץ הייצוא:"
+            : "Enter export file name:",
+          defaultName
+        );
+
+        if (!fileName) return;
+
+        const finalName = fileName.endsWith(".json")
+          ? fileName
+          : `${fileName}.json`;
+
+        const linkElement = document.createElement("a");
+        linkElement.setAttribute("href", dataUri);
+        linkElement.setAttribute("download", finalName);
+        linkElement.click();
+
+        showToast(languages[currentLanguage].exportSuccess);
+      }
+
+      function importFromJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            const importedItems = JSON.parse(e.target.result);
+            if (Array.isArray(importedItems)) {
+              items = importedItems;
+              renderAllItems();
+              saveItems();
+              showToast(languages[currentLanguage].importSuccess);
+            } else {
+              throw new Error("Invalid format");
+            }
+          } catch (error) {
+            showToast(languages[currentLanguage].importError);
+            console.error("Error parsing JSON:", error);
+          }
+        };
+        reader.onerror = function () {
+          showToast(languages[currentLanguage].importError);
+        };
+        reader.readAsText(file);
+
+        event.target.value = "";
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
+      function exitApplication() {
+        window.location.href = "index.html";
+      }
+
+      function showExitDialog() {
+        const exitModal = document.getElementById("exit-modal");
+        if (exitModal) {
+          exitModal.style.display = "flex";
+        }
+      }
+
+      function hideExitDialog() {
+        const exitModal = document.getElementById("exit-modal");
+        if (exitModal) {
+          exitModal.style.display = "none";
+        }
+      }
+
+      function initExitSystem() {
+        history.pushState(null, null, window.location.pathname);
+
+        window.addEventListener("popstate", function (event) {
+          showExitDialog();
+          history.pushState(null, null, window.location.pathname);
+        });
+
+        document
+          .getElementById("confirm-exit")
+          ?.addEventListener("click", exitApplication);
+        document
+          .getElementById("cancel-exit")
+          ?.addEventListener("click", hideExitDialog);
+
+        updateExitModalTexts();
+      }
+
+      function updateExitModalTexts() {
+        const exitModalTitle = document.getElementById("exit-modal-title");
+        const confirmExitBtn = document.getElementById("confirm-exit");
+        const cancelExitBtn = document.getElementById("cancel-exit");
+
+        if (exitModalTitle && confirmExitBtn && cancelExitBtn) {
+          exitModalTitle.textContent =
+            currentLanguage === "he" ? "האם לצאת?" : "Exit?";
+          confirmExitBtn.textContent =
+            currentLanguage === "he" ? "יציאה" : "Exit";
+          cancelExitBtn.textContent =
+            currentLanguage === "he" ? "ביטול" : "Cancel";
+        }
+      }
+
+      function initApp() {
+        const savedTheme = localStorage.getItem("checklistTheme") || "dark";
+        setTheme(savedTheme);
+
+        updateTexts();
+        renderAllItems();
+        updateProgress();
+
+        // אתחול Sortable
+        initSortable();
+
+        document.getElementById("newItem").addEventListener("keypress", (e) => {
+          if (e.key === "Enter") addItem();
+        });
+
+        initExitSystem();
+      }
+
+      document.addEventListener("DOMContentLoaded", initApp);
+    </script>
+  </body>
+</html>
