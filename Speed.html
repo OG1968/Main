@@ -8,6 +8,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
     <style>
       :root {
         --primary-color: #4285f4;
@@ -341,6 +345,7 @@
       #map {
         height: 100%;
         width: 100%;
+        background-color: #e0e0e0;
       }
 
       .hidden {
@@ -385,6 +390,30 @@
         background-color: var(--primary-color);
         color: white;
       }
+
+      .start-marker {
+        background-color: green;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+      }
+
+      .end-marker {
+        background-color: red;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -405,15 +434,13 @@
         </button>
 
         <div class="scale-selector">
-          <button class="scale-btn" data-scale="walking">
+          <button class="scale-btn active" data-scale="walking">
             הליכה/ריצה (0-12 קמ"ש)
           </button>
           <button class="scale-btn" data-scale="bike">
             אופניים (0-40 קמ"ש)
           </button>
-          <button class="scale-btn active" data-scale="car">
-            רכב (0-180 קמ"ש)
-          </button>
+          <button class="scale-btn" data-scale="car">רכב (0-180 קמ"ש)</button>
         </div>
       </div>
 
@@ -424,10 +451,8 @@
       </div>
 
       <div class="display-selector">
-        <button class="display-btn active" data-display="digital">
-          דיגיטלי
-        </button>
-        <button class="display-btn" data-display="analog">אנלוגי</button>
+        <button class="display-btn" data-display="digital">דיגיטלי</button>
+        <button class="display-btn active" data-display="analog">אנלוגי</button>
       </div>
 
       <div class="dashboard">
@@ -436,10 +461,10 @@
             <i class="fas fa-tachometer-alt"></i> מד מהירות
           </h2>
           <div class="speed-display">
-            <div id="digitalDisplay" class="digital-display">
+            <div id="digitalDisplay" class="digital-display hidden">
               0 <span class="unit">קמ"ש</span>
             </div>
-            <div id="analogDisplay" class="hidden">
+            <div id="analogDisplay">
               <div class="speedometer">
                 <div class="speedometer-scale"></div>
                 <div class="speedometer-marks"></div>
@@ -485,6 +510,7 @@
       </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
       // מצב תצוגה
       const darkModeToggle = document.getElementById("darkModeToggle");
@@ -501,7 +527,7 @@
 
       // מצבי סקאלה
       const scaleButtons = document.querySelectorAll(".scale-btn");
-      let currentScale = "car";
+      let currentScale = "walking";
 
       scaleButtons.forEach((button) => {
         button.addEventListener("click", () => {
@@ -509,6 +535,7 @@
           button.classList.add("active");
           currentScale = button.dataset.scale;
           updateSpeedometerScale();
+          updateSpeedDisplay();
         });
       });
 
@@ -516,7 +543,7 @@
       const displayButtons = document.querySelectorAll(".display-btn");
       const digitalDisplay = document.getElementById("digitalDisplay");
       const analogDisplay = document.getElementById("analogDisplay");
-      let currentDisplay = "digital";
+      let currentDisplay = "analog";
 
       displayButtons.forEach((button) => {
         button.addEventListener("click", () => {
@@ -594,6 +621,11 @@
 
           document.getElementById("locationInfo").innerHTML =
             "<p>מאתר את המיקום שלך...</p>";
+
+          // אתחל מפה אם עדיין לא הותחלה
+          if (!window.map) {
+            initMap();
+          }
         } else {
           alert("GPS לא נתמך בדפדפן זה.");
         }
@@ -619,7 +651,9 @@
         }
 
         // עדכן מפה עם מסלול
-        updateMapWithRoute();
+        if (positions.length > 0) {
+          updateMapWithRoute();
+        }
 
         document.getElementById("locationInfo").innerHTML =
           '<p>מעקב הופסק. לחץ על "התחל פעילות" כדי להתחיל מעקב חדש.</p>';
@@ -729,8 +763,8 @@
         switch (currentScale) {
           case "walking":
             maxSpeed = 12;
-            majorSteps = 6;
-            minorSteps = 2;
+            majorSteps = 2;
+            minorSteps = 1;
             break;
           case "bike":
             maxSpeed = 40;
@@ -740,8 +774,8 @@
           case "car":
           default:
             maxSpeed = 180;
-            majorSteps = 9;
-            minorSteps = 20;
+            majorSteps = 20;
+            minorSteps = 10;
             break;
         }
 
@@ -804,7 +838,7 @@
 
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        const seconds = Math.floor(diff % (1000 * 60)) / 1000;
 
         document.getElementById("duration").textContent = `${hours
           .toString()
@@ -817,12 +851,28 @@
         if (!window.map) {
           initMap(lat, lng);
         } else {
-          window.map.setView([lat, lng]);
+          window.map.setView([lat, lng], 15);
 
           if (!window.currentMarker) {
             window.currentMarker = L.marker([lat, lng]).addTo(window.map);
           } else {
             window.currentMarker.setLatLng([lat, lng]);
+          }
+
+          // אם יש יותר ממיקום אחד, צייר קו ביניהם
+          if (positions.length > 1) {
+            const latLngs = positions.map((pos) => [pos.lat, pos.lng]);
+
+            if (window.route) {
+              window.map.removeLayer(window.route);
+            }
+
+            window.route = L.polyline(latLngs, {
+              color: "#4285f4",
+              weight: 4,
+              opacity: 0.7,
+              smoothFactor: 1,
+            }).addTo(window.map);
           }
         }
       }
@@ -845,51 +895,46 @@
         }).addTo(window.map);
 
         // הוסף סמן להתחלה ולסיום
-        if (!window.startMarker) {
-          window.startMarker = L.marker(latLngs[0], {
-            icon: L.divIcon({
-              className: "start-marker",
-              html: '<i class="fas fa-play" style="color: green; font-size: 16px;"></i>',
-              iconSize: [20, 20],
-            }),
-          }).addTo(window.map);
+        if (window.startMarker) {
+          window.map.removeLayer(window.startMarker);
+        }
+        if (window.endMarker) {
+          window.map.removeLayer(window.endMarker);
         }
 
-        if (!window.endMarker) {
-          window.endMarker = L.marker(latLngs[latLngs.length - 1], {
-            icon: L.divIcon({
-              className: "end-marker",
-              html: '<i class="fas fa-stop" style="color: red; font-size: 16px;"></i>',
-              iconSize: [20, 20],
-            }),
-          }).addTo(window.map);
-        }
+        window.startMarker = L.marker(latLngs[0], {
+          icon: L.divIcon({
+            className: "start-marker",
+            html: '<i class="fas fa-play"></i>',
+            iconSize: [20, 20],
+          }),
+        })
+          .addTo(window.map)
+          .bindTooltip("נקודת התחלה", { permanent: true, direction: "top" });
+
+        window.endMarker = L.marker(latLngs[latLngs.length - 1], {
+          icon: L.divIcon({
+            className: "end-marker",
+            html: '<i class="fas fa-stop"></i>',
+            iconSize: [20, 20],
+          }),
+        })
+          .addTo(window.map)
+          .bindTooltip("נקודת סיום", { permanent: true, direction: "top" });
 
         // התאם את התצוגה לכל המסלול
         window.map.fitBounds(window.route.getBounds());
       }
 
-      function initMap(lat, lng) {
-        // טען את ספריית Leaflet באופן דינמי
-        const script = document.createElement("script");
-        script.src = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.js";
-        script.onload = () => {
-          window.map = L.map("map").setView([lat, lng], 15);
+      function initMap(lat = 32.0853, lng = 34.7818) {
+        window.map = L.map("map").setView([lat, lng], 15);
 
-          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution:
-              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          }).addTo(window.map);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(window.map);
 
-          window.currentMarker = L.marker([lat, lng]).addTo(window.map);
-        };
-        document.head.appendChild(script);
-
-        // הוסף CSS של Leaflet
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css";
-        document.head.appendChild(link);
+        window.currentMarker = L.marker([lat, lng]).addTo(window.map);
       }
 
       function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -928,8 +973,9 @@
         ).innerHTML = `<p style="color: red;">שגיאה: ${message}</p>`;
       }
 
-      // אתחל את הספידומטר
+      // אתחל את הספידומטר והמפה
       updateSpeedometerScale();
+      initMap();
     </script>
   </body>
 </html>
