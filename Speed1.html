@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ספידומטר GPS</title>
+    <style>
+      :root {
+        --primary-color: #3498db;
+        --secondary-color: #2ecc71;
+        --danger-color: #e74c3c;
+        --text-color: #333;
+        --bg-color: #fff;
+        --card-bg: #f9f9f9;
+        --border-color: #ddd;
+      }
+
+      .dark-theme {
+        --primary-color: #2980b9;
+        --secondary-color: #27ae60;
+        --danger-color: #c0392b;
+        --text-color: #f5f5f5;
+        --bg-color: #121212;
+        --card-bg: #1e1e1e;
+        --border-color: #333;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        padding: 20px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 2rem;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .control-group {
+        background-color: var(--card-bg);
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .control-group h3 {
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1rem;
+        margin: 5px;
+        transition: transform 0.1s, box-shadow 0.2s;
+      }
+
+      .btn:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-color);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+      }
+
+      .btn-danger {
+        background-color: var(--danger-color);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background-color: var(--danger-color);
+        box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+      }
+
+      .btn-secondary {
+        background-color: var(--secondary-color);
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--secondary-color);
+        box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+      }
+
+      .btn-toggle {
+        background-color: #7f8c8d;
+        color: white;
+      }
+
+      .btn-toggle.active {
+        background-color: var(--primary-color);
+      }
+
+      .speedometer-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .speedometer {
+        width: 300px;
+        height: 300px;
+        margin: 20px auto;
+        position: relative;
+        border-radius: 50%;
+        background-color: var(--card-bg);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .gauge {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .dial {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(
+          var(--primary-color) 0%,
+          var(--secondary-color) 50%,
+          var(--danger-color) 85%,
+          var(--danger-color) 100%
+        );
+        clip-path: polygon(50% 50%, 100% 0, 100% 50%, 100% 100%, 0 100%, 0 0);
+        position: absolute;
+        transition: clip-path 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .mask {
+        position: absolute;
+        width: 80%;
+        height: 80%;
+        background-color: var(--card-bg);
+        border-radius: 50%;
+        top: 10%;
+        left: 10%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .speed-value {
+        font-size: 3rem;
+        font-weight: bold;
+        transition: all 0.3s;
+      }
+
+      .speed-unit {
+        font-size: 1rem;
+        color: var(--primary-color);
+      }
+
+      .ticks {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+      }
+
+      .tick {
+        position: absolute;
+        width: 2px;
+        height: 10px;
+        background-color: var(--text-color);
+        transform-origin: center 150px;
+        left: 149px;
+        top: 0;
+      }
+
+      .tick.major {
+        height: 15px;
+        width: 3px;
+      }
+
+      .tick-label {
+        position: absolute;
+        transform-origin: center 135px;
+        width: 40px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-color);
+      }
+
+      .needle {
+        position: absolute;
+        width: 4px;
+        height: 120px;
+        background-color: #e74c3c;
+        top: 30px;
+        left: 148px;
+        transform-origin: bottom center;
+        border-radius: 2px 2px 0 0;
+        transform: rotate(0deg);
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .needle::after {
+        content: "";
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background-color: #e74c3c;
+        border-radius: 50%;
+        bottom: -6px;
+        left: -4px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .stats-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 30px;
+        justify-content: center;
+      }
+
+      .stat-card {
+        background-color: var(--card-bg);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        flex: 1;
+        min-width: 200px;
+        max-width: 300px;
+        text-align: center;
+        transition: transform 0.3s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-card h3 {
+        margin-bottom: 10px;
+        color: var(--primary-color);
+      }
+
+      .stat-card .value {
+        font-size: 1.8rem;
+        font-weight: bold;
+      }
+
+      .stat-card .unit {
+        font-size: 0.9rem;
+        color: #777;
+      }
+
+      .digital-speedometer {
+        background-color: var(--card-bg);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        max-width: 400px;
+        margin: 0 auto;
+        text-align: center;
+        display: none;
+      }
+
+      .digital-speed {
+        font-family: "digital-7", monospace;
+        font-size: 5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        margin-bottom: 10px;
+      }
+
+      .digital-unit {
+        font-size: 1.2rem;
+        color: var(--secondary-color);
+      }
+
+      .map-container {
+        height: 400px;
+        margin-top: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      #map {
+        height: 100%;
+        width: 100%;
+      }
+
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background-color: var(--card-bg);
+        border-radius: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 5px;
+        display: flex;
+        align-items: center;
+      }
+
+      .theme-toggle label {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+      }
+
+      .theme-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--primary-color);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(30px);
+      }
+
+      .theme-icon {
+        margin: 0 10px;
+        font-size: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .controls {
+          flex-direction: column;
+        }
+
+        .control-group {
+          width: 100%;
+        }
+
+        .speedometer {
+          width: 250px;
+          height: 250px;
+        }
+
+        .needle {
+          height: 100px;
+          top: 25px;
+          left: 124px;
+        }
+
+        .ticks .tick {
+          transform-origin: center 125px;
+          left: 124px;
+        }
+
+        .ticks .tick-label {
+          transform-origin: center 110px;
+        }
+
+        .digital-speed {
+          font-size: 3.5rem;
+        }
+
+        .map-container {
+          height: 300px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .speedometer {
+          width: 200px;
+          height: 200px;
+        }
+
+        .needle {
+          height: 80px;
+          top: 20px;
+          left: 98px;
+        }
+
+        .ticks .tick {
+          transform-origin: center 100px;
+          left: 99px;
+        }
+
+        .ticks .tick-label {
+          transform-origin: center 85px;
+          font-size: 10px;
+        }
+
+        .speed-value {
+          font-size: 2rem;
+        }
+
+        .digital-speed {
+          font-size: 2.5rem;
+        }
+
+        .stats-container {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .stat-card {
+          width: 100%;
+          max-width: none;
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .recording .speedometer,
+      .recording .digital-speedometer {
+        animation: pulse 2s infinite;
+      }
+
+      .shake {
+        animation: shake 0.5s;
+      }
+
+      @keyframes shake {
+        0% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        50% {
+          transform: translateX(5px);
+        }
+        75% {
+          transform: translateX(-5px);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="theme-toggle">
+        <span class="theme-icon">☀️</span>
+        <label>
+          <input type="checkbox" id="theme-toggle" />
+          <span class="slider"></span>
+        </label>
+        <span class="theme-icon">🌙</span>
+      </div>
+
+      <h1>ספידומטר GPS</h1>
+
+      <div class="controls fade-in">
+        <div class="control-group">
+          <h3>בקרת מדידה</h3>
+          <button id="start-btn" class="btn btn-primary">התחל מדידה</button>
+          <button id="stop-btn" class="btn btn-danger" disabled>
+            סיים מדידה
+          </button>
+          <button id="reset-btn" class="btn btn-secondary" disabled>
+            איפוס
+          </button>
+        </div>
+
+        <div class="control-group">
+          <h3>מצב תצוגה</h3>
+          <button id="analog-btn" class="btn btn-toggle active">אנלוגי</button>
+          <button id="digital-btn" class="btn btn-toggle">דיגיטלי</button>
+        </div>
+
+        <div class="control-group">
+          <h3>טווח מהירות</h3>
+          <button id="walking-btn" class="btn btn-toggle active">
+            הליכה/ריצה (0-12 קמ"ש)
+          </button>
+          <button id="cycling-btn" class="btn btn-toggle">
+            אופניים (0-40 קמ"ש)
+          </button>
+          <button id="driving-btn" class="btn btn-toggle">
+            רכב (0-180 קמ"ש)
+          </button>
+        </div>
+
+        <div class="control-group">
+          <h3>יחידות מדידה</h3>
+          <button id="kmh-btn" class="btn btn-toggle active">קמ"ש</button>
+          <button id="ms-btn" class="btn btn-toggle">מ'/שנייה</button>
+          <button id="mph-btn" class="btn btn-toggle">מייל/שעה</button>
+        </div>
+      </div>
+
+      <div class="speedometer-container fade-in">
+        <div class="speedometer" id="analog-speedometer">
+          <div class="gauge">
+            <div class="dial"></div>
+            <div class="ticks" id="ticks"></div>
+            <div class="needle"></div>
+            <div class="mask">
+              <div class="speed-value">0</div>
+              <div class="speed-unit">קמ"ש</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="digital-speedometer" id="digital-speedometer">
+          <div class="digital-speed">0.0</div>
+          <div class="digital-unit">קמ"ש</div>
+        </div>
+      </div>
+
+      <div class="stats-container fade-in">
+        <div class="stat-card">
+          <h3>מרחק</h3>
+          <div id="distance" class="value">0.00</div>
+          <div class="unit">ק"מ</div>
+        </div>
+
+        <div class="stat-card">
+          <h3>זמן</h3>
+          <div id="duration" class="value">00:00:00</div>
+          <div class="unit">שעות:דקות:שניות</div>
+        </div>
+
+        <div class="stat-card">
+          <h3>מהירות ממוצעת</h3>
+          <div id="avg-speed" class="value">0.0</div>
+          <div class="unit" id="avg-speed-unit">קמ"ש</div>
+        </div>
+
+        <div class="stat-card">
+          <h3>מהירות מקסימלית</h3>
+          <div id="max-speed" class="value">0.0</div>
+          <div class="unit" id="max-speed-unit">קמ"ש</div>
+        </div>
+      </div>
+
+      <div class="map-container fade-in">
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+    />
+
+    <script>
+      // DOM Elements
+      const startBtn = document.getElementById("start-btn");
+      const stopBtn = document.getElementById("stop-btn");
+      const resetBtn = document.getElementById("reset-btn");
+      const walkingBtn = document.getElementById("walking-btn");
+      const cyclingBtn = document.getElementById("cycling-btn");
+      const drivingBtn = document.getElementById("driving-btn");
+      const kmhBtn = document.getElementById("kmh-btn");
+      const msBtn = document.getElementById("ms-btn");
+      const mphBtn = document.getElementById("mph-btn");
+      const analogBtn = document.getElementById("analog-btn");
+      const digitalBtn = document.getElementById("digital-btn");
+      const themeToggle = document.getElementById("theme-toggle");
+      const analogSpeedometer = document.getElementById("analog-speedometer");
+      const digitalSpeedometer = document.getElementById("digital-speedometer");
+      const speedValue = document.querySelector(".speed-value");
+      const speedUnit = document.querySelector(".speed-unit");
+      const digitalSpeed = document.querySelector(".digital-speed");
+      const digitalUnit = document.querySelector(".digital-unit");
+      const distanceEl = document.getElementById("distance");
+      const durationEl = document.getElementById("duration");
+      const avgSpeedEl = document.getElementById("avg-speed");
+      const maxSpeedEl = document.getElementById("max-speed");
+      const avgSpeedUnitEl = document.getElementById("avg-speed-unit");
+      const maxSpeedUnitEl = document.getElementById("max-speed-unit");
+      const needle = document.querySelector(".needle");
+      const ticksContainer = document.getElementById("ticks");
+      const themeIcons = document.querySelectorAll(".theme-icon");
+
+      // State variables
+      let watchId = null;
+      let isTracking = false;
+      let startTime = null;
+      let currentSpeed = 0;
+      let maxSpeed = 0;
+      let totalDistance = 0;
+      let lastPosition = null;
+      let currentMaxSpeed = 12; // Default max speed (walking/running)
+      let currentUnit = "kmh"; // Default unit
+      let positions = [];
+      let map = null;
+      let startMarker = null;
+      let endMarker = null;
+      let routeLine = null;
+      let isDarkTheme = false;
+
+      // Initialize the speedometer
+      function init() {
+        createTicks(currentMaxSpeed);
+        initMap();
+        setupEventListeners();
+      }
+
+      // Create tick marks for the analog speedometer
+      function createTicks(maxSpeed) {
+        ticksContainer.innerHTML = "";
+        const totalTicks = 120; // 120 degrees of rotation
+        const majorTicksFrequency = 10; // Major tick every 10 ticks
+
+        for (let i = 0; i <= totalTicks; i++) {
+          const isMajor = i % majorTicksFrequency === 0;
+          const rotation = -210 + i * (240 / totalTicks);
+
+          const tick = document.createElement("div");
+          tick.className = isMajor ? "tick major" : "tick";
+          tick.style.transform = `rotate(${rotation}deg)`;
+          ticksContainer.appendChild(tick);
+
+          if (isMajor) {
+            const labelValue = Math.round((i / totalTicks) * maxSpeed);
+            const label = document.createElement("div");
+            label.className = "tick-label";
+            label.textContent = labelValue;
+            label.style.transform = `rotate(${rotation}deg) translate(0, -20px) rotate(${-rotation}deg)`;
+            ticksContainer.appendChild(label);
+          }
+        }
+      }
+
+      // Initialize the map
+      function initMap() {
+        map = L.map("map").setView([32.0853, 34.7818], 13); // Default view of Tel Aviv
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+      }
+
+      // Set up event listeners
+      function setupEventListeners() {
+        startBtn.addEventListener("click", startTracking);
+        stopBtn.addEventListener("click", stopTracking);
+        resetBtn.addEventListener("click", resetTracking);
+
+        walkingBtn.addEventListener("click", () => setSpeedRange("walking"));
+        cyclingBtn.addEventListener("click", () => setSpeedRange("cycling"));
+        drivingBtn.addEventListener("click", () => setSpeedRange("driving"));
+
+        kmhBtn.addEventListener("click", () => setUnit("kmh"));
+        msBtn.addEventListener("click", () => setUnit("ms"));
+        mphBtn.addEventListener("click", () => setUnit("mph"));
+
+        analogBtn.addEventListener("click", () => setDisplayMode("analog"));
+        digitalBtn.addEventListener("click", () => setDisplayMode("digital"));
+
+        themeToggle.addEventListener("change", toggleTheme);
+      }
+
+      // Start GPS tracking
+      function startTracking() {
+        if (navigator.geolocation) {
+          try {
+            watchId = navigator.geolocation.watchPosition(
+              updatePosition,
+              handleLocationError,
+              { enableHighAccuracy: true, maximumAge: 0 }
+            );
+
+            isTracking = true;
+            startTime = new Date();
+            positions = [];
+
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            resetBtn.disabled = true;
+
+            document
+              .querySelector(".speedometer-container")
+              .classList.add("recording");
+
+            updateDuration();
+          } catch (error) {
+            alert("שגיאה בגישה למיקום: " + error.message);
+          }
+        } else {
+          alert("הדפדפן שלך אינו תומך בשירותי מיקום.");
+        }
+      }
+
+      // Stop GPS tracking
+      function stopTracking() {
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+        }
+
+        isTracking = false;
+        stopBtn.disabled = true;
+        startBtn.disabled = false;
+        resetBtn.disabled = false;
+
+        document
+          .querySelector(".speedometer-container")
+          .classList.remove("recording");
+
+        if (positions.length > 0) {
+          const lastPos = positions[positions.length - 1];
+          if (endMarker) {
+            map.removeLayer(endMarker);
+          }
+          endMarker = L.marker([lastPos.lat, lastPos.lng], {
+            icon: L.divIcon({
+              className: "end-marker",
+              html: '<div style="background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
+              iconSize: [15, 15],
+            }),
+          }).addTo(map);
+          endMarker.bindPopup("נקודת סיום").openPopup();
+        }
+      }
+
+      // Reset tracking data
+      function resetTracking() {
+        currentSpeed = 0;
+        maxSpeed = 0;
+        totalDistance = 0;
+        lastPosition = null;
+        positions = [];
+
+        updateSpeedDisplay(0);
+        distanceEl.textContent = "0.00";
+        avgSpeedEl.textContent = "0.0";
+        maxSpeedEl.textContent = "0.0";
+        durationEl.textContent = "00:00:00";
+
+        // Reset map
+        if (startMarker) map.removeLayer(startMarker);
+        if (endMarker) map.removeLayer(endMarker);
+        if (routeLine) map.removeLayer(routeLine);
+        startMarker = null;
+        endMarker = null;
+        routeLine = null;
+
+        resetBtn.disabled = true;
+      }
+
+      // Update position data from GPS
+      function updatePosition(position) {
+        const { latitude, longitude, speed } = position.coords;
+        const currentPos = { lat: latitude, lng: longitude };
+
+        // Save position
+        positions.push(currentPos);
+
+        // Create start marker for first position
+        if (positions.length === 1) {
+          if (startMarker) {
+            map.removeLayer(startMarker);
+          }
+
+          startMarker = L.marker([latitude, longitude], {
+            icon: L.divIcon({
+              className: "start-marker",
+              html: '<div style="background-color: #2ecc71; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
+              iconSize: [15, 15],
+            }),
+          }).addTo(map);
+          startMarker.bindPopup("נקודת התחלה").openPopup();
+
+          map.setView([latitude, longitude], 15);
+        }
+
+        // Update route line
+        if (positions.length > 1) {
+          if (routeLine) {
+            map.removeLayer(routeLine);
+          }
+
+          const lineCoords = positions.map((pos) => [pos.lat, pos.lng]);
+          routeLine = L.polyline(lineCoords, {
+            color: "#3498db",
+            weight: 5,
+            opacity: 0.7,
+          }).addTo(map);
+
+          map.fitBounds(routeLine.getBounds());
+        }
+
+        // Calculate speed
+        let currentSpeedMps = speed !== null ? speed : 0;
+
+        // Calculate distance if we have at least two positions
+        if (lastPosition) {
+          const distance = calculateDistance(
+            lastPosition.lat,
+            lastPosition.lng,
+            latitude,
+            longitude
+          );
+
+          totalDistance += distance;
+          distanceEl.textContent = (totalDistance / 1000).toFixed(2); // Convert to km
+        }
+
+        lastPosition = currentPos;
+
+        // Update speed display
+        updateSpeedDisplay(currentSpeedMps);
+        updateDuration();
+
+        // Update stats
+        if (currentSpeed > maxSpeed) {
+          maxSpeed = currentSpeed;
+          maxSpeedEl.textContent = convertSpeed(
+            maxSpeed,
+            "mps",
+            currentUnit
+          ).toFixed(1);
+        }
+
+        // Calculate average speed
+        const elapsedTime = (new Date() - startTime) / 1000; // seconds
+        if (elapsedTime > 0) {
+          const avgSpeed = totalDistance / elapsedTime; // m/s
+          avgSpeedEl.textContent = convertSpeed(
+            avgSpeed,
+            "mps",
+            currentUnit
+          ).toFixed(1);
+        }
+
+        // Update map view
+        map.setView([latitude, longitude]);
+      }
+
+      // Handle location errors
+      function handleLocationError(error) {
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            alert("המשתמש לא אישר גישה לשירותי המיקום.");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            alert("מידע המיקום אינו זמין כרגע.");
+            break;
+          case error.TIMEOUT:
+            alert("בקשת המיקום עברה את הזמן המוקצב.");
+            break;
+          case error.UNKNOWN_ERROR:
+            alert("שגיאה לא ידועה בשירותי המיקום.");
+            break;
+        }
+
+        stopTracking();
+      }
+
+      // Set the speed range (walking/running, cycling, driving)
+      function setSpeedRange(mode) {
+        walkingBtn.classList.remove("active");
+        cyclingBtn.classList.remove("active");
+        drivingBtn.classList.remove("active");
+
+        switch (mode) {
+          case "walking":
+            currentMaxSpeed = 12;
+            walkingBtn.classList.add("active");
+            break;
+          case "cycling":
+            currentMaxSpeed = 40;
+            cyclingBtn.classList.add("active");
+            break;
+          case "driving":
+            currentMaxSpeed = 180;
+            drivingBtn.classList.add("active");
+            break;
+        }
+
+        createTicks(currentMaxSpeed);
+      }
+
+      // Set unit for speed display
+      function setUnit(unit) {
+        kmhBtn.classList.remove("active");
+        msBtn.classList.remove("active");
+        mphBtn.classList.remove("active");
+
+        switch (unit) {
+          case "kmh":
+            kmhBtn.classList.add("active");
+            break;
+          case "ms":
+            msBtn.classList.add("active");
+            break;
+          case "mph":
+            mphBtn.classList.add("active");
+            break;
+        }
+
+        currentUnit = unit;
+        speedUnit.textContent = getUnitLabel(unit);
+        digitalUnit.textContent = getUnitLabel(unit);
+        avgSpeedUnitEl.textContent = getUnitLabel(unit);
+        maxSpeedUnitEl.textContent = getUnitLabel(unit);
+      }
+
+      function getUnitLabel(unit) {
+        switch (unit) {
+          case "kmh":
+            return 'קמ"ש';
+          case "ms":
+            return "מ'/שנייה";
+          case "mph":
+            return "מייל/שעה";
+        }
+      }
+
+      // Toggle between analog and digital display
+      function setDisplayMode(mode) {
+        analogBtn.classList.remove("active");
+        digitalBtn.classList.remove("active");
+
+        if (mode === "analog") {
+          analogSpeedometer.style.display = "block";
+          digitalSpeedometer.style.display = "none";
+          analogBtn.classList.add("active");
+        } else {
+          analogSpeedometer.style.display = "none";
+          digitalSpeedometer.style.display = "block";
+          digitalBtn.classList.add("active");
+        }
+      }
+
+      // Toggle dark/light theme
+      function toggleTheme() {
+        isDarkTheme = !isDarkTheme;
+        document.body.classList.toggle("dark-theme", isDarkTheme);
+      }
+
+      // Update the speed display
+      function updateSpeedDisplay(speedMps) {
+        currentSpeed = speedMps;
+
+        const convertedSpeed = convertSpeed(speedMps, "mps", currentUnit);
+        speedValue.textContent = convertedSpeed.toFixed(1);
+        digitalSpeed.textContent = convertedSpeed.toFixed(1);
+
+        // Update needle
+        const angle = (convertedSpeed / currentMaxSpeed) * 240 - 120;
+        needle.style.transform = `rotate(${Math.min(angle, 120)}deg)`;
+      }
+
+      // Convert speed between units
+      function convertSpeed(value, fromUnit, toUnit) {
+        if (fromUnit === toUnit) return value;
+
+        // First convert from fromUnit to mps
+        let mps;
+        switch (fromUnit) {
+          case "kmh":
+            mps = value / 3.6;
+            break;
+          case "mph":
+            mps = value * 0.44704;
+            break;
+          case "mps":
+            mps = value;
+            break;
+        }
+
+        // Then convert mps to toUnit
+        switch (toUnit) {
+          case "kmh":
+            return mps * 3.6;
+          case "mph":
+            return mps / 0.44704;
+          case "mps":
+            return mps;
+        }
+      }
+
+      // Haversine formula for distance in meters
+      function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000;
+        const toRad = (angle) => (angle * Math.PI) / 180;
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(toRad(lat1)) *
+            Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+      }
+
+      // Update duration display
+      function updateDuration() {
+        if (!startTime) return;
+
+        const now = new Date();
+        const elapsed = new Date(now - startTime);
+        const hrs = String(elapsed.getUTCHours()).padStart(2, "0");
+        const mins = String(elapsed.getUTCMinutes()).padStart(2, "0");
+        const secs = String(elapsed.getUTCSeconds()).padStart(2, "0");
+
+        durationEl.textContent = `${hrs}:${mins}:${secs}`;
+
+        if (isTracking) {
+          requestAnimationFrame(updateDuration);
+        }
+      }
+
+      // Start everything
+      init();
+    </script>
+  </body>
+</html>
