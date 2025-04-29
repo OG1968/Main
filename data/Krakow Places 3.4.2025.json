@@ -1,0 +1,1145 @@
+[
+  {
+    "id": 1,
+    "category": "lodging",
+    "name": "INX Design Hotel",
+    "address": "Starowiślna, 31-032 Kraków, Poland",
+    "lat": 50.051472,
+    "lng": 19.950742,
+    "details": "מלון עיצובי במרכז קרקוב"
+  },
+  {
+    "id": 2,
+    "category": "lodging",
+    "name": "Kraków Airport",
+    "address": "Kapitana Mieczysława Medweckiego 1, 32-083 Balice, Poland",
+    "lat": 50.077731,
+    "lng": 19.784836,
+    "details": "נמל התעופה הבינלאומי של קרקוב"
+  },
+  {
+    "id": 1743286631099,
+    "category": "attraction",
+    "name": "Kraków Barbican",
+    "address": "Basztowa, 30-547 Kraków, Poland",
+    "lat": 50.0655647739601,
+    "lng": 19.941650571164008,
+    "details": "שער הגנה משנות ה-90 של המאה ה-14, פעם מקושר לחומות העיר, כיום חלק מהמוזיאון ההיסטורי של העיר.\nהברביקן של קרקוב הוא מאחז מבוצר שהתחבר בעבר לחומות העיר. זהו שער היסטורי המוביל אל העיר העתיקה של קרקוב, פולין. הברביקן הוא אחד השרידים הבודדים שנותרו לרשת המורכבת של ביצורים ומחסומי הגנה שהקיפו בעבר את עיר המלוכה קרקוב בדרום פולין.כיום הוא משמש כאטרקציה תיירותית ומקום למגוון תערוכות."
+  },
+  {
+    "id": 1743286894063,
+    "category": "attraction",
+    "name": "Kazimierz",
+    "address": "Kazimierz, Kraków, Poland",
+    "lat": 50.04860497559054,
+    "lng": 19.944711527405637,
+    "details": "קז'ימייז' האופנתי והיצירתי הוא הרובע היהודי ההיסטורי של קרקוב, כיום ערבוביה של גלריות אינדי, חנויות מוזרות, חנויות בגדי וינטג וברים שנעים בין מאורות קוקטיילים אופנתיים לחללים עלובים-שיקים. בתי הכנסת הרבים של רחוב שרוקה כוללים את בית הכנסת העתיק מהמאה ה-16, בעוד שבבית הקברות רמוח הסמוך יש קיר בנוי מצבות שנשברו במהלך מלחמת העולם השנייה. המוזיאון היהודי של גליציה חוגג את התרבות היהודית המקומית."
+  },
+  {
+    "id": 1743286989447,
+    "category": "attraction",
+    "name": "Old Synagogue",
+    "address": "Szeroka 24, 31-053 Kraków, Poland",
+    "lat": 50.05159403488998,
+    "lng": 19.94863651534397,
+    "details": "בית כנסת משוחזר מהמאה ה-15 ובו מוזיאון לתרבות והיסטוריה יהודית של קרקוב.\nבית הכנסת העתיק (Stara Synagoga) - אחד מבתי הכנסת העתיקים באירופה, כיום משמש כמוזיאון להיסטוריה יהודית"
+  },
+  {
+    "id": 1743287039145,
+    "category": "attraction",
+    "name": "Remuh Synagogue",
+    "address": "Szeroka 40, 31-053 Kraków, Poland",
+    "lat": 50.05285366416691,
+    "lng": 19.947714373015955,
+    "details": "בית תפילה יהודי זה, המתוארך למאה ה-16, הוא אחד מבתי הכנסת העתיקים ביותר בעיר."
+  },
+  {
+    "id": 1743287155253,
+    "category": "attraction",
+    "name": "Oskar Schindler's Enamel Factory",
+    "address": "Lipowa 4, 30-702 Kraków, Poland",
+    "lat": 50.04749505074568,
+    "lng": 19.961616515343966,
+    "details": "מוזיאון שינדלר (Schindler's Factory) - מוזיאון המוקדש לשואה ולתקופת הכיבוש הנאצי\nהמשרד המנהלי לשעבר של שינדלר, שהציל יהודים מקומיים במהלך הכיבוש הנאצי."
+  },
+  {
+    "id": 1743287201912,
+    "category": "attraction",
+    "name": "Market Hall",
+    "address": "Grzegórzecka 3/11, 31-532 Kraków, Poland",
+    "lat": 50.05875423057744,
+    "lng": 19.948532113240656,
+    "details": "שוק תוצרת חקלאים הומה וותיק עם דוכנים נוספים לאומנות, עתיקות ובגדים."
+  },
+  {
+    "id": 1743273908108,
+    "category": "attraction",
+    "name": "Wawel Royal Castle",
+    "address": "Wawel 5, 31-001 Kraków, Poland",
+    "lat": 50.05423893888784,
+    "lng": 19.935412271164008,
+    "details": "גבעת ואוול שעליה שוכנת הטירה המלכותית מהווים את האתר המשמעותי ביותר מבחינה היסטורית ותרבותית בפולין. מקום מגורים מבוצר על נהר הוויסלה בקרקוב, הוקם בהוראת המלך קזימיר השלישי הגדול והוגדל במשך מאות שנים למספר מבנים סביב חצר מתקופת הרנסנס הפולנית. הוא מייצג כמעט את כל הסגנונות האדריכליים האירופיים של ימי הביניים, הרנסנס והבארוק."
+  },
+  {
+    "id": 1743286677462,
+    "category": "attraction",
+    "name": "Wawel Cathedral",
+    "address": "Wawel, 31-001 Kraków, Poland",
+    "lat": 50.05481275699523,
+    "lng": 19.93542548465603,
+    "details": "אתר ההכתרה של המלכים הפולנים, עם ביקורים בפעמון זיגיסמונד, קברים מלכותיים ומוזיאון.\nקתדרלת ואוול, שנקראה רשמית בזיליקת ארכי-קתדרלת סנט סטניסלאוס וסנט ואצלב, היא קתדרלה קתולית השוכנת על גבעת וואוול בקרקוב, פולין. בן כמעט 1000 שנה, הוא חלק ממתחם טירת וואוול והוא מקדש לאומי ששימש כאתר ההכתרה של המלכים הפולנים."
+  },
+  {
+    "id": 1743286751042,
+    "category": "attraction",
+    "name": "Smocza Jama",
+    "address": "Wawel 5, 31-001 Kraków, Poland",
+    "lat": 50.05310987561158,
+    "lng": 19.9335826,
+    "details": "Smocza Jama (בפולנית מאור הדרקון) היא מערת אבן גיר בגבעת ואוול בקרקוב. בשל מיקומה בלב הבירה הפולנית לשעבר והקשר שלה לדרקון וואוול האגדי, זוהי המערה הידועה ביותר בפולין.\n"
+  },
+  {
+    "id": 1743315181467,
+    "category": "attraction",
+    "name": "National Museum in Kraków",
+    "address": "al. 3 Maja 1, 30-062 Kraków, Poland",
+    "lat": 50.060214286241575,
+    "lng": 19.923823755820038,
+    "details": "3 גלריות קבועות המציגות יצירות אמנות וחפצים היסטוריים מפולין וממקומות אחרים באירופה."
+  },
+  {
+    "id": 1743315265441,
+    "category": "attraction",
+    "name": "Galicia Jewish Museum",
+    "address": "Dajwór 18, 31-052 Kraków, Poland",
+    "lat": 50.051081516748425,
+    "lng": 19.949685983604372,
+    "details": "המוזאון היהודי של גליסיה מוזיאון עכשווי זה מכיל תערוכות המכבדות את קורבנות השואה וחוגגים את התרבות היהודית. ממוקם ברובע היהודי ההיסטורי של קז'ימייז' בקרקוב, פולין. זוהי תערוכת צילומים המתעדת את שרידי התרבות והחיים היהודיים בגליציה הפולנית, שבעבר הייתה תוססת מאוד באזור זה."
+  },
+  {
+    "id": 1743315344883,
+    "category": "attraction",
+    "name": "Muzeum Zabawek w Krakowie",
+    "address": "Mikołaja Kopernika 19A, 31-501 Kraków, Poland",
+    "lat": 50.062208292630416,
+    "lng": 19.952764715343967,
+    "details": "מוזיאון הצעצועים (Muzeum Zabawek) - אוסף צעצועים היסטוריים"
+  },
+  {
+    "id": 1743315398280,
+    "category": "attraction",
+    "name": "Muzeum Lotnictwa Polskiego",
+    "address": "al. Jana Pawła II 39, 31-864 Kraków, Poland",
+    "lat": 50.0771524458326,
+    "lng": 19.98980511534397,
+    "details": "מוזיאון אווירי בשדה תעופה ישן עם מטוסים ומסוקים, וגם מרכז מבקרים מודרני."
+  },
+  {
+    "id": 1743315450624,
+    "category": "attraction",
+    "name": "Muzeum Archeologiczne",
+    "address": "Senacka 3, 31-002 Kraków, Poland",
+    "lat": 50.05783084594644,
+    "lng": 19.936723515343967,
+    "details": "עתיקות ממצרים העתיקה, פולין הקטנה והאוקיינוס ​​השקט, וגם חיפושי אוצרות לילדים.\nהמוזיאון הארכיאולוגי בקרקוב הוא המוזיאון הארכיאולוגי העתיק ביותר בפולין. הוא נוסד כמוזיאון העתיקות, על ידי קבוצת אינטלקטואלים ואקדמאים שהשתייכו לאגודה המדעית של קרקוב במהלך חלוקת פולין."
+  },
+  {
+    "id": 1743315500765,
+    "category": "attraction",
+    "name": "Museum of Contemporary Art",
+    "address": "Lipowa 4, 30-702 Kraków, Poland",
+    "lat": 50.047806772169665,
+    "lng": 19.961630059523927,
+    "details": "מוזיאון לאמנות אולטרה-מודרני בן 3 קומות המציג יצירות מולטימדיה עכשוויות, לעיתים פרובוקטיביות.\nהמוזיאון לאמנות עכשווית בקרקוב, היא גלריה לאמנות עכשווית בקרקוב.\nממוקמת 3 קילומטרים ממרכז העיר, בחלק שנהרס של המפעל של אוסקר שינדלר, מטרת הגלריה היא להציג ולתמוך באמנות ובאמנים עכשוויים, בפרט באמנות משני העשורים האחרונים."
+  },
+  {
+    "id": 1743315589218,
+    "category": "attraction",
+    "name": "Muzeum Fotografii ",
+    "address": "Rakowicka 22A, 31-510 Kraków, Poland",
+    "lat": 50.07084119107,
+    "lng": 19.95362059843535,
+    "details": "מוזיאון הצילום (Muzeum Fotografii) - מציג תערוכות צילום מרתקות והיסטוריה של הצילום"
+  },
+  {
+    "id": 1743315676837,
+    "category": "attraction",
+    "name": "Manggha Museum of Japanese Art &Technology",
+    "address": "Marii Konopnickiej 26, 30-302 Kraków, Poland",
+    "lat": 50.05070662648033,
+    "lng": 19.931588186507984,
+    "details": "מוזיאון האמנות היפנית (Manggha Museum) - מציג אמנות יפנית מסורתית ומודרנית"
+  },
+  {
+    "id": 1743315725096,
+    "category": "attraction",
+    "name": "St. Florian's Gate",
+    "address": "30-001 Kraków, Poland",
+    "lat": 50.0649669492259,
+    "lng": 19.94141655767198,
+    "details": "מגדל שער גותי מימי הביניים מהמאה ה-14 וצמוד לחומות המבוצרות של העיר."
+  },
+  {
+    "id": 1743315778286,
+    "category": "attraction",
+    "name": "Rynek Underground Museum",
+    "address": "Rynek Główny 1, 31-042 Kraków, Poland",
+    "lat": 50.06208208047605,
+    "lng": 19.937834373015956,
+    "details": "מוזיאון תת-קרקעי היי-טק המתאר את ההיסטוריה של העיר בין רחובות ומבנים שנחפרו.\nממוקם מתחת לכיכר השוק של העיר. גודל המוזיאון הוא כ-4000 מ\"ר"
+  },
+  {
+    "id": 1743315831941,
+    "category": "attraction",
+    "name": "Kościuszko Mound",
+    "address": "al. Waszyngtona 1, 30-204 Kraków, Poland",
+    "lat": 50.058027569391854,
+    "lng": 19.892256361416937,
+    "details": "תל מלאכותי שנבנה בשנת 1820 להנצחת תדיאוש קושציושקו, גיבור צבאי.\nהוא עוצב על פי דגם התלים הפרהיסטוריים של קרקוב, קראק וונדה. שביל נחש מוביל לפסגה, כ-326 מטר מעל פני הים, עם נוף פנורמי של נהר הוויסלה והעיר."
+  },
+  {
+    "id": 1743315882894,
+    "category": "attraction",
+    "name": "Wieliczka Salt Mine",
+    "address": "Daniłowicza 10, 32-020 Wieliczka, Poland",
+    "lat": 49.98416581548394,
+    "lng": 20.053111373015952,
+    "details": "מנהרות תת קרקעיות ומכרה עם קפלות, חדרים ואגמים מלוחים. מכרה המלח וייליצקה הוא מכרה מלח בעיירה וייליצקה, ליד קרקוב בדרום פולין. מהתקופה הניאוליתית הופק שם נתרן כלורי (מלח שולחן). מכרה המלח וייליצקה, שנחפר מהמאה ה-13, ייצר מלח שולחני ברציפות עד 1996, כאחד ממכרות המלח העתיקים בעולם הפועלים."
+  },
+  {
+    "id": 1743315933579,
+    "category": "attraction",
+    "name": "Vistula River",
+    "address": "Nadwiślańska 11, 30-527 Kraków, Poland",
+    "lat": 50.046981316727816,
+    "lng": 19.951289198148054,
+    "details": "הוויסלה הוא הנהר הארוך ביותר בפולין והתשיעי באורכו באירופה, באורך של 1,047 קילומטר. אגן הניקוז שלו, המשתרע לשלוש מדינות נוספות מלבד פולין."
+  },
+  {
+    "id": 1743315999007,
+    "category": "attraction",
+    "name": " Museum of Illusions",
+    "address": "Floriana Straszewskiego 15, 31-101 Kraków, Poland",
+    "lat": 50.05793878229364,
+    "lng": 19.933473483604377,
+    "details": "חללי משחק וציורים אינטראקטיביים פופולריים לצילומי סלפי, בתוספת עותקים של תרגילי אשליה עתיקים."
+  },
+  {
+    "id": 1743316075244,
+    "category": "attraction",
+    "name": "Planty Park",
+    "address": "31-041 Kraków, Poland",
+    "lat": 50.060107025376,
+    "lng": 19.941409242328014,
+    "details": "שרשרת גנים באורך 4 ק\"מ עם שבילים, עצים ומדשאות המקיפה את המרכז ההיסטורי של קרקוב.\nפלנטי הוא אחד הפארקים העירוניים הגדולים ביותר בקרקוב, פולין. הוא מקיף את העיר העתיקה, שם עמדו חומות העיר מימי הביניים עד תחילת המאה ה-19. "
+  },
+  {
+    "id": 1743316131825,
+    "category": "attraction",
+    "name": "Henryk Jordan Park",
+    "address": "al. 3 Maja 11, 30-059 Kraków, Poland",
+    "lat": 50.063583137624214,
+    "lng": 19.91622671349202,
+    "details": "גנים בסגנון אנגלי עם אזורי ספורט, בריכה ומספר אנדרטאות לפולנים מפורסמים, וגם השכרת אופניים."
+  },
+  {
+    "id": 1743316189269,
+    "category": "attraction",
+    "name": "Saints Peter and Paul Church",
+    "address": "Grodzka 52A, 31-044 Kraków, Poland",
+    "lat": 50.057066419570624,
+    "lng": 19.938828415343963,
+    "details": "כנסייה קתולית מעוטרת בסגנון הבארוק עם הפגנות שבועיות של מטוטלת פוקו.\nכנסיית הקדושים השליחים פטרוס ופאולוס היא כנסיית בארוק פולנית רומא-קתולית הממוקמת ברחוב גרודצ'קה 52a ברובע העיר העתיקה של קרקוב, פולין. הוא נבנה בין השנים 1597-1619 על ידי ג'ובאני מריה ברנרדוני ששכלל את העיצוב המקורי של יוזף בריטוס. זוהי הכנסייה הגדולה מבין הכנסיות ההיסטוריות של קרקוב מבחינת קיבולת הישיבה."
+  },
+  {
+    "id": 1743316247089,
+    "category": "attraction",
+    "name": "St. Andrew's Church, Kraków",
+    "address": "Grodzka 54, 31-044 Kraków, Poland",
+    "lat": 50.05675774987495,
+    "lng": 19.938352484656033,
+    "details": "כנסיית אבן רומנסקית ​​מהמאה ה-11 עם צריחי בארוק, וכן מנזר ועוגב מהמאה ה-18.\nכנסיית אנדרו הקדוש ברובע העיר העתיקה של קרקוב, פולין הממוקמת ברחוב גרודז'קה, היא כנסייה רומנסקית ​​היסטורית שנבנתה בין השנים 1079 ל-1098 על ידי מדינאי פולני מימי הביניים Palatine Sieciech. זוהי דוגמה נדירה ששרדה לכנסיית המבצר האירופית המשמשת למטרות הגנה."
+  },
+  {
+    "id": 1743316302356,
+    "category": "attraction",
+    "name": "Plac Bohaterów Getta",
+    "address": "Plac Bohaterów Getta, 30-547 Kraków, Poland",
+    "lat": 50.046800668976616,
+    "lng": 19.95449123598215,
+    "details": "בכיכר גטו קרקוב היה אחד מחמישה גטאות מטרופוליניים נאצים גדולים שנוצרו על ידי גרמניה בשטח הגנרל גנרל החדש במהלך הכיבוש הגרמני של פולין במלחמת העולם השנייה. היא הוקמה למטרת ניצול, טרור ורדיפה של יהודי פולין מקומיים. מאוחר יותר שימש הגטו כשטח היערכות להפרדה בין הפועלים המוכשרים לאלו שיגורשו למחנות ההשמדה במבצע ריינהרד. הגטו חוסל בין יוני 1942 למרץ 1943, ורוב תושביו גורשו למחנה ההשמדה בלזץ וכן למחנה עבדות פלשוב וכן למחנה הריכוז אושוויץ, במרחק של 60 קילומטרים ."
+  },
+  {
+    "id": 1743316464004,
+    "category": "attraction",
+    "name": "Concentration Camp Auschwitz & Birkenau",
+    "address": "Ofiar Faszyzmu 12, 32-600 Brzezinka, Poland",
+    "lat": 50.037975073009505,
+    "lng": 19.173851728835995,
+    "details": "אנדרטה ומוזיאון למחנה הריכוז וההשמדה הנאצים שבו מתו 1.1 מיליון יהודים.\nאושוויץ היה מתחם של למעלה מ-40 מחנות ריכוז והשמדה שהופעלו על ידי גרמניה הנאצית בפולין הכבושה (בחלק שסופח לגרמניה ב-1939) במהלך מלחמת העולם השנייה. הוא כלל מאושוויץ הראשון, המחנה הראשי (Stammlager) באושוויץ; אושוויץ II-Birkenau, מחנה ריכוז והשמדה עם תאי גזים; Auschwitz III-Monowitz, מחנה עבודה של הקונגלומרט הכימי  ועשרות מחנות משנה.המחנות הפכו לאתר מרכזי של הפתרון הסופי של הנאצים לשאלת היהודים."
+  },
+  {
+    "id": 1743316511294,
+    "category": "attraction",
+    "name": "Remains of the Ghetto wall",
+    "address": "Lwowska 29, 30-548 Kraków, Poland",
+    "lat": 50.045014366277684,
+    "lng": 19.95755234127636,
+    "details": "שריד של חומת האבן שנבנתה מסביב לגטו קרקוב ב-1941, מסומן בלוח זיכרון."
+  },
+  {
+    "id": 1743316630239,
+    "category": "restaurant",
+    "name": "Al Medina",
+    "address": "Szeroka 22, 31-053 Kraków, Poland",
+    "lat": 50.05193344501074,
+    "lng": 19.94864455582004,
+    "details": "מסעדה מזרח תיכונית חומוס, פלאפל, קבב"
+  },
+  {
+    "id": 1743316702468,
+    "category": "restaurant",
+    "name": "Ariel",
+    "address": "Szeroka 18, 31-053 Kraków, Poland",
+    "lat": 50.05223602684134,
+    "lng": 19.948541595320037,
+    "details": "יהודית כשרה מנות כשרות מסורתיות"
+  },
+  {
+    "id": 1743316766032,
+    "category": "restaurant",
+    "name": "Awiw Restauracja",
+    "address": "Szeroka 13, 31-053 Kraków, Poland",
+    "lat": 50.05267673661688,
+    "lng": 19.94839895515811,
+    "details": "מסעדה ישראלית פלאפל, חומוס, שקשוקה"
+  },
+  {
+    "id": 1743316828836,
+    "category": "restaurant",
+    "name": "Beef Burger Bar",
+    "address": "Warszauera 1, 31-057 Kraków, Poland",
+    "lat": 50.05229539956414,
+    "lng": 19.945357044179957,
+    "details": "מסעדת בורגרים בורגרים, צ'יפס, סלטים"
+  },
+  {
+    "id": 1743316902177,
+    "category": "restaurant",
+    "name": "Bistro Bene",
+    "address": "Świętego Krzyża 17, 31-023 Kraków, Poland",
+    "lat": 50.06295543309707,
+    "lng": 19.94264396986099,
+    "details": "ביסטרו צרפתי מנות צרפתיות קלאסיות"
+  },
+  {
+    "id": 1743316986689,
+    "category": "restaurant",
+    "name": "Corner Burger",
+    "address": "Dajwór 25, 31-052 Kraków, Poland",
+    "lat": 50.051566161996824,
+    "lng": 19.949483138644652,
+    "details": "בורגר בר בורגרים,מטוגנים"
+  },
+  {
+    "id": 1743317146858,
+    "category": "restaurant",
+    "name": "Euskadi Restaurant",
+    "address": "Kazimierza Brodzińskiego 4/U1, 30-506 Kraków, Poland",
+    "lat": 50.04522227190117,
+    "lng": 19.948446230687935,
+    "details": "מסעדה באסקית טפאס, פאייה, מנות דגים"
+  },
+  {
+    "id": 1743317215719,
+    "category": "restaurant",
+    "name": "Farsztat",
+    "address": "Ciemna 4, 31-053 Kraków, Poland",
+    "lat": 50.051660255023734,
+    "lng": 19.947027373015953,
+    "details": "פוד טראק סטים של כיסונים (פירוגי) בשלל טעמים"
+  },
+  {
+    "id": 1743317362299,
+    "category": "restaurant",
+    "name": "Gate of India",
+    "address": "Stradomska 11, 31-068 Kraków, Poland",
+    "lat": 50.05353092781083,
+    "lng": 19.939923688359922,
+    "details": "מסעדה הודית קארי, טנדורי, נאן"
+  },
+  {
+    "id": 1743317470599,
+    "category": "restaurant",
+    "name": "GOGO Burger",
+    "address": "Starowiślna 6, 31-032 Kraków, Poland",
+    "lat": 50.058704714984174,
+    "lng": 19.943456144179958,
+    "details": "מסעדת בורגרים בורגרים, צ'יפס, שייקים"
+  },
+  {
+    "id": 1743317538024,
+    "category": "restaurant",
+    "name": "Gruba Buła",
+    "address": "Dajwór 2A, 31-052 Kraków, Poland",
+    "lat": 50.052514631449824,
+    "lng": 19.949162259790697,
+    "details": "בורגרים, מטוגנים"
+  },
+  {
+    "id": 1743317603404,
+    "category": "restaurant",
+    "name": "Hana Sushi",
+    "address": "Kupa 12, 30-057 Kraków, Poland",
+    "lat": 50.05187715018184,
+    "lng": 19.946239319114557,
+    "details": "מסעדה יפאנית מאכלים יפנים מסורתיים"
+  },
+  {
+    "id": 1743317696440,
+    "category": "restaurant",
+    "name": "Halicka Eatery & Bar",
+    "address": "Halicka 14A, 31-036 Kraków, Poland",
+    "lat": 50.051747299894075,
+    "lng": 19.951787245370134,
+    "details": "מנות מסורתיות מסעדה פולנית במראה מודרני"
+  },
+  {
+    "id": 1743317752934,
+    "category": "restaurant",
+    "name": "HEVRE",
+    "address": "Beera Meiselsa 18, 31-058 Kraków, Poland",
+    "lat": 50.051338302655516,
+    "lng": 19.943399713492024,
+    "details": "מסעדה ישראלית מנות פיוז'ן מודרניות"
+  },
+  {
+    "id": 1743317813432,
+    "category": "restaurant",
+    "name": "Judah Food Market",
+    "address": "Św. Wawrzyńca 16, 33-332 Kraków, Poland",
+    "lat": 50.05096205810296,
+    "lng": 19.948004515882626,
+    "details": "מתחם אוכל מבחר אפשרויות אוכל רחוב"
+  },
+  {
+    "id": 1743317873043,
+    "category": "restaurant",
+    "name": "Kathi Curry",
+    "address": "Miodowa 12, 31-055 Kraków, Poland",
+    "lat": 50.05250919926406,
+    "lng": 19.94331477645822,
+    "details": "מסעדה הודית עוף טיקה מסאלה , טלה ברוטב"
+  },
+  {
+    "id": 1743317943142,
+    "category": "restaurant",
+    "name": "Karakter",
+    "address": "Brzozowa 17, 31-050 Kraków, Poland",
+    "lat": 50.05341444107755,
+    "lng": 19.945863713492024,
+    "details": "מטבח בינלאומי מודרני מנות בשר ייחודיות"
+  },
+  {
+    "id": 1743317992228,
+    "category": "restaurant",
+    "name": "KraCowska Burgers",
+    "address": "Krakowska 33, 31-062 Kraków, Poland",
+    "lat": 50.04875132448662,
+    "lng": 19.94306362910276,
+    "details": "אמריקן דיינר בורגרים, מטוגנים"
+  },
+  {
+    "id": 1743318059953,
+    "category": "restaurant",
+    "name": "Kuchnia Domowa Sąsiedzi",
+    "address": "Miodowa 25, 31-055 Kraków, Poland",
+    "lat": 50.052879509759,
+    "lng": 19.945180499999996,
+    "details": "מסעדה פולנית מנות מסורתיות, מרקים, קינוחים"
+  },
+  {
+    "id": 1743318123650,
+    "category": "restaurant",
+    "name": "Kuchnia u Doroty",
+    "address": "Augustiańska 4, 31-064 Kraków, Poland",
+    "lat": 50.05077887598108,
+    "lng": 19.941173324155987,
+    "details": "פמסעדה פולנית עם מאכלים ביתיים מנות כרוב ממולא, פנקייקים, תפ\"א"
+  },
+  {
+    "id": 1743318178266,
+    "category": "restaurant",
+    "name": "La Campana",
+    "address": "Kanonicza 7, 31-002 Kraków, Poland",
+    "lat": 50.05739624843208,
+    "lng": 19.937433610065156,
+    "details": "מסעדה איטלקית"
+  },
+  {
+    "id": 1743318243452,
+    "category": "restaurant",
+    "name": "Los Gorditos",
+    "address": "Augustiańska 24/LU2, 31-064 Kraków, Poland",
+    "lat": 50.048935563613654,
+    "lng": 19.942215644179964,
+    "details": "מסעדה מקסיקנית בוריטו, טאקוס, קסדיות"
+  },
+  {
+    "id": 1743318338012,
+    "category": "restaurant",
+    "name": "Matt's",
+    "address": "Kącik 6, 30-549 Kraków, Poland",
+    "lat": 50.04753343581816,
+    "lng": 19.955741947622226,
+    "details": "מסעדה אמריקאית בסגנון בורגר בר"
+  },
+  {
+    "id": 1743318388972,
+    "category": "restaurant",
+    "name": "Mirror Bistro - Pierogi Bystro",
+    "address": "Brzozowa 8, 31-050 Kraków, Poland",
+    "lat": 50.054092227896724,
+    "lng": 19.94487098650798,
+    "details": "ביסטרו פולני מגוון פירוגי (כופתאות)"
+  },
+  {
+    "id": 1743318444441,
+    "category": "restaurant",
+    "name": "Moaburger",
+    "address": "Mikołajska 3, 31-027 Kraków, Poland",
+    "lat": 50.06162144178115,
+    "lng": 19.94121423756733,
+    "details": "מסעדת בורגרים, מטוגנים"
+  },
+  {
+    "id": 1743318501100,
+    "category": "restaurant",
+    "name": "Moo Moo Steak & Wine",
+    "address": "Szeroka 3, 31-053 Kraków, Poland",
+    "lat": 50.05333831873563,
+    "lng": 19.947904913492025,
+    "details": "מסעדת סטייקים ויין סטייקים, מנות בשר משובחות"
+  },
+  {
+    "id": 1743318566127,
+    "category": "restaurant",
+    "name": "Mr. Broda Sandwich Bar",
+    "address": "Krakowska 31, 31-062 Kraków, Poland",
+    "lat": 50.04879393463561,
+    "lng": 19.943017917195917,
+    "details": "סנדוויץ בר סנוויצ'ים מושקעים"
+  },
+  {
+    "id": 1743318634721,
+    "category": "restaurant",
+    "name": "Mustachos",
+    "address": "Zabłocie 35, 30-701 Kraków, Poland",
+    "lat": 50.04994323171378,
+    "lng": 19.963717900000006,
+    "details": "דרום אמריקאית מסעדת בשרים סטייקים, המבורגרים"
+  },
+  {
+    "id": 1743318785095,
+    "category": "restaurant",
+    "name": "Nolio Restaurant",
+    "address": "Krakowska 27, 31-062 Kraków, Poland",
+    "lat": 50.049406419600416,
+    "lng": 19.942847840476066,
+    "details": "מסעדה איטלקית פסטה, פיצות, קינוחים"
+  },
+  {
+    "id": 1743319358358,
+    "category": "restaurant",
+    "name": "Nostra Napoletana",
+    "address": "Zabłocie, 30-701 Kraków, Poland",
+    "lat": 50.05077937176009,
+    "lng": 19.95982846931206,
+    "details": "איטלקית פיצריה"
+  },
+  {
+    "id": 1743432747152,
+    "category": "restaurant",
+    "name": "Otto Pompieri",
+    "address": "Grzegórzecka 18, 31-531 Kraków, Poland",
+    "lat": 50.0590181519281,
+    "lng": 19.952760673015955,
+    "details": "איטלקית פיצות פסטה"
+  },
+  {
+    "id": 1743319426001,
+    "category": "restaurant",
+    "name": "PHO EVER Restaurant",
+    "address": "Dajwór 25c, 31-052 Kraków, Poland",
+    "lat": 50.05077283718875,
+    "lng": 19.949386815343967,
+    "details": "מסעדה אסייתית מנות ומרקים אסייתים"
+  },
+  {
+    "id": 1743319486223,
+    "category": "restaurant",
+    "name": "Pierwszy Stopień Restaurant",
+    "address": "Krakowska 17, 31-062 Kraków, Poland",
+    "lat": 50.05012683899702,
+    "lng": 19.94254741349202,
+    "details": "מסעדה פולנית מנות מסורתיות, מרקים, קינוחים"
+  },
+  {
+    "id": 1743319551404,
+    "category": "restaurant",
+    "name": "Pimiento Argentino",
+    "address": "Stolarska 13, 31-043 Kraków, Poland",
+    "lat": 50.06016507356278,
+    "lng": 19.93886793492023,
+    "details": "מסעדה ארגנטינאית סטייקים, אסאדו, אמפנדס"
+  },
+  {
+    "id": 1743319602346,
+    "category": "restaurant",
+    "name": "Plac Nowy 1",
+    "address": "plac Nowy 1, 31-056 Kraków, Poland",
+    "lat": 50.051511301197955,
+    "lng": 19.945362984656033,
+    "details": "מסעדה ובר קוקטיילים"
+  },
+  {
+    "id": 1743319650264,
+    "category": "restaurant",
+    "name": "Restauracja Broo",
+    "address": "Św. Katarzyny 4, 31-063 Kraków, Poland",
+    "lat": 50.04998952859057,
+    "lng": 19.94191887831016,
+    "details": "בורגר מאכלי ים"
+  },
+  {
+    "id": 1743319727143,
+    "category": "restaurant",
+    "name": "Restauracja Pod Nosem",
+    "address": "Kanonicza 22, 31-002 Kraków, Poland",
+    "lat": 50.05591331115752,
+    "lng": 19.937222784656026,
+    "details": "מסעדה פולנית גבוהה מנות פולניות ואיכותיות"
+  },
+  {
+    "id": 1743319848407,
+    "category": "restaurant",
+    "name": "Restauracja Po Krakosku",
+    "address": "plac Wolnica 12, 31-061 Kraków, Poland",
+    "lat": 50.048547832833094,
+    "lng": 19.944579234130202,
+    "details": "מסעדה פולנית עם מנות מסורתיות"
+  },
+  {
+    "id": 1743319906444,
+    "category": "restaurant",
+    "name": "Restauracja Starka",
+    "address": "Józefa 14, 31-056 Kraków, Poland",
+    "lat": 50.050805748005594,
+    "lng": 19.944277326984043,
+    "details": "מסעדה פולנית מנות מסורתיות עם אווירה ביתית"
+  },
+  {
+    "id": 1743319958516,
+    "category": "restaurant",
+    "name": "Spice of India",
+    "address": "Starowiślna 48, 31-032 Kraków, Poland",
+    "lat": 50.05437614717894,
+    "lng": 19.948168257671988,
+    "details": "מסעדה הודית קארי, טנדורי, נאן"
+  },
+  {
+    "id": 1743320035585,
+    "category": "restaurant",
+    "name": "Stodoła",
+    "address": "Floriańska 47, 31-019 Kraków, Poland",
+    "lat": 50.06430647596041,
+    "lng": 19.941415642333144,
+    "details": "מסעדה פולנית פירוגי (כופתאות) במגוון טעמים"
+  },
+  {
+    "id": 1743320102687,
+    "category": "restaurant",
+    "name": "Sushi Show",
+    "address": "Józefa 25, 31-056 Kraków, Poland",
+    "lat": 50.0514377803437,
+    "lng": 19.948293571164008,
+    "details": "מסעדה יפאנית מנות סושי אסייתיות"
+  },
+  {
+    "id": 1743320157436,
+    "category": "restaurant",
+    "name": "Szamot na Wielopolu",
+    "address": "Wielopole 3, 31-072 Kraków, Poland",
+    "lat": 50.059010889956134,
+    "lng": 19.943528128835993,
+    "details": "איטלקית פיצריה"
+  },
+  {
+    "id": 1743320244873,
+    "category": "restaurant",
+    "name": "Szara Ges",
+    "address": "Rynek Główny 17, 31-008 Kraków, Poland",
+    "lat": 50.06068041087579,
+    "lng": 19.937211644179964,
+    "details": "מסעדה פולנית מודרנית מנות פולניות עדכניות"
+  },
+  {
+    "id": 1743320305016,
+    "category": "restaurant",
+    "name": "Tajemniczy Ogród",
+    "address": "plac Nowy 9, 33-332 Kraków, Poland",
+    "lat": 50.054184802145855,
+    "lng": 19.945397184707357,
+    "details": "מסעדה פולנית מנות מסורתיות, מרקים, קינוחים"
+  },
+  {
+    "id": 1743320363887,
+    "category": "restaurant",
+    "name": "Talerz",
+    "address": "Zabłocie 19/lu5, 30-701 Kraków, Poland",
+    "lat": 50.05035079863809,
+    "lng": 19.95943081839091,
+    "details": "מסעדה פולנית מנות מסורתיות, מרקים, בשרים"
+  },
+  {
+    "id": 1743320446151,
+    "category": "restaurant",
+    "name": "Tasty Beast Burger",
+    "address": "Starowiślna 47, 31-038 Kraków, Poland",
+    "lat": 50.05575446876302,
+    "lng": 19.947165710070287,
+    "details": "בורגר בר בורגרים,מטוגנים"
+  },
+  {
+    "id": 1743321035935,
+    "category": "restaurant",
+    "name": "Trattoria Soprano",
+    "address": "Świętej Anny 7, 31-008 Kraków, Poland",
+    "lat": 50.061983193224975,
+    "lng": 19.934618576719846,
+    "details": "איטלקית פסטות טריות ופיצות"
+  },
+  {
+    "id": 1743321105052,
+    "category": "restaurant",
+    "name": "Warsztat & Cafe No 3 (Burger)",
+    "address": "Izaaka 3, 31-053 Kraków, Poland",
+    "lat": 50.0515166580571,
+    "lng": 19.94604158465603,
+    "details": "מסעדת בורגרים בורגרים, צ'יפס, שייקים"
+  },
+  {
+    "id": 1743321189117,
+    "category": "restaurant",
+    "name": "Yum Yum Viet Nam",
+    "address": "Józefa 20, 31-056 Kraków, Poland",
+    "lat": 50.050878725973874,
+    "lng": 19.944783842328015,
+    "details": "ויאטנאמית אוכל ויאטנאמי"
+  },
+  {
+    "id": 1743321244086,
+    "category": "restaurant",
+    "name": "ZAZIE Bistro",
+    "address": "Józefa 34, 31-056 Kraków, Poland",
+    "lat": 50.05140379040655,
+    "lng": 19.946829113492026,
+    "details": "ביסטרו צרפתי ביף בורגיניון, מרק בצל"
+  },
+  {
+    "id": 1743321315623,
+    "category": "restaurant",
+    "name": "!ncredible pizzeria",
+    "address": "Józefa Dietla 113, 31-031 Kraków, Poland",
+    "lat": 50.05823739234373,
+    "lng": 19.947132453968095,
+    "details": "איטלקית פיצריה"
+  },
+  {
+    "id": 1743321377750,
+    "category": "restaurant",
+    "name": "Antler Poutine Burger",
+    "address": "Wiślna 8, 31-007 Kraków, Poland",
+    "lat": 50.06071616833749,
+    "lng": 19.934939137049202,
+    "details": "מסעדת ברביקיו המבורגרים"
+  },
+  {
+    "id": 1743321436984,
+    "category": "restaurant",
+    "name": "Chimera",
+    "address": "Świętej Anny 3, 31-008 Kraków, Poland",
+    "lat": 50.061786418841905,
+    "lng": 19.934891101851942,
+    "details": "פולנית צמחונית סלטים עשירים ומנות צמחוניות"
+  },
+  {
+    "id": 1743321486780,
+    "category": "restaurant",
+    "name": "Dynia Resto Bar",
+    "address": "Krupnicza 20, 31-123 Kraków, Poland",
+    "lat": 50.06349896035238,
+    "lng": 19.92904292415676,
+    "details": "פולנית מנות מהמטבח הפולני המודרני"
+  },
+  {
+    "id": 1743321533635,
+    "category": "restaurant",
+    "name": "Restauracja Pino River",
+    "address": "Bulwar Wołyński, 30-302 Kraków, Poland",
+    "lat": 50.04726473592459,
+    "lng": 19.935558152916435,
+    "details": "פולנית מיני תבשילים מסורתיים"
+  },
+  {
+    "id": 1743321605042,
+    "category": "restaurant",
+    "name": "Kolanko No 6 Restaurant",
+    "address": "Józefa 17, 31-056 Kraków, Poland",
+    "lat": 50.05106373637444,
+    "lng": 19.946180957671988,
+    "details": "מטבח בינלאומי קרפים מתוקים ומלוחים"
+  },
+  {
+    "id": 1743432747153,
+    "category": "restaurant",
+    "name": "Pasibus",
+    "address": "Pawia 5, 31-154 Kraków, Poland",
+    "lat": 50.070116282311496,
+    "lng": 19.946368855998774,
+    "details": "מסעדת המבורגרים"
+  },
+  {
+    "id": 1743432747155,
+    "category": "restaurant",
+    "name": "Pyszne Pierogi na Wynos",
+    "address": "Brzozowa 8, 31-050 Kraków, Poland",
+    "lat": 50.05639882315418,
+    "lng": 19.94491780098647,
+    "details": "מסעדת פירוגי (כופתאות)"
+  },
+  {
+    "id": 1743272758010,
+    "category": "cafe",
+    "name": "Cytat Café\t",
+    "address": "Miodowa 23, 31-055 Kraków, Poland",
+    "lat": 50.052779276540136,
+    "lng": 19.94500181508234,
+    "details": "בית קפה ספרותי רגוע עוגות ביתיות, קפה איכותי\t"
+  },
+  {
+    "id": 1743274062982,
+    "category": "cafe",
+    "name": "Księgarnia Czytanie",
+    "address": "Starowiślna 82, 31-035 Kraków, Poland",
+    "lat": 50.05137051416734,
+    "lng": 19.95102977913354,
+    "details": "בית קפה מול המלון"
+  },
+  {
+    "id": 1743321920699,
+    "category": "cafe",
+    "name": "Grain Cafe",
+    "address": "Starowiślna 78, 31-035 Kraków, Poland",
+    "lat": 50.05166365749788,
+    "lng": 19.95083179550608,
+    "details": "בית קפה בריאותי שייקים, כריכים, קפה"
+  },
+  {
+    "id": 1743321973361,
+    "category": "cafe",
+    "name": "Cukiernia Starowicz",
+    "address": "Św. Wawrzyńca 32, 31-060 Kraków, Poland",
+    "lat": 50.05084963129572,
+    "lng": 19.950764382208998,
+    "details": "קפה המתמחה בקינוחים\tעוגות, עוגיות, סופגניות, סבארינות"
+  },
+  {
+    "id": 1743322034089,
+    "category": "cafe",
+    "name": "Lagun Krakowski",
+    "address": "Św. Wawrzyńca 24, 31-060 Kraków, Poland",
+    "lat": 50.05062893138456,
+    "lng": 19.949846520238033,
+    "details": "קפה המתמחה במאפים\tקוראסונים ממולאים ומנות כיסונים"
+  },
+  {
+    "id": 1743322089191,
+    "category": "cafe",
+    "name": "2 Okna Cafe",
+    "address": "Józefa 40, 31-056 Kraków, Poland",
+    "lat": 50.0514008346622,
+    "lng": 19.9474301592623,
+    "details": "בית קפה אינטימי מאפים, כריכים, קפה"
+  },
+  {
+    "id": 1743322156634,
+    "category": "cafe",
+    "name": "Domówka Cafe",
+    "address": "Miodowa 28 a, 31-050 Kraków, Poland",
+    "lat": 50.053193826934624,
+    "lng": 19.945843428835214,
+    "details": "בית קפה ביתי כריכים, קפה"
+  },
+  {
+    "id": 1743322215092,
+    "category": "cafe",
+    "name": "Cafe Karma",
+    "address": "Krupnicza 12, 31-123 Kraków, Poland",
+    "lat": 50.063527976012715,
+    "lng": 19.93061795767198,
+    "details": "בית קפה בוהמייני קינוחים, קפה איכותי"
+  },
+  {
+    "id": 1743322285093,
+    "category": "cafe",
+    "name": "Aftertaste",
+    "address": "Plac Bohaterów Getta 17, 30-547 Kraków, Poland",
+    "lat": 50.046561536667824,
+    "lng": 19.954597398948344,
+    "details": "קפה מסעדה מנות בינלאומיות, קינוחים"
+  },
+  {
+    "id": 1743322408473,
+    "category": "cafe",
+    "name": "Fresh Cafe",
+    "address": "Nadwiślańska 4, 30-527 Kraków, Poland",
+    "lat": 50.04735609699905,
+    "lng": 19.951378616600834,
+    "details": "עוגות וקינוחים"
+  },
+  {
+    "id": 1743322465362,
+    "category": "cafe",
+    "name": "Kawiarnia Literacka",
+    "address": "Krakowska 41, 31-066 Kraków, Poland",
+    "lat": 50.04771832046017,
+    "lng": 19.943463380028728,
+    "details": "בית קפה ספרותי כריכים, עוגות, קפה"
+  },
+  {
+    "id": 1743322523289,
+    "category": "cafe",
+    "name": "Coffee & Pizza Giona",
+    "address": "Aleja Pokoju 1A, 31-548 Kraków, Poland",
+    "lat": 50.058085703887926,
+    "lng": 19.961287062437805,
+    "details": "קפה פיצריה פיצות, קפה איטלקי"
+  },
+  {
+    "id": 1743322578189,
+    "category": "cafe",
+    "name": "Cafe Camelot",
+    "address": "Św. Tomasza 17, 31-022 Kraków, Poland",
+    "lat": 50.063086316800984,
+    "lng": 19.93929397222593,
+    "details": "בית קפה אינטימי עוגות ביתיות וקפה איכותי"
+  },
+  {
+    "id": 1743322641738,
+    "category": "cafe",
+    "name": "Cafe Botanica",
+    "address": "Dolnych Młynów 3/4, 31-124 Kraków, Poland",
+    "lat": 50.06391269529056,
+    "lng": 19.92800274363888,
+    "details": "בית קפה פורטוגלי פסטלים וקפה פורטוגלי"
+  },
+  {
+    "id": 1743322923133,
+    "category": "cafe",
+    "name": "Yellow Monkey Coffee",
+    "address": "Świętej Gertrudy 17, 31-048 Kraków, Poland",
+    "lat": 50.05621399709957,
+    "lng": 19.940432449751203,
+    "details": "בית קפה קינוחים, קפה איכותי"
+  },
+  {
+    "id": 1743322979699,
+    "category": "cafe",
+    "name": "Tartelette Cafe",
+    "address": "Stradomska 15, 31-058 Kraków, Poland",
+    "lat": 50.05306041851311,
+    "lng": 19.939918689688607,
+    "details": "מתמחה במאפים טטרטים, עוגות, קפה"
+  },
+  {
+    "id": 1743323028726,
+    "category": "cafe",
+    "name": "FINCA COFFEE",
+    "address": "Józefa 11, 31-056 Kraków, Poland",
+    "lat": 50.0509118805023,
+    "lng": 19.94564052989791,
+    "details": "קפה מסעדה קינוחים, קפה איכותי"
+  },
+  {
+    "id": 1743323080109,
+    "category": "cafe",
+    "name": "Somnium Cafe Bar",
+    "address": "Beera Meiselsa 5, 31-062 Kraków, Poland",
+    "lat": 50.05091019311827,
+    "lng": 19.94273028968861,
+    "details": "קפה מסעדה קינוחים, קפה איכותי"
+  },
+  {
+    "id": 1743272831718,
+    "category": "pub",
+    "name": "Singer",
+    "address": "Estery 20, 31-056 Kraków, Poland",
+    "lat": 50.05152367054994,
+    "lng": 19.945664210588422,
+    "details": "בר שכונתי קרוב למלון"
+  },
+  {
+    "id": 1743323158997,
+    "category": "pub",
+    "name": "Duffy's Irish Bar",
+    "address": "Św. Wawrzyńca 18, 31-060 Kraków, Poland",
+    "lat": 50.05051502704415,
+    "lng": 19.948902757671988,
+    "details": "בר אירי בר שכונתי סמוך למלון"
+  },
+  {
+    "id": 1743323215389,
+    "category": "pub",
+    "name": "Zaraz Wracam Tu",
+    "address": "Miodowa 51a, 31-036 Kraków, Poland",
+    "lat": 50.05443218280975,
+    "lng": 19.949370143928597,
+    "details": "בר המתמחה בשוטים של קוקטיילים"
+  },
+  {
+    "id": 1743323272747,
+    "category": "pub",
+    "name": "Shot Bar BANG BANG",
+    "address": "Miodowa 31, 31-055 Kraków, Poland",
+    "lat": 50.053423701078614,
+    "lng": 19.94595410583287,
+    "details": "שוטים וקוקטילים"
+  },
+  {
+    "id": 1743323329372,
+    "category": "pub",
+    "name": "Wręga",
+    "address": "Józefa 17, 31-055 Kraków, Poland",
+    "lat": 50.05119224833463,
+    "lng": 19.946463913492018,
+    "details": "פאב פולני עם מנות מסורתיות"
+  },
+  {
+    "id": 1743323370250,
+    "category": "pub",
+    "name": "Eszeweria",
+    "address": "Józefa 9, 31-056 Kraków, Poland",
+    "lat": 50.05127178368862,
+    "lng": 19.944571082552716,
+    "details": "בר באווירה ביזארית"
+  },
+  {
+    "id": 1743323414094,
+    "category": "pub",
+    "name": "Alchemia",
+    "address": "Estery 5, 31-056 Kraków, Poland",
+    "lat": 50.05227109349588,
+    "lng": 19.944991368335952,
+    "details": "אווירה בוהמיינית עם מוזיקה חיה"
+  },
+  {
+    "id": 1743323473632,
+    "category": "pub",
+    "name": "Poli Craft Beers Cocktails Bar",
+    "address": "Józefa Dietla 97, 31-031 Kraków, Poland",
+    "lat": 50.0569729783774,
+    "lng": 19.946328688626686,
+    "details": "קוקטייל בר באווירה טובה"
+  },
+  {
+    "id": 1743323512484,
+    "category": "pub",
+    "name": "Harris Piano Jazz Bar",
+    "address": "Rynek Główny 28, 31-010 Kraków, Poland",
+    "lat": 50.061888631222835,
+    "lng": 19.935584805555838,
+    "details": "בר מוסיקת ג'אז"
+  },
+  {
+    "id": 1743346465878,
+    "category": "pub",
+    "name": "Nalej Se",
+    "address": "Podgórska 34, 31-536 Kraków, Poland",
+    "lat": 50.05305518401543,
+    "lng": 19.954631935720517,
+    "details": "פאב מגניב עם מקומות ישיבה בחוץ וקיר של בירות מהחבית בהגשה עצמית, וגם המבורגרים וצ'יפס."
+  },
+  {
+    "id": 1743323576875,
+    "category": "pub",
+    "name": "Piwnica Pod Baranami",
+    "address": "Pałac Pod Baranami, Rynek Główny 27, 31-010 Kraków, Poland",
+    "lat": 50.06171726583592,
+    "lng": 19.93532633764859,
+    "details": "בר תרבותי מקום מפגש לאמנים"
+  },
+  {
+    "id": 1743323618059,
+    "category": "pub",
+    "name": "PANDORA. Cocktail BAR",
+    "address": "Szpitalna 36, 31-024 Kraków, Poland",
+    "lat": 50.06446811248818,
+    "lng": 19.942094605832867,
+    "details": "קוקטיילים ע\"פ טעם אישי"
+  },
+  {
+    "id": 1743323662943,
+    "category": "pub",
+    "name": "Pijalnia Wódki i Piwa",
+    "address": "Floriańska 34, 31-019 Kraków, Poland",
+    "lat": 50.06439698618834,
+    "lng": 19.940721757671984,
+    "details": "בר וודקה ובירה מקומית"
+  },
+  {
+    "id": 1743323704952,
+    "category": "pub",
+    "name": "TAG Cocktail Bar",
+    "address": "Podwale 7, 31-118 Kraków, Poland",
+    "lat": 50.06339010577692,
+    "lng": 19.93250563439183,
+    "details": "בר קוקטיילים"
+  },
+  {
+    "id": 1743274472086,
+    "category": "shopping",
+    "name": "Galeria Kazimierz",
+    "address": "Podgórska 34, 31-536 Kraków, Poland",
+    "lat": 50.05376091749196,
+    "lng": 19.955430399999997,
+    "details": "קניון עכשווי עם חזית זכוכית עם יותר מ-160 חנויות, מגרש משחקים חיצוני, בריכה מחוממת ובית קולנוע.\nמרכז קניות גדול הממוקם ברובע Grzegórzki של קרקוב. השם נובע מהמחוז השכן קז'ימייז'. נפתח בשנת 2004. לקניון יש שטח של כ-38,150 מ\"ר , עם מגוון רחב של מסעדות וחנויות גדולות כמו זארה, פומה, קוויקסילבר, H&M ..."
+  },
+  {
+    "id": 1743286360549,
+    "category": "shopping",
+    "name": "Centrum Handlowe Bonarka",
+    "address": "Henryka Kamieńskiego 11, 30-644 Kraków, Poland",
+    "lat": 50.02814541583219,
+    "lng": 19.95106334417996,
+    "details": "קניון מרווח הכולל מגוון טיפוסי של חנויות ושירותים ברשת, וגם מתחם אוכל ובית קולנוע.\nבונארקה הוא מרכז עירוני רב תכליתי הממוקם ברובע פודגורה ההיסטורי, על הגדה הדרומית של נהר הוויסלה. שטח של למעלה מ-92 אלף מ\"ר יש 230 חנויות ומסעדות, כולל Auchan, TK MAXX, Media Expert, ZARA, Peek & Cloppenburg"
+  },
+  {
+    "id": 1743286472130,
+    "category": "shopping",
+    "name": "Galeria Krakowska Shopping Mall",
+    "address": "Pawia 5, 31-154 Kraków, Poland",
+    "lat": 50.06655873957262,
+    "lng": 19.946149096296107,
+    "details": "מרכז קניות מקורה ומואר הכולל 250 מגוון חנויות ומסעדות ב-3 מפלסים.\nלגלריה קרקובסקה יש כמעט כל מה שהנוסע יכול להזדקק לו, הכל תחת קורת גג אחת. הפרוסות על שלוש קומות וקלות לניווט, החנויות פתוחות בין 9:00 ל-22:00 (ובאופן מדהים, עד 21:00 בימי ראשון). תמצאו מותגים מוכרים כמו H&M, Zara ודייכמן, אז זה מקום טוב לאסוף בגדים."
+  },
+  {
+    "id": 1743323830691,
+    "category": "shopping",
+    "name": "M1",
+    "address": "Aleja Pokoju 67, 31-580 Kraków, Poland",
+    "lat": 50.06404702318842,
+    "lng": 19.999997673015958,
+    "details": "קניון מקורה סטנדרטי עם חנויות בגדים ואלקטרוניקה, מסעדות מזון מהיר וסופרמרקט."
+  }
+]
