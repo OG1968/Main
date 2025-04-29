@@ -207,6 +207,7 @@
       }
 
       .ticks {
+        z-index: 10;
         position: absolute;
         width: 100%;
         height: 100%;
@@ -250,6 +251,7 @@
         transform: rotate(0deg);
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
         transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        z-index: 20; /* הוסף זאת */
       }
 
       .needle::after {
@@ -727,25 +729,34 @@
       // Create tick marks for the analog speedometer
       function createTicks(maxSpeed) {
         ticksContainer.innerHTML = "";
-        const totalTicks = 120; // 120 degrees of rotation
-        const majorTicksFrequency = 10; // Major tick every 10 ticks
+        const totalTicks = 12; // מספר שנתות עיקריות
+        const minorTicksPerMajor = 5; // מספר שנתות משניות בין כל שתי שנתות עיקריות
 
         for (let i = 0; i <= totalTicks; i++) {
-          const isMajor = i % majorTicksFrequency === 0;
+          // שנתות עיקריות
           const rotation = -210 + i * (240 / totalTicks);
 
           const tick = document.createElement("div");
-          tick.className = isMajor ? "tick major" : "tick";
+          tick.className = "tick major";
           tick.style.transform = `rotate(${rotation}deg)`;
           ticksContainer.appendChild(tick);
 
-          if (isMajor) {
-            const labelValue = Math.round((i / totalTicks) * maxSpeed);
-            const label = document.createElement("div");
-            label.className = "tick-label";
-            label.textContent = labelValue;
-            label.style.transform = `rotate(${rotation}deg) translate(0, -20px) rotate(${-rotation}deg)`;
-            ticksContainer.appendChild(label);
+          // תוויות למהירויות
+          const labelValue = Math.round((i / totalTicks) * maxSpeed);
+          const label = document.createElement("div");
+          label.className = "tick-label";
+          label.textContent = labelValue;
+          label.style.transform = `rotate(${rotation}deg) translate(0, -20px) rotate(${-rotation}deg)`;
+          ticksContainer.appendChild(label);
+
+          // שנתות משניות
+          for (let j = 1; j < minorTicksPerMajor; j++) {
+            const minorRotation =
+              rotation + j * (240 / totalTicks / minorTicksPerMajor);
+            const minorTick = document.createElement("div");
+            minorTick.className = "tick";
+            minorTick.style.transform = `rotate(${minorRotation}deg)`;
+            ticksContainer.appendChild(minorTick);
           }
         }
       }
@@ -1076,14 +1087,16 @@
       // Update the speed display
       function updateSpeedDisplay(speedMps) {
         currentSpeed = speedMps;
-
         const convertedSpeed = convertSpeed(speedMps, "mps", currentUnit);
         speedValue.textContent = convertedSpeed.toFixed(1);
         digitalSpeed.textContent = convertedSpeed.toFixed(1);
 
-        // Update needle
+        // עדכן את המחט
         const angle = (convertedSpeed / currentMaxSpeed) * 240 - 120;
-        needle.style.transform = `rotate(${Math.min(angle, 120)}deg)`;
+        needle.style.transform = `rotate(${Math.min(
+          Math.max(angle, -120),
+          120
+        )}deg)`;
       }
 
       // Convert speed between units
