@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="images/speed.png" type="image/png" />
     <link rel="apple-touch-icon" href="images/speed.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <title>ספידומטר GPS</title>
     <style>
       :root {
@@ -582,10 +586,14 @@
       <div class="controls fade-in">
         <div class="control-group">
           <h3>בקרת מדידה</h3>
-          <button id="start-btn" class="btn btn-primary">התחל</button>
-          <button id="stop-btn" class="btn btn-danger" disabled>סיים</button>
+          <button id="start-btn" class="btn btn-primary">
+            <i class="fa-solid fa-circle-play"></i><br />התחל
+          </button>
+          <button id="stop-btn" class="btn btn-danger" disabled>
+            <i class="fa-solid fa-circle-stop"></i><br />סיים
+          </button>
           <button id="reset-btn" class="btn btn-secondary" disabled>
-            איפוס
+            <i class="fa-solid fa-rotate"></i><br />איפוס
           </button>
         </div>
 
@@ -598,13 +606,13 @@
         <div class="control-group">
           <h3>טווח מהירות</h3>
           <button id="walking-btn" class="btn btn-toggle active">
-            רגלית <br />(0-12 קמ"ש)
+            <i class="fa-solid fa-person-walking"></i> <br />(0-12 קמ"ש)
           </button>
           <button id="cycling-btn" class="btn btn-toggle">
-            אופניים <br />(0-40 קמ"ש)
+            <i class="fa-solid fa-bicycle"></i> <br />(0-40 קמ"ש)
           </button>
           <button id="driving-btn" class="btn btn-toggle">
-            רכב <br />(0-180 קמ"ש)
+            <i class="fa-solid fa-car"></i> <br />(0-180 קמ"ש)
           </button>
         </div>
 
