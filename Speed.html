@@ -9,6 +9,8 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link href="https://fonts.cdnfonts.com/css/digital-numbers" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
+
 
     <title>ספידומטר GPS</title>
     <style>
@@ -21,6 +23,8 @@
         --card-bg: #f9f9f9;
         --border-color: #ddd;
         --theme-toggle-bg: #ceab6a;
+        --hover-primary-color: #266996;
+
 
       }
 
@@ -56,9 +60,11 @@
       }
 
       h1 {
+        font-family: 'ds-digital', system-ui ;        
         text-align: center;
         margin-bottom: 20px;
-        font-size: 2rem;
+        font-size: 2.5rem;
+        font-weight: 400;
       }
 
       h3 {
@@ -99,6 +105,8 @@
         font-weight: bold;
         font-size: 0.8rem;
         margin: 5px;
+        min-width: 100px;
+        min-height: 50px;
         transition: transform 0.1s, box-shadow 0.2s;
       }
 
@@ -141,8 +149,19 @@
         color: white;
       }
 
+      .btn-toggle:hover {
+        background-color: #4a5353;
+        box-shadow: 0 5px 15px rgba(59, 59, 59, 0.4);
+      }
+
       .btn-toggle.active {
         background-color: var(--primary-color);
+      }
+
+      .btn-toggle.active:hover {
+        background-color: var(--hover-primary-color);
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+
       }
 
       .speedometer-container {
