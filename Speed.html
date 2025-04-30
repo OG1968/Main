@@ -15,7 +15,7 @@
         --primary-color: #3498db;
         --secondary-color: #2ecc71;
         --danger-color: #e74c3c;
-        --text-color: #333;
+        --text-color: #111;
         --bg-color: #ffd579;
         --card-bg: #f9f9f9;
         --border-color: #ddd;
@@ -149,12 +149,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-bottom: 30px;
+        margin-bottom: 0px;
+        margin-top: -30px;
       }
 
       .speedometer {
-  width: 300px;
-  height: 300px;
+  width: 400px;
+  height: 400px;
   position: relative;
 }
 
@@ -164,13 +165,7 @@
 }
 
 .dial {
-  fill: conic-gradient(
-    from 30deg,
-    var(--primary-color) 0%,
-    var(--secondary-color) 50%,
-    var(--danger-color) 85%,
-    var(--danger-color) 100%
-  );
+  fill:var(--bg-color);
 }
 
 .major-tick {
@@ -210,8 +205,9 @@
       }
 
       .speed-unit {
-        font-size: 1rem;
-        color: var(--primary-color);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--secondary-color);
       }
 
       .ticks-container {
@@ -315,13 +311,12 @@
       }
 
       .digital-speedometer {
-        background-color: var(--card-bg);
+        background-color: var(--bg-color);
         padding: 30px;
         border-radius: 15px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         max-width: 400px;
         margin: 0 auto;
-        margin-top: -30px;
+        margin-top: 20px;
         margin-bottom: 20px;
         text-align: center;
         display: none;
@@ -332,16 +327,18 @@
         font-size: 5rem;
         font-weight: bold;
         color: var(--primary-color);
-        text-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
         margin-bottom: 10px;
       }
 
       .digital-unit {
-        font-size: 1.2rem;
+        font-size: 2rem;
+        font-weight: 700;
         color: var(--secondary-color);
       }
 
       .map-container {
+        max-width: 850px;
+        margin:auto;
         height: 400px;
         margin-top: 20px;
         border-radius: 10px;
@@ -434,11 +431,6 @@
           width: 100%;
         }
 
-        .speedometer {
-          width: 250px;
-          height: 250px;
-        }
-
         .needle {
           height: 100px;
           top: 25px;
@@ -454,9 +446,7 @@
           transform-origin: center 110px;
         }
 
-        .digital-speed {
-          font-size: 3.5rem;
-        }
+
 
         .map-container {
           height: 300px;
@@ -480,11 +470,6 @@
           font-size: 0.8rem;
         }
 
-        .speedometer {
-          width: 200px;
-          height: 200px;
-        }
-
         .needle {
           height: 80px;
           top: 20px;
@@ -505,9 +490,6 @@
           font-size: 2rem;
         }
 
-        .digital-speed {
-          font-size: 2.5rem;
-        }
 
         .stats-container {
           flex-direction: column;
