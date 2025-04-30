@@ -816,7 +816,7 @@ function updateSpeedDisplay(speedMps) {
         analogBtn.addEventListener("click", () => setDisplayMode("analog"));
         digitalBtn.addEventListener("click", () => setDisplayMode("digital"));
 
-        themeToggle.addEventListener("change", toggleTheme);
+        document.getElementById("theme-toggle-btn").addEventListener("click", toggleTheme);
       }
 
       // Start GPS tracking
