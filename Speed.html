@@ -364,8 +364,8 @@
 
       .theme-toggle-container {
         position: fixed;
-        top: 25px;
-        left: 50px;
+        top: 30px;
+        left: 30px;
         z-index: 1000;
       }
 
@@ -474,7 +474,7 @@
 
         .btn {
           padding: 8px 8px;
-          margin: 3px;
+          margin: 1px;
           font-size: 0.8rem;
         }
 
@@ -526,6 +526,121 @@
           opacity: 1;
         }
       }
+
+      .btn i {
+  margin-bottom: 5px;
+}
+
+/* אנימציות חדשות */
+@keyframes savePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); box-shadow: 0 0 15px rgba(46, 204, 113, 0.6); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.saved {
+  animation: savePulse 0.5s ease-in-out;
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* עיצוב לכפתור מחיקה */
+#clear-tracks-btn {
+  transition: all 0.3s;
+}
+
+#clear-tracks-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+/* הוסף ל-CSS הקיים */
+.saved-tracks-container {
+  background-color: var(--card-bg);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(70, 0, 0, 0.5);
+  margin-top: 20px;
+  max-width: 850px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.saved-tracks-container h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: var(--primary-color);
+}
+
+.tracks-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.track-item {
+  background-color: var(--bg-color);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.track-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.track-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.track-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.track-btn:hover {
+  transform: scale(1.05);
+}
+
+.track-btn-view {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.track-btn-delete {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.empty-tracks {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-color);
+  opacity: 0.7;
+}
     </style>
   </head>
   <body>
@@ -552,6 +667,9 @@
           </button>
           <button id="reset-btn" class="btn btn-secondary">
             <i class="fa-solid fa-rotate"></i><br />איפוס
+          </button>
+          <button id="clear-tracks-btn" class="btn btn-danger">
+            <i class="fa-solid fa-trash"></i><br />מחק מסלולים
           </button>
         </div>
 
@@ -638,6 +756,12 @@ transform="rotate(-15 150 150)"/>
       </div>
     </div>
 
+    <div class="saved-tracks-container fade-in">
+      <h3>מסלולים שמורים</h3>
+      <div id="saved-tracks-list" class="tracks-list">
+        <!-- כאן יוטענו המסלולים -->
+      </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <link
       rel="stylesheet"
@@ -695,6 +819,7 @@ transform="rotate(-15 150 150)"/>
         createTicks(currentMaxSpeed);
         initMap();
         setupEventListeners();
+        loadSavedTracks(); 
       }
 
       function createTicks(maxSpeed) {
@@ -761,29 +886,32 @@ transform="rotate(-15 150 150)"/>
 
       // Set up event listeners
       function setupEventListeners() {
-        startStopBtn.addEventListener("click", function() {
-          if (!isTracking) {
-            startTracking();
-          } else {
-            stopTracking();
-          }
-        });
+  startStopBtn.addEventListener("click", function() {
+    if (!isTracking) {
+      startTracking();
+    } else {
+      stopTracking();
+    }
+  });
 
-        resetBtn.addEventListener("click", resetTracking);
+  resetBtn.addEventListener("click", resetTracking);
+  
+  // הוספת אירוע לכפתור החדש
+  document.getElementById("clear-tracks-btn").addEventListener("click", clearAllTracks);
 
-        walkingBtn.addEventListener("click", () => setSpeedRange("walking"));
-        cyclingBtn.addEventListener("click", () => setSpeedRange("cycling"));
-        drivingBtn.addEventListener("click", () => setSpeedRange("driving"));
+  walkingBtn.addEventListener("click", () => setSpeedRange("walking"));
+  cyclingBtn.addEventListener("click", () => setSpeedRange("cycling"));
+  drivingBtn.addEventListener("click", () => setSpeedRange("driving"));
 
-        kmhBtn.addEventListener("click", () => setUnit("kmh"));
-        msBtn.addEventListener("click", () => setUnit("ms"));
-        mphBtn.addEventListener("click", () => setUnit("mph"));
+  kmhBtn.addEventListener("click", () => setUnit("kmh"));
+  msBtn.addEventListener("click", () => setUnit("ms"));
+  mphBtn.addEventListener("click", () => setUnit("mph"));
 
-        analogBtn.addEventListener("click", () => setDisplayMode("analog"));
-        digitalBtn.addEventListener("click", () => setDisplayMode("digital"));
+  analogBtn.addEventListener("click", () => setDisplayMode("analog"));
+  digitalBtn.addEventListener("click", () => setDisplayMode("digital"));
 
-        document.getElementById("theme-toggle-btn").addEventListener("click", toggleTheme);
-      }
+  document.getElementById("theme-toggle-btn").addEventListener("click", toggleTheme);
+}
 
       // Start GPS tracking
       function startTracking() {
@@ -820,62 +948,272 @@ transform="rotate(-15 150 150)"/>
 
       // Stop GPS tracking
       function stopTracking() {
-        startStopBtn.innerHTML = '<i class="fa-solid fa-circle-play"></i><br />התחל';
-        startStopBtn.classList.remove("btn-danger");
-        startStopBtn.classList.add("btn-primary");
-        
-        if (watchId !== null) {
-          navigator.geolocation.clearWatch(watchId);
-          watchId = null;
-        }
+  startStopBtn.innerHTML = '<i class="fa-solid fa-circle-play"></i><br />התחל';
+  startStopBtn.classList.remove("btn-danger");
+  startStopBtn.classList.add("btn-primary");
+  
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
 
-        isTracking = false;
-        resetBtn.disabled = false;
+  isTracking = false;
+  resetBtn.disabled = false;
 
-        document
-          .querySelector(".speedometer-container")
-          .classList.remove("recording");
+  document.querySelector(".speedometer-container").classList.remove("recording");
 
-        if (positions.length > 0) {
-          const lastPos = positions[positions.length - 1];
-          if (endMarker) {
-            map.removeLayer(endMarker);
-          }
-          endMarker = L.marker([lastPos.lat, lastPos.lng], {
-            icon: L.divIcon({
-              className: "end-marker",
-              html: '<div style="background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
-              iconSize: [15, 15],
-            }),
-          }).addTo(map);
-          endMarker.bindPopup("נקודת סיום").openPopup();
-        }
+  // שמירת המסלול אם יש מספיק נתונים
+  if (positions.length > 1) {
+    saveTrack();
+  }
+
+  // הוספת מרקר סיום אם יש מיקומים
+  if (positions.length > 0) {
+    const lastPos = positions[positions.length - 1];
+    if (endMarker) {
+      map.removeLayer(endMarker);
+    }
+    endMarker = L.marker([lastPos.lat, lastPos.lng], {
+      icon: L.divIcon({
+        className: "end-marker",
+        html: '<div style="background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
+        iconSize: [15, 15],
+      }),
+    }).addTo(map);
+    endMarker.bindPopup("נקודת סיום").openPopup();
+  }
+}
+
+function loadSavedTracks() {
+  const saved = localStorage.getItem('speed99_saved_tracks');
+  if (saved) {
+    try {
+      savedTracks = JSON.parse(saved);
+      renderSavedTracks();
+    } catch (e) {
+      console.error("שגיאה בטעינת מסלולים שמורים:", e);
+      savedTracks = [];
+      renderSavedTracks();
+    }
+  } else {
+    savedTracks = [];
+    renderSavedTracks();
+  }
+}
+
+function renderSavedTracks() {
+  const tracksList = document.getElementById('saved-tracks-list');
+  
+  if (savedTracks.length === 0) {
+    tracksList.innerHTML = '<div class="empty-tracks">אין מסלולים שמורים</div>';
+    return;
+  }
+
+  tracksList.innerHTML = savedTracks.map(track => `
+    <div class="track-item" data-id="${track.id}">
+      <div class="track-info">
+        <div><strong>תאריך:</strong> ${track.date}</div>
+        <div><strong>מרחק:</strong> ${track.distance} ק"מ</div>
+        <div><strong>זמן:</strong> ${track.duration}</div>
+        <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${track.unit || 'קמ"ש'}</div>
+      </div>
+      <div class="track-actions">
+        <button class="track-btn track-btn-view" onclick="viewTrack('${track.id}')">
+          <i class="fas fa-map-marked-alt"></i> הצג במפה
+        </button>
+        <button class="track-btn track-btn-delete" onclick="deleteTrack('${track.id}')">
+          <i class="fas fa-trash"></i> מחק
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewTrack(trackId) {
+  const track = savedTracks.find(t => t.id == trackId);
+  if (!track) return;
+
+  // נקה את המפה
+  if (startMarker) map.removeLayer(startMarker);
+  if (endMarker) map.removeLayer(endMarker);
+  if (routeLine) map.removeLayer(routeLine);
+
+  // צייר את המסלול
+  const lineCoords = track.positions.map(pos => [pos.lat, pos.lng]);
+  routeLine = L.polyline(lineCoords, {
+    color: "#3498db",
+    weight: 5,
+    opacity: 0.7,
+  }).addTo(map);
+
+  // הוסף מרקרים להתחלה וסיום
+  if (track.positions.length > 0) {
+    const firstPos = track.positions[0];
+    const lastPos = track.positions[track.positions.length - 1];
+
+    startMarker = L.marker([firstPos.lat, firstPos.lng], {
+      icon: L.divIcon({
+        className: "start-marker",
+        html: '<div style="background-color: #2ecc71; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
+        iconSize: [15, 15],
+      }),
+    }).addTo(map).bindPopup("נקודת התחלה");
+
+    endMarker = L.marker([lastPos.lat, lastPos.lng], {
+      icon: L.divIcon({
+        className: "end-marker",
+        html: '<div style="background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
+        iconSize: [15, 15],
+      }),
+    }).addTo(map).bindPopup("נקודת סיום");
+
+    // מרכז את המפה על המסלול
+    map.fitBounds(routeLine.getBounds());
+  }
+
+  // הדגש את הפריט ברשימה
+  document.querySelectorAll('.track-item').forEach(item => {
+    item.style.border = '1px solid var(--border-color)';
+    if (item.dataset.id == trackId) {
+      item.style.border = '2px solid var(--primary-color)';
+      item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+}
+
+function deleteTrack(trackId) {
+  if (!confirm('האם אתה בטוח שברצונך למחוק מסלול זה?')) return;
+
+  savedTracks = savedTracks.filter(track => track.id != trackId);
+  localStorage.setItem('speed99_saved_tracks', JSON.stringify(savedTracks));
+  
+  // רענון הרשימה
+  renderSavedTracks();
+  
+  // אם המסלול שהיה מוצג נמחק, נקה את המפה
+  const currentTrack = document.querySelector('.track-item[style*="primary-color"]');
+  if (!currentTrack || currentTrack.dataset.id == trackId) {
+    if (routeLine) map.removeLayer(routeLine);
+    if (startMarker) map.removeLayer(startMarker);
+    if (endMarker) map.removeLayer(endMarker);
+  }
+  
+  // אנימציה למחיקה
+  const deletedItem = document.querySelector(`.track-item[data-id="${trackId}"]`);
+  if (deletedItem) {
+    deletedItem.classList.add('shake');
+    setTimeout(() => {
+      deletedItem.remove();
+      if (savedTracks.length === 0) {
+        renderSavedTracks(); // להציג הודעה שאין מסלולים
       }
+    }, 500);
+  }
+}
+
+function saveTrack() {
+  if (positions.length < 2) {
+    console.log("אין מספיק נקודות מיקום לשמירת מסלול");
+    return;
+  }
+
+  const track = {
+    id: Date.now(),
+    date: new Date().toLocaleString('he-IL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }),
+    distance: (totalDistance / 1000).toFixed(2),
+    duration: durationEl.textContent,
+    maxSpeed: maxSpeedEl.textContent,
+    avgSpeed: avgSpeedEl.textContent,
+    positions: positions,
+    unit: getUnitLabel(currentUnit)
+  };
+  
+  savedTracks.unshift(track);
+  
+  try {
+    localStorage.setItem('speed99_saved_tracks', JSON.stringify(savedTracks));
+    
+    // רענון הרשימה
+    renderSavedTracks();
+    
+    // אנימציה ויזואלית
+    document.querySelector(".stats-container").classList.add("saved");
+    setTimeout(() => {
+      document.querySelector(".stats-container").classList.remove("saved");
+    }, 500);
+    
+    // הודעה למשתמש
+    alert(`המסלול נשמר בהצלחה!\nתאריך: ${track.date}\nמרחק: ${track.distance} ק"מ\nזמן: ${track.duration}`);
+  } catch (e) {
+    console.error("שגיאה בשמירת מסלול:", e);
+    alert("אירעה שגיאה בשמירת המסלול. ייתכן שאין מספיק מקום באחסון המקומי.");
+  }
+}
+
+function clearAllTracks() {
+  if (savedTracks.length === 0) {
+    alert("אין מסלולים שמורים למחיקה");
+    return;
+  }
+
+  if (confirm('האם אתה בטוח שברצונך למחוק את כל ה-' + savedTracks.length + ' המסלולים השמורים?\nפעולה זו לא ניתנת לביטול!')) {
+    try {
+      savedTracks = [];
+      localStorage.removeItem('speed99_saved_tracks');
+      
+      // נקה את המפה אם מוצג מסלול
+      if (routeLine) map.removeLayer(routeLine);
+      if (startMarker) map.removeLayer(startMarker);
+      if (endMarker) map.removeLayer(endMarker);
+      
+      // רענון הרשימה
+      renderSavedTracks();
+      
+      // אנימציה ויזואלית
+      const container = document.querySelector(".saved-tracks-container");
+      container.classList.add("shake");
+      setTimeout(() => {
+        container.classList.remove("shake");
+      }, 500);
+      
+      alert('כל המסלולים נמחקו בהצלחה');
+    } catch (e) {
+      console.error("שגיאה במחיקת מסלולים:", e);
+      alert("אירעה שגיאה במחיקת המסלולים");
+    }
+  }
+}
 
       // Reset tracking data
       function resetTracking() {
-        currentSpeed = 0;
-        maxSpeed = 0;
-        totalDistance = 0;
-        lastPosition = null;
-        positions = [];
+  currentSpeed = 0;
+  maxSpeed = 0;
+  totalDistance = 0;
+  lastPosition = null;
+  positions = [];
 
-        updateSpeedDisplay(0);
-        distanceEl.textContent = "0.00";
-        avgSpeedEl.textContent = "0.0";
-        maxSpeedEl.textContent = "0.0";
-        durationEl.textContent = "00:00:00";
+  updateSpeedDisplay(0);
+  distanceEl.textContent = "0.00";
+  avgSpeedEl.textContent = "0.0";
+  maxSpeedEl.textContent = "0.0";
+  durationEl.textContent = "00:00:00";
 
-        // Reset map
-        if (startMarker) map.removeLayer(startMarker);
-        if (endMarker) map.removeLayer(endMarker);
-        if (routeLine) map.removeLayer(routeLine);
-        startMarker = null;
-        endMarker = null;
-        routeLine = null;
+  // Reset map
+  if (startMarker) map.removeLayer(startMarker);
+  if (endMarker) map.removeLayer(endMarker);
+  if (routeLine) map.removeLayer(routeLine);
+  startMarker = null;
+  endMarker = null;
+  routeLine = null;
 
-        resetBtn.disabled = true;
-      }
+  resetBtn.disabled = true;
+}
 
       // Update position data from GPS
       function updatePosition(position) {
