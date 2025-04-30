@@ -153,51 +153,55 @@
       }
 
       .speedometer {
-        width: 300px;
-        height: 300px;
-        margin: 20px auto;
-        position: relative;
-        border-radius: 50%;
-        background-color: var(--card-bg);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-      }
+  width: 300px;
+  height: 300px;
+  position: relative;
+}
 
-      .gauge {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        position: relative;
-        overflow: hidden;
-      }
+.gauge-svg {
+  width: 100%;
+  height: 100%;
+}
 
-      .dial {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        background: conic-gradient(
-          var(--primary-color) 0%,
-          var(--secondary-color) 50%,
-          var(--danger-color) 85%,
-          var(--danger-color) 100%
-        );
-        clip-path: polygon(50% 50%, 100% 0, 100% 50%, 100% 100%, 0 100%, 0 0);
-        position: absolute;
-        transition: clip-path 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      }
+.dial {
+  fill: conic-gradient(
+    from 30deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 50%,
+    var(--danger-color) 85%,
+    var(--danger-color) 100%
+  );
+}
 
-      .mask {
-        position: absolute;
-        width: 80%;
-        height: 80%;
-        background-color: var(--card-bg);
-        border-radius: 50%;
-        top: 10%;
-        left: 10%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-      }
+.major-tick {
+  stroke: var(--text-color);
+  stroke-width: 3;
+}
+
+.minor-tick {
+  stroke: var(--text-color);
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+.major-ticks line {
+  stroke: var(--text-color);
+  stroke-width: 2;
+}
+
+.major-ticks text {
+  font-size: 12px;
+  fill: var(--text-color);
+  text-anchor: middle;
+}
+
+.mask {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
 
       .speed-value {
         font-size: 3rem;
@@ -210,13 +214,19 @@
         color: var(--primary-color);
       }
 
-      .ticks {
-        z-index: 10;
+      .ticks-container {
         position: absolute;
         width: 100%;
         height: 100%;
         top: 0;
         left: 0;
+        z-index: 10;
+      }
+
+      .ticks {
+        position: relative;
+        width: 100%;
+        height: 100%;
       }
 
       .tick {
@@ -224,8 +234,8 @@
         width: 2px;
         height: 10px;
         background-color: var(--text-color);
-        transform-origin: center 150px;
-        left: 149px;
+        transform-origin: 50% 100%;
+        left: calc(50% - 1px);
         top: 0;
       }
 
@@ -236,27 +246,21 @@
 
       .tick-label {
         position: absolute;
-        transform-origin: center 135px;
+        transform-origin: center;
         width: 40px;
         text-align: center;
         font-size: 12px;
         color: var(--text-color);
+        font-weight: bold;
+        z-index: 20;
+        left: calc(50% - 20px);
       }
 
       .needle {
-        position: absolute;
-        width: 4px;
-        height: 120px;
-        background-color: #e74c3c;
-        top: 30px;
-        left: 148px;
-        transform-origin: bottom center;
-        border-radius: 2px 2px 0 0;
-        transform: rotate(0deg);
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-        transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        z-index: 20; /* הוסף זאת */
-      }
+  transform: rotate(-120deg); /* מיקום התחלתי תואם לשנתות */
+  transform-origin: 150px 150px;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
 
       .needle::after {
         content: "";
@@ -317,6 +321,8 @@
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         max-width: 400px;
         margin: 0 auto;
+        margin-top: -30px;
+        margin-bottom: 20px;
         text-align: center;
         display: none;
       }
@@ -626,15 +632,25 @@
 
       <div class="speedometer-container fade-in">
         <div class="speedometer" id="analog-speedometer">
-          <div class="gauge">
-            <div class="dial"></div>
-            <div class="ticks" id="ticks"></div>
-            <div class="needle"></div>
-            <div class="mask">
-              <div class="speed-value">0</div>
-              <div class="speed-unit">קמ"ש</div>
-            </div>
+          <svg class="gauge-svg" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet">
+            <!-- רקע + שנתות + תוויות כחלק אחד -->
+            <path class="dial" d="M150,30 A120,120 0 0 1 270,150 A120,120 0 0 1 150,270 A120,120 0 0 1 30,150 A120,120 0 0 1 150,30 Z" 
+transform="rotate(-15 150 150)"/>          
+            <!-- שנתות עיקריות -->
+            <g class="major-ticks">
+              <!-- יווצר דינאמית ב-JS -->
+            </g>
+            
+            <!-- מחט -->
+            <line class="needle" x1="150" y1="150" x2="150" y2="70" stroke="#e74c3c" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="150" cy="150" r="8" fill="#e74c3c"/>
+          </svg>
+          
+          <div class="mask">
+            <div class="speed-value">0</div>
+            <div class="speed-unit">קמ"ש</div>
           </div>
+        </div>
         </div>
 
         <div class="digital-speedometer" id="digital-speedometer">
@@ -735,39 +751,63 @@
       }
 
       // Create tick marks for the analog speedometer
-      function createTicks(maxSpeed) {
-        ticksContainer.innerHTML = "";
-        const totalTicks = 12; // מספר שנתות עיקריות
-        const minorTicksPerMajor = 5; // מספר שנתות משניות בין כל שתי שנתות עיקריות
+// בפונקציית createTicks
+function createTicks(maxSpeed) {
+  const majorTicks = document.querySelector('.major-ticks');
+  majorTicks.innerHTML = '';
+  const centerX = 150, centerY = 150, radius = 100;
+  const totalTicks = 12;
+  const startAngle = -210; // זווית התחלה חדשה (45 מעלות שמאלה מהמקור)
+  const endAngle = 75;     // זווית סיום חדשה
 
-        for (let i = 0; i <= totalTicks; i++) {
-          // שנתות עיקריות
-          const rotation = -210 + i * (240 / totalTicks);
+  for (let i = 0; i <= totalTicks; i++) {
+    const angle = startAngle + (i * ((endAngle - startAngle) / totalTicks));
+    const radian = angle * (Math.PI / 180);
+    
+    // יצירת שנתות
+    const tickLength = i % 3 === 0 ? 20 : 10;
+    const x1 = centerX + radius * Math.cos(radian);
+    const y1 = centerY + radius * Math.sin(radian);
+    const x2 = centerX + (radius - tickLength) * Math.cos(radian);
+    const y2 = centerY + (radius - tickLength) * Math.sin(radian);
+    
+    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    tick.setAttribute('class', i % 3 === 0 ? 'major-tick' : 'minor-tick');
+    tick.setAttribute('x1', x1);
+    tick.setAttribute('y1', y1);
+    tick.setAttribute('x2', x2);
+    tick.setAttribute('y2', y2);
+    majorTicks.appendChild(tick);
+    
+    if (i % 3 === 0) {
+      const labelValue = Math.round((i / totalTicks) * maxSpeed);
+      const labelX = centerX + (radius - 35) * Math.cos(radian);
+      const labelY = centerY + (radius - 35) * Math.sin(radian);
+      
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', labelX);
+      label.setAttribute('y', labelY);
+      label.setAttribute('dy', '4px');
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = labelValue;
+      majorTicks.appendChild(label);
+    }
+  }
+}
 
-          const tick = document.createElement("div");
-          tick.className = "tick major";
-          tick.style.transform = `rotate(${rotation}deg)`;
-          ticksContainer.appendChild(tick);
+function updateSpeedDisplay(speedMps) {
+  currentSpeed = speedMps;
+  const convertedSpeed = convertSpeed(speedMps, "mps", currentUnit);
+  speedValue.textContent = convertedSpeed.toFixed(1);
+  digitalSpeed.textContent = convertedSpeed.toFixed(1);
 
-          // תוויות למהירויות
-          const labelValue = Math.round((i / totalTicks) * maxSpeed);
-          const label = document.createElement("div");
-          label.className = "tick-label";
-          label.textContent = labelValue;
-          label.style.transform = `rotate(${rotation}deg) translate(0, -20px) rotate(${-rotation}deg)`;
-          ticksContainer.appendChild(label);
-
-          // שנתות משניות
-          for (let j = 1; j < minorTicksPerMajor; j++) {
-            const minorRotation =
-              rotation + j * (240 / totalTicks / minorTicksPerMajor);
-            const minorTick = document.createElement("div");
-            minorTick.className = "tick";
-            minorTick.style.transform = `rotate(${minorRotation}deg)`;
-            ticksContainer.appendChild(minorTick);
-          }
-        }
-      }
+  // עדכון זווית המחט עם הטיה של 45 מעלות שמאלה
+  const angle = (convertedSpeed / currentMaxSpeed) * 240 - 165; // שינוי מ-120 ל-165
+  needle.style.transform = `rotate(${Math.min(
+    Math.max(angle, -165),
+    75
+  )}deg)`;
+}
 
       // Initialize the map
       function initMap() {
@@ -1018,6 +1058,7 @@
         }
 
         createTicks(currentMaxSpeed);
+        updateSpeedDisplay(currentSpeed);
       }
 
       // Set unit for speed display
