@@ -740,18 +740,15 @@ transform="rotate(-15 150 150)"/>
       }
 
       function updateSpeedDisplay(speedMps) {
-        currentSpeed = speedMps;
-        const convertedSpeed = convertSpeed(speedMps, "mps", currentUnit);
-        speedValue.textContent = convertedSpeed.toFixed(1);
-        digitalSpeed.textContent = convertedSpeed.toFixed(1);
+    currentSpeed = speedMps;
+    const convertedSpeed = convertSpeed(speedMps, "mps", currentUnit);
+    speedValue.textContent = convertedSpeed.toFixed(1);
+    digitalSpeed.textContent = convertedSpeed.toFixed(1);
 
-        const angle = (convertedSpeed / currentMaxSpeed) * 240 - 165;
-        needle.style.transform = `rotate(${Math.min(
-          Math.max(angle, -120),
-          75
-        )}deg)`;
-      }
-
+    // חישוב הזווית בהתאם לטווח המהירות הנוכחי
+    const angle = (convertedSpeed / currentMaxSpeed) * 240 - 120; // טווח זווית מ- -120° ל- 120°
+    needle.style.transform = `rotate(${Math.min(Math.max(angle, -120), 120)}deg)`;
+}
       // Initialize the map
       function initMap() {
         map = L.map("map").setView([32.0853, 34.7818], 13);
