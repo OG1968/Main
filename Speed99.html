@@ -375,23 +375,25 @@
         width: 100%;
       }
 
+
+
       #theme-btn {
-  min-width: 75px;
-  padding: 8px 5px;
-  font-size: 0.8rem;
-  line-height: 1;
-  margin: 2px;
-}
+        min-width: 75px;
+        padding: 8px 5px;
+        font-size: 0.8rem;
+        line-height: 1;
+        margin: 0px;
+      }
 
-#theme-btn img {
-  margin-bottom: 3px;
-  width: 16px;
-  height: 16px;
-}
+      #theme-btn img {
+        margin-bottom: 0px;
+        width: 16px;
+        height: 16px;
+      }
 
-#theme-btn:hover {
-  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
-}
+      #theme-btn:hover {
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+      }
 
       .slider {
         position: absolute;
@@ -731,6 +733,38 @@
         margin-bottom: 3px;
         font-size: 0.9rem;
       }
+
+      /* עיצוב כפתורי מצב תצוגה */
+.display-mode-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.display-mode-buttons .btn {
+  min-width: 80px;
+  width: 80px;
+  height: 60px;
+  padding: 8px 5px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.display-mode-buttons .btn i {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.display-mode-buttons .btn img.theme-icon {
+  width: 16px;
+  height: 16px;
+  margin-bottom: 5px;
+  object-fit: contain;
+}
     </style>
   </head>
   <body>
@@ -754,10 +788,17 @@
 
         <div class="control-group">
           <h3>מצב תצוגה</h3>
-          <button id="analog-btn" class="btn btn-toggle active">אנלוגי</button>
-          <button id="digital-btn" class="btn btn-toggle">דיגיטלי</button>
-          <button id="theme-btn" class="btn btn-toggle"><img src="images/moon.ico" alt="תצוגה" class="theme-icon" width="16" height="16" /></button>
-          
+          <div class="display-mode-buttons">
+            <button id="analog-btn" class="btn btn-toggle active">
+              <i class="fas fa-tachometer-alt"></i><br />אנלוגי
+            </button>
+            <button id="digital-btn" class="btn btn-toggle">
+              <i class="fas fa-digital-tachograph"></i><br />דיגיטלי
+            </button>
+            <button id="theme-btn" class="btn btn-toggle">
+              <img src="images/moon.ico" alt="תצוגה" class="theme-icon" /><br />תצוגה
+            </button>
+          </div>
           <h3>סוג מפה</h3>
           <button id="osm-btn" class="btn btn-toggle active">
             <i class="fas fa-map"></i><br />
