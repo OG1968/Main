@@ -709,7 +709,6 @@
         <div class="control-group">
           <h3>יחידות מדידה</h3>
           <button id="kmh-btn" class="btn btn-toggle active">ק"מ/שעה</button>
-          <button id="ms-btn" class="btn btn-toggle">מטר/שניה</button>
           <button id="mph-btn" class="btn btn-toggle">מייל/שעה</button>
         </div>
       </div>
@@ -910,7 +909,6 @@ transform="rotate(-15 150 150)"/>
 
   resetBtn.addEventListener("click", resetTracking);
   
-  // הוספת אירוע לכפתור החדש
   document.getElementById("clear-tracks-btn").addEventListener("click", clearAllTracks);
 
   walkingBtn.addEventListener("click", () => setSpeedRange("walking"));
@@ -918,7 +916,6 @@ transform="rotate(-15 150 150)"/>
   drivingBtn.addEventListener("click", () => setSpeedRange("driving"));
 
   kmhBtn.addEventListener("click", () => setUnit("kmh"));
-  msBtn.addEventListener("click", () => setUnit("ms"));
   mphBtn.addEventListener("click", () => setUnit("mph"));
 
   analogBtn.addEventListener("click", () => setDisplayMode("analog"));
@@ -1365,39 +1362,35 @@ function clearAllTracks() {
 
       // Set unit for speed display
       function setUnit(unit) {
-        kmhBtn.classList.remove("active");
-        msBtn.classList.remove("active");
-        mphBtn.classList.remove("active");
+  kmhBtn.classList.remove("active");
+  mphBtn.classList.remove("active");
 
-        switch (unit) {
-          case "kmh":
-            kmhBtn.classList.add("active");
-            break;
-          case "ms":
-            msBtn.classList.add("active");
-            break;
-          case "mph":
-            mphBtn.classList.add("active");
-            break;
-        }
+  switch (unit) {
+    case "kmh":
+      kmhBtn.classList.add("active");
+      break;
+    case "mph":
+      mphBtn.classList.add("active");
+      break;
+  }
 
-        currentUnit = unit;
-        speedUnit.textContent = getUnitLabel(unit);
-        digitalUnit.textContent = getUnitLabel(unit);
-        avgSpeedUnitEl.textContent = getUnitLabel(unit);
-        maxSpeedUnitEl.textContent = getUnitLabel(unit);
-      }
+  currentUnit = unit;
+  speedUnit.textContent = getUnitLabel(unit);
+  digitalUnit.textContent = getUnitLabel(unit);
+  avgSpeedUnitEl.textContent = getUnitLabel(unit);
+  maxSpeedUnitEl.textContent = getUnitLabel(unit);
+}
 
-      function getUnitLabel(unit) {
-        switch (unit) {
-          case "kmh":
-            return 'קמ"ש';
-          case "ms":
-            return "מ'/שנייה";
-          case "mph":
-            return "מייל/שעה";
-        }
-      }
+function getUnitLabel(unit) {
+  switch (unit) {
+    case "kmh":
+      return 'קמ"ש';
+    case "mph":
+      return "מייל/שעה";
+    default:
+      return 'קמ"ש'; // ערך ברירת מחדל למקרה שלא צפוי
+  }
+}
 
       // Toggle between analog and digital display
       function setDisplayMode(mode) {
@@ -1430,30 +1423,30 @@ function clearAllTracks() {
 
       // Convert speed between units
       function convertSpeed(value, fromUnit, toUnit) {
-        if (fromUnit === toUnit) return value;
+  if (fromUnit === toUnit) return value;
 
-        let mps;
-        switch (fromUnit) {
-          case "kmh":
-            mps = value / 3.6;
-            break;
-          case "mph":
-            mps = value * 0.44704;
-            break;
-          case "mps":
-            mps = value;
-            break;
-        }
+  let mps;
+  switch (fromUnit) {
+    case "kmh":
+      mps = value / 3.6;
+      break;
+    case "mph":
+      mps = value * 0.44704;
+      break;
+    case "mps":
+      mps = value;
+      break;
+  }
 
-        switch (toUnit) {
-          case "kmh":
-            return mps * 3.6;
-          case "mph":
-            return mps / 0.44704;
-          case "mps":
-            return mps;
-        }
-      }
+  switch (toUnit) {
+    case "kmh":
+      return mps * 3.6;
+    case "mph":
+      return mps / 0.44704;
+    default:
+      return mps * 3.6; // ברירת מחדל לקמ"ש
+  }
+}
 
       // Haversine formula for distance in meters
       function calculateDistance(lat1, lon1, lat2, lon2) {
