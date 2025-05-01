@@ -1261,8 +1261,7 @@
   const tracksList = document.getElementById("saved-tracks-list");
 
   if (savedTracks.length === 0) {
-    tracksList.innerHTML =
-      '<div class="empty-tracks">אין מסלולים שמורים</div>';
+    tracksList.innerHTML = '<div class="empty-tracks">אין מסלולים שמורים</div>';
     return;
   }
 
@@ -1274,25 +1273,21 @@
     <div><strong>תאריך:</strong> ${track.date}</div>
     <div><strong>מרחק:</strong> ${track.distance} קילומטר</div>
     <div><strong>זמן:</strong> ${track.duration}</div>
-    <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${
-        track.unit || 'קמ"ש'
-      }</div>
+    <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${track.unit || 'קמ"ש'}</div>
   </div>
   <div class="track-actions">
     <button class="track-btn track-btn-view" onclick="viewTrack('${track.id}')">
-      <i class="fas fa-map-marked-alt"></i> הצג במפה
+      <i class="fas fa-map-marked-alt"></i> הצג
     </button>
     <button class="track-btn track-btn-share" onclick="shareTrack('${track.id}')">
       <i class="fas fa-share-alt"></i> שתף
     </button>
-    <button class="track-btn track-btn-delete" onclick="deleteTrack('${
-      track.id
-    }')">
+    <button class="track-btn track-btn-delete" onclick="deleteTrack('${track.id}')">
       <i class="fas fa-trash"></i> מחק
     </button>
   </div>
 </div>
-  `
+`
     )
     .join("");
 }
