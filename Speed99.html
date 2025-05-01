@@ -619,23 +619,31 @@
       }
 
       .track-actions {
-        display: flex;
-        gap: 10px;
-      }
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-      .track-btn {
-        padding: 8px 12px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 0.8rem;
-        transition: all 0.2s;
-      }
+.track-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
 
-      .track-btn:hover {
-        transform: scale(1.05);
-      }
+.track-btn:hover {
+  transform: scale(1.05);
+}
+
+.track-btn i {
+  font-size: 14px;
+}
 
       .track-btn-view {
         background-color: var(--primary-color);
@@ -1294,46 +1302,47 @@
 
 <!-- הוסף את הפונקציה הבאה לטיפול בשיתוף -->
 function shareTrack(trackId) {
-  const track = savedTracks.find((t) => t.id == trackId);
-  if (!track) return;
+  try {
+    const track = savedTracks.find((t) => t.id == trackId);
+    if (!track) {
+      console.error('Track not found');
+      return;
+    }
 
-  // יצירת קישור עם נתוני המסלול
-  const trackData = {
-    id: track.id,
-    date: track.date,
-    distance: track.distance,
-    duration: track.duration,
-    maxSpeed: track.maxSpeed,
-    positions: track.positions,
-    unit: track.unit || 'קמ"ש'
-  };
+    // יצירת קישור עם נתוני המסלול
+    const trackData = {
+      id: track.id,
+      date: track.date,
+      distance: track.distance,
+      duration: track.duration,
+      maxSpeed: track.maxSpeed,
+      positions: track.positions,
+      unit: track.unit || 'קמ"ש'
+    };
 
-  // המרת הנתונים למחרוזת base64
-  const trackDataStr = JSON.stringify(trackData);
-  const base64Data = btoa(unescape(encodeURIComponent(trackDataStr)));
-  
-  // יצירת קישור שיתוף מלא
-  const currentUrl = new URL(window.location.href);
-  currentUrl.searchParams.set('track', base64Data);
-  const shareUrl = currentUrl.toString();
+    // המרת הנתונים למחרוזת base64
+    const trackDataStr = JSON.stringify(trackData);
+    const base64Data = btoa(unescape(encodeURIComponent(trackDataStr)));
+    
+    // יצירת קישור שיתוף מלא
+    const shareUrl = `${window.location.origin}${window.location.pathname}?track=${encodeURIComponent(base64Data)}`;
 
-  // בדיקה אם Web Share API נתמך וזמין בשימוש
-  if (isWebShareSupported()) {
-    try {
+    // בדיקה אם Web Share API נתמך
+    if (navigator.share) {
       navigator.share({
         title: `מסלול GPS מתאריך ${track.date}`,
-        text: `מסלול באורך ${track.distance} ק"מ, זמן ${track.duration}, מהירות מקסימלית ${track.maxSpeed} ${track.unit || 'קמ"ש'}`,
+        text: `מסלול באורך ${track.distance} ק"מ, זמן ${track.duration}`,
         url: shareUrl
       }).catch(err => {
-        console.log('שגיאה בשיתוף:', err);
-        fallbackShare(shareUrl);
+        console.log('User canceled share:', err);
+        copyToClipboard(shareUrl);
       });
-    } catch (e) {
-      console.log('שגיאה בשיתוף:', e);
-      fallbackShare(shareUrl);
+    } else {
+      copyToClipboard(shareUrl);
     }
-  } else {
-    fallbackShare(shareUrl);
+  } catch (error) {
+    console.error('Error in shareTrack:', error);
+    alert('אירעה שגיאה בניסיון לשתף את המסלול');
   }
 }
 
@@ -1345,12 +1354,19 @@ function isWebShareSupported() {
 }
 
 // פונקציית גיבוי לשיתוף
-function copyToClipboardWithFeedback(text) {
+function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => {
-    showNotification('קישור המסלול הועתק ללוח!', '#27ae60');
+    alert('קישור המסלול הועתק ללוח:\n' + text);
   }).catch(err => {
-    console.error('שגיאה בהעתקה ללוח:', err);
-    showNotification('לא הצלחנו להעתיק את הקישור, נסה שוב', '#e74c3c');
+    console.error('Failed to copy:', err);
+    // Fallback for older browsers
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    alert('קישור המסלול הועתק ללוח');
   });
 }
 
