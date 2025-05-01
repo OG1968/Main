@@ -765,17 +765,6 @@
   margin-bottom: 5px;
   object-fit: contain;
 }
-
-.track-btn-share {
-  background-color: #f39c12;
-  color: white;
-}
-
-.track-btn-share:hover {
-  background-color: #e67e22;
-  box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
-}
-
     </style>
   </head>
   <body>
@@ -1258,185 +1247,41 @@
       }
 
       function renderSavedTracks() {
-  const tracksList = document.getElementById("saved-tracks-list");
+        const tracksList = document.getElementById("saved-tracks-list");
 
-  if (savedTracks.length === 0) {
-    tracksList.innerHTML = '<div class="empty-tracks">אין מסלולים שמורים</div>';
-    return;
-  }
+        if (savedTracks.length === 0) {
+          tracksList.innerHTML =
+            '<div class="empty-tracks">אין מסלולים שמורים</div>';
+          return;
+        }
 
-  tracksList.innerHTML = savedTracks
-    .map(
-      (track) => `
+        tracksList.innerHTML = savedTracks
+          .map(
+            (track) => `
 <div class="track-item" data-id="${track.id}">
   <div class="track-info">
     <div><strong>תאריך:</strong> ${track.date}</div>
     <div><strong>מרחק:</strong> ${track.distance} קילומטר</div>
     <div><strong>זמן:</strong> ${track.duration}</div>
-    <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${track.unit || 'קמ"ש'}</div>
+    <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${
+              track.unit || 'קמ"ש'
+            }</div>
   </div>
   <div class="track-actions">
     <button class="track-btn track-btn-view" onclick="viewTrack('${track.id}')">
-      <i class="fas fa-map-marked-alt"></i> הצג
+      <i class="fas fa-map-marked-alt"></i> הצג במפה
     </button>
-    <button class="track-btn track-btn-share" onclick="shareTrack('${track.id}')">
-      <i class="fas fa-share-alt"></i> שתף
-    </button>
-    <button class="track-btn track-btn-delete" onclick="deleteTrack('${track.id}')">
+    <button class="track-btn track-btn-delete" onclick="deleteTrack('${
+      track.id
+    }')">
       <i class="fas fa-trash"></i> מחק
     </button>
   </div>
 </div>
-`
-    )
-    .join("");
-}
-
-<!-- הוסף את הפונקציה הבאה לטיפול בשיתוף -->
-function shareTrack(trackId) {
-  const track = savedTracks.find((t) => t.id == trackId);
-  if (!track) return;
-
-  // יצירת קישור עם נתוני המסלול
-  const trackData = {
-    id: track.id,
-    date: track.date,
-    distance: track.distance,
-    duration: track.duration,
-    maxSpeed: track.maxSpeed,
-    positions: track.positions
-  };
-
-  // המרת הנתונים למחרוזת base64
-  const trackDataStr = JSON.stringify(trackData);
-  const base64Data = btoa(unescape(encodeURIComponent(trackDataStr)));
-  
-  // יצירת קישור שיתוף
-  const shareUrl = `${window.location.origin}${window.location.pathname}?track=${base64Data}`;
-
-  // בדיקה אם API השיתוף של הדפדפן זמין
-  if (navigator.share) {
-    navigator.share({
-      title: `מסלול GPS מתאריך ${track.date}`,
-      text: `מסלול באורך ${track.distance} ק"מ, זמן ${track.duration}, מהירות מקסימלית ${track.maxSpeed} ${track.unit || 'קמ"ש'}`,
-      url: shareUrl
-    }).catch(err => {
-      console.log('שגיאה בשיתוף:', err);
-      copyToClipboard(shareUrl);
-    });
-  } else {
-    // אם API השיתוף לא זמין, העתק ללוח
-    copyToClipboard(shareUrl);
-  }
-}
-
-function copyToClipboard(text) {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand('copy');
-  document.body.removeChild(textarea);
-  
-  alert('קישור המסלול הועתק ללוח! ניתן לשתף אותו כעת.');
-}
-
-function loadSharedTrack() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const trackData = urlParams.get('track');
-  
-  if (trackData) {
-    try {
-      const decodedData = decodeURIComponent(escape(atob(trackData)));
-      const sharedTrack = JSON.parse(decodedData);
-      
-      // הצג את המסלול במפה
-      displaySharedTrack(sharedTrack);
-      
-      // הצעה לשמירת המסלול
-      if (confirm('האם ברצונך לשמור את המסלול המשותף ברשימת המסלולים שלך?')) {
-        saveSharedTrack(sharedTrack);
+  `
+          )
+          .join("");
       }
-    } catch (e) {
-      console.error('שגיאה בטעינת מסלול משותף:', e);
-    }
-  }
-}
-
-function displaySharedTrack(track) {
-  // נקה את המפה
-  if (startMarker) map.removeLayer(startMarker);
-  if (endMarker) map.removeLayer(endMarker);
-  if (routeLine) map.removeLayer(routeLine);
-
-  // צייר את המסלול
-  const lineCoords = track.positions.map(pos => [pos.lat, pos.lng]);
-  routeLine = L.polyline(lineCoords, {
-    color: "#3498db",
-    weight: 5,
-    opacity: 0.7
-  }).addTo(map);
-
-  // הוסף מרקרים להתחלה וסיום
-  if (track.positions.length > 0) {
-    const firstPos = track.positions[0];
-    const lastPos = track.positions[track.positions.length - 1];
-
-    startMarker = L.marker([firstPos.lat, firstPos.lng], {
-      icon: L.divIcon({
-        className: "start-marker",
-        html: '<div style="background-color: #2ecc71; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
-        iconSize: [15, 15],
-      }),
-    }).addTo(map).bindPopup("נקודת התחלה");
-
-    endMarker = L.marker([lastPos.lat, lastPos.lng], {
-      icon: L.divIcon({
-        className: "end-marker",
-        html: '<div style="background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
-        iconSize: [15, 15],
-      }),
-    }).addTo(map).bindPopup("נקודת סיום");
-
-    // מרכז את המפה על המסלול
-    map.fitBounds(routeLine.getBounds());
-  }
-}
-
-function saveSharedTrack(track) {
-  // הוסף את המסלול לרשימה
-  savedTracks.unshift({
-    id: track.id || Date.now(),
-    date: track.date || new Date().toLocaleString("he-IL", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    }),
-    distance: track.distance || "0.00",
-    duration: track.duration || "00:00:00",
-    maxSpeed: track.maxSpeed || "0.0",
-    positions: track.positions || [],
-    unit: track.unit || 'קמ"ש'
-  });
-
-  // שמור ב-localStorage
-  localStorage.setItem("speed99_saved_tracks", JSON.stringify(savedTracks));
-  
-  // רענן את הרשימה
-  renderSavedTracks();
-  
-  alert('המסלול נשמר בהצלחה!');
-}
-
-function init() {
-  createTicks(currentMaxSpeed);
-  initMap();
-  setupEventListeners();
-  loadSavedTracks();
-  loadSharedTrack(); // הוסף שורה זו
-}
 
       function viewTrack(trackId) {
         const track = savedTracks.find((t) => t.id == trackId);
