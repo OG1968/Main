@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="images/speed.png" />
     <link
       rel="stylesheet"
@@ -23,6 +23,11 @@
         --border-color: #ddd;
         --theme-toggle-bg: #ceab6a;
         --hover-primary-color: #266996;
+      }
+
+      html, body {
+        overflow-x: hidden;
+        width: 100%;
       }
 
       .dark-theme {
@@ -51,8 +56,9 @@
         min-height: 100vh;
       }
 
-      .container {
+      .container {   
         max-width: 800px;
+        overflow: hidden;
         margin: 0 auto;
       }
 
@@ -78,14 +84,14 @@
       }
 
       .control-group {
-        justify-content: center;
+        justify-items: center;
         background-color: var(--card-bg);
-        padding: 5px;
+        padding: 10px;
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(70, 0, 0, 0.9);
+        box-shadow: 0 4px 3px rgba(70, 0, 0, 0.9);
         flex: 1;
         min-width: 280px;
-        max-width: 100%;
+        max-width:100%;
       }
 
       .control-group h3 {
@@ -295,12 +301,12 @@
 
       .stat-card {
         background-color: var(--card-bg);
-        padding: 20px;
+        padding: 10px;
         border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(70, 0, 0, 0.9);
+        box-shadow: 0 4px 3px rgba(70, 0, 0, 0.9);
         flex: 1;
         min-width: 150px;
-        max-width: 200px;
+        max-width: calc(200px - 10px);
         text-align: center;
         transition: transform 0.3s;
       }
@@ -348,13 +354,13 @@
       }
 
       .map-container {
-        max-width: 850px;
+        max-width: 810px;
         margin:auto;
         height: 400px;
         margin-top: 20px;
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 0px 16px rgba(0, 255, 255, 0.9);
+        box-shadow: 0 4px 3px rgba(70, 0, 0, 0.9);
       }
 
       #map {
@@ -436,10 +442,6 @@
       @media (max-width: 800px) {
         .controls {
           flex-direction: column;
-        }
-
-        .control-group {
-          width: 100%;
         }
 
         .needle {
@@ -569,9 +571,9 @@
   background-color: var(--card-bg);
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(70, 0, 0, 0.5);
+  box-shadow: 0 4px 3px rgba(70, 0, 0, 0.9);
   margin-top: 20px;
-  max-width: 850px;
+  max-width: 810px;
   margin-left: auto;
   margin-right: auto;
 }
