@@ -931,33 +931,6 @@
       let isDarkTheme = false;
       let backgroundNotification = null;
 
-      // בתחילת הקובץ, אחרי הגדרת המשתנים
-      if (typeof localStorage === "undefined") {
-        alert(
-          "הדפדפן שלך אינו תומך באחסון מקומי. מסלולים לא יישמרו בין הפעלות."
-        );
-      }
-
-      // בבדיקת תמיכה בשמירת נתונים
-      function checkStorageSupport() {
-        try {
-          const testKey = "speed99_test";
-          localStorage.setItem(testKey, testKey);
-          localStorage.removeItem(testKey);
-          return true;
-        } catch (e) {
-          console.error("האחסון המקומי לא זמין:", e);
-          return false;
-        }
-      }
-
-      // בעת טעינת האפליקציה
-      if (!checkStorageSupport()) {
-        document.getElementById("clear-tracks-btn").disabled = true;
-        document.getElementById("clear-tracks-btn").title =
-          "האחסון המקומי לא זמין";
-      }
-
       // Initialize the application
       function init() {
         createTicks(currentMaxSpeed);
