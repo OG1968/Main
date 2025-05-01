@@ -2,7 +2,10 @@
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"
+    />
     <link rel="icon" type="image/x-icon" href="images/speed.png" />
     <link
       rel="stylesheet"
@@ -13,6 +16,7 @@
       rel="stylesheet"
     />
     <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet" />
+
     <title>ספידומטר GPS</title>
     <style>
       :root {
@@ -526,7 +530,6 @@
         from {
           opacity: 0;
         }
-
         to {
           opacity: 1;
         }
@@ -541,12 +544,10 @@
         0% {
           transform: scale(1);
         }
-
         50% {
           transform: scale(1.02);
           box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
         }
-
         100% {
           transform: scale(1);
         }
@@ -556,19 +557,15 @@
         0% {
           transform: translateX(0);
         }
-
         25% {
           transform: translateX(-5px);
         }
-
         50% {
           transform: translateX(5px);
         }
-
         75% {
           transform: translateX(-5px);
         }
-
         100% {
           transform: translateX(0);
         }
@@ -671,19 +668,15 @@
         0% {
           transform: translateX(0);
         }
-
         25% {
           transform: translateX(-5px);
         }
-
         50% {
           transform: translateX(5px);
         }
-
         75% {
           transform: translateX(-5px);
         }
-
         100% {
           transform: translateX(0);
         }
@@ -710,32 +703,33 @@
           />
         </button>
       </div>
+
       <h1>ספידומטר GPS</h1>
+
       <div class="controls fade-in">
         <div class="control-group">
           <h3>בקרת מדידה</h3>
           <button id="start-stop-btn" class="btn btn-primary">
-            <i class="fa-solid fa-circle-play"></i>
-            <br />התחל
+            <i class="fa-solid fa-circle-play"></i><br />התחל
           </button>
           <button id="reset-btn" class="btn btn-secondary">
-            <i class="fa-solid fa-rotate"></i>
-            <br />איפוס
+            <i class="fa-solid fa-rotate"></i><br />איפוס
           </button>
           <button id="clear-tracks-btn" class="btn btn-danger">
-            <i class="fa-solid fa-trash"></i>
-            <br />מחק מסלולים
+            <i class="fa-solid fa-trash"></i><br />מחק מסלולים
           </button>
         </div>
+
         <div class="control-group">
           <h3>מצב תצוגה</h3>
           <button id="analog-btn" class="btn btn-toggle active">אנלוגי</button>
           <button id="digital-btn" class="btn btn-toggle">דיגיטלי</button>
         </div>
+
         <div class="control-group">
           <h3>טווח מהירות</h3>
           <button id="walking-btn" class="btn btn-toggle active">
-            רגלית <i class="fa-solid fa-person-walking"></i> <br />(0-12 קמ"ש)
+            רגלית <i class="fa-solid fa-person-walking"></i><br />(0-12 קמ"ש)
           </button>
           <button id="cycling-btn" class="btn btn-toggle">
             אופניים <i class="fa-solid fa-bicycle"></i> <br />(0-40 קמ"ש)
@@ -744,12 +738,14 @@
             רכב <i class="fa-solid fa-car"></i> <br />(0-180 קמ"ש)
           </button>
         </div>
+
         <div class="control-group">
           <h3>יחידות מדידה</h3>
           <button id="kmh-btn" class="btn btn-toggle active">ק"מ/שעה</button>
           <button id="mph-btn" class="btn btn-toggle">מייל/שעה</button>
         </div>
       </div>
+
       <div class="speedometer-container fade-in">
         <div class="speedometer" id="analog-speedometer">
           <svg
@@ -763,6 +759,7 @@
               transform="rotate(-15 150 150)"
             />
             <g class="major-ticks"></g>
+
             <line
               class="needle"
               x1="150"
@@ -775,47 +772,56 @@
             />
             <circle cx="150" cy="150" r="8" fill="#e74c3c" />
           </svg>
+
           <div class="mask">
             <div class="speed-value">0</div>
             <div class="speed-unit">קמ"ש</div>
           </div>
         </div>
       </div>
+
       <div class="digital-speedometer" id="digital-speedometer">
         <div class="digital-speed">0.0</div>
         <div class="digital-unit">קמ"ש</div>
       </div>
     </div>
+
     <div class="stats-container fade-in">
       <div class="stat-card">
         <h3>מרחק</h3>
         <div id="distance" class="value">0.00</div>
         <div class="unit">קילומטר</div>
       </div>
+
       <div class="stat-card">
         <h3>זמן</h3>
         <div id="duration" class="value">00:00:00</div>
         <div class="unit">שעות:דקות:שניות</div>
       </div>
+
       <div class="stat-card">
         <h3>מהירות ממוצעת</h3>
         <div id="avg-speed" class="value">0.0</div>
         <div class="unit" id="avg-speed-unit">קמ"ש</div>
       </div>
+
       <div class="stat-card">
         <h3>מהירות מקסימלית</h3>
         <div id="max-speed" class="value">0.0</div>
         <div class="unit" id="max-speed-unit">קמ"ש</div>
       </div>
     </div>
+
     <div class="map-container fade-in">
       <div id="map"></div>
     </div>
+
     <div class="saved-tracks-container fade-in">
       <h3>מסלולים שמורים</h3>
       <div id="saved-tracks-list" class="tracks-list">
         <!-- כאן יוטענו המסלולים -->
       </div>
+
       <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
       <link
         rel="stylesheet"
@@ -850,6 +856,7 @@
       const needle = document.querySelector(".needle");
       const ticksContainer = document.getElementById("ticks");
       const themeIcons = document.querySelectorAll(".theme-icon");
+
       // State variables
       let watchId = null;
       let isTracking = false;
@@ -866,6 +873,7 @@
       let endMarker = null;
       let routeLine = null;
       let isDarkTheme = false;
+
       // Initialize the speedometer
       function init() {
         createTicks(currentMaxSpeed);
@@ -883,14 +891,17 @@
         const totalTicks = 12;
         const startAngle = -210;
         const endAngle = 75;
+
         for (let i = 0; i <= totalTicks; i++) {
           const angle = startAngle + i * ((endAngle - startAngle) / totalTicks);
           const radian = angle * (Math.PI / 180);
+
           const tickLength = i % 3 === 0 ? 20 : 10;
           const x1 = centerX + radius * Math.cos(radian);
           const y1 = centerY + radius * Math.sin(radian);
           const x2 = centerX + (radius - tickLength) * Math.cos(radian);
           const y2 = centerY + (radius - tickLength) * Math.sin(radian);
+
           const tick = document.createElementNS(
             "http://www.w3.org/2000/svg",
             "line"
@@ -901,10 +912,12 @@
           tick.setAttribute("x2", x2);
           tick.setAttribute("y2", y2);
           majorTicks.appendChild(tick);
+
           if (i % 3 === 0) {
             const labelValue = Math.round((i / totalTicks) * maxSpeed);
             const labelX = centerX + (radius - 35) * Math.cos(radian);
             const labelY = centerY + (radius - 35) * Math.sin(radian);
+
             const label = document.createElementNS(
               "http://www.w3.org/2000/svg",
               "text"
@@ -924,6 +937,7 @@
         const convertedSpeed = convertSpeed(speedMps, "mps", currentUnit);
         speedValue.textContent = convertedSpeed.toFixed(1);
         digitalSpeed.textContent = convertedSpeed.toFixed(1);
+
         // חישוב הזווית בהתאם לטווח המהירות הנוכחי
         const angle = (convertedSpeed / currentMaxSpeed) * 240 - 120; // טווח זווית מ- -120° ל- 120°
         needle.style.transform = `rotate(${Math.min(
@@ -934,11 +948,13 @@
       // Initialize the map
       function initMap() {
         map = L.map("map").setView([32.0853, 34.7818], 13);
+
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution:
-            '&copy;  < a href = "https://www.openstreetmap.org/copyright" > OpenStreetMap < /a> contributors',
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(map);
       }
+
       // Set up event listeners
       function setupEventListeners() {
         startStopBtn.addEventListener("click", function () {
@@ -948,44 +964,53 @@
             stopTracking();
           }
         });
+
         resetBtn.addEventListener("click", resetTracking);
+
         document
           .getElementById("clear-tracks-btn")
           .addEventListener("click", clearAllTracks);
+
         walkingBtn.addEventListener("click", () => setSpeedRange("walking"));
         cyclingBtn.addEventListener("click", () => setSpeedRange("cycling"));
         drivingBtn.addEventListener("click", () => setSpeedRange("driving"));
+
         kmhBtn.addEventListener("click", () => setUnit("kmh"));
         mphBtn.addEventListener("click", () => setUnit("mph"));
+
         analogBtn.addEventListener("click", () => setDisplayMode("analog"));
         digitalBtn.addEventListener("click", () => setDisplayMode("digital"));
+
         document
           .getElementById("theme-toggle-btn")
           .addEventListener("click", toggleTheme);
       }
+
       // Start GPS tracking
       function startTracking() {
         startStopBtn.innerHTML =
-          ' < i class = "fa-solid fa-circle-stop" > < /i> < br / > סיים ';
+          '<i class="fa-solid fa-circle-stop"></i><br />סיים';
         startStopBtn.classList.remove("btn-primary");
         startStopBtn.classList.add("btn-danger");
+
         if (navigator.geolocation) {
           try {
             watchId = navigator.geolocation.watchPosition(
               updatePosition,
               handleLocationError,
-              {
-                enableHighAccuracy: true,
-                maximumAge: 0,
-              }
+              { enableHighAccuracy: true, maximumAge: 0 }
             );
+
             isTracking = true;
             startTime = new Date();
             positions = [];
+
             resetBtn.disabled = true;
+
             document
               .querySelector(".speedometer-container")
               .classList.add("recording");
+
             updateDuration();
           } catch (error) {
             alert("שגיאה בגישה למיקום: " + error.message);
@@ -994,25 +1019,31 @@
           alert("הדפדפן שלך אינו תומך בשירותי מיקום.");
         }
       }
+
       // Stop GPS tracking
       function stopTracking() {
         startStopBtn.innerHTML =
-          ' < i class = "fa-solid fa-circle-play" > < /i> < br / > התחל ';
+          '<i class="fa-solid fa-circle-play"></i><br />התחל';
         startStopBtn.classList.remove("btn-danger");
         startStopBtn.classList.add("btn-primary");
+
         if (watchId !== null) {
           navigator.geolocation.clearWatch(watchId);
           watchId = null;
         }
+
         isTracking = false;
         resetBtn.disabled = false;
+
         document
           .querySelector(".speedometer-container")
           .classList.remove("recording");
+
         // שמירת המסלול אם יש מספיק נתונים
         if (positions.length > 1) {
           saveTrack();
         }
+
         // הוספת מרקר סיום אם יש מיקומים
         if (positions.length > 0) {
           const lastPos = positions[positions.length - 1];
@@ -1022,7 +1053,7 @@
           endMarker = L.marker([lastPos.lat, lastPos.lng], {
             icon: L.divIcon({
               className: "end-marker",
-              html: ' < div style = "background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;" > < /div>',
+              html: '<div style="background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
               iconSize: [15, 15],
             }),
           }).addTo(map);
@@ -1049,41 +1080,36 @@
 
       function renderSavedTracks() {
         const tracksList = document.getElementById("saved-tracks-list");
+
         if (savedTracks.length === 0) {
           tracksList.innerHTML =
-            ' < div class = "empty-tracks" > אין מסלולים שמורים < /div>';
+            '<div class="empty-tracks">אין מסלולים שמורים</div>';
           return;
         }
+
         tracksList.innerHTML = savedTracks
           .map(
             (track) => `
-
-			<div class="track-item" data-id="${track.id}">
-				<div class="track-info">
-					<div>
-						<strong>תאריך:</strong> ${track.date}
-					</div>
-					<div>
-						<strong>מרחק:</strong> ${track.distance} קילומטר
-					</div>
-					<div>
-						<strong>זמן:</strong> ${track.duration}
-					</div>
-					<div>
-						<strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${track.unit || 'קמ"ש'}
-					</div>
-				</div>
-				<div class="track-actions">
-					<button class="track-btn track-btn-view" onclick="viewTrack('${track.id}')">
-						<i class="fas fa-map-marked-alt"></i> הצג במפה
-    
-					</button>
-					<button class="track-btn track-btn-delete" onclick="deleteTrack('${track.id}')">
-						<i class="fas fa-trash"></i> מחק
-    
-					</button>
-				</div>
-			</div>
+<div class="track-item" data-id="${track.id}">
+  <div class="track-info">
+    <div><strong>תאריך:</strong> ${track.date}</div>
+    <div><strong>מרחק:</strong> ${track.distance} קילומטר</div>
+    <div><strong>זמן:</strong> ${track.duration}</div>
+    <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${
+              track.unit || 'קמ"ש'
+            }</div>
+  </div>
+  <div class="track-actions">
+    <button class="track-btn track-btn-view" onclick="viewTrack('${track.id}')">
+      <i class="fas fa-map-marked-alt"></i> הצג במפה
+    </button>
+    <button class="track-btn track-btn-delete" onclick="deleteTrack('${
+      track.id
+    }')">
+      <i class="fas fa-trash"></i> מחק
+    </button>
+  </div>
+</div>
   `
           )
           .join("");
@@ -1092,10 +1118,12 @@
       function viewTrack(trackId) {
         const track = savedTracks.find((t) => t.id == trackId);
         if (!track) return;
+
         // נקה את המפה
         if (startMarker) map.removeLayer(startMarker);
         if (endMarker) map.removeLayer(endMarker);
         if (routeLine) map.removeLayer(routeLine);
+
         // צייר את המסלול
         const lineCoords = track.positions.map((pos) => [pos.lat, pos.lng]);
         routeLine = L.polyline(lineCoords, {
@@ -1103,53 +1131,58 @@
           weight: 5,
           opacity: 0.7,
         }).addTo(map);
+
         // הוסף מרקרים להתחלה וסיום
         if (track.positions.length > 0) {
           const firstPos = track.positions[0];
           const lastPos = track.positions[track.positions.length - 1];
+
           startMarker = L.marker([firstPos.lat, firstPos.lng], {
             icon: L.divIcon({
               className: "start-marker",
-              html: ' < div style = "background-color: #2ecc71; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;" > < /div>',
+              html: '<div style="background-color: #2ecc71; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
               iconSize: [15, 15],
             }),
           })
             .addTo(map)
             .bindPopup("נקודת התחלה");
+
           endMarker = L.marker([lastPos.lat, lastPos.lng], {
             icon: L.divIcon({
               className: "end-marker",
-              html: ' < div style = "background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;" > < /div>',
+              html: '<div style="background-color: #e74c3c; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
               iconSize: [15, 15],
             }),
           })
             .addTo(map)
             .bindPopup("נקודת סיום");
+
           // מרכז את המפה על המסלול
           map.fitBounds(routeLine.getBounds());
         }
+
         // הדגש את הפריט ברשימה
         document.querySelectorAll(".track-item").forEach((item) => {
           item.style.border = "1px solid var(--border-color)";
           if (item.dataset.id == trackId) {
             item.style.border = "2px solid var(--primary-color)";
-            item.scrollIntoView({
-              behavior: "smooth",
-              block: "nearest",
-            });
+            item.scrollIntoView({ behavior: "smooth", block: "nearest" });
           }
         });
       }
 
       function deleteTrack(trackId) {
         if (!confirm("האם אתה בטוח שברצונך למחוק מסלול זה?")) return;
+
         savedTracks = savedTracks.filter((track) => track.id != trackId);
         localStorage.setItem(
           "speed99_saved_tracks",
           JSON.stringify(savedTracks)
         );
+
         // רענון הרשימה
         renderSavedTracks();
+
         // אם המסלול שהיה מוצג נמחק, נקה את המפה
         const currentTrack = document.querySelector(
           '.track-item[style*="primary-color"]'
@@ -1159,6 +1192,7 @@
           if (startMarker) map.removeLayer(startMarker);
           if (endMarker) map.removeLayer(endMarker);
         }
+
         // אנימציה למחיקה
         const deletedItem = document.querySelector(
           `.track-item[data-id="${trackId}"]`
@@ -1179,6 +1213,7 @@
           console.log("אין מספיק נקודות מיקום לשמירת מסלול");
           return;
         }
+
         const track = {
           id: Date.now(),
           date: new Date().toLocaleString("he-IL", {
@@ -1195,14 +1230,18 @@
           positions: positions,
           unit: getUnitLabel(currentUnit),
         };
+
         savedTracks.unshift(track);
+
         try {
           localStorage.setItem(
             "speed99_saved_tracks",
             JSON.stringify(savedTracks)
           );
+
           // רענון הרשימה
           renderSavedTracks();
+
           // אנימציה ויזואלית
           document.querySelector(".stats-container").classList.add("saved");
           setTimeout(() => {
@@ -1210,6 +1249,7 @@
               .querySelector(".stats-container")
               .classList.remove("saved");
           }, 500);
+
           // הודעה למשתמש
           alert(
             `המסלול נשמר בהצלחה!\nתאריך: ${track.date}\nמרחק: ${track.distance} ק"מ\nזמן: ${track.duration}`
@@ -1227,6 +1267,7 @@
           alert("אין מסלולים שמורים למחיקה");
           return;
         }
+
         if (
           confirm(
             "האם אתה בטוח שברצונך למחוק את כל ה-" +
@@ -1237,18 +1278,22 @@
           try {
             savedTracks = [];
             localStorage.removeItem("speed99_saved_tracks");
+
             // נקה את המפה אם מוצג מסלול
             if (routeLine) map.removeLayer(routeLine);
             if (startMarker) map.removeLayer(startMarker);
             if (endMarker) map.removeLayer(endMarker);
+
             // רענון הרשימה
             renderSavedTracks();
+
             // אנימציה ויזואלית
             const container = document.querySelector(".saved-tracks-container");
             container.classList.add("shake");
             setTimeout(() => {
               container.classList.remove("shake");
             }, 500);
+
             alert("כל המסלולים נמחקו בהצלחה");
           } catch (e) {
             console.error("שגיאה במחיקת מסלולים:", e);
@@ -1256,6 +1301,7 @@
           }
         }
       }
+
       // Reset tracking data
       function resetTracking() {
         currentSpeed = 0;
@@ -1263,11 +1309,13 @@
         totalDistance = 0;
         lastPosition = null;
         positions = [];
+
         updateSpeedDisplay(0);
         distanceEl.textContent = "0.00";
         avgSpeedEl.textContent = "0.0";
         maxSpeedEl.textContent = "0.0";
         durationEl.textContent = "00:00:00";
+
         // Reset map
         if (startMarker) map.removeLayer(startMarker);
         if (endMarker) map.removeLayer(endMarker);
@@ -1275,47 +1323,55 @@
         startMarker = null;
         endMarker = null;
         routeLine = null;
+
         resetBtn.disabled = true;
       }
+
       // Update position data from GPS
       function updatePosition(position) {
         const { latitude, longitude, speed } = position.coords;
-        const currentPos = {
-          lat: latitude,
-          lng: longitude,
-        };
+        const currentPos = { lat: latitude, lng: longitude };
+
         // Save position
         positions.push(currentPos);
+
         // Create start marker for first position
         if (positions.length === 1) {
           if (startMarker) {
             map.removeLayer(startMarker);
           }
+
           startMarker = L.marker([latitude, longitude], {
             icon: L.divIcon({
               className: "start-marker",
-              html: ' < div style = "background-color: #2ecc71; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;" > < /div>',
+              html: '<div style="background-color: #2ecc71; width: 15px; height: 15px; border-radius: 50%; border: 2px solid white;"></div>',
               iconSize: [15, 15],
             }),
           }).addTo(map);
           startMarker.bindPopup("נקודת התחלה").openPopup();
+
           map.setView([latitude, longitude], 15);
         }
+
         // Update route line
         if (positions.length > 1) {
           if (routeLine) {
             map.removeLayer(routeLine);
           }
+
           const lineCoords = positions.map((pos) => [pos.lat, pos.lng]);
           routeLine = L.polyline(lineCoords, {
             color: "#3498db",
             weight: 5,
             opacity: 0.7,
           }).addTo(map);
+
           map.fitBounds(routeLine.getBounds());
         }
+
         // Calculate speed
         let currentSpeedMps = speed !== null ? speed : 0;
+
         // Calculate distance if we have at least two positions
         if (lastPosition) {
           const distance = calculateDistance(
@@ -1324,13 +1380,17 @@
             latitude,
             longitude
           );
+
           totalDistance += distance;
           distanceEl.textContent = (totalDistance / 1000).toFixed(2);
         }
+
         lastPosition = currentPos;
+
         // Update speed display
         updateSpeedDisplay(currentSpeedMps);
         updateDuration();
+
         // Update stats
         if (currentSpeed > maxSpeed) {
           maxSpeed = currentSpeed;
@@ -1340,6 +1400,7 @@
             currentUnit
           ).toFixed(1);
         }
+
         // Calculate average speed
         const elapsedTime = (new Date() - startTime) / 1000;
         if (elapsedTime > 0) {
@@ -1350,9 +1411,11 @@
             currentUnit
           ).toFixed(1);
         }
+
         // Update map view
         map.setView([latitude, longitude]);
       }
+
       // Handle location errors
       function handleLocationError(error) {
         switch (error.code) {
@@ -1369,13 +1432,16 @@
             alert("שגיאה לא ידועה בשירותי המיקום.");
             break;
         }
+
         stopTracking();
       }
+
       // Set the speed range (walking/running, cycling, driving)
       function setSpeedRange(mode) {
         walkingBtn.classList.remove("active");
         cyclingBtn.classList.remove("active");
         drivingBtn.classList.remove("active");
+
         switch (mode) {
           case "walking":
             currentMaxSpeed = 12;
@@ -1390,13 +1456,16 @@
             drivingBtn.classList.add("active");
             break;
         }
+
         createTicks(currentMaxSpeed);
         updateSpeedDisplay(currentSpeed);
       }
+
       // Set unit for speed display
       function setUnit(unit) {
         kmhBtn.classList.remove("active");
         mphBtn.classList.remove("active");
+
         switch (unit) {
           case "kmh":
             kmhBtn.classList.add("active");
@@ -1405,6 +1474,7 @@
             mphBtn.classList.add("active");
             break;
         }
+
         currentUnit = unit;
         speedUnit.textContent = getUnitLabel(unit);
         digitalUnit.textContent = getUnitLabel(unit);
@@ -1422,10 +1492,12 @@
             return 'קמ"ש'; // ערך ברירת מחדל למקרה שלא צפוי
         }
       }
+
       // Toggle between analog and digital display
       function setDisplayMode(mode) {
         analogBtn.classList.remove("active");
         digitalBtn.classList.remove("active");
+
         if (mode === "analog") {
           analogSpeedometer.style.display = "block";
           digitalSpeedometer.style.display = "none";
@@ -1436,10 +1508,12 @@
           digitalBtn.classList.add("active");
         }
       }
+
       // Toggle dark/light theme
       function toggleTheme() {
         isDarkTheme = !isDarkTheme;
         document.body.classList.toggle("dark-theme", isDarkTheme);
+
         const themeIcon = document.querySelector(".theme-icon");
         if (isDarkTheme) {
           themeIcon.src = "images/sun.ico";
@@ -1447,9 +1521,11 @@
           themeIcon.src = "images/moon.ico";
         }
       }
+
       // Convert speed between units
       function convertSpeed(value, fromUnit, toUnit) {
         if (fromUnit === toUnit) return value;
+
         let mps;
         switch (fromUnit) {
           case "kmh":
@@ -1462,6 +1538,7 @@
             mps = value;
             break;
         }
+
         switch (toUnit) {
           case "kmh":
             return mps * 3.6;
@@ -1471,6 +1548,7 @@
             return mps * 3.6; // ברירת מחדל לקמ"ש
         }
       }
+
       // Haversine formula for distance in meters
       function calculateDistance(lat1, lon1, lat2, lon2) {
         const R = 6371000;
@@ -1485,19 +1563,24 @@
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
       }
+
       // Update duration display
       function updateDuration() {
         if (!startTime) return;
+
         const now = new Date();
         const elapsed = new Date(now - startTime);
         const hrs = String(elapsed.getUTCHours()).padStart(2, "0");
         const mins = String(elapsed.getUTCMinutes()).padStart(2, "0");
         const secs = String(elapsed.getUTCSeconds()).padStart(2, "0");
+
         durationEl.textContent = `${hrs}:${mins}:${secs}`;
+
         if (isTracking) {
           requestAnimationFrame(updateDuration);
         }
       }
+
       // Start everything
       init();
     </script>
