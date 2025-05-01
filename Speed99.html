@@ -1187,6 +1187,9 @@
           .querySelector(".speedometer-container")
           .classList.remove("recording");
 
+        // איפוס המהירות ל-0
+        updateSpeedDisplay(0);
+
         // שמירת המסלול אם יש מספיק נתונים
         if (positions.length > 1) {
           saveTrack();
