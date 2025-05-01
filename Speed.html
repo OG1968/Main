@@ -688,6 +688,64 @@
         color: var(--text-color);
         opacity: 0.7;
       }
+      #osm-btn {
+        background-color: #9e5400;
+      }
+      #satellite-btn {
+        background-color: #27ae60;
+      }
+      #topo-btn {
+        background-color: #8e44ad;
+      }
+      #dark-btn {
+        background-color: #2c3e50;
+      }
+
+      #osm-btn.active {
+        background-color: #3498db;
+      }
+      #satellite-btn.active {
+        background-color: #3498db;
+      }
+      #topo-btn.active {
+        background-color: #3498db;
+      }
+      #dark-btn.active {
+        background-color: #3498db;
+      }
+
+      #osm-btn:hover {
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+      }
+      #satellite-btn:hover {
+        box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+      }
+      #topo-btn:hover {
+        box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+      }
+      #dark-btn:hover {
+        box-shadow: 0 5px 15px rgba(44, 62, 80, 0.4);
+      }
+
+      #osm-btn,
+      #satellite-btn,
+      #topo-btn,
+      #dark-btn {
+        max-width: 50px;
+        min-width: 75px;
+        padding: 8px 5px;
+        font-size: 0.8rem;
+        line-height: 1;
+        margin: 2px;
+      }
+
+      #osm-btn i,
+      #satellite-btn i,
+      #topo-btn i,
+      #dark-btn i {
+        margin-bottom: 3px;
+        font-size: 0.9rem;
+      }
     </style>
   </head>
   <body>
@@ -724,6 +782,23 @@
           <h3>מצב תצוגה</h3>
           <button id="analog-btn" class="btn btn-toggle active">אנלוגי</button>
           <button id="digital-btn" class="btn btn-toggle">דיגיטלי</button>
+          <h3>סוג מפה</h3>
+          <button id="osm-btn" class="btn btn-toggle active">
+            <i class="fas fa-map"></i><br />
+            רגילה
+          </button>
+          <button id="satellite-btn" class="btn btn-toggle">
+            <i class="fas fa-satellite"></i><br />
+            לוויין
+          </button>
+          <button id="topo-btn" class="btn btn-toggle">
+            <i class="fas fa-mountain"></i><br />
+            טופוגרפית
+          </button>
+          <button id="dark-btn" class="btn btn-toggle">
+            <i class="fas fa-moon"></i><br />
+            כהה
+          </button>
         </div>
 
         <div class="control-group">
@@ -873,6 +948,13 @@
       let endMarker = null;
       let routeLine = null;
       let isDarkTheme = false;
+      let baseLayers = {
+        osm: null,
+        satellite: null,
+        topo: null,
+        dark: null,
+      };
+      let currentBaseLayer = "osm";
 
       // Initialize the speedometer
       function init() {
@@ -949,10 +1031,63 @@
       function initMap() {
         map = L.map("map").setView([32.0853, 34.7818], 13);
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        }).addTo(map);
+        // Create base layers
+        baseLayers.osm = L.tileLayer(
+          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          {
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          }
+        );
+
+        baseLayers.satellite = L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          {
+            attribution:
+              "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+          }
+        );
+
+        baseLayers.topo = L.tileLayer(
+          "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+          {
+            attribution:
+              'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+          }
+        );
+
+        baseLayers.dark = L.tileLayer(
+          "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+          {
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          }
+        );
+
+        // Add default layer
+        baseLayers.osm.addTo(map);
+        currentBaseLayer = "osm";
+      }
+
+      function setMapType(type) {
+        // Remove current layer
+        if (baseLayers[currentBaseLayer]) {
+          map.removeLayer(baseLayers[currentBaseLayer]);
+        }
+
+        // Add new layer
+        if (baseLayers[type]) {
+          baseLayers[type].addTo(map);
+          currentBaseLayer = type;
+        }
+
+        // Update button states
+        document.getElementById("osm-btn").classList.remove("active");
+        document.getElementById("satellite-btn").classList.remove("active");
+        document.getElementById("topo-btn").classList.remove("active");
+        document.getElementById("dark-btn").classList.remove("active");
+
+        document.getElementById(`${type}-btn`).classList.add("active");
       }
 
       // Set up event listeners
@@ -984,6 +1119,19 @@
         document
           .getElementById("theme-toggle-btn")
           .addEventListener("click", toggleTheme);
+
+        document
+          .getElementById("osm-btn")
+          .addEventListener("click", () => setMapType("osm"));
+        document
+          .getElementById("satellite-btn")
+          .addEventListener("click", () => setMapType("satellite"));
+        document
+          .getElementById("topo-btn")
+          .addEventListener("click", () => setMapType("topo"));
+        document
+          .getElementById("dark-btn")
+          .addEventListener("click", () => setMapType("dark"));
       }
 
       // Start GPS tracking
