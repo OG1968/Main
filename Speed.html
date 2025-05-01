@@ -635,6 +635,18 @@
   color: white;
 }
 
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
 .empty-tracks {
   text-align: center;
   padding: 20px;
@@ -1010,22 +1022,22 @@ function renderSavedTracks() {
   }
 
   tracksList.innerHTML = savedTracks.map(track => `
-    <div class="track-item" data-id="${track.id}">
-      <div class="track-info">
-        <div><strong>תאריך:</strong> ${track.date}</div>
-        <div><strong>מרחק:</strong> ${track.distance} ק"מ</div>
-        <div><strong>זמן:</strong> ${track.duration}</div>
-        <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${track.unit || 'קמ"ש'}</div>
-      </div>
-      <div class="track-actions">
-        <button class="track-btn track-btn-view" onclick="viewTrack('${track.id}')">
-          <i class="fas fa-map-marked-alt"></i> הצג במפה
-        </button>
-        <button class="track-btn track-btn-delete" onclick="deleteTrack('${track.id}')">
-          <i class="fas fa-trash"></i> מחק
-        </button>
-      </div>
-    </div>
+<div class="track-item" data-id="${track.id}">
+  <div class="track-info">
+    <div><strong>תאריך:</strong> ${track.date}</div>
+    <div><strong>מרחק:</strong> ${track.distance} ק"מ</div>
+    <div><strong>זמן:</strong> ${track.duration}</div>
+    <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${track.unit || 'קמ"ש'}</div>
+  </div>
+  <div class="track-actions">
+    <button class="track-btn track-btn-view" onclick="viewTrack('${track.id}')">
+      <i class="fas fa-map-marked-alt"></i> הצג במפה
+    </button>
+    <button class="track-btn track-btn-delete" onclick="deleteTrack('${track.id}')">
+      <i class="fas fa-trash"></i> מחק
+    </button>
+  </div>
+</div>
   `).join('');
 }
 
