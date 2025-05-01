@@ -688,6 +688,64 @@
         color: var(--text-color);
         opacity: 0.7;
       }
+      #osm-btn {
+        background-color: #9e5400;
+      }
+      #satellite-btn {
+        background-color: #27ae60;
+      }
+      #topo-btn {
+        background-color: #8e44ad;
+      }
+      #dark-btn {
+        background-color: #2c3e50;
+      }
+
+      #osm-btn.active {
+        background-color: #3498db;
+      }
+      #satellite-btn.active {
+        background-color: #3498db;
+      }
+      #topo-btn.active {
+        background-color: #3498db;
+      }
+      #dark-btn.active {
+        background-color: #3498db;
+      }
+
+      #osm-btn:hover {
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+      }
+      #satellite-btn:hover {
+        box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+      }
+      #topo-btn:hover {
+        box-shadow: 0 5px 15px rgba(142, 68, 173, 0.4);
+      }
+      #dark-btn:hover {
+        box-shadow: 0 5px 15px rgba(44, 62, 80, 0.4);
+      }
+
+      #osm-btn,
+      #satellite-btn,
+      #topo-btn,
+      #dark-btn {
+        max-width: 50px;
+        min-width: 75px;
+        padding: 8px 5px;
+        font-size: 0.8rem;
+        line-height: 1;
+        margin: 2px;
+      }
+
+      #osm-btn i,
+      #satellite-btn i,
+      #topo-btn i,
+      #dark-btn i {
+        margin-bottom: 3px;
+        font-size: 0.9rem;
+      }
     </style>
   </head>
   <body>
