@@ -375,37 +375,24 @@
         width: 100%;
       }
 
-      .theme-toggle-container {
-        position: fixed;
-        top: 20px;
-        right: 10px;
-        z-index: 1000;
+
+
+      #theme-btn {
+        min-width: 75px;
+        padding: 8px 5px;
+        font-size: 0.8rem;
+        line-height: 1;
+        margin: 0px;
       }
 
-      .theme-toggle-btn {
-        width: 40px;
-        height: 40px;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 0px 12px rgb(0, 255, 0);
-        background-color: var(--theme-toggle-bg);
-        transition: all 0.3s ease;
+      #theme-btn img {
+        margin-bottom: 0px;
+        width: 16px;
+        height: 16px;
       }
 
-      .theme-toggle-btn:hover {
-        transform: scale(1.1);
-      }
-
-      .theme-toggle-btn:active {
-        transform: scale(0.95);
-      }
-
-      .theme-icon {
-        transition: all 0.3s ease;
+      #theme-btn:hover {
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
       }
 
       .slider {
@@ -746,21 +733,42 @@
         margin-bottom: 3px;
         font-size: 0.9rem;
       }
+
+      /* עיצוב כפתורי מצב תצוגה */
+.display-mode-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.display-mode-buttons .btn {
+  min-width: 80px;
+  width: 100px;
+  height: 60px;
+  padding: 8px 5px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.display-mode-buttons .btn i {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.display-mode-buttons .btn img.theme-icon {
+  width: 16px;
+  height: 16px;
+  margin-bottom: 5px;
+  object-fit: contain;
+}
     </style>
   </head>
   <body>
     <div class="container">
-      <div class="theme-toggle-container">
-        <button id="theme-toggle-btn" class="theme-toggle-btn">
-          <img
-            src="images/moon.ico"
-            alt="Toggle theme"
-            class="theme-icon"
-            width="20"
-            height="20"
-          />
-        </button>
-      </div>
 
       <h1>ספידומטר GPS</h1>
 
@@ -780,8 +788,17 @@
 
         <div class="control-group">
           <h3>מצב תצוגה</h3>
-          <button id="analog-btn" class="btn btn-toggle active">אנלוגי</button>
-          <button id="digital-btn" class="btn btn-toggle">דיגיטלי</button>
+          <div class="display-mode-buttons">
+            <button id="analog-btn" class="btn btn-toggle active">
+              <i class="fas fa-tachometer-alt"></i>אנלוגי
+            </button>
+            <button id="digital-btn" class="btn btn-toggle">
+              <i class="fas fa-digital-tachograph"></i>דיגיטלי
+            </button>
+            <button id="theme-btn" class="btn btn-toggle">
+              <i class="fa-solid fa-moon"></i>תצוגה
+            </button>
+          </div>
           <h3>סוג מפה</h3>
           <button id="osm-btn" class="btn btn-toggle active">
             <i class="fas fa-map"></i><br />
@@ -896,6 +913,7 @@
       <div id="saved-tracks-list" class="tracks-list">
         <!-- כאן יוטענו המסלולים -->
       </div>
+    </div>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
       <link
@@ -1116,9 +1134,8 @@
         analogBtn.addEventListener("click", () => setDisplayMode("analog"));
         digitalBtn.addEventListener("click", () => setDisplayMode("digital"));
 
-        document
-          .getElementById("theme-toggle-btn")
-          .addEventListener("click", toggleTheme);
+        document.getElementById("theme-btn").addEventListener("click", toggleTheme);
+
 
         document
           .getElementById("osm-btn")
@@ -1662,16 +1679,18 @@
 
       // Toggle dark/light theme
       function toggleTheme() {
-        isDarkTheme = !isDarkTheme;
-        document.body.classList.toggle("dark-theme", isDarkTheme);
+  isDarkTheme = !isDarkTheme;
+  document.body.classList.toggle("dark-theme", isDarkTheme);
 
-        const themeIcon = document.querySelector(".theme-icon");
-        if (isDarkTheme) {
-          themeIcon.src = "images/sun.ico";
-        } else {
-          themeIcon.src = "images/moon.ico";
-        }
-      }
+  const themeIcon = document.querySelector("#theme-btn i");
+  if (isDarkTheme) {
+    themeIcon.classList.remove("fa-moon");
+    themeIcon.classList.add("fa-sun");
+  } else {
+    themeIcon.classList.remove("fa-sun");
+    themeIcon.classList.add("fa-moon");
+  }
+}
 
       // Convert speed between units
       function convertSpeed(value, fromUnit, toUnit) {
