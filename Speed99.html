@@ -1378,6 +1378,14 @@ function showNotification(message, color) {
   }, 3000);
 }
 
+function isWebShareSupported() {
+  const supported = navigator.share && 
+                  navigator.canShare && 
+                  navigator.canShare({ title: 'Test', url: 'https://example.com' });
+  console.log('Web Share API supported:', supported);
+  return supported;
+}
+
 function loadSharedTrack() {
   const urlParams = new URLSearchParams(window.location.search);
   const trackData = urlParams.get('track');
