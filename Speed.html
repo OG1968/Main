@@ -384,14 +384,13 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        box-shadow: 0 0px 16px rgb(255, 255, 0);
+        box-shadow: 0 0px 12px rgb(0, 255, 0);
         background-color: var(--theme-toggle-bg);
         transition: all 0.3s ease;
       }
 
       .theme-toggle-btn:hover {
         transform: scale(1.1);
-        box-shadow: 0 0px 12px rgb(0, 255, 0);
       }
 
       .theme-toggle-btn:active {
@@ -742,7 +741,7 @@ transform="rotate(-15 150 150)"/>
         <div class="stat-card">
           <h3>מרחק</h3>
           <div id="distance" class="value">0.00</div>
-          <div class="unit">ק"מ</div>
+          <div class="unit">קילומטר</div>
         </div>
 
         <div class="stat-card">
@@ -1024,7 +1023,7 @@ function renderSavedTracks() {
 <div class="track-item" data-id="${track.id}">
   <div class="track-info">
     <div><strong>תאריך:</strong> ${track.date}</div>
-    <div><strong>מרחק:</strong> ${track.distance} ק"מ</div>
+    <div><strong>מרחק:</strong> ${track.distance} קילומטר</div>
     <div><strong>זמן:</strong> ${track.duration}</div>
     <div><strong>מהירות מקסימלית:</strong> ${track.maxSpeed} ${track.unit || 'קמ"ש'}</div>
   </div>
