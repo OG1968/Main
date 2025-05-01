@@ -1304,17 +1304,20 @@ function shareTrack(trackId) {
     distance: track.distance,
     duration: track.duration,
     maxSpeed: track.maxSpeed,
-    positions: track.positions
+    positions: track.positions,
+    unit: track.unit || 'קמ"ש'
   };
 
   // המרת הנתונים למחרוזת base64
   const trackDataStr = JSON.stringify(trackData);
   const base64Data = btoa(unescape(encodeURIComponent(trackDataStr)));
   
-  // יצירת קישור שיתוף
-  const shareUrl = `${window.location.origin}${window.location.pathname}?track=${base64Data}`;
+  // יצירת קישור שיתוף מלא
+  const currentUrl = new URL(window.location.href);
+  currentUrl.searchParams.set('track', base64Data);
+  const shareUrl = currentUrl.toString();
 
-  // בדיקה אם API השיתוף של הדפדפן זמין
+  // ניסיון שיתוף דרך Web Share API
   if (navigator.share) {
     navigator.share({
       title: `מסלול GPS מתאריך ${track.date}`,
@@ -1322,23 +1325,39 @@ function shareTrack(trackId) {
       url: shareUrl
     }).catch(err => {
       console.log('שגיאה בשיתוף:', err);
-      copyToClipboard(shareUrl);
+      copyToClipboardWithFeedback(shareUrl);
     });
   } else {
-    // אם API השיתוף לא זמין, העתק ללוח
-    copyToClipboard(shareUrl);
+    // אם Web Share API לא זמין - העתק ללוח
+    copyToClipboardWithFeedback(shareUrl);
   }
 }
 
-function copyToClipboard(text) {
-  const textarea = document.createElement('textarea');
-  textarea.value = text;
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand('copy');
-  document.body.removeChild(textarea);
-  
-  alert('קישור המסלול הועתק ללוח! ניתן לשתף אותו כעת.');
+
+function copyToClipboardWithFeedback(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    // הצג הודעת משוב
+    const notification = document.createElement('div');
+    notification.style.position = 'fixed';
+    notification.style.bottom = '20px';
+    notification.style.right = '20px';
+    notification.style.backgroundColor = '#27ae60';
+    notification.style.color = 'white';
+    notification.style.padding = '10px 20px';
+    notification.style.borderRadius = '5px';
+    notification.style.zIndex = '1000';
+    notification.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    notification.textContent = 'קישור המסלול הועתק ללוח!';
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 3000);
+  }).catch(err => {
+    console.error('שגיאה בהעתקה ללוח:', err);
+    alert('לא הצלחנו להעתיק את הקישור, נסה שוב');
+  });
 }
 
 function loadSharedTrack() {
@@ -1347,6 +1366,9 @@ function loadSharedTrack() {
   
   if (trackData) {
     try {
+      // נקה את פרמטר ה-URL אחרי הטעינה
+      history.replaceState(null, null, window.location.pathname);
+      
       const decodedData = decodeURIComponent(escape(atob(trackData)));
       const sharedTrack = JSON.parse(decodedData);
       
@@ -1362,6 +1384,9 @@ function loadSharedTrack() {
     }
   }
 }
+
+// קריאה לפונקציה בזמן טעינת האפליקציה
+init();
 
 function displaySharedTrack(track) {
   // נקה את המפה
@@ -1404,6 +1429,13 @@ function displaySharedTrack(track) {
 }
 
 function saveSharedTrack(track) {
+  // בדוק אם המסלול כבר קיים
+  const existingTrack = savedTracks.find(t => t.id === track.id);
+  if (existingTrack) {
+    alert('מסלול זה כבר קיים ברשימת המסלולים השמורים שלך!');
+    return;
+  }
+
   // הוסף את המסלול לרשימה
   savedTracks.unshift({
     id: track.id || Date.now(),
@@ -1427,7 +1459,7 @@ function saveSharedTrack(track) {
   // רענן את הרשימה
   renderSavedTracks();
   
-  alert('המסלול נשמר בהצלחה!');
+  alert('המסלול נשמר בהצלחה ברשימת המסלולים שלך!');
 }
 
 function init() {
