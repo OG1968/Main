@@ -931,6 +931,33 @@
       let isDarkTheme = false;
       let backgroundNotification = null;
 
+      // בתחילת הקובץ, אחרי הגדרת המשתנים
+      if (typeof localStorage === "undefined") {
+        alert(
+          "הדפדפן שלך אינו תומך באחסון מקומי. מסלולים לא יישמרו בין הפעלות."
+        );
+      }
+
+      // בבדיקת תמיכה בשמירת נתונים
+      function checkStorageSupport() {
+        try {
+          const testKey = "speed99_test";
+          localStorage.setItem(testKey, testKey);
+          localStorage.removeItem(testKey);
+          return true;
+        } catch (e) {
+          console.error("האחסון המקומי לא זמין:", e);
+          return false;
+        }
+      }
+
+      // בעת טעינת האפליקציה
+      if (!checkStorageSupport()) {
+        document.getElementById("clear-tracks-btn").disabled = true;
+        document.getElementById("clear-tracks-btn").title =
+          "האחסון המקומי לא זמין";
+      }
+
       // Initialize the application
       function init() {
         createTicks(currentMaxSpeed);
@@ -1167,10 +1194,22 @@
           backgroundNotification = null;
         }
 
-        if (positions.length > 1) {
-          saveTrack();
+        // שמירת המסלול רק אם יש מספיק נקודות
+        if (positions.length >= 2) {
+          // הוספת השהייה קצרה לפני השמירה
+          setTimeout(() => {
+            try {
+              saveTrack();
+            } catch (saveError) {
+              console.error("שגיאה בשמירת מסלול בסיום מעקב:", saveError);
+              alert("אירעה שגיאה בשמירת המסלול. הנתונים לא נשמרו.");
+            }
+          }, 500);
+        } else {
+          console.log("אין מספיק נתונים לשמירת מסלול");
         }
 
+        // הוספת מרקר סיום אם יש מיקומים
         if (positions.length > 0) {
           const lastPos = positions[positions.length - 1];
           if (endMarker) {
@@ -1189,6 +1228,13 @@
 
       // Reset tracking data
       function resetTracking() {
+        // שמירת המסלול הנוכחי לפני איפוס
+        if (positions.length >= 2) {
+          if (confirm("האם לשמור את המסלול הנוכחי לפני איפוס?")) {
+            saveTrack();
+          }
+        }
+
         currentSpeed = 0;
         maxSpeed = 0;
         totalDistance = 0;
@@ -1525,19 +1571,49 @@
 
       // Load saved tracks
       function loadSavedTracks() {
-        const saved = localStorage.getItem("speed99_saved_tracks");
-        if (saved) {
-          try {
-            savedTracks = JSON.parse(saved);
-            renderSavedTracks();
-          } catch (e) {
-            console.error("שגיאה בטעינת מסלולים שמורים:", e);
+        try {
+          const saved = localStorage.getItem("speed99_saved_tracks");
+          if (saved) {
+            // ניסיון פענוח הנתונים
+            const parsed = JSON.parse(saved);
+
+            // וידוא שהנתונים תקינים
+            if (Array.isArray(parsed)) {
+              savedTracks = parsed;
+
+              // תיקון מבנה אם חסר
+              savedTracks = savedTracks.map((track) => {
+                // הוספת שדה ID אם חסר
+                if (!track.id) {
+                  track.id = Date.now().toString();
+                }
+                // המרת תאריך אם נשמר כמחרוזת
+                if (typeof track.date === "string") {
+                  track.date =
+                    new Date(track.date).toLocaleString("he-IL") || track.date;
+                }
+                return track;
+              });
+            } else {
+              console.error("פורמט נתונים לא תקין - איפוס הרשימה");
+              savedTracks = [];
+            }
+          } else {
             savedTracks = [];
-            renderSavedTracks();
           }
-        } else {
+
+          renderSavedTracks();
+        } catch (e) {
+          console.error("שגיאה קריטית בטעינת מסלולים שמורים:", e);
           savedTracks = [];
           renderSavedTracks();
+
+          // ניסיון תיקון ע"י מחיקת הנתונים הפגומים
+          try {
+            localStorage.removeItem("speed99_saved_tracks");
+          } catch (cleanError) {
+            console.error("שגיאה בניקוי נתונים פגומים:", cleanError);
+          }
         }
       }
 
@@ -1670,37 +1746,63 @@
 
       // Save track
       function saveTrack() {
+        // בדיקה שיש מספיק נתונים לשמירה
         if (positions.length < 2) {
           console.log("אין מספיק נקודות מיקום לשמירת מסלול");
           return;
         }
 
+        // יצירת אובייקט מסלול חדש
         const track = {
-          id: Date.now(),
+          id: Date.now().toString(), // המרה למחרוזת ליתר תאימות
           date: new Date().toLocaleString("he-IL", {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
             hour: "2-digit",
             minute: "2-digit",
+            second: "2-digit",
           }),
           distance: (totalDistance / 1000).toFixed(2),
           duration: durationEl.textContent,
           maxSpeed: maxSpeedEl.textContent,
           avgSpeed: avgSpeedEl.textContent,
-          positions: positions,
+          positions: JSON.parse(JSON.stringify(positions)), // יצירת עותק עמוק של המערך
           unit: getUnitLabel(currentUnit),
+          maxSpeedValue: maxSpeed, // שמירת הערך המספרי למקרה הצורך
+          distanceValue: totalDistance, // שמירת הערך המספרי למקרה הצורך
         };
 
-        savedTracks.unshift(track);
-
         try {
+          // טעינת מסלולים קיימים
+          let existingTracks = [];
+          const savedData = localStorage.getItem("speed99_saved_tracks");
+          if (savedData) {
+            existingTracks = JSON.parse(savedData);
+
+            // וידוא שהנתונים תקינים
+            if (!Array.isArray(existingTracks)) {
+              console.error("שגיאה: נתוני המסלולים השמורים אינם מערך");
+              existingTracks = [];
+            }
+          }
+
+          // הוספת המסלול החדש
+          existingTracks.unshift(track);
+
+          // שמירה מחדש
           localStorage.setItem(
             "speed99_saved_tracks",
-            JSON.stringify(savedTracks)
+            JSON.stringify(existingTracks)
           );
+
+          // עדכון המערך המקומי
+          savedTracks = existingTracks;
+
+          // רענון התצוגה
           renderSavedTracks();
 
+          // אנימציה ויזואלית
           document.querySelector(".stats-container").classList.add("saved");
           setTimeout(() => {
             document
@@ -1708,6 +1810,7 @@
               .classList.remove("saved");
           }, 500);
 
+          // הודעה למשתמש
           alert(
             `המסלול נשמר בהצלחה!\nתאריך: ${track.date}\nמרחק: ${track.distance} ק"מ\nזמן: ${track.duration}`
           );
