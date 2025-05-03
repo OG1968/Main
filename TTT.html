@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <title>איקס עיגול</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap");
+
+      :root {
+        --primary-bg: #0076ca;
+        --board-bg: #ffcb8c;
+        --text-color: #ffffff;
+        --button-bg: #224b00;
+        --status-text: #ffff00;
+        --win-color: #00ff00;
+        --lose-color: #ff0000;
+      }
+
+      .theme-ocean {
+        --primary-bg: #006994;
+        --board-bg: #a7c7e7;
+        --text-color: #ffffff;
+        --button-bg: #1a3e72;
+        --status-text: #4cc9f0;
+        --win-color: #38b000;
+        --lose-color: #ef476f;
+      }
+
+      .theme-dark {
+        --primary-bg: #444466;
+        --board-bg: #747474;
+        --text-color: #e6e6e6;
+        --button-bg: #0044ff;
+        --status-text: #f8d210;
+        --win-color: #06d6a0;
+        --lose-color: #ef476f;
+      }
+
+      .theme-warm {
+        --primary-bg: #6a040f;
+        --board-bg: #faa307;
+        --text-color: #ffffff;
+        --button-bg: #30357e;
+        --status-text: #ffba08;
+        --win-color: #80b918;
+        --lose-color: #d00000;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        border: none;
+        font-family: "Rubik", sans-serif;
+      }
+
+      body {
+        width: 100vw;
+        min-height: 100vh;
+        background-color: var(--primary-bg);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding: 20px;
+        transition: background-color 0.3s ease;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 8vw, 3.5rem);
+        padding: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+        color: var(--text-color);
+      }
+
+      .container {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(80px, 120px));
+        grid-template-rows: repeat(3, minmax(80px, 120px));
+        border: 3px solid black;
+        background-color: var(--board-bg);
+        margin: 10px 0;
+      }
+
+      .box {
+        border: 3px solid black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        aspect-ratio: 1/1;
+        background-color: var(--board-bg);
+      }
+
+      .box img {
+        width: 70%;
+        height: auto;
+        max-width: 100px;
+      }
+
+      .status {
+        margin: 15px 0;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-size: clamp(1rem, 4vw, 1.5rem);
+        font-weight: 700;
+        background-color: var(--board-bg);
+        text-align: center;
+        min-width: 35%;
+        max-width: 90%;
+        color: black;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        font-size: clamp(0.9rem, 4vw, 1.2rem);
+        font-weight: 500;
+        color: var(--text-color);
+        background-color: var(--button-bg);
+        border-radius: 30px;
+        cursor: pointer;
+        margin: 5px;
+        transition: all 0.2s;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+      }
+
+      .btn:active {
+        transform: scale(0.95);
+      }
+
+      .btn i {
+        font-size: 1.1em;
+      }
+
+      .win {
+        animation: winAnim ease-in-out 1s infinite;
+      }
+
+      @keyframes winAnim {
+        0% {
+          background-color: var(--win-color);
+        }
+        100% {
+          background-color: color-mix(in srgb, var(--win-color) 80%, white);
+        }
+      }
+
+      /* מסך הגדרות */
+      .setup-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .setup-screen h2 {
+        font-size: clamp(1.8rem, 6vw, 2.5rem);
+        margin-bottom: 20px;
+        color: white;
+        text-align: center;
+      }
+
+      .setup-options {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        max-width: 500px;
+      }
+
+      .option-group {
+        margin: 15px 0;
+        text-align: center;
+        width: 100%;
+      }
+
+      .option-group h3 {
+        font-size: clamp(1.2rem, 4vw, 1.5rem);
+        margin-bottom: 12px;
+        color: white;
+      }
+
+      .option-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .option-btn {
+        background-color: #333;
+        color: white;
+        padding: 10px 15px;
+        font-size: clamp(0.9rem, 3vw, 1.1rem);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-grow: 1;
+        max-width: 120px;
+      }
+
+      .option-btn.selected {
+        background-color: var(--board-bg);
+        color: black;
+        font-weight: 500;
+      }
+
+      .theme-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        cursor: pointer;
+        border: 2px solid white;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+      }
+
+      .theme-btn:hover {
+        transform: scale(1.05);
+      }
+
+      .theme-btn.selected {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 3px var(--board-bg);
+      }
+
+      .theme-default {
+        background-color: #0076ca;
+      }
+      .theme-ocean {
+        background-color: #006994;
+      }
+      .theme-dark {
+        background-color: #5a5aaa;
+      }
+      .theme-warm {
+        background-color: #ff3e51cb;
+      }
+
+      .start-btn {
+        margin-top: 20px;
+        padding: 12px 25px;
+        font-size: clamp(1.1rem, 4vw, 1.3rem);
+        background-color: var(--board-bg);
+        color: black;
+        font-weight: 600;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .settings-btn {
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        padding: 10px;
+        font-size: 1.2rem;
+        background-color: var(--board-bg);
+        color: black;
+        z-index: 101;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      /* התאמות למסכים קטנים */
+      @media (max-width: 500px) {
+        .container {
+          grid-template-columns: repeat(3, minmax(70px, 1fr));
+          grid-template-rows: repeat(3, minmax(70px, 1fr));
+        }
+
+        .option-btn {
+          padding: 8px 10px;
+          font-size: 0.9rem;
+        }
+
+        .btn {
+          padding: 8px 15px;
+        }
+
+        .theme-btn {
+          width: 40px;
+          height: 40px;
+        }
+      }
+
+      @media (max-width: 350px) {
+        .container {
+          grid-template-columns: repeat(3, minmax(60px, 1fr));
+          grid-template-rows: repeat(3, minmax(60px, 1fr));
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="theme-default">
+    <button class="settings-btn" id="settingsBtn">
+      <i class="fas fa-cog"></i>
+    </button>
+
+    <div class="setup-screen" id="setupScreen">
+      <h2>הגדרות משחק</h2>
+      <div class="setup-options">
+        <div class="option-group">
+          <h3>:בחר סימן</h3>
+          <div class="option-row">
+            <button class="option-btn" data-option="X" id="selectX">
+              <i class="fas fa-times"></i> איקס
+            </button>
+            <button class="option-btn" data-option="O" id="selectO">
+              <i class="far fa-circle"></i> עיגול
+            </button>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <h3>:רמת קושי</h3>
+          <div class="option-row">
+            <button class="option-btn" data-difficulty="easy">
+              <i class="fas fa-baby"></i> קל
+            </button>
+            <button class="option-btn" data-difficulty="medium">
+              <i class="fas fa-user"></i> בינוני
+            </button>
+            <button class="option-btn" data-difficulty="hard">
+              <i class="fas fa-robot"></i> קשה
+            </button>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <h3>:ערכת צבעים</h3>
+          <div class="option-row">
+            <button
+              class="theme-btn theme-default selected"
+              data-theme="default"
+            >
+              1
+            </button>
+            <button class="theme-btn theme-ocean" data-theme="ocean">2</button>
+            <button class="theme-btn theme-dark" data-theme="dark">3</button>
+            <button class="theme-btn theme-warm" data-theme="warm">4</button>
+          </div>
+        </div>
+
+        <button class="btn start-btn" id="startGame">
+          <i class="fas fa-play"></i> התחל משחק
+        </button>
+      </div>
+    </div>
+
+    <h1>איקס עיגול</h1>
+    <div class="container">
+      <div data-index="0" class="box"></div>
+      <div data-index="1" class="box"></div>
+      <div data-index="2" class="box"></div>
+      <div data-index="3" class="box"></div>
+      <div data-index="4" class="box"></div>
+      <div data-index="5" class="box"></div>
+      <div data-index="6" class="box"></div>
+      <div data-index="7" class="box"></div>
+      <div data-index="8" class="box"></div>
+    </div>
+    <div class="status"></div>
+    <button class="btn restartBtn">
+      <i class="fas fa-redo"></i> התחל מחדש
+    </button>
+  </body>
+
+  <script>
+    // אלמנטים בדף
+    const boxEls = document.querySelectorAll(".box");
+    const statusEl = document.querySelector(".status");
+    const restartBtnEl = document.querySelector(".restartBtn");
+    const setupScreen = document.getElementById("setupScreen");
+    const selectXBtn = document.getElementById("selectX");
+    const selectOBtn = document.getElementById("selectO");
+    const startGameBtn = document.getElementById("startGame");
+    const difficultyBtns = document.querySelectorAll("[data-difficulty]");
+    const optionBtns = document.querySelectorAll(".option-btn");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const themeBtns = document.querySelectorAll(".theme-btn");
+    const body = document.body;
+
+    // סמלים - שימוש בתמונות
+    let x = "<img src='images/X-Player.png' alt='X'>";
+    let o = "<img src='images/O-Player.png' alt='O'>";
+
+    // אפשרויות ניצחון
+    const win = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    // משתני משחק
+    let options = ["", "", "", "", "", "", "", "", ""];
+    let player = "X";
+    let running = false;
+    let userSymbol = "X";
+    let computerSymbol = "O";
+    let difficulty = "easy";
+    let gameStarted = false;
+    let currentTheme = "default";
+
+    // מאזיני אירועים
+    selectXBtn.addEventListener("click", () => selectSymbol("X"));
+    selectOBtn.addEventListener("click", () => selectSymbol("O"));
+    difficultyBtns.forEach((btn) =>
+      btn.addEventListener("click", () =>
+        selectDifficulty(btn.dataset.difficulty)
+      )
+    );
+    themeBtns.forEach((btn) =>
+      btn.addEventListener("click", () => selectTheme(btn.dataset.theme))
+    );
+    startGameBtn.addEventListener("click", startGame);
+    settingsBtn.addEventListener("click", showSettings);
+    restartBtnEl.addEventListener("click", restartGame);
+
+    // פונקציות עזר
+    function selectSymbol(symbol) {
+      userSymbol = symbol;
+      computerSymbol = symbol === "X" ? "O" : "X";
+
+      optionBtns.forEach((btn) => {
+        if (btn.dataset.option === symbol) {
+          btn.classList.add("selected");
+        } else if (btn.dataset.option) {
+          btn.classList.remove("selected");
+        }
+      });
+    }
+
+    function selectDifficulty(level) {
+      difficulty = level;
+
+      difficultyBtns.forEach((btn) => {
+        if (btn.dataset.difficulty === level) {
+          btn.classList.add("selected");
+        } else if (btn.dataset.difficulty) {
+          btn.classList.remove("selected");
+        }
+      });
+    }
+
+    function selectTheme(theme) {
+      currentTheme = theme;
+      body.className = `theme-${theme}`;
+
+      themeBtns.forEach((btn) => {
+        if (btn.dataset.theme === theme) {
+          btn.classList.add("selected");
+        } else {
+          btn.classList.remove("selected");
+        }
+      });
+    }
+
+    function showSettings() {
+      setupScreen.classList.remove("hidden");
+    }
+
+    function startGame() {
+      setupScreen.classList.add("hidden");
+      gameStarted = true;
+      startGameBtn.innerHTML = "<i class='fas fa-redo'></i> התחל מחדש";
+      init();
+
+      if (userSymbol === "O") {
+        setTimeout(computerMove, 500);
+      }
+    }
+
+    function init() {
+      boxEls.forEach((box) => box.addEventListener("click", boxClick));
+      statusEl.textContent = ` ${player} -תור ה`;
+      running = true;
+    }
+
+    function boxClick(e) {
+      const index = e.target.dataset.index;
+      if (options[index] != "" || !running || player !== userSymbol) return;
+
+      updateBox(e.target, index);
+      checkWinner();
+
+      if (running && player === computerSymbol) {
+        setTimeout(computerMove, 500);
+      }
+    }
+
+    function computerMove() {
+      if (!running || player !== computerSymbol) return;
+
+      let move;
+
+      switch (difficulty) {
+        case "easy":
+          move = getRandomMove();
+          break;
+        case "medium":
+          move = Math.random() > 0.5 ? getSmartMove() : getRandomMove();
+          break;
+        case "hard":
+          move = getSmartMove();
+          break;
+        default:
+          move = getRandomMove();
+      }
+
+      if (move !== -1) {
+        updateBox(boxEls[move], move);
+        checkWinner();
+      }
+    }
+
+    function getRandomMove() {
+      const availableMoves = [];
+      for (let i = 0; i < options.length; i++) {
+        if (options[i] === "") availableMoves.push(i);
+      }
+      return availableMoves.length > 0
+        ? availableMoves[Math.floor(Math.random() * availableMoves.length)]
+        : -1;
+    }
+
+    function getSmartMove() {
+      // 1. בדוק אם המחשב יכול לנצח
+      for (let i = 0; i < win.length; i++) {
+        const [a, b, c] = win[i];
+        if (
+          options[a] === computerSymbol &&
+          options[b] === computerSymbol &&
+          options[c] === ""
+        )
+          return c;
+        if (
+          options[a] === computerSymbol &&
+          options[c] === computerSymbol &&
+          options[b] === ""
+        )
+          return b;
+        if (
+          options[b] === computerSymbol &&
+          options[c] === computerSymbol &&
+          options[a] === ""
+        )
+          return a;
+      }
+
+      // 2. בדוק אם צריך לחסום את השחקן
+      for (let i = 0; i < win.length; i++) {
+        const [a, b, c] = win[i];
+        if (
+          options[a] === userSymbol &&
+          options[b] === userSymbol &&
+          options[c] === ""
+        )
+          return c;
+        if (
+          options[a] === userSymbol &&
+          options[c] === userSymbol &&
+          options[b] === ""
+        )
+          return b;
+        if (
+          options[b] === userSymbol &&
+          options[c] === userSymbol &&
+          options[a] === ""
+        )
+          return a;
+      }
+
+      // 3. תפוס את המרכז אם פנוי
+      if (options[4] === "") return 4;
+
+      // 4. תפוס פינה אם פנויה
+      const corners = [0, 2, 6, 8];
+      const availableCorners = corners.filter((i) => options[i] === "");
+      if (availableCorners.length > 0) {
+        return availableCorners[
+          Math.floor(Math.random() * availableCorners.length)
+        ];
+      }
+
+      // 5. כל מהלך אחר פנוי
+      return getRandomMove();
+    }
+
+    function updateBox(box, index) {
+      options[index] = player;
+      box.innerHTML = player === "X" ? x : o;
+      changePlayer();
+    }
+
+    function changePlayer() {
+      player = player == "X" ? "O" : "X";
+      statusEl.textContent =
+        player === userSymbol ? ` ${player} -תור ה` : `המחשב חושב...`;
+    }
+
+    function restartGame() {
+      options = ["", "", "", "", "", "", "", "", ""];
+      player = userSymbol;
+      running = true;
+      statusEl.textContent = ` ${player} -תור ה`;
+      restartBtnEl.innerHTML = "<i class='fas fa-redo'></i> התחל מחדש";
+
+      boxEls.forEach((box) => {
+        box.innerHTML = "";
+        box.classList.remove("win");
+      });
+
+      if (userSymbol === "O") {
+        setTimeout(computerMove, 500);
+      }
+    }
+
+    function checkWinner() {
+      let isWon = false;
+
+      for (let i = 0; i < win.length; i++) {
+        const [a, b, c] = win[i];
+        if (
+          options[a] &&
+          options[a] === options[b] &&
+          options[a] === options[c]
+        ) {
+          isWon = true;
+          boxEls[a].classList.add("win");
+          boxEls[b].classList.add("win");
+          boxEls[c].classList.add("win");
+        }
+      }
+
+      if (isWon) {
+        const winner = player === "O" ? "X" : "O";
+        const isUserWinner = winner === userSymbol;
+        statusEl.textContent = isUserWinner
+          ? `ניצח במשחק  ${winner}  ! כל הכבוד`
+          : `המחשב ניצח! נסה שוב`;
+        restartBtnEl.innerHTML = "<i class='fas fa-redo'></i> שחק שוב";
+        running = false;
+      } else if (!options.includes("")) {
+        statusEl.textContent = `אופס ... המשחק בתיקו`;
+        restartBtnEl.innerHTML = "<i class='fas fa-redo'></i> שחק שוב";
+        running = false;
+      }
+    }
+
+    // אתחול ראשוני
+    selectSymbol("X");
+    selectDifficulty("easy");
+    selectTheme("default");
+  </script>
+</html>
