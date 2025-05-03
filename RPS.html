@@ -237,7 +237,7 @@
         }
 
         .result-display {
-          font-size: 1.4rem;
+          font-size: 1.2rem;
         }
 
         .action-btn {
@@ -361,18 +361,18 @@
 
       function getWinMessage(player, computer) {
         const messages = {
-          "rock-scissors": "ניצחת! אבן שוברת מספריים!",
-          "paper-rock": "ניצחת! נייר עוטף אבן!",
-          "scissors-paper": "ניצחת! מספריים חותכים נייר!",
+          "rock-scissors": "ניצחת!  אבן שוברת מספריים.",
+          "paper-rock": "ניצחת!  נייר עוטף אבן.",
+          "scissors-paper": "ניצחת!  מספריים חותכים נייר.",
         };
         return messages[`${player}-${computer}`];
       }
 
       function getLoseMessage(player, computer) {
         const messages = {
-          "rock-paper": "הפסדת! נייר עוטף אבן!",
-          "paper-scissors": "הפסדת! מספריים חותכים נייר!",
-          "scissors-rock": "הפסדת! אבן שוברת מספריים!",
+          "rock-paper": "הפסדת!  נייר עוטף אבן.",
+          "paper-scissors": "הפסדת!  מספריים חותכים נייר.",
+          "scissors-rock": "הפסדת!  אבן שוברת מספריים.",
         };
         return messages[`${player}-${computer}`];
       }
