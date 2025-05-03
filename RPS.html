@@ -37,14 +37,14 @@
         font-size: 3rem;
         color: #2c3e50;
         text-align: center;
-        margin-bottom: 8px;
+        margin-bottom: 0px;
       }
 
       .subtitle {
         font-size: 1.5rem;
         color: #7f8c8d;
         text-align: center;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
       }
 
       .score-display {
@@ -82,16 +82,16 @@
       }
 
       .vs-text {
-        font-size: 20px;
+        font-size: 25px;
         font-weight: bold;
         color: #e74c3c;
-        margin: 5px 0;
+        margin: -40px 0;
       }
 
       .result-image-container {
         width: 100%;
         text-align: center;
-        margin: 10px 0;
+        margin: 25px 0;
       }
 
       .result-image {
@@ -104,8 +104,7 @@
         font-size: 1.8rem;
         font-weight: bold;
         text-align: center;
-        min-height: 40px;
-        margin: 10px 0;
+        margin-top: -70px;
         color: #27ae60;
       }
 
@@ -208,9 +207,19 @@
         z-index: 50;
       }
 
+      @media (max-width: 500px) {
+        .action-btn {
+          padding: 6px 6px;
+          font-size: 1.4rem;
+        }
+
+        .header {
+          font-size: 2.8rem;
+        }
+      }
       @media (max-width: 400px) {
         .header {
-          font-size: 2.5rem;
+          font-size: 2.4rem;
         }
 
         .choice-btn img {
@@ -219,7 +228,7 @@
         }
 
         .action-btn {
-          padding: 6px 4px;
+          padding: 6px 2px;
           font-size: 1.2rem;
         }
 
@@ -238,11 +247,6 @@
 
         .result-display {
           font-size: 1.2rem;
-        }
-
-        .action-btn {
-          padding: 4px 8px;
-          font-size: 1rem;
         }
       }
     </style>
