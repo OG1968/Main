@@ -12,7 +12,7 @@
     <style>
       :root {
         --primary-color: #002a54;
-        --secondary-color: #f8f9fa;
+        --secondary-color: #bedeff;
         --accent-color: #ff6b6b;
         --text-color: #333;
         --light-text: #f5f5f5;
@@ -56,8 +56,8 @@
       }
 
       header {
-        border-radius: 20px;
-        background: linear-gradient(135deg, var(--primary-color), #004080);
+        border-radius: 10px;
+        background: var(--primary-color);
         color: var(--light-text);
         padding: 25px 0;
         text-align: center;
@@ -103,7 +103,7 @@
 
       .personal-details:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.9);
       }
 
       h2 {
@@ -141,11 +141,11 @@
 
       footer {
         text-align: center;
-        border-radius: 20px;
+        border-radius: 10px;
         margin-bottom: 20px;
         margin-top: 0px;
-        padding: 20px 5px;
-        background: linear-gradient(135deg, var(--primary-color), #004080);
+        padding: 0px 5px;
+        background: var(--primary-color);
         color: var(--light-text);
         width: 96%;
         box-shadow: var(--shadow);
@@ -157,7 +157,7 @@
         display: inline-block;
         padding: 12px 25px;
         margin: 10px 5px;
-        border-radius: 50px;
+        border-radius: 10px;
         text-decoration: none;
         font-weight: 600;
         transition: var(--transition);
@@ -263,6 +263,10 @@
         animation: fadeIn 0.8s ease-out forwards;
       }
 
+      .contact-form:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.9);
+      }
+
       .form-group {
         margin-bottom: 20px;
         width: 100%;
@@ -279,7 +283,7 @@
         width: 100%;
         padding: 12px 15px;
         border: 1px solid #ddd;
-        border-radius: 5px;
+        border-radius: 10px;
         font-size: 1em;
         transition: var(--transition);
       }
@@ -374,9 +378,7 @@
             <h2>דרכי יצירת קשר</h2>
 
             <div class="contact-info">
-              <p>
-                <i class="fas fa-user"></i> <strong>שם:</strong> אורן גוברין
-              </p>
+              <p><i class="fas fa-user"></i><strong>שם:</strong>אורן גוברין</p>
               <p>
                 <i class="fas fa-mobile-alt"></i> <strong>נייד:</strong>
                 <a href="tel:+972506807747" class="phone-link"
@@ -471,17 +473,6 @@
 
       <footer>
         <p>כל הזכויות שמורות &copy; אורן גוברין <span id="year"></span></p>
-        <div class="social-links" style="margin-top: 10px">
-          <a href="#" style="color: white; margin: 0 10px; font-size: 1.2em"
-            ><i class="fab fa-linkedin"></i
-          ></a>
-          <a href="#" style="color: white; margin: 0 10px; font-size: 1.2em"
-            ><i class="fab fa-facebook"></i
-          ></a>
-          <a href="#" style="color: white; margin: 0 10px; font-size: 1.2em"
-            ><i class="fab fa-whatsapp"></i
-          ></a>
-        </div>
       </footer>
     </div>
 
