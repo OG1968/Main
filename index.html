@@ -37,7 +37,7 @@
       }
 
       body {
-        background: linear-gradient(135deg, var(--light-color), #ffffff);
+        background: #ffeb92;
         color: var(--dark-color);
         line-height: 1.2;
         padding-bottom: 2rem;
@@ -193,6 +193,7 @@
       }
 
       .app-card {
+        cursor: pointer;
         background: white;
         border-radius: 10px;
         overflow: hidden;
@@ -205,7 +206,6 @@
         height: 100%;
         opacity: 0;
         transform: translateY(20px);
-        overflow: hidden;
       }
 
       .app-card::before {
@@ -226,7 +226,7 @@
 
       .app-card:hover {
         transform: translateY(-10px) scale(1.03);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
       }
 
       .app-icon {
@@ -935,11 +935,7 @@
           </div>
           <div class="app-info">
             <h3>איקס עיגול</h3>
-            <p>
-              משחק הילדות איקס עיגול במשחק מול המחשב. שים לב שברמת הקושי "קשה"
-              לא ניתן לנצח , מקסימום לכפות על המחשב תיקו... ולכן רמה זו הינה
-              לאימון בלבד.
-            </p>
+            <p>משחק הילדות איקס עיגול בגירסת אונליין המשחק מול המחשב.</p>
             <a href="TTT.html" class="btn"
               >לכניסה <i class="fas fa-external-link-alt"></i
             ></a>
@@ -969,7 +965,7 @@
           </div>
           <div class="app-info">
             <h3>בלאק ג'ק</h3>
-            <p>משחק בלאק ג'ק אונליין (עדיין בבטא)</p>
+            <p>משחק בלאק ג'ק אונליין (Beta)</p>
             <a href="BJ.html" class="btn"
               >לכניסה <i class="fas fa-external-link-alt"></i
             ></a>
@@ -981,9 +977,9 @@
       <div class="app-card about-card" data-category="about">
         <div class="app-icon">
           <img
-            src="images/logo_white.png"
+            src="data:image/png;base64,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"
             alt="לוגו"
-            style="width: 100px; height: 100px"
+            style="width: 80px; height: 80px"
           />
         </div>
         <div class="app-info">
