@@ -133,16 +133,41 @@
         background-color: var(--danger-color);
       }
 
+      .controls-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+.controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+/* אפשר להוסיף זאת אם הכפתורים קטנים מדי */
+button {
+    min-width: 10px;
+    height: 10px;
+}
+
       .controls {
         display: flex;
+        justify-content: center; 
         gap: 5px;
         margin-top: 0px;
         align-items: center;
-      }
+        width: 100%; 
+     }
 
       button {
         width: 100px;
-        height: 50px;
+        height: 60px;
         padding: 5px 20px;
         border: none;
         border-radius: 5px;
@@ -242,7 +267,7 @@
       }
 
       .hit-marker::after {
-        content: "✖";
+        content: "✖️";
         font-size: 1.2rem;
         position: absolute;
         top: 50%;
@@ -251,7 +276,7 @@
       }
 
       .miss-marker::after {
-        content: "•";
+        content: "🔹";
         font-size: 1.5rem;
         color: #555;
         position: absolute;
@@ -289,6 +314,7 @@
       .instructions-modal {
         display: none;
         position: fixed;
+        padding: 15px;
         top: 0;
         left: 0;
         width: 100%;
@@ -301,9 +327,11 @@
 
       .instructions-content {
         background-color: rgb(200, 219, 255);
-        padding: 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 10px;
         border-radius: 10px;
-        max-width: 500px;
+        max-width: 400px;
         max-height: 80vh;
         overflow-y: auto;
       }
@@ -319,7 +347,7 @@
       }
 
       .ship-rotate-btn {
-        width: 30px;
+        width: 20px;
         height: 30px;
         color: white;
         font-size: 1rem;
@@ -372,8 +400,7 @@
 
         .ship-rotate-btn {
           right: -0px;
-          width: 20px;
-          height: 25px;
+          height: 20px;
           font-size: 0.8rem;
         }
 
@@ -420,15 +447,13 @@
             <!-- Ships will be added here dynamically -->
           </div>
 
-          <div class="controls">
-            <button class="start-btn" id="startBtn" disabled>
-              התחל<br />משחק
-            </button>
-            <button class="rotate-btn" id="rotateBtn" style="display: none">
-              סובב<br />90°
-            </button>
-            <button class="reset-btn" id="resetBtn">אפס<br />משחק</button>
-          </div>
+          <div class="controls-container">
+            <div class="controls">
+                <button class="start-btn" id="startBtn" disabled>
+                    התחל<br />משחק
+                </button>
+                <button class="reset-btn" id="resetBtn">אפס<br />משחק</button>
+            </div>
         </div>
 
         <div class="board-container">
@@ -472,7 +497,6 @@
         const playerBoard = document.getElementById("playerBoard");
         const computerBoard = document.getElementById("computerBoard");
         const shipPalette = document.getElementById("shipPalette");
-        const rotateBtn = document.getElementById("rotateBtn");
         const startBtn = document.getElementById("startBtn");
         const resetBtn = document.getElementById("resetBtn");
         const gameStatus = document.getElementById("gameStatus");
@@ -534,31 +558,28 @@
               if (gameState.phase !== "setup") return;
 
               const shipIndex = e.target.dataset.shipIndex;
-              const ship = document.querySelector(
-                `.ship[data-index="${shipIndex}"]`
-              );
+              const ship = document.querySelector(`.ship[data-index="${shipIndex}"]`);
 
               if (ship.dataset.rotated === "false") {
-                ship.style.flexDirection = "column";
-                ship.dataset.rotated = "true";
-                gameState.isRotated = true;
+                  ship.style.flexDirection = "column";
+                  ship.dataset.rotated = "true";
+                  gameState.isRotated = true;
               } else {
-                ship.style.flexDirection = "row";
-                ship.dataset.rotated = "false";
-                gameState.isRotated = false;
+                  ship.style.flexDirection = "row";
+                  ship.dataset.rotated = "false";
+                  gameState.isRotated = false;
               }
 
               // עדכון מיקום כפתור הסיבוב לאחר שינוי הכיוון
-              const rotateBtn =
-                ship.parentElement.querySelector(".ship-rotate-btn");
+              const rotateBtn = ship.parentElement.querySelector(".ship-rotate-btn");
               if (ship.dataset.rotated === "true") {
-                rotateBtn.style.right = "auto";
-                rotateBtn.style.left = "-5px";
+                  rotateBtn.style.right = "auto";
+                  rotateBtn.style.left = "-5px";
               } else {
-                rotateBtn.style.left = "auto";
-                rotateBtn.style.right = "-5px";
+                  rotateBtn.style.left = "auto";
+                  rotateBtn.style.right = "-5px";
               }
-            });
+          });
             shipContainer.appendChild(rotateBtn);
 
             ship.draggable = true;
@@ -794,7 +815,6 @@
           const shipContainer = ships[shipIndex].parentElement;
           const rotateBtn = shipContainer.querySelector(".ship-rotate-btn");
           if (rotateBtn) {
-            rotateBtn.style.display = "none";
           }
 
           adjustShipPaletteLayout();
@@ -869,7 +889,6 @@
             return;
           }
 
-          rotateBtn.style.display = "none";
           placeComputerShips();
 
           gameState.phase = "player";
@@ -1268,7 +1287,6 @@
           gameStatus.style.color = "";
           computerTurnStatus.textContent = "";
           startBtn.disabled = true;
-          rotateBtn.style.display = "none";
 
           const playerCells = playerBoard.querySelectorAll(".cell");
           playerCells.forEach((cell) => {
