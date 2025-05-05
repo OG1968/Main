@@ -49,6 +49,7 @@
       }
 
       .game-status {
+        font-family: "Alef", sans-serif;
         font-size: 1.5rem;
         font-weight: 700;
         margin: 0px 0;
@@ -134,36 +135,36 @@
       }
 
       .controls-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin: 0 auto;
-    padding: 20px 0;
-}
-
-.controls {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 100%;
-}
-
-/* אפשר להוסיף זאת אם הכפתורים קטנים מדי */
-button {
-    min-width: 10px;
-    height: 10px;
-}
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px 0;
+      }
 
       .controls {
         display: flex;
-        justify-content: center; 
+        gap: 15px;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        max-width: 100%;
+      }
+
+      /* אפשר להוסיף זאת אם הכפתורים קטנים מדי */
+      button {
+        min-width: 10px;
+        height: 10px;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
         gap: 5px;
         margin-top: 0px;
         align-items: center;
-        width: 100%; 
-     }
+        width: 100%;
+      }
 
       button {
         width: 100px;
@@ -347,7 +348,7 @@ button {
       }
 
       .ship-rotate-btn {
-        background:none;
+        background: none;
         font-weight: 200;
         width: 20px;
         height: 30px;
@@ -365,9 +366,8 @@ button {
       }
 
       .ship-rotate-btn:hover {
-        background:none;
+        background: none;
       }
-      
 
       .toast {
         position: fixed;
@@ -400,8 +400,8 @@ button {
           grid-template-rows: repeat(10, var(--cell-size));
         }
         .ship-rotate-btn {
-        width: 10px;
-        height: 20px;
+          width: 10px;
+          height: 20px;
         }
 
         .ship-container {
@@ -432,28 +432,29 @@ button {
           </p>
         </div>
       </div>
+    </div>
 
-      <header>
-        <h1>משחק צוללות</h1>
-        <div class="game-status" id="gameStatus">הכן את הצוללות שלך</div>
-      </header>
+    <header>
+      <h1>משחק צוללות</h1>
+      <div class="game-status" id="gameStatus">הכן את הצוללות שלך</div>
+    </header>
 
-      <div class="game-area">
-        <div class="board-container">
-          <div class="board-title">הלוח שלך</div>
-          <div class="board" id="playerBoard"></div>
+    <div class="game-area">
+      <div class="board-container">
+        <div class="board-title">הלוח שלך</div>
+        <div class="board" id="playerBoard"></div>
 
-          <div class="ship-palette" id="shipPalette">
-            <!-- Ships will be added here dynamically -->
+        <div class="ship-palette" id="shipPalette">
+          <!-- Ships will be added here dynamically -->
+        </div>
+
+        <div class="controls-container">
+          <div class="controls">
+            <button class="start-btn" id="startBtn" disabled>
+              התחל<br />משחק
+            </button>
+            <button class="reset-btn" id="resetBtn">אפס<br />משחק</button>
           </div>
-
-          <div class="controls-container">
-            <div class="controls">
-                <button class="start-btn" id="startBtn" disabled>
-                    התחל<br />משחק
-                </button>
-                <button class="reset-btn" id="resetBtn">אפס<br />משחק</button>
-            </div>
         </div>
 
         <div class="board-container">
@@ -558,28 +559,31 @@ button {
               if (gameState.phase !== "setup") return;
 
               const shipIndex = e.target.dataset.shipIndex;
-              const ship = document.querySelector(`.ship[data-index="${shipIndex}"]`);
+              const ship = document.querySelector(
+                `.ship[data-index="${shipIndex}"]`
+              );
 
               if (ship.dataset.rotated === "false") {
-                  ship.style.flexDirection = "column";
-                  ship.dataset.rotated = "true";
-                  gameState.isRotated = true;
+                ship.style.flexDirection = "column";
+                ship.dataset.rotated = "true";
+                gameState.isRotated = true;
               } else {
-                  ship.style.flexDirection = "row";
-                  ship.dataset.rotated = "false";
-                  gameState.isRotated = false;
+                ship.style.flexDirection = "row";
+                ship.dataset.rotated = "false";
+                gameState.isRotated = false;
               }
 
               // עדכון מיקום כפתור הסיבוב לאחר שינוי הכיוון
-              const rotateBtn = ship.parentElement.querySelector(".ship-rotate-btn");
+              const rotateBtn =
+                ship.parentElement.querySelector(".ship-rotate-btn");
               if (ship.dataset.rotated === "true") {
-                  rotateBtn.style.right = "auto";
-                  rotateBtn.style.left = "-5px";
+                rotateBtn.style.right = "auto";
+                rotateBtn.style.left = "-5px";
               } else {
-                  rotateBtn.style.left = "auto";
-                  rotateBtn.style.right = "-5px";
+                rotateBtn.style.left = "auto";
+                rotateBtn.style.right = "-5px";
               }
-          });
+            });
             shipContainer.appendChild(rotateBtn);
 
             ship.draggable = true;
