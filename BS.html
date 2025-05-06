@@ -24,6 +24,10 @@
       }
 
       body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
         margin: 0;
         padding: 0;
         background-color: var(--background-color);
@@ -32,6 +36,7 @@
       }
 
       .container {
+        position: relative;
         max-width: 600px;
         margin: 0 auto;
         padding: 0px;
@@ -68,7 +73,7 @@
 
       @media (min-width: 768px) {
         .game-area {
-          flex-direction: row;
+          flex-direction: column;
           justify-content: center;
           align-items: flex-start;
         }
@@ -76,6 +81,7 @@
 
       .board-container {
         color: #001aff;
+        margin-bottom: 20px;
         font-size: 1.6rem;
         font-weight: 700;
         display: flex;
@@ -135,11 +141,9 @@
       }
 
       .controls-container {
-        display: flex;
-        justify-content: center;
+        order: 3;
         width: 100%;
-        margin: 0 auto;
-        padding: 20px 0;
+        margin-top: -20px;
       }
 
       .controls {
@@ -151,7 +155,6 @@
         max-width: 100%;
       }
 
-      /* אפשר להוסיף זאת אם הכפתורים קטנים מדי */
       button {
         min-width: 10px;
         height: 10px;
@@ -441,27 +444,25 @@
 
     <div class="game-area">
       <div class="board-container">
-        <div class="board-title">הלוח שלך</div>
-        <div class="board" id="playerBoard"></div>
+        <div class="board-title">לוח המחשב</div>
+        <div class="board" id="computerBoard"></div>
+        <div class="controls">
+          <div id="computerTurnStatus"></div>
+        </div>
 
-        <div class="ship-palette" id="shipPalette">
-          <!-- Ships will be added here dynamically -->
+        <div class="board-container">
+          <div class="board-title">הלוח שלך</div>
+          <div class="board" id="playerBoard"></div>
+
+          <div class="ship-palette" id="shipPalette">
+            <!-- Ships will be added here dynamically -->
+          </div>
         </div>
 
         <div class="controls-container">
           <div class="controls">
-            <button class="start-btn" id="startBtn" disabled>
-              התחל<br />משחק
-            </button>
-            <button class="reset-btn" id="resetBtn">אפס<br />משחק</button>
-          </div>
-        </div>
-
-        <div class="board-container">
-          <div class="board-title">לוח המחשב</div>
-          <div class="board" id="computerBoard"></div>
-          <div class="controls">
-            <div id="computerTurnStatus"></div>
+            <button class="start-btn" id="startBtn" disabled>התחל משחק</button>
+            <button class="reset-btn" id="resetBtn">אפס משחק</button>
           </div>
         </div>
       </div>
