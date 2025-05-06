@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="images/ship.png" />
-
     <title>משחק צוללות - Battleship</title>
     <style>
       :root {
@@ -30,7 +29,10 @@
         min-height: 100vh;
         margin: 0;
         padding: 0;
-        background-color: var(--background-color);
+        background-image: url("sea.jpg");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
         color: var(--dark-gray);
         direction: rtl;
       }
@@ -48,7 +50,7 @@
       }
 
       h1 {
-        color: var(--primary-color);
+        color: var(--accent-color);
         margin: 5px;
         font-size: 2.5rem;
       }
@@ -80,7 +82,7 @@
       }
 
       .board-container {
-        color: #001aff;
+        color: #bdc4ff;
         margin-bottom: 20px;
         font-size: 1.6rem;
         font-weight: 700;
@@ -91,10 +93,10 @@
       }
 
       .board-title {
-        margin-top: -5px;
+        margin-top: 5px;
         font-size: 1.2rem;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 0px;
       }
 
       .board {
