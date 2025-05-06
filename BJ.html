@@ -424,13 +424,18 @@
 
           return card;
         }
-
         function updateDisplay() {
           const dealerValue = calculateHandValue(dealerCards);
           const playerValue = calculateHandValue(playerCards);
 
           playerTotalEl.textContent = playerValue;
-          dealerTotalEl.textContent = gameOver ? dealerValue : "?";
+
+          // הצגת ערך הדילר רק אם המשחק הסתיים או אם זה הקלף הגלוי הראשון
+          if (gameOver || dealerCards.length > 0) {
+            dealerTotalEl.textContent = gameOver ? dealerValue : "?";
+          } else {
+            dealerTotalEl.textContent = "0";
+          }
 
           if (playerValue > 21) {
             endGame("הפסדת! עברת את 21", "lose");
@@ -468,15 +473,18 @@
           // בדיקת בלאק ג'ק
           if (playerValue === 21 && dealerValue === 21) {
             endGame("תיקו! לשניכם בלאק ג'ק", "draw");
+            return;
           } else if (playerValue === 21) {
             const winnings = Math.floor(currentBet * 1.5);
             score += winnings;
             updateScore();
             endGame(`בלאק ג'ק! ניצחת! (+${winnings} נקודות)`, "blackjack");
+            return;
           } else if (dealerValue === 21) {
             score -= currentBet;
             updateScore();
             endGame("הדילר קיבל בלאק ג'ק! הפסדת", "lose");
+            return;
           }
 
           updateDisplay();
@@ -496,6 +504,9 @@
 
           const dealerValue = calculateHandValue(dealerCards);
           const playerValue = calculateHandValue(playerCards);
+
+          // הצגת הערך האמיתי של יד הדילר
+          dealerTotalEl.textContent = dealerValue;
 
           // חישוב תוצאות רק אם לא נקבע סוג מראש
           if (!type) {
@@ -524,13 +535,13 @@
 
           // הצגת הודעה
           messageEl.innerHTML = `
-                    <div>${msg}</div>
-                    <div>ניקוד נוכחי: ${score}</div>
-                `;
+    <div>${msg}</div>
+    <div>ניקוד נוכחי: ${score}</div>
+  `;
           messageEl.className = `message ${type}`;
           messageEl.style.display = "block";
 
-          // עדכון מצב הכפתורים
+          // עדכון מצב הכפתורים - תמיד מאפשר משחק חדש
           gameBtn.textContent = "משחק חדש";
           gameBtn.classList.remove("disabled");
           gameBtn.disabled = false;
