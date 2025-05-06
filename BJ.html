@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/x-icon" href="images/BJ.png" />
-
     <title>Blackjack</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Rubik:wght@400;700;900&display=swap");
@@ -188,10 +187,60 @@
         flex-shrink: 0;
       }
 
-      .new-game-btn {
-        font-size: clamp(0.8rem, 3vw, 1rem);
-        padding: 0.6rem 1rem;
-        margin: 0.5rem auto 0;
+      .game-btn {
+        background-color: #2ecc71;
+        color: white;
+      }
+
+      .game-btn.disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+
+      .hit-btn {
+        background-color: #3498db;
+        color: white;
+      }
+
+      .stand-btn {
+        background-color: #e74c3c;
+        color: white;
+      }
+
+      .message.win {
+        background-color: rgba(46, 204, 113, 0.2);
+        border: 1px solid #2ecc71;
+      }
+
+      .message.lose {
+        background-color: rgba(231, 76, 60, 0.2);
+        border: 1px solid #e74c3c;
+      }
+
+      .message.draw {
+        background-color: rgba(241, 196, 15, 0.2);
+        border: 1px solid #f1c40f;
+      }
+
+      .message.blackjack {
+        background-color: rgba(155, 89, 182, 0.2);
+        border: 1px solid #9b59b6;
+      }
+
+      .message.error {
+        background-color: rgba(192, 57, 43, 0.2);
+        border: 1px solid #c0392b;
+      }
+
+      @keyframes dealCard {
+        from {
+          transform: translateY(-50px) rotate(5deg);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0) rotate(0deg);
+          opacity: 1;
+        }
       }
 
       @media (max-height: 700px) {
@@ -260,7 +309,7 @@
         </div>
 
         <div class="controls">
-          <button class="deal-btn" id="deal-btn">התחל משחק</button>
+          <button class="game-btn" id="game-btn">התחל משחק</button>
           <button class="hit-btn" id="hit-btn" disabled>קלף</button>
           <button class="stand-btn" id="stand-btn" disabled>עצור</button>
         </div>
@@ -278,7 +327,7 @@
         const playerTotalEl = document.getElementById("player-total");
         const hitBtn = document.getElementById("hit-btn");
         const standBtn = document.getElementById("stand-btn");
-        const dealBtn = document.getElementById("deal-btn");
+        const gameBtn = document.getElementById("game-btn");
         const messageEl = document.getElementById("message");
         const scoreEl = document.getElementById("score");
         const betControls = document.getElementById("bet-controls");
@@ -292,7 +341,8 @@
         let currentBet = 0;
         let isBetActive = false;
 
-        // אתחול חפיסה
+        // פונקציות המשחק
+
         function initDeck() {
           deck = [];
           const suits = ["hearts", "diamonds", "clubs", "spades"];
@@ -324,7 +374,6 @@
           shuffleDeck();
         }
 
-        // ערבוב החפיסה
         function shuffleDeck() {
           for (let i = deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -332,7 +381,6 @@
           }
         }
 
-        // חישוב ערך יד
         function calculateHandValue(hand) {
           let value = 0;
           let aces = 0;
@@ -356,7 +404,6 @@
           return value;
         }
 
-        // הוספת קלף ליד
         function addCardToHand(hand, element, isDealer = false) {
           const card = deck.pop();
           hand.push(card);
@@ -378,23 +425,21 @@
           return card;
         }
 
-        // עדכון התצוגה
         function updateDisplay() {
           const dealerValue = calculateHandValue(dealerCards);
           const playerValue = calculateHandValue(playerCards);
 
           playerTotalEl.textContent = playerValue;
-          dealerTotalEl.textContent = dealerValue;
+          dealerTotalEl.textContent = gameOver ? dealerValue : "?";
 
           if (playerValue > 21) {
             endGame("הפסדת! עברת את 21", "lose");
           }
         }
 
-        // התחלת משחק חדש
         function startGame() {
           if (currentBet <= 0 || currentBet > score) {
-            showMessage("בחר סכום להמרה תקין", "draw");
+            showMessage("בחר סכום להמרה תקין", "error");
             return;
           }
 
@@ -408,32 +453,41 @@
 
           initDeck();
 
+          // דילר מקבל 2 קלפים (אחד מוסתר)
           addCardToHand(dealerCards, dealerCardsEl, true);
-          addCardToHand(dealerCards, dealerCardsEl, true);
+          const hiddenCard = addCardToHand(dealerCards, dealerCardsEl, true);
+          hiddenCard.hidden = true;
+
+          // שחקן מקבל 2 קלפים
           addCardToHand(playerCards, playerCardsEl);
           addCardToHand(playerCards, playerCardsEl);
 
           const playerValue = calculateHandValue(playerCards);
           const dealerValue = calculateHandValue(dealerCards);
 
+          // בדיקת בלאק ג'ק
           if (playerValue === 21 && dealerValue === 21) {
             endGame("תיקו! לשניכם בלאק ג'ק", "draw");
           } else if (playerValue === 21) {
-            endGame("בלאק ג'ק! ניצחת!", "blackjack");
+            const winnings = Math.floor(currentBet * 1.5);
+            score += winnings;
+            updateScore();
+            endGame(`בלאק ג'ק! ניצחת! (+${winnings} נקודות)`, "blackjack");
           } else if (dealerValue === 21) {
-            endGame("הדילר קיבל בלאק ג'ק! הפסדת", "lose");
             score -= currentBet;
             updateScore();
+            endGame("הדילר קיבל בלאק ג'ק! הפסדת", "lose");
           }
 
           updateDisplay();
+          gameBtn.textContent = "משחק בתהליך";
+          gameBtn.classList.add("disabled");
+          gameBtn.disabled = true;
           hitBtn.disabled = false;
           standBtn.disabled = false;
-          dealBtn.disabled = true;
           betControls.style.display = "none";
         }
 
-        // סיום המשחק
         function endGame(msg, type) {
           if (!isBetActive) return;
 
@@ -443,7 +497,7 @@
           const dealerValue = calculateHandValue(dealerCards);
           const playerValue = calculateHandValue(playerCards);
 
-          // חישוב תוצאות
+          // חישוב תוצאות רק אם לא נקבע סוג מראש
           if (!type) {
             if (playerValue > 21) {
               type = "lose";
@@ -465,62 +519,79 @@
               type = "draw";
               msg = "תיקו! שתי הידיים שוות";
             }
-          }
-
-          // טיפול בבלאק ג'ק
-          if (
-            type === "win" &&
-            playerValue === 21 &&
-            playerCards.length === 2
-          ) {
-            const winnings = Math.floor(currentBet * 1.5);
-            score += winnings;
-            msg = `בלאק ג'ק! ניצחת! (+${winnings} נקודות)`;
+            updateScore();
           }
 
           // הצגת הודעה
           messageEl.innerHTML = `
-        <div>${msg}</div>
-        <div>ניקוד נוכחי: ${score}</div>
-        ${score > 0 ? '<button class="new-game-btn">משחק חדש</button>' : ""}
-    `;
+                    <div>${msg}</div>
+                    <div>ניקוד נוכחי: ${score}</div>
+                `;
           messageEl.className = `message ${type}`;
           messageEl.style.display = "block";
 
-          // אירוע לכפתור משחק חדש
-          const newGameBtn = messageEl.querySelector(".new-game-btn");
-          if (newGameBtn) {
-            newGameBtn.addEventListener("click", () => {
-              hideMessage();
-              startGame();
-            });
-          }
-
-          updateScore();
+          // עדכון מצב הכפתורים
+          gameBtn.textContent = "משחק חדש";
+          gameBtn.classList.remove("disabled");
+          gameBtn.disabled = false;
           hitBtn.disabled = true;
           standBtn.disabled = true;
-          dealBtn.disabled = false;
           betControls.style.display = "flex";
         }
 
-        // הצגת הודעה
+        function resetGame() {
+          dealerCardsEl.innerHTML = "";
+          playerCardsEl.innerHTML = "";
+          dealerCards = [];
+          playerCards = [];
+          currentBet = 0;
+          gameOver = true;
+          isBetActive = false;
+
+          dealerTotalEl.textContent = "0";
+          playerTotalEl.textContent = "0";
+          hideMessage();
+
+          // איפוס בחירת ההמרה
+          document.querySelectorAll(".bet-btn").forEach((b) => {
+            b.style.transform = "scale(1)";
+            b.style.boxShadow = "none";
+          });
+
+          // עדכון מצב הכפתורים
+          gameBtn.textContent = "התחל משחק";
+          gameBtn.classList.remove("disabled");
+          gameBtn.disabled = false;
+          hitBtn.disabled = true;
+          standBtn.disabled = true;
+          betControls.style.display = "flex";
+        }
+
         function showMessage(msg, type) {
           messageEl.textContent = msg;
           messageEl.className = `message ${type}`;
           messageEl.style.display = "block";
         }
 
-        // הסתרת הודעה
         function hideMessage() {
           messageEl.style.display = "none";
         }
 
-        // עדכון הניקוד
         function updateScore() {
           scoreEl.textContent = score;
         }
 
         // אירועי כפתורים
+        gameBtn.addEventListener("click", () => {
+          if (gameOver) {
+            if (isBetActive) {
+              resetGame();
+            } else {
+              startGame();
+            }
+          }
+        });
+
         hitBtn.addEventListener("click", () => {
           if (gameOver) return;
 
@@ -551,8 +622,6 @@
           drawDealerCard();
         });
 
-        dealBtn.addEventListener("click", startGame);
-
         // אירועי הכפתורים להמרה
         document.querySelectorAll(".bet-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
@@ -567,7 +636,7 @@
         });
 
         // אתחול ראשוני
-        updateScore();
+        resetGame();
       });
     </script>
   </body>
