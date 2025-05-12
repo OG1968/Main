@@ -924,7 +924,14 @@
       </a>
     </div>
 
-    <div style="text-align: center; margin: 20px 0; padding: 10px">
+    <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
+    <div style="text-align: center; margin: -0px 0; padding: 0px">
       <a href="about_me.html">
         <img
           src="images/logo.png"
@@ -933,21 +940,11 @@
             max-width: 100%;
             height: auto;
             max-height: 60px;
-            margin-bottom: 10px;
+            margin-bottom: -20px;
           "
         />
       </a>
-      <p style="color: var(--text-color); margin: 0">כל הזכויות שמורות ©</p>
     </div>
-
-    <script>
-      fetch("footer.html")
-        .then((response) => response.text())
-        .then((data) => {
-          document.body.insertAdjacentHTML("beforeend", data);
-        });
-    </script>
-
     <script>
       const defaultImage = "images/default_image.png";
 
