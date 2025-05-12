@@ -15,7 +15,7 @@
 
         /* ערכת צבעים כהה */
         --dark-bg: #000;
-        --dark-container-bg: #2d2d2d;
+        --dark-container-bg: #000000;
         --dark-text: #ffffff;
         --dark-input-bg: #444;
         --dark-button: #6c5ce7;
@@ -25,8 +25,8 @@
         --dark-border: #444;
 
         /* ערכת צבעים בהירה */
-        --light-bg: #00626d;
-        --light-container-bg: #ffffff;
+        --light-bg: #8eb5ff;
+        --light-container-bg: #8eb5ff;
         --light-text: #00626d;
         --light-input-bg: #ffffff;
         --light-button: #00626d;
@@ -35,27 +35,39 @@
         --light-border: #ddd;
       }
 
-      /* === הגדרות בסיסיות משותפות === */
       body {
-        font-family: Arial, sans-serif;
         direction: rtl;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        padding: 10px;
-        transition: background-color var(--transition-time) ease,
-          color var(--transition-time) ease;
+        height: 100%;
+        max-width: 800px;
+        font-family: Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        margin: auto;
+        padding: 15px;
+        padding-right: 15px;
+        padding-left: 15px;
       }
 
       .container {
-        padding: 14px;
-        border-radius: 10px;
-        box-shadow: -1px -1px 3px 3px rgb(149, 255, 2);
-        width: 400px;
-        transition: background-color var(--transition-time) ease,
-          box-shadow var(--transition-time) ease;
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .footer {
+        flex-grow: 0;
+        flex-shrink: 0;
+        flex-basis: auto;
+        width: 100%;
+        color: var(--dark-container-bg);
       }
 
       /* איחוד סגנונות כותרות */
@@ -65,7 +77,6 @@
         font-family: "Secular One", sans-serif;
         font-style: italic;
         line-height: 1;
-        transition: color var(--transition-time) ease;
       }
 
       h1 {
@@ -131,7 +142,6 @@
         display: none;
       }
 
-      /* === סגנונות משותפים להיסטוריה === */
       .history {
         margin-top: 0px;
         padding: 10px;
@@ -367,7 +377,7 @@
     <button id="clearHistoryButton" class="theme-toggle">🗑️</button>
 
     <div class="container">
-      <h1>המרת מידות 🔁</h1>
+      <h1>המרת מידות</h1>
       <div class="input-group">
         <b><label for="conversionType">סוג ההמרה:</label></b
         ><br />
@@ -698,6 +708,15 @@
         <button id="cancel-exit">ביטול</button>
       </div>
     </div>
+
+    <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
+
     <script>
       // מערך לשמירת היסטוריית ההמרות
       let conversionHistory = [];
