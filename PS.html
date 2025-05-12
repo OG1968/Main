@@ -310,6 +310,14 @@
         height: 1px;
       }
 
+      footer {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
       /* התאמה לתצוגות במסכים שונים */
       @media (max-width: 1200px) {
         .container {
@@ -336,7 +344,7 @@
         .container {
           grid-template-columns: 1fr;
           max-width: 350px;
-          padding: 20px 20px;
+          padding: 80px 20px;
         }
       }
 
@@ -344,10 +352,11 @@
         .export-btn {
           margin-left: -100%;
         }
-      }
-
-      /* התאמות למסך קטן */
-      @media (max-width: 600px) {
+        footer {
+          width: 100%;
+          padding: 10px;
+          box-sizing: border-box;
+        }
         .button-group {
           display: grid !important;
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -395,16 +404,13 @@
     <div class="container" id="gallery-container">
       <!-- Cards will be added here dynamically -->
     </div>
-
     <script>
       fetch("footer.html")
         .then((response) => response.text())
         .then((data) => {
           document.body.insertAdjacentHTML("beforeend", data);
         });
-    </script>
 
-    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const clearAllBtn = document.getElementById("clear-all-btn");
         const exportBtn = document.getElementById("export-btn");
