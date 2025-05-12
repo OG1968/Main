@@ -647,6 +647,14 @@
     </button>
 
     <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
+
+    <script>
       // כפתור גלילה מעלה
       window.addEventListener("scroll", function () {
         const scrollButton = document.querySelector(".scroll-to-top");
