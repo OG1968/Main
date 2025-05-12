@@ -363,6 +363,14 @@
     </div>
 
     <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
+
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         // Getting DOM elements
         const imageInputsContainer = document.getElementById(
