@@ -574,7 +574,6 @@
           onchange="importFromJSON(event)"
         />
       </div>
-      <div class="neon-text">כל הזכויות שמורות G©.</div>
     </div>
 
     <!-- Exit Confirmation Modal -->
@@ -588,6 +587,14 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
+
+    <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
 
     <script>
       // אתחול הרשימה מ-localStorage
