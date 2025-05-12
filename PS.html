@@ -397,6 +397,14 @@
     </div>
 
     <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
+
+    <script>
       document.addEventListener("DOMContentLoaded", function () {
         const clearAllBtn = document.getElementById("clear-all-btn");
         const exportBtn = document.getElementById("export-btn");
