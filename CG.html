@@ -743,6 +743,13 @@
       <div class="status" id="status"></div>
     </div>
 
+        <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
     <script>
       // מערך לשמירת התמונות והכותרות שהועלו
       const uploadedImages = {
