@@ -24,13 +24,8 @@
         font-family: "Segoe UI", Tahoma, sans-serif;
         margin: 0;
         padding: 0;
-        background: linear-gradient(
-          135deg,
-          var(--secondary-color) 0%,
-          var(--primary-color) 100%
-        );
-        min-height: 100vh;
-        display: flex;
+        background: var(--secondary-color);
+        max-height: 800px;
         justify-content: center;
         align-items: center;
         color: var(--dark-color);
@@ -48,11 +43,7 @@
       }
 
       header {
-        background: linear-gradient(
-          to right,
-          var(--primary-color),
-          var(--secondary-color)
-        );
+        background: var(--primary-color);
         color: white;
         padding: 25px 20px;
         text-align: center;
@@ -345,6 +336,13 @@
         font-style: italic;
       }
 
+      footer {
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
       /* אנימציות העלאה */
       @keyframes pulse {
         0% {
@@ -451,8 +449,13 @@
         </div>
       </div>
     </div>
-
     <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+
       // משתנים גלובליים
       let selectedImage = null;
       let selectedFiles = [];
