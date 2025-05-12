@@ -15,7 +15,7 @@
         direction: rtl;
         margin: 0;
         padding: 20px;
-        background-color: #027cb4;
+        background-color: #15b5ff;
       }
 
       .container {
@@ -1534,6 +1534,14 @@
           <button id="refresh-btn">ניקוי ורענון</button>
         </div>
       </div>
+
+      <script>
+        fetch("footer.html")
+          .then((response) => response.text())
+          .then((data) => {
+            document.body.insertAdjacentHTML("beforeend", data);
+          });
+      </script>
 
       <script>
         // אלמנטים מהדף
