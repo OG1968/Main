@@ -29,7 +29,7 @@
         --dark-border: #ffffff;
 
         /* ערכת צבעים בהירה */
-        --light-bg: #00626d;
+        --light-bg: #96b8ff;
         --light-container-bg: #dcdcdc;
         --light-text: #00626d;
         --light-input-bg: #ffffff;
@@ -50,30 +50,39 @@
         --border: var(--dark-border);
       }
 
-      /* === הגדרות בסיסיות משותפות === */
       body {
-        font-family: Arial, sans-serif;
         direction: rtl;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        padding: 10px;
-        transition: background-color var(--transition-time) ease,
-          color var(--transition-time) ease;
+        height: 100%;
+        max-width: 800px;
+        font-family: Arial, sans-serif;
         background-color: var(--bg);
         color: var(--text);
+        margin: auto;
+        padding: 15px;
+        padding-right: 15px;
+        padding-left: 15px;
       }
 
       .container {
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: -1px -1px 5px 5px rgba(255, 47, 0, 0.655);
-        width: 400px;
-        transition: background-color var(--transition-time) ease,
-          box-shadow var(--transition-time) ease;
-        background-color: var(--container-bg);
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+      }
+
+      .content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .footer {
+        flex-grow: 0;
+        flex-shrink: 0;
+        flex-basis: auto;
+        width: 100%;
+        color: var(--dark-container-bg);
       }
 
       h1,
@@ -88,6 +97,7 @@
       }
 
       h1 {
+        padding-top: 40px;
         font-size: 28px;
       }
 
@@ -369,6 +379,14 @@
         <button id="cancel-exit">ביטול</button>
       </div>
     </div>
+
+    <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
 
     <script>
       // נתוני המרה
