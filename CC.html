@@ -15,7 +15,7 @@
       href="images/scale.png"
     />
     <title>מחשבון קלוריות</title>
-    <style>
+<style>
       /* === בסיס משותף - משתנים והגדרות בסיסיות === */
       :root {
         --transition-time: 0.5s;
@@ -54,32 +54,41 @@
         --border: var(--dark-border);
       }
 
-      /* === הגדרות בסיסיות משותפות === */
       body {
-        overscroll-behavior-y: contain;
+        height: 100%;
+        max-width: 800px;
         font-family: Arial, sans-serif;
-        direction: rtl; /* כיוון כללי של הדף */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        padding: 20px;
-        transition: background-color var(--transition-time) ease,
-          color var(--transition-time) ease;
         background-color: var(--bg);
         color: var(--text);
+        margin: auto;
+        padding: 0;
       }
 
       .container {
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: -1px -1px 5px 5px rgba(255, 47, 0, 0.655);
-        width: 400px;
-        height: 550px; /* הגדלנו את הגובה כדי להכיל את המידע הנוסף */
-        transition: background-color var(--transition-time) ease,
-          box-shadow var(--transition-time) ease;
-        background-color: var(--container-bg);
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+   }
+
+      .content {
+        max-width: 800px;
+        margin: 0 auto;
+        padding-right: 15px;
+        padding-left: 15px;   
+      }
+
+      .footer {
+        flex-grow: 0;
+        flex-shrink: 0;
+        flex-basis: auto;
+        width: 100%;
+        background-color: rgb(241, 241, 241);
+        color: rgb(51, 51, 51);
+        text-align: center;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        padding-left: 0px;
+        padding-right: 0px;
       }
 
       h1 {
@@ -108,12 +117,13 @@
         text-align: center;
         margin: 5px 0;
         border-radius: 5px;
-        font-weight: bold;
         text-decoration: underline;
       }
 
       input,
       button {
+                direction: rtl;
+
         width: 100%;
         padding: 12px;
         margin-bottom: 10px;
@@ -141,16 +151,16 @@
       }
 
       .result {
-        border: 1px solid var(--border); /* מסגרת */
-        background-color: var(--container-bg); /* רקע */
+        border: 1px solid var(--border);
+        background-color: var(--container-bg);
         font-weight: bold;
         text-align: right;
         padding: 15px;
         margin-top: 10px;
         border-radius: 5px;
         color: var(--result);
-        font-size: 12px; /* גודל פונט 12 פיקסל */
-        line-height: 1.5; /* ריווח בין שורות */
+        font-size: 12px;
+        line-height: 1.5;
       }
 
       .result span {
@@ -158,7 +168,6 @@
         color: var(--result);
       }
 
-      /* כפתור שינוי מצב תצוגה */
       .theme-toggle {
         width: 40px;
         height: 40px;
@@ -181,7 +190,6 @@
         background-color: #5a4acb;
       }
 
-      /* === ערכת צבעים בהירה === */
       body.light-theme {
         --bg: var(--light-bg);
         --container-bg: var(--light-container-bg);
@@ -194,7 +202,6 @@
         --border: var(--light-border);
       }
 
-      /* התאמה למסכים קטנים */
       @media (max-width: 600px) {
         :root {
           --container-padding: 15px;
@@ -218,18 +225,16 @@
         }
       }
       
-      /* הסרת חצים לגלילה בשדות מספר בדפדפנים מסוימים */
-input[type="number"] {
-  -moz-appearance: textfield;
-}
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
 
-      /* סטייל למודל המותאם אישית */
       .modal {
         display: none;
         position: fixed;
@@ -265,7 +270,6 @@ input[type="number"]::-webkit-outer-spin-button {
         color: var(--button-hover);
       }
 
-      /* === אלמנט מותאם אישית לתפריט === */
       .custom-select {
         position: relative;
         width: 100%;
@@ -287,16 +291,14 @@ input[type="number"]::-webkit-outer-spin-button {
         display: none;
         position: absolute;
         width: 100%;
-        max-height: calc(
-          500px - 100px
-        ); /* גובה ה-container פחות הגובה של שאר האלמנטים */
+        max-height: calc(500px - 100px);
         overflow-y: auto;
         border: 1px solid var(--border);
         border-radius: 5px;
         background-color: var(--input-bg);
         z-index: 1;
         text-align: right;
-        top: 100%; /* מתחיל מתחת ל-selected-item */
+        top: 100%;
         left: 0;
       }
 
@@ -310,58 +312,56 @@ input[type="number"]::-webkit-outer-spin-button {
 
       .dropdown-options div:hover {
         background-color: var(--button-hover);
-        color: var(--text); /* צבע טקסט זהה ל-select המקורי */
+        color: var(--text);
       }
 
-      /* סטייל למודל היציאה */
-#exit-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 10000;
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
+      #exit-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
 
-#exit-modal-content {
-  background-color: #5a8de6;
-  color: #000;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-  max-width: 80%;
-  border: 1px solid var(--primary-color);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+      #exit-modal-content {
+        background-color: #5a8de6;
+        color: #000;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 80%;
+        border: 1px solid var(--primary-color);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
 
-#exit-modal h3 {
-  margin-bottom: 15px;
-  font-weight: bold;
-}
+      #exit-modal h3 {
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
 
-#exit-modal button {
-  border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
-  margin: 0 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
+      #exit-modal button {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
 
-#confirm-exit {
-  background-color: #ff4444;
-  color: #000;
-}
+      #confirm-exit {
+        background-color: #ff4444;
+        color: #000;
+      }
 
-#cancel-exit {
-  background-color: var(--primary-color);
-  color: #000;
-}
-
+      #cancel-exit {
+        background-color: var(--primary-color);
+        color: #000;
+      }
     </style>
   </head>
   <body class="dark-theme">
@@ -3480,13 +3480,7 @@ input[type="number"]::-webkit-outer-spin-button {
         <span id="nutritionInfo"></span>
       </div>
     </div>
-
-
-
-
-
-
-
+    
     <!-- הדרכה -->
     <div id="customModal" class="modal">
       <div class="modal-content">
@@ -3514,6 +3508,14 @@ input[type="number"]::-webkit-outer-spin-button {
     <button id="cancel-exit">ביטול</button>
   </div>
 </div>
+
+    <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+    </script>
 
     <script>
       // פונקציה להצגת הודעת שגיאה
