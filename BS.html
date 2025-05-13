@@ -392,6 +392,17 @@
         opacity: 1;
       }
 
+      footer {
+        width: 100vw;
+        max-width: 100%;
+        padding: 5px;
+        color: white;
+        text-align: center;
+        font-size: 14px;
+        box-sizing: border-box;
+        overflow-x: hidden;
+      }
+
       @media (max-width: 600px) {
         :root {
           --cell-size: 25px;
@@ -474,6 +485,12 @@
     <div class="toast" id="toast"></div>
 
     <script>
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        });
+
       document.addEventListener("DOMContentLoaded", () => {
         // Game state
         const gameState = {
