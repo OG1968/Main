@@ -299,6 +299,16 @@
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       }
 
+      footer {
+        width: 100vw;
+        max-width: 100%;
+        padding: 15px;
+        color: white;
+        font-size: 14px;
+        box-sizing: border-box;
+        overflow-x: hidden;
+      }
+
       /* התאמות למסכים קטנים */
       @media (max-width: 500px) {
         .container {
@@ -409,6 +419,12 @@
   </body>
 
   <script>
+    fetch("footer.html")
+      .then((response) => response.text())
+      .then((data) => {
+        document.body.insertAdjacentHTML("beforeend", data);
+      });
+
     // אלמנטים בדף
     const boxEls = document.querySelectorAll(".box");
     const statusEl = document.querySelector(".status");
