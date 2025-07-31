@@ -439,6 +439,7 @@
           <option value="MYR">🇲🇾 רינגיט מלזי (MYR)</option>
           <option value="RON">🇷🇴 לאו רומני (RON)</option>
           <option value="ARS">🇦🇷 פסו ארגנטינאי (ARS)</option>
+          <option value="GEL">🇬🇪 לארי גאורגי (GEL)</option>
         </select>
       </div>
 
@@ -481,6 +482,7 @@
           <option value="MYR">🇲🇾 רינגיט מלזי (MYR)</option>
           <option value="RON">🇷🇴 לאו רומני (RON)</option>
           <option value="ARS">🇦🇷 פסו ארגנטינאי (ARS)</option>
+          <option value="GEL">🇬🇪 לארי גאורגי (GEL)</option>
         </select>
       </div>
 
@@ -751,37 +753,29 @@
           return;
         }
 
-        try {
-          // שימוש ב-AbortController כדי להגביל את זמן הבקשה
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 שניות טיימאאוט
+try {
+  const apiKey = "41caba7e7669ab928d05523c"; // Your API key
+  const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
+  const response = await fetch(apiUrl);
 
-          const apiUrl = `https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`;
-          const response = await fetch(apiUrl, { signal: controller.signal });
+  if (!response.ok) {
+    throw new Error(`שגיאת HTTP: ${response.status}`);
+  }
 
-          // ניקוי הטיימר
-          clearTimeout(timeoutId);
+  const data = await response.json();
 
-          if (!response.ok) {
-            throw new Error(`שגיאת HTTP: ${response.status}`);
-          }
+  if (data.result === "error") {
+    throw new Error(data["error-type"] || "מטבע לא נתמך או שגיאה ב-API.");
+  }
 
-          const data = await response.json();
+  const rate = data.conversion_rates[toCurrency];
+  if (!rate) {
+    throw new Error(`מטבע ${toCurrency} אינו נתמך.`);
+  }
 
-          // בדיקה שהמטבע קיים בתוצאות
-          if (!data.rates[toCurrency]) {
-            throw new Error("מטבע יעד לא נתמך.");
-          }
-
-          // הצגת התוצאה (API כבר מבצע את החישוב עם הפרמטר amount)
-          const convertedAmount = data.rates[toCurrency];
-          resultDiv.textContent = `סכום לאחר המרה: ${convertedAmount.toFixed(
-            2
-          )} ${toCurrency}`;
-
-          // הצגת זמן העדכון האמיתי מה-API (במקום הזמן המקומי)
-          const apiUpdateTime = new Date(data.date).toLocaleDateString("he-IL");
-          updateTimeDiv.textContent = `זמן עדכון שער : ${apiUpdateTime}`;
+  const convertedAmount = amount * rate;
+  resultDiv.textContent = `סכום לאחר המרה: ${convertedAmount.toFixed(2)} ${toCurrency}`;
+  updateTimeDiv.textContent = `זמן עדכון: ${new Date(data.time_last_update_utc).toLocaleString("he-IL")}`;
 
           // הוספת ההמרה להיסטוריה
           addToHistory(amount, fromCurrency, toCurrency, convertedAmount);
