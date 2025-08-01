@@ -404,7 +404,8 @@
         <b><label for="fromCurrency">ממטבע:</label></b
         ><br />
         <select id="fromCurrency">
-<option value="USD">🇺🇸 דולר אמריקאי (USD)</option>
+          <option value="ILS">🇮🇱 שקל ישראלי (ILS)</option>
+          <option value="USD">🇺🇸 דולר אמריקאי (USD)</option>
           <option value="EUR">🇪🇺 יורו (EUR)</option>
           <option value="GBP">🇬🇧 לירה שטרלינג (GBP)</option>
           <option value="JPY">🇯🇵 ין יפני (JPY)</option>
@@ -430,7 +431,6 @@
           <option value="IDR">🇮🇩 רופיה אינדונזית (IDR)</option>
           <option value="HUF">🇭🇺 פורינט הונגרי (HUF)</option>
           <option value="CZK">🇨🇿 קורונה צ'כית (CZK)</option>
-          <option value="ILS">🇮🇱 שקל ישראלי (ILS)</option>
           <option value="CLP">🇨🇱 פסו צ'יליאני (CLP)</option>
           <option value="PHP">🇵🇭 פסו פיליפיני (PHP)</option>
           <option value="AED">🇦🇪 דירהם אמירויות (AED)</option>
@@ -572,6 +572,7 @@
         <b><label for="toCurrency">למטבע:</label></b
         ><br />
         <select id="toCurrency">
+          <option value="ILS">🇮🇱 שקל ישראלי (ILS)</option>
           <option value="USD">🇺🇸 דולר אמריקאי (USD)</option>
           <option value="EUR">🇪🇺 יורו (EUR)</option>
           <option value="GBP">🇬🇧 לירה שטרלינג (GBP)</option>
@@ -598,7 +599,6 @@
           <option value="IDR">🇮🇩 רופיה אינדונזית (IDR)</option>
           <option value="HUF">🇭🇺 פורינט הונגרי (HUF)</option>
           <option value="CZK">🇨🇿 קורונה צ'כית (CZK)</option>
-          <option value="ILS">🇮🇱 שקל ישראלי (ILS)</option>
           <option value="CLP">🇨🇱 פסו צ'יליאני (CLP)</option>
           <option value="PHP">🇵🇭 פסו פיליפיני (PHP)</option>
           <option value="AED">🇦🇪 דירהם אמירויות (AED)</option>
@@ -1003,29 +1003,35 @@
           return;
         }
 
-try {
-  const apiKey = "41caba7e7669ab928d05523c"; // Your API key
-  const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
-  const response = await fetch(apiUrl);
+        try {
+          const apiKey = "41caba7e7669ab928d05523c"; // Your API key
+          const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
+          const response = await fetch(apiUrl);
 
-  if (!response.ok) {
-    throw new Error(`שגיאת HTTP: ${response.status}`);
-  }
+          if (!response.ok) {
+            throw new Error(`שגיאת HTTP: ${response.status}`);
+          }
 
-  const data = await response.json();
+          const data = await response.json();
 
-  if (data.result === "error") {
-    throw new Error(data["error-type"] || "מטבע לא נתמך או שגיאה ב-API.");
-  }
+          if (data.result === "error") {
+            throw new Error(
+              data["error-type"] || "מטבע לא נתמך או שגיאה ב-API."
+            );
+          }
 
-  const rate = data.conversion_rates[toCurrency];
-  if (!rate) {
-    throw new Error(`מטבע ${toCurrency} אינו נתמך.`);
-  }
+          const rate = data.conversion_rates[toCurrency];
+          if (!rate) {
+            throw new Error(`מטבע ${toCurrency} אינו נתמך.`);
+          }
 
-  const convertedAmount = amount * rate;
-  resultDiv.textContent = `סכום לאחר המרה: ${convertedAmount.toFixed(2)} ${toCurrency}`;
-  updateTimeDiv.textContent = `זמן עדכון: ${new Date(data.time_last_update_utc).toLocaleString("he-IL")}`;
+          const convertedAmount = amount * rate;
+          resultDiv.textContent = `סכום לאחר המרה: ${convertedAmount.toFixed(
+            2
+          )} ${toCurrency}`;
+          updateTimeDiv.textContent = `זמן עדכון: ${new Date(
+            data.time_last_update_utc
+          ).toLocaleString("he-IL")}`;
 
           // הוספת ההמרה להיסטוריה
           addToHistory(amount, fromCurrency, toCurrency, convertedAmount);
