@@ -1991,6 +1991,15 @@
         document.body.classList.add("dark-theme");
         document.getElementById("themeToggle").textContent = "🌙";
 
+        // הגדרת ברירת מחדל לסכומים להמרה
+        document.getElementById("amount").value = "1";
+        document.getElementById("distanceAmount").value = "1";
+        document.getElementById("weightAmount").value = "1";
+        document.getElementById("temperatureAmount").value = "1";
+        document.getElementById("volumeAmount").value = "1";
+        document.getElementById("areaAmount").value = "1";
+        document.getElementById("speedAmount").value = "1";
+
         // טעינת היסטוריית ההמרות מהאחסון המקומי
         const savedHistory = localStorage.getItem("conversionHistory");
         if (savedHistory) {
@@ -1999,8 +2008,8 @@
         }
 
         // הגדרת ברירת מחדל למטבעות
-        document.getElementById("toCurrency").value = "ILS";
-        document.getElementById("fromCurrency").value = "USD";
+        document.getElementById("fromCurrency").value = "ILS";
+        document.getElementById("toCurrency").value = "USD";
 
         // הגדרת ברירת מחדל למרחקים
         document.getElementById("fromDistance").value = "Mile"; // ממידה: מייל
