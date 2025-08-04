@@ -2122,14 +2122,19 @@ document.addEventListener("DOMContentLoaded", function() {
         });
       });
     
-      // אתחול ראשוני
-      refreshSelects();
-      refreshMarkers();
-      if (places.length > 0) {
-        document.getElementById("from").value = places[0].id;
-        updateSelectedPlace(places[0]);
-        refreshSortedPlaces(places[0].id);
-      }
+// אתחול ראשוני עם מיקום נוכחי כברירת מחדל
+getCurrentLocation()
+  .then(() => {
+    refreshSelects();
+    refreshMarkers();
+    refreshSortedPlaces(currentLocation.id);
+    showToast("המיקום הנוכחי נטען כברירת מחדל", "info");
+  })
+  .catch(error => {
+    refreshSelects();
+    refreshMarkers();
+    showToast("שגיאה באיתור מיקום, אנא בחר ידנית", "warning");
+  });
     </script>
   </body>
 </html>
