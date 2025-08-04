@@ -276,6 +276,11 @@
         color: white;
       }
 
+            .essentials  {
+        background-color: #ff00c8;
+        color: white;
+      }
+
       .error-message {
         color: #e74c3c;
         margin-top: 5px;
@@ -990,6 +995,9 @@ body.dark-mode #useCurrentLocation:hover {
             <option value="cafe">בית קפה</option>
             <option value="pub">פאב</option>
             <option value="shopping">שופינג</option>
+            <option value="essentials">חיוני</option>
+            
+
           </select>
           <i class="fas fa-check-circle valid-icon"></i>
           <i class="fas fa-exclamation-circle invalid-icon"></i>
@@ -1065,20 +1073,13 @@ body.dark-mode #useCurrentLocation:hover {
       <h4>מיון מרחקים מנקודת המוצא</h4>
       <div class="category-filter">
         <button class="category-btn active" data-category="all">הכל</button>
-        <button class="category-btn lodging" data-category="lodging">
-          שמורים
-        </button>
-        <button class="category-btn attraction" data-category="attraction">
-          אתר תירותי
-        </button>
-        <button class="category-btn restaurant" data-category="restaurant">
-          מסעדה
-        </button>
+        <button class="category-btn lodging" data-category="lodging">שמורים</button>
+        <button class="category-btn attraction" data-category="attraction">אתר תירותי</button>
+        <button class="category-btn restaurant" data-category="restaurant">מסעדה</button>
         <button class="category-btn cafe" data-category="cafe">בית קפה</button>
         <button class="category-btn pub" data-category="pub">פאב</button>
-        <button class="category-btn shopping" data-category="shopping">
-          שופינג
-        </button>
+        <button class="category-btn shopping" data-category="shopping">שופינג</button>
+        <button class="category-btn essentials" data-category="essentials">חיוני</button>
       </div>
       <div id="sortedPlaces" class="places-list"></div>
       <div class="json-buttons">
@@ -1768,6 +1769,7 @@ document.addEventListener("DOMContentLoaded", function() {
           cafe: "בית קפה",
           pub: "פאב",
           shopping: "שופינג",
+          essentials : "חיוני",          
           current: "מיקום נוכחי"
         };
         return names[category] || "אחר";
