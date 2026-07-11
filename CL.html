@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="he">
 <head>
     <meta charset="UTF-8">
-    <title>פריסת קרטון</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פריסת קרטון – יוצר קופסאות</title>
+    <!-- Favicon: אייקון קרטון מעוצב (SVG inline) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='8' y='18' width='48' height='28' rx='2' fill='%23b47e4a' stroke='%235a3e1f' stroke-width='2'/%3E%3Cpath d='M8 46 L56 46 L50 52 L14 52 Z' fill='%239d6b3a' stroke='%235a3e1f' stroke-width='2'/%3E%3Cpath d='M8 18 L14 12 L50 12 L56 18' fill='%23c69b6d' stroke='%235a3e1f' stroke-width='2'/%3E%3Crect x='24' y='32' width='16' height='8' rx='1' fill='%23d9b382' opacity='0.7'/%3E%3C/svg%3E" type="image/svg+xml">
     <style>
         * {
             margin: 0;
@@ -16,7 +19,8 @@
         }
 
         body {
-            background: linear-gradient(135deg, #e3f0ff 0%, #b8d4f0 50%, #91bce6 100%);
+            /* שינוי רקע לכחול בהיר (רקע בהיר עם גוון תכלת) */
+            background: linear-gradient(145deg, #d4e8ff 0%, #b3d4f0 50%, #8bb8e0 100%);
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -29,7 +33,7 @@
             overflow-x: hidden;
         }
 
-        /* רקע דקורטיבי עם עיגולים */
+        /* אפקט עיגולים דקורטיביים (נשאר) */
         body::before {
             content: '';
             position: fixed;
@@ -38,9 +42,9 @@
             width: 200%;
             height: 200%;
             background: 
-                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
             animation: float 20s ease-in-out infinite;
             z-index: 0;
             pointer-events: none;
@@ -65,7 +69,7 @@
         .main-header h1 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #0f2a44;
+            color: #0c3861;
             text-shadow: 0 2px 15px rgba(255,255,255,0.3);
             letter-spacing: 1px;
             background: rgba(255, 255, 255, 0.7);
@@ -85,7 +89,7 @@
         .main-header h1 .sub {
             font-size: 0.8rem;
             font-weight: 400;
-            color: #3a5a7a;
+            color: #3b5a7a;
             display: block;
             margin-top: 0px;
             letter-spacing: 0.5px;
@@ -431,7 +435,7 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         }
 
-        /* צבעי לוחות – עדינים ומודרניים עם מעברי צבע */
+        /* צבעי לוחות – עדינים ומודרניים */
         .panel[style*="background: #ffe6f0"] { 
             background: linear-gradient(135deg, #fcecf2, #f8dce6); 
             border-color: #c97b9c;
@@ -442,7 +446,7 @@
         }
         .panel[style*="background: #e6f2ff"] { 
             background: linear-gradient(135deg, #e2edfc, #d4e3f8); 
-            border-color: #5d7fa0;
+            border-color: #1c62a8;
         }
 
         .dim-label {
@@ -515,8 +519,6 @@
         }
 
         /* ------ תוספות קוסמטיות ------ */
-        
-        /* אינדיקטור טעינה ויזואלי */
         .loading-indicator {
             display: none;
             position: fixed;
@@ -536,7 +538,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* עיצוב מספרים בשדות הקלט */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             opacity: 0.5;
@@ -547,7 +548,6 @@
             opacity: 1;
         }
 
-        /* תוספת - טוסט הודעה */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -584,7 +584,7 @@
     <!-- ===== כותרת ראשית ===== -->
     <div class="main-header">
         <h1>
-            📦 <span class="highlight"></span> יוצר פריסת קרטונים</span>
+            📦 <span class="highlight">יוצר פריסת קרטונים</span>
         </h1>
     </div>
 
@@ -660,7 +660,6 @@
         }
 
         function buildNet(L, W, H) {
-            // הצגת אינדיקטור טעינה
             const indicator = document.getElementById('loadingIndicator');
             indicator.style.display = 'block';
 
@@ -677,7 +676,6 @@
                 container.className = 'net';
                 container.innerHTML = '';
 
-                // בדיקה אם להסתיר כותרות
                 const hideLabels = getHideLabels();
 
                 function createPanel(name, left, top, w, h, color, sub) {
@@ -690,18 +688,15 @@
                     div.style.background = color;
                     
                     if (hideLabels) {
-                        // הצג רק מידות ללא כותרת
                         div.innerHTML = `
                             <span class="dim-label" style="font-size: 16px;">${sub}</span>
                         `;
                     } else {
-                        // הצג כותרת ומידות
                         div.innerHTML = `
                             <span class="dim-label">${name}<br><span class="dim-sub">${sub}</span></span>
                         `;
                     }
                     
-                    // הוספת אפקט hover עם מידע נוסף
                     div.title = `${name}: ${sub} ס"מ`;
                     container.appendChild(div);
                 }
@@ -749,7 +744,6 @@
                     x += p.w;
                 });
 
-                // עדכון שורת מידע
                 document.getElementById('infoBar').innerHTML =
                     '📐 L=' + L + ' ס"מ &nbsp;|&nbsp; W=' + W + ' ס"מ &nbsp;|&nbsp; H=' + H + ' ס"מ &nbsp;|&nbsp; ' +
                     'פריסה: ' + totalWidth + '×' + totalHeight.toFixed(1) + ' ס"מ &nbsp;|&nbsp; ' +
@@ -763,13 +757,10 @@
                 window._totalW = totalW;
                 window._totalH = totalH;
 
-                // הסתרת אינדיקטור טעינה
                 indicator.style.display = 'none';
-                
-                // הצגת טוסט
                 showToast('✅ פריסה עודכנה!');
 
-            }, 300); // אנימציית טעינה קטנה
+            }, 300);
         }
 
         function updateNet() {
@@ -790,7 +781,6 @@
             const totalH = totalHeight * scale;
 
             const container = document.getElementById('netContainer');
-            // נשמור את ה-HTML המעודכן עם המצב הנוכחי של הצ'קבוקס
             const originalHTML = container.innerHTML;
 
             showToast('📄 מוריד PDF...');
@@ -909,7 +899,6 @@
             }, 1000);
         }
 
-        // האזנה לשינוי בצ'קבוקס - עדכון הפריסה אוטומטי
         document.getElementById('hideLabels').addEventListener('change', function() {
             updateNet();
         });
@@ -928,14 +917,13 @@
             });
         });
 
-        // עדכון פריסה גם בלחיצת Enter בשדה ההערה
         document.getElementById('noteInput').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 updateNet();
             }
         });
 
-        console.log('✅ מוכן! המכסים צמודים לחלק העליון של הדפנות.');
+        console.log('✅ מוכן! המכסים צמודים לחלק העליון של הדפנות. רקע כחול בהיר + favicon קרטון.');
     </script>
 </body>
 </html>
