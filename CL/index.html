@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פריסת קרטון – יוצר קופסאות</title>
+    <link rel="icon" href="box.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="loading-indicator" id="loadingIndicator"></div>
+    <div class="toast" id="toast">✅ הפריסה עודכנה!</div>
+
+    <!-- Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- כפתור תפריט נייד -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="פתח תפריט שליטה">
+        📐 תפריט
+        <span class="badge" id="mobileBadge">⚡</span>
+    </button>
+
+    <!-- תפריט נייד -->
+    <div class="mobile-menu-panel" id="mobileMenuPanel">
+        <div class="panel-header">
+            <h3>📦 שליטה בפריסה</h3>
+            <button class="panel-close" id="mobileMenuClose">✕</button>
+        </div>
+        
+        <div class="control-group">
+            <div class="control-row">
+                <label>L</label>
+                <input type="number" id="mobileInputL" value="62" step="0.1" min="1">
+                <label>W</label>
+                <input type="number" id="mobileInputW" value="46" step="0.1" min="1">
+                <label>H</label>
+                <input type="number" id="mobileInputH" value="88.5" step="0.1" min="1">
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn-update-mobile" id="mobileUpdateBtn">🔄 עדכן פריסה</button>
+                <button class="btn-pdf-mobile" id="mobilePdfBtn">📄 הורד PDF</button>
+            </div>
+            
+            <div class="toggle-row">
+                <label for="mobileHideLabels">הסתר כותרות חלקים</label>
+                <input type="checkbox" id="mobileHideLabels">
+            </div>
+            
+            <div class="note-row">
+                <input type="text" id="mobileNoteInput" placeholder="✏️ הוסף הערה..." maxlength="100">
+            </div>
+        </div>
+    </div>
+
+    <div class="main-header">
+        <h1>📦 <span class="highlight">יוצר פריסת קרטונים</span></h1>
+    </div>
+
+    <div class="controls">
+        <label>L (אורך)</label>
+        <input type="number" id="inputL" value="62" step="0.1" min="1">
+        <label>W (רוחב)</label>
+        <input type="number" id="inputW" value="46" step="0.1" min="1">
+        <label>H (גובה)</label>
+        <input type="number" id="inputH" value="88.5" step="0.1" min="1">
+        <button class="btn-update" onclick="updateNet()">🔄 עדכן פריסה</button>
+    </div>
+
+    <div class="actions">
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="hideLabels">
+            <label for="hideLabels">הסתר כותרות חלקים</label>
+        </div>
+        <button class="btn-pdf" onclick="downloadPDF()">הורד PDF</button>
+        <div class="note-wrapper">
+            <label for="noteInput">הערה</label>
+            <input type="text" id="noteInput" placeholder="הוסף הערה לפריסה..." maxlength="100">
+        </div>
+    </div>
+
+    <div class="info-bar" id="infoBar"></div>
+    
+    <div class="net-wrapper" id="netWrapper">
+        <div id="netContainer"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
