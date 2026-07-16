@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 ניהול משלוחים - סטטוס + הערה</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #f0f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1550px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+            padding: 25px 20px 30px;
+        }
+        h1 {
+            font-size: 1.9rem;
+            margin: 0 0 8px 0;
+            color: #0b1e33;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            gap: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 18px;
+        }
+        .filter-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .filter-area label {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .filter-area select {
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.95rem;
+            cursor: pointer;
+            outline: none;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: #eef2f6;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .btn-success { background: #0f7b3a; color: white; }
+        .btn-success:hover { background: #0b662f; }
+        .btn-danger { background: #b91c1c; color: white; }
+        .btn-danger:hover { background: #991515; }
+        .btn-excel { background: #1d6f42; color: white; }
+        .btn-excel:hover { background: #155a34; }
+        .btn-sort { background: #6c5b7b; color: white; }
+        .btn-sort:hover { background: #5a4a68; }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 1200px;
+        }
+        th {
+            background: #f2f6fd;
+            color: #1a2c44;
+            font-weight: 700;
+            padding: 14px 8px;
+            border-bottom: 2px solid #d0dbe8;
+            text-align: center;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+        td {
+            padding: 6px 4px;
+            border-bottom: 1px solid #e9edf3;
+            text-align: center;
+            vertical-align: middle;
+            min-height: 44px;
+        }
+        td[contenteditable="true"] {
+            outline: none;
+            transition: background 0.1s;
+            border-radius: 6px;
+        }
+        td[contenteditable="true"]:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        td[contenteditable="true"]:focus {
+            background: rgba(255,255,255,0.6);
+            box-shadow: inset 0 0 0 2px #1e3a5f;
+        }
+
+        /* סטטוסים - צבעי רקע לשורה - חלים רק על תאי נתונים (לא על עמודת הפעולות) */
+        .status-arrived td:not(.row-actions) { background-color: #009953; }
+        .status-onway td:not(.row-actions) { background-color: #3bffa6; }
+        .status-inprogress td:not(.row-actions) { background-color: #fff3cd; }
+        .status-missing td:not(.row-actions) { background-color: #fc8d97; }
+        .status-preparing td:not(.row-actions) { background-color: #ffe5b4; }
+        .status-cancelled td:not(.row-actions) { background-color: #ff293c; }
+        .status-cancelled td:not(.row-actions) { text-decoration: line-through; }
+        .status-pending td:not(.row-actions) { background-color: #e0e0e0; }
+        .status-empty td:not(.row-actions) { background-color: #ffffff; }
+
+        /* עמודת הפעולות והצ'קבוקס נשארות לבנות */
+        .row-actions { background-color: #ffffff !important; }
+        td:first-child { background-color: #ffffff !important; }
+
+        .status-select, .type-select {
+            padding: 4px 8px;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            outline: none;
+            font-weight: 500;
+            width: 85px;
+        }
+        .save-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            margin-right: 8px;
+            transition: 0.3s;
+        }
+        .save-indicator.saving {
+            background: #eab308;
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+        }
+        .footer-info {
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #3d5775;
+        }
+        .counter {
+            background: #eef2f6;
+            padding: 5px 18px;
+            border-radius: 30px;
+        }
+        .empty-row-msg {
+            text-align: center;
+            padding: 30px 0;
+            color: #6a7c94;
+        }
+        .row-actions {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff !important;
+        }
+        .row-actions button {
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 30px;
+            transition: 0.1s;
+        }
+        .row-actions .delete-btn:hover { background: #fecaca; color: #b91c1c; }
+        .row-actions .duplicate-btn:hover { background: #dbeafe; color: #1a3f6e; }
+        @media (max-width: 700px) {
+            .container { padding: 12px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .filter-area { flex-wrap: wrap; }
+            .action-buttons { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="toolbar">
+        <h1>📦 ניהול משלוחים</h1>
+        <div class="filter-area">
+            <label for="statusFilter">🔎 סינון לפי סטטוס:</label>
+            <select id="statusFilter">
+                <option value="all">הכל</option>
+                <option value="arrived">הגיע</option>
+                <option value="onway">בדרך</option>
+                <option value="inprogress">ביצוע</option>
+                <option value="missing">חוסר</option>
+                <option value="preparing">הכנה</option>
+                <option value="cancelled">בוטל</option>
+                <option value="pending">המתנה</option>
+                <option value="empty">חדש</option>
+            </select>
+            <span class="save-indicator" id="saveIndicator" title="נשמר אוטומטית"></span>
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-success" id="addRowBtn">➕ הוסף שורה</button>
+            <button class="btn btn-danger" id="deleteSelectedBtn">🗑️ מחק נבחרות</button>
+            <button class="btn btn-sort" id="sortBtn">🔽 מיון לפי סטטוס</button>
+            <button class="btn btn-excel" id="exportExcelBtn">📊 יצוא לאקסל</button>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table id="deliveryTable">
+            <thead>
+                <tr>
+                    <th style="width:40px;"><input type="checkbox" id="selectAllCheck"></th>
+                    <th>סוג מכולה</th>
+                    <th>20'</th>
+                    <th>40'</th>
+                    <th>הזמנה</th>
+                    <th>סוג מוצר</th>
+                    <th>תיק</th>
+                    <th>שם ספק</th>
+                    <th>תאריך הגעה</th>
+                    <th>ספק</th>
+                    <th>סכום $</th>
+                    <th>סטטוס</th>
+                    <th>הערה</th>
+                    <th style="width:70px;">פעולות</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="footer-info">
+        <span class="counter" id="rowCounter">0 שורות</span>
+        <span>✅ כל שינוי נשמר אוטומטית ב-LocalStorage</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const statusMap = {
+            'arrived': 'הגיע',
+            'onway': 'בדרך',
+            'inprogress': 'ביצוע',
+            'missing': 'חוסר',
+            'preparing': 'הכנה',
+            'cancelled': 'בוטל',
+            'pending': 'המתנה',
+            'empty': 'חדש'
+        };
+
+        const sortOrder = {
+            'arrived': 1,
+            'onway': 2,
+            'inprogress': 3,
+            'preparing': 4,
+            'missing': 5,
+            'cancelled': 6,
+            'pending': 7,
+            'empty': 8,
+            '': 8
+        };
+
+        const defaultData = [
+            { type: "FCL", q20: "0", q40: "1", order: "150118535", product: "אופנועים", file: "101260008", supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-03-10", vendor: "24210046000", amount: "30074", status: "arrived", note: "הגיע" },
+            { type: "LCL", q20: "0", q40: "0", order: "150118544", product: "מאשה והדוב", file: "101260011", supplier: "GIOCHI PREZIOSI", date: "2026-03-22", vendor: "24210035000", amount: "20555", status: "arrived", note: "הגיע" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118545", product: "מאשה והדוב", file: "101260007", supplier: "FABRICAS AGRUPADAS DE MUN", date: "2026-03-30", vendor: "24210052000", amount: "61277", status: "arrived", note: "הגיע" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118555", product: "רכבות", file: "101260009", supplier: "SHANTOU SWEET TOYS COMPAN", date: "2026-03-30", vendor: "24210009000", amount: "32655", status: "arrived", note: "הגיע" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118540", product: "משאיות", file: "101260010", supplier: "SHANTOU SHENGQI IMP", date: "2026-04-04", vendor: "24210007000", amount: "23093", status: "arrived", note: "הגיע" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118549", product: "אופני איזון פדאלים", file: "101260013", supplier: "HEBEI JOYRIDE TOYS", date: "2026-04-21", vendor: "24210095000", amount: "20664", status: "arrived", note: "הגיע" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118548", product: "אופני איזון", file: "101260014", supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-04-22", vendor: "24210008000", amount: "17088", status: "arrived", note: "הגיע" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118551", product: "רובי ג'ל", file: "101260015", supplier: "DOWELLIN GROUP", date: "2026-05-02", vendor: "24210012000", amount: "40219.04", status: "arrived", note: "הגיע" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118547", product: "בימבה ג'וק", file: "101260016", supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-06-16", vendor: "24210008000", amount: "24541", status: "arrived", note: "הגיע" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118559", product: "רובים פלסטיק", file: "101260018", supplier: "ZING ZASIA LIMITED", date: "2026-07-09", vendor: "24210010000", amount: "47423.89", status: "onway", note: "ממתין להגעה ושחרור" },
+            { type: "FCL", q20: "0", q40: "2", order: "150118556", product: "משחקי צבא", file: "101260017", supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-08-07", vendor: "24210046000", amount: "31915.32", status: "onway", note: "ממתין להגעה ושחרור" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118564", product: "שטיחוני פעילות", file: "x", supplier: "GUANGDONG FAIRNESS ENTRPRISE", date: "2026-08-06", vendor: "24210090000", amount: "10096.5", status: "onway", note: "ממתין להגעה ושחרור" },
+            { type: "", q20: "", q40: "", order: "150118558", product: "בובות הפעלה", file: "x", supplier: "EOLO TOYS LTD", date: "", vendor: "24210037000", amount: "36087", status: "missing", note: "בתהליך חוסר תעודות מעבדה" },
+            { type: "", q20: "", q40: "", order: "150118560", product: "רכבי פעלולים על שלט", file: "x", supplier: "KABOOM ASIA LIMITED", date: "", vendor: "24210011000", amount: "52152", status: "missing", note: "ממתין חוסר תעודות משרד התקשורת" },
+            { type: "", q20: "", q40: "", order: "150118562", product: "כלי עבודה", file: "x", supplier: "SHANTOU SHENGQI IMP", date: "", vendor: "24210007000", amount: "38958.12", status: "inprogress", note: "נשלח לספק לביצוע" },
+            { type: "", q20: "", q40: "", order: "150118565", product: "שולחנות פעילות", file: "x", supplier: "WENZHOU RUIZHI CRAFTS", date: "", vendor: "24210900000", amount: "34318.5", status: "inprogress", note: "נשלח לספק לביצוע" },
+            { type: "", q20: "", q40: "", order: "150118571", product: "תלת אופן (בימבה יטבתה)", file: "x", supplier: "YONGKANG YULIEN INDUSTRY", date: "", vendor: "24210396000", amount: "20037.6", status: "inprogress", note: "נשלח לספק לביצוע" },
+            { type: "", q20: "", q40: "", order: "150118584", product: "שולחנות משחק", file: "x", supplier: "SPEEDINDUSTIAL INTERNATIONAL", date: "", vendor: "24220007000", amount: "17820", status: "inprogress", note: "נשלח לספק לביצוע" },
+            { type: "", q20: "", q40: "", order: "150118585", product: "שולחנות משחק", file: "x", supplier: "SPEEDINDUSTIAL INTERNATIONAL", date: "", vendor: "24220007000", amount: "21300", status: "inprogress", note: "נשלח לספק לביצוע - (קיבל מקדמה להכנת תעודת מעבדה)" },
+            { type: "", q20: "", q40: "", order: "150118579", product: "משאיות גדול", file: "x", supplier: "SHATOU FENGCHENGJIA TRAD -  HK FAIR TOYS", date: "", vendor: "24210355000", amount: "19945.44", status: "onway", note: "ממתין להכנת הסטודיו" },
+            { type: "", q20: "", q40: "", order: "150118580", product: "חניונים", file: "x", supplier: "GUANGDONG ZHENLE TOYS FACTORY", date: "", vendor: "24210356000", amount: "25260.48", status: "onway", note: "ממתין להכנת הסטודיו" },
+            { type: "", q20: "", q40: "", order: "150118572", product: "משאיות עבודה קטן", file: "x", supplier: "SHANTOU HUAHUAN IMPORTAND  -  HH TOYS", date: "", vendor: "24210365000", amount: "27164.58", status: "onway", note: "ממתין להכנת הסטודיו" },
+            { type: "", q20: "", q40: "", order: "150118566", product: "ספיידי", file: "x", supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "83944.78", status: "preparing", note: "בתהליך הכנה" },
+            { type: "", q20: "", q40: "", order: "150118567", product: "קוקומלון", file: "x", supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "46145", status: "preparing", note: "בתהליך הכנה" },
+            { type: "", q20: "", q40: "", order: "150118563", product: "שונות", file: "x", supplier: "HASBRO   -    JULY", date: "", vendor: "24210361100", amount: "295492.98", status: "preparing", note: "בתהליך הכנה" },
+            { type: "", q20: "", q40: "", order: "150118589", product: "שונות", file: "x", supplier: "HASBRO   -    SEPTEMBER", date: "", vendor: "24210361100", amount: "162861.02", status: "preparing", note: "בתהליך הכנה" },
+            { type: "", q20: "", q40: "", order: "150118588", product: "צבי נינג'ה", file: "x", supplier: "PLAYMATES", date: "", vendor: "24210336000", amount: "24822.57", status: "preparing", note: "בתהליך הכנה" },
+            { type: "", q20: "", q40: "", order: "150118587", product: "נשכן", file: "x", supplier: "GUANGDONG HUANGER BABY PRODUCTS", date: "", vendor: "24220008000", amount: "3769.52", status: "preparing", note: "בתהליך הכנה" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118591", product: "אופני איזון פדאלים", file: "x", supplier: "HEBEI JOYRIDE TOYS", date: "", vendor: "24210095000", amount: "20664", status: "preparing", note: "בתהליך הכנה" },
+            { type: "FCL", q20: "0", q40: "1", order: "150118592", product: "אופני איזון", file: "x", supplier: "SHIJIAZHUANG SENTER INTER", date: "", vendor: "24210008000", amount: "17837.4", status: "preparing", note: "בתהליך הכנה" },
+            { type: "", q20: "", q40: "", order: "150118550", product: "שולחנות משחק", file: "x", supplier: "GUANGDONG HUANGGUAN TECHN", date: "x", vendor: "24210005000", amount: "43940", status: "cancelled", note: "בוטל לעת עתה" },
+            { type: "", q20: "", q40: "", order: "150118557", product: "רכבות", file: "x", supplier: "HANG WING INDUSTRY", date: "x", vendor: "24210061000", amount: "71228", status: "cancelled", note: "בוטל לעת עתה" },
+            { type: "", q20: "", q40: "", order: "150118568", product: "קוקומלון", file: "x", supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "30565", status: "cancelled", note: "בוטל לעת עתה" }
+        ];
+
+        const STORAGE_KEY = 'deliveryData';
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    return JSON.parse(JSON.stringify(defaultData));
+                }
+            }
+            return JSON.parse(JSON.stringify(defaultData));
+        }
+
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('saving');
+            setTimeout(() => {
+                indicator.classList.remove('saving');
+            }, 400);
+        }
+
+        let currentData = loadData();
+        let nextId = currentData.length + 1000;
+
+        const tbody = document.getElementById('tableBody');
+        const filterSelect = document.getElementById('statusFilter');
+        const rowCounter = document.getElementById('rowCounter');
+        const selectAllCheck = document.getElementById('selectAllCheck');
+
+        function getStatusClass(status) {
+            if (!status || status === 'empty') return 'status-empty';
+            return `status-${status}`;
+        }
+
+        function formatDateForDisplay(dateStr) {
+            if (!dateStr || dateStr === 'x' || dateStr === '') return '—';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return dateStr;
+        }
+
+        function saveAndUpdate() {
+            saveData(currentData);
+            updateCounter(document.querySelectorAll('#tableBody tr').length);
+        }
+
+        function sortData() {
+            currentData.sort((a, b) => {
+                const orderA = sortOrder[a.status] || 8;
+                const orderB = sortOrder[b.status] || 8;
+                return orderA - orderB;
+            });
+            renderTable(filterSelect.value);
+            saveAndUpdate();
+        }
+
+        function renderTable(filter = 'all') {
+            const filtered = currentData.filter(row => {
+                if (filter === 'all') return true;
+                if (filter === 'empty') return !row.status || row.status === 'empty';
+                return row.status === filter;
+            });
+
+            tbody.innerHTML = '';
+            if (filtered.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 14;
+                td.className = 'empty-row-msg';
+                td.textContent = '🚫 אין שורות התואמות לסטטוס זה';
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                updateCounter(filtered.length);
+                return;
+            }
+
+            filtered.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.dataset.rowId = row._id || `row-${index}`;
+                tr.className = getStatusClass(row.status);
+
+                const tdCheck = document.createElement('td');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'row-checkbox';
+                tdCheck.appendChild(checkbox);
+                tr.appendChild(tdCheck);
+
+                // ----- סוג מכולה - תפריט בחירה עם "אחר" -----
+                const tdType = document.createElement('td');
+                const typeSelect = document.createElement('select');
+                typeSelect.className = 'type-select';
+                const typeOptions = ['', 'FCL', 'LCL', 'אחר'];
+                typeOptions.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt || '';
+                    if (row.type === opt || (!row.type && opt === '')) option.selected = true;
+                    typeSelect.appendChild(option);
+                });
+                typeSelect.addEventListener('change', function() {
+                    const newVal = this.value;
+                    const rowId = tr.dataset.rowId;
+                    const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) === rowId);
+                    if (rowData) {
+                        rowData.type = newVal;
+                        saveAndUpdate();
+                    }
+                });
+                tdType.appendChild(typeSelect);
+                tr.appendChild(tdType);
+
+                // ----- 20' ו-40' - editable -----
+                const fields = ['q20', 'q40', 'order', 'product', 'file', 'supplier', 'date', 'vendor', 'amount'];
+                fields.forEach((field) => {
+                    const td = document.createElement('td');
+                    td.contentEditable = true;
+                    const val = row[field] !== undefined ? row[field] : '';
+                    td.textContent = (field === 'date' && val) ? formatDateForDisplay(val) : val;
+                    td.setAttribute('data-field', field);
+                    td.addEventListener('blur', function(e) {
+                        const newVal = this.textContent.trim();
+                        const rowId = tr.dataset.rowId;
+                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) === rowId);
+                        if (rowData) {
+                            if (field === 'date') {
+                                const parts = newVal.split('/');
+                                if (parts.length === 3) {
+                                    rowData[field] = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                } else {
+                                    rowData[field] = newVal;
+                                }
+                            } else {
+                                rowData[field] = newVal;
+                            }
+                            saveAndUpdate();
+                        }
+                    });
+                    td.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.blur();
+                        }
+                    });
+                    tr.appendChild(td);
+                });
+
+                // ----- סטטוס - תפריט בחירה -----
+                const tdStatus = document.createElement('td');
+                const statusSelect = document.createElement('select');
+                statusSelect.className = 'status-select';
+                const statusOptions = ['empty', 'arrived', 'onway', 'inprogress', 'missing', 'preparing', 'cancelled', 'pending'];
+                statusOptions.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = statusMap[opt] || opt;
+                    if (row.status === opt || (!row.status && opt === 'empty')) option.selected = true;
+                    statusSelect.appendChild(option);
+                });
+                statusSelect.addEventListener('change', function() {
+                    const newStatus = this.value;
+                    const rowId = tr.dataset.rowId;
+                    const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) === rowId);
+                    if (rowData) {
+                        rowData.status = newStatus === 'empty' ? '' : newStatus;
+                        tr.className = getStatusClass(newStatus);
+                        if (!rowData.note || rowData.note === '') {
+                            rowData.note = statusMap[newStatus] || '';
+                            const noteTd = tr.querySelector('td[data-field="note"]');
+                            if (noteTd) noteTd.textContent = rowData.note;
+                        }
+                        saveAndUpdate();
+                    }
+                });
+                tdStatus.appendChild(statusSelect);
+                tr.appendChild(tdStatus);
+
+                // ----- הערה - editable -----
+                const tdNote = document.createElement('td');
+                tdNote.contentEditable = true;
+                tdNote.textContent = row.note || '';
+                tdNote.setAttribute('data-field', 'note');
+                tdNote.addEventListener('blur', function(e) {
+                    const newVal = this.textContent.trim();
+                    const rowId = tr.dataset.rowId;
+                    const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) === rowId);
+                    if (rowData) {
+                        rowData.note = newVal;
+                        saveAndUpdate();
+                    }
+                });
+                tdNote.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.blur();
+                    }
+                });
+                tr.appendChild(tdNote);
+
+                // ----- פעולות -----
+                const tdActions = document.createElement('td');
+                tdActions.className = 'row-actions';
+                const dupBtn = document.createElement('button');
+                dupBtn.textContent = '📋';
+                dupBtn.title = 'שכפל שורה';
+                dupBtn.className = 'duplicate-btn';
+                dupBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const rowId = tr.dataset.rowId;
+                    const original = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) === rowId);
+                    if (original) {
+                        const copy = JSON.parse(JSON.stringify(original));
+                        copy._id = `row-${nextId++}`;
+                        copy.order = copy.order ? copy.order + 'cpy' : 'cpy';
+                        currentData.push(copy);
+                        renderTable(filterSelect.value);
+                        saveAndUpdate();
+                    }
+                });
+                const delBtn = document.createElement('button');
+                delBtn.textContent = '🗑️';
+                delBtn.title = 'מחק שורה';
+                delBtn.className = 'delete-btn';
+                delBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const rowId = tr.dataset.rowId;
+                    const index = currentData.findIndex(r => (r._id || `row-${currentData.indexOf(r)}`) === rowId);
+                    if (index !== -1) {
+                        if (confirm('למחוק שורה זו?')) {
+                            currentData.splice(index, 1);
+                            renderTable(filterSelect.value);
+                            saveAndUpdate();
+                        }
+                    }
+                });
+                tdActions.appendChild(dupBtn);
+                tdActions.appendChild(delBtn);
+                tr.appendChild(tdActions);
+
+                tbody.appendChild(tr);
+            });
+
+            updateCounter(filtered.length);
+            selectAllCheck.checked = false;
+        }
+
+        function updateCounter(count) {
+            rowCounter.textContent = `${count} שורות (סה"כ ${currentData.length})`;
+        }
+
+        function addNewRow() {
+            const newRow = {
+                _id: `row-${nextId++}`,
+                type: '',
+                q20: '',
+                q40: '',
+                order: 'חדש',
+                product: 'מוצר חדש',
+                file: 'x',
+                supplier: 'ספק חדש',
+                date: '',
+                vendor: '24210000000',
+                amount: '0',
+                status: '',
+                note: ''
+            };
+            currentData.push(newRow);
+            renderTable(filterSelect.value);
+            saveAndUpdate();
+        }
+
+        function deleteSelectedRows() {
+            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('לא נבחרו שורות למחיקה');
+                return;
+            }
+            if (!confirm(`למחוק ${checkboxes.length} שורות?`)) return;
+            const idsToRemove = [];
+            checkboxes.forEach(cb => {
+                const tr = cb.closest('tr');
+                if (tr) idsToRemove.push(tr.dataset.rowId);
+            });
+            currentData = currentData.filter(r => {
+                const id = r._id || `row-${currentData.indexOf(r)}`;
+                return !idsToRemove.includes(id);
+            });
+            renderTable(filterSelect.value);
+            saveAndUpdate();
+        }
+
+        // ---------- יצוא לאקסל ----------
+        function exportToExcel() {
+            try {
+                let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+                html += '<head><meta charset="UTF-8">';
+                html += '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>סטטוס משלוחים</x:Name><x:WorksheetOptions><x:DisplayRightToLeft/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
+                html += '<style>';
+                html += 'table { border-collapse: collapse; direction: rtl; }';
+                html += 'th, td { border: 1px solid #999; padding: 6px 8px; text-align: center; font-size: 12px; }';
+                html += 'th { background-color: #d0dbe8; font-weight: bold; }';
+                
+                const colorMap = {
+                    'arrived': '#009953',
+                    'onway': '#3bffa6',
+                    'inprogress': '#fff3cd',
+                    'missing': '#fc8d97',
+                    'preparing': '#ffe5b4',
+                    'cancelled': '#ff293c',
+                    'pending': '#e0e0e0',
+                    'empty': '#ffffff'
+                };
+                
+                Object.keys(colorMap).forEach(status => {
+                    html += `.status-${status} td { background-color: ${colorMap[status]}; }`;
+                });
+                
+                // ביטול צבע לעמודה האחרונה
+                html += '.status-arrived td:last-child { background-color: #ffffff !important; }';
+                html += '.status-onway td:last-child { background-color: #ffffff !important; }';
+                html += '.status-inprogress td:last-child { background-color: #ffffff !important; }';
+                html += '.status-missing td:last-child { background-color: #ffffff !important; }';
+                html += '.status-preparing td:last-child { background-color: #ffffff !important; }';
+                html += '.status-cancelled td:last-child { background-color: #ffffff !important; }';
+                html += '.status-pending td:last-child { background-color: #ffffff !important; }';
+                html += '.status-empty td:last-child { background-color: #ffffff !important; }';
+                
+                html += '.status-cancelled td { text-decoration: line-through; }';
+                html += '.status-cancelled td:last-child { text-decoration: none; }';
+                html += '</style>';
+                html += '</head><body>';
+                html += '<table>';
+
+                const headers = ['סוג מכולה', '20\'', '40\'', 'הזמנה', 'סוג מוצר', 'תיק', 'שם ספק', 'תאריך הגעה', 'ספק', 'סכום $', 'סטטוס', 'הערה'];
+                html += '<tr>';
+                headers.forEach(h => {
+                    html += `<th>${h}</th>`;
+                });
+                html += '</tr>';
+
+                currentData.forEach(row => {
+                    const status = row.status || 'empty';
+                    html += `<tr class="status-${status}">`;
+                    const fields = ['type', 'q20', 'q40', 'order', 'product', 'file', 'supplier', 'date', 'vendor', 'amount'];
+                    fields.forEach(f => {
+                        let val = row[f] !== undefined ? row[f] : '';
+                        if (f === 'date' && val) {
+                            const parts = val.split('-');
+                            if (parts.length === 3) val = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        }
+                        html += `<td>${val}</td>`;
+                    });
+                    html += `<td>${statusMap[row.status] || row.status || ''}</td>`;
+                    html += `<td>${row.note || ''}</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</table>';
+                html += '</body></html>';
+
+                const blob = new Blob([html], { 
+                    type: 'application/vnd.ms-excel;charset=UTF-8' 
+                });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'סטטוס משלוחים.xls';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+                
+                console.log('קובץ אקסל הורד בהצלחה!');
+            } catch (error) {
+                console.error('שגיאה ביצוא אקסל:', error);
+                alert('אירעה שגיאה ביצוא הקובץ. אנא בדוק את המסוף.');
+            }
+        }
+
+        filterSelect.addEventListener('change', function() {
+            renderTable(this.value);
+        });
+
+        document.getElementById('addRowBtn').addEventListener('click', addNewRow);
+        document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedRows);
+        document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+        document.getElementById('sortBtn').addEventListener('click', sortData);
+
+        selectAllCheck.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+
+        renderTable('all');
+        updateCounter(currentData.length);
+    })();
+</script>
+</body>
+</html>
