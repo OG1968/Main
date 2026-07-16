@@ -231,17 +231,17 @@
             }
         }
         .footer-info {
-            margin-top: 18px;
+            margin-top: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            font-size: 0.85rem;
-            color: #3d5775;
+            font-size: 1 rem;
+            color: #ffffff;
         }
         .counter {
-            background: #eef2f6;
+            background: #002555;
             padding: 5px 18px;
             border-radius: 30px;
         }
@@ -344,7 +344,6 @@
 
         <div class="footer-info">
             <span class="counter" id="rowCounter">0 שורות</span>
-            <span>✅ כל שינוי נשמר אוטומטית ב-LocalStorage</span>
         </div>
     </div>
 
@@ -730,7 +729,7 @@
             }
 
             function updateCounter(count) {
-                rowCounter.textContent = `${count} שורות (סה"כ ${currentData.length})`;
+                rowCounter.textContent = ` שורות סה"כ ${currentData.length}`;
             }
 
             function addNewRow() {
