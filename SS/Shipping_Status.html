@@ -2,10 +2,9 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
     <title>ניהול משלוחים</title>
-    <!-- favicon -->
-<link rel="icon" href="cargo.png" type="image/png">
+    <link rel="icon" href="cargo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
     </script>
     <style>
@@ -13,23 +12,27 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         body {
             background: #90c0fc;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             justify-content: center;
+            min-height: 100vh;
         }
+
         .container {
             max-width: 1550px;
             width: 100%;
             background: white;
             border-radius: 28px;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-            padding: 25px 20px 30px;
+            padding: 20px 15px 25px;
         }
+
         h1 {
-            font-size: 1.9rem;
+            font-size: 1.5rem;
             margin: 0 0 8px 0;
             color: #0b1e33;
             display: flex;
@@ -37,55 +40,109 @@
             gap: 10px;
             flex-wrap: wrap;
         }
+
         .toolbar {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 18px;
-            gap: 15px;
-            border-bottom: 1px solid #ffffff;
-            padding-bottom: 18px;
+            margin-bottom: 15px;
+            gap: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 15px;
         }
+
         .filter-area {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
+            flex: 1;
         }
+
         .filter-area label {
             font-weight: 600;
             color: #1e293b;
+            font-size: 0.9rem;
         }
-        .filter-area select {
-            padding: 8px 18px;
+
+        .filter-area select,
+        .filter-area input {
+            padding: 8px 14px;
             border-radius: 40px;
             border: 1px solid #cbd5e1;
             background: white;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             outline: none;
+            min-height: 40px;
         }
+
+        .filter-area select {
+            min-width: 100px;
+            flex: 1;
+            max-width: 180px;
+        }
+
+        .search-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .search-area input {
+            width: 100%;
+            min-width: 120px;
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.9rem;
+            outline: none;
+            min-height: 40px;
+        }
+
+        .search-area input:focus {
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+
         .action-buttons {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             flex-wrap: wrap;
+            justify-content: center;
         }
+
         .btn {
-            padding: 8px 20px;
+            padding: 8px 16px;
             border: none;
             border-radius: 60px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             background: #eef2f6;
             color: #1e293b;
             cursor: pointer;
             transition: 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+            min-height: 40px;
+            white-space: nowrap;
         }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
         .btn-success {
             background: #0f7b3a;
             color: white;
@@ -93,6 +150,7 @@
         .btn-success:hover {
             background: #0b662f;
         }
+
         .btn-danger {
             background: #b91c1c;
             color: white;
@@ -100,6 +158,7 @@
         .btn-danger:hover {
             background: #991515;
         }
+
         .btn-excel {
             background: #1d6f42;
             color: white;
@@ -107,6 +166,7 @@
         .btn-excel:hover {
             background: #155a34;
         }
+
         .btn-sort {
             background: #6c5b7b;
             color: white;
@@ -115,51 +175,121 @@
             background: #5a4a68;
         }
 
+        .btn-load {
+            background: #7c3aed;
+            color: white;
+        }
+        .btn-load:hover {
+            background: #6d28d9;
+        }
+
+        /* סטטיסטיקות */
+        .stats-bar {
+            display: flex;
+            gap: 12px;
+            margin: 10px 0 15px 0;
+            flex-wrap: wrap;
+            background: #f8fafc;
+            padding: 12px 18px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stats-bar span {
+            font-size: 0.9rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stats-bar strong {
+            color: #0b1e33;
+            font-size: 1rem;
+        }
+
+        .stats-bar .stat-amount {
+            color: #0f7b3a;
+            font-weight: 700;
+        }
+
+        .stats-bar .stat-preparing {
+            color: #eab308;
+            font-weight: 700;
+        }
+
+        .stats-bar .stat-missing {
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .stats-bar .stat-cancelled {
+            color: #7f1d1d;
+            font-weight: 700;
+        }
+
+        .stats-bar .stat-inprogress {
+            color: #2563eb;
+            font-weight: 700;
+        }
+
+        /* טבלה */
         .table-wrap {
             overflow-x: auto;
             border-radius: 16px;
             border: 1px solid #e2e8f0;
             background: white;
+            -webkit-overflow-scrolling: touch;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
-            min-width: 1200px;
+            font-size: 0.85rem;
+            min-width: 1000px;
         }
+
         th {
             background: #969696;
             color: #1a2c44;
             font-weight: 700;
-            padding: 14px 8px;
+            padding: 12px 6px;
             border-bottom: 2px solid #d0dbe8;
             text-align: center;
             white-space: nowrap;
             position: sticky;
             top: 0;
             z-index: 5;
+            font-size: 0.8rem;
         }
+
         td {
-            padding: 6px 4px;
+            padding: 4px 3px;
             border-bottom: 1px solid #e9edf3;
             text-align: center;
             vertical-align: middle;
-            min-height: 44px;
+            min-height: 38px;
+            font-size: 0.8rem;
         }
+
         td[contenteditable="true"] {
             outline: none;
             transition: background 0.1s;
-            border-radius: 6px;
+            border-radius: 4px;
+            min-width: 40px;
+            padding: 3px 4px;
         }
+
         td[contenteditable="true"]:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(30, 58, 95, 0.05);
         }
+
         td[contenteditable="true"]:focus {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.8);
             box-shadow: inset 0 0 0 2px #1e3a5f;
         }
 
-        /* סטטוסים - צבעי רקע לשורה - חלים רק על תאי נתונים (לא על עמודת הפעולות) */
+        /* סטטוסים */
         .status-arrived td:not(.row-actions) {
             background-color: #009953;
         }
@@ -167,7 +297,7 @@
             background-color: #3bffa6;
         }
         .status-inprogress td:not(.row-actions) {
-            background-color: #fff3cd;
+            background-color: #93c5fd;
         }
         .status-missing td:not(.row-actions) {
             background-color: #fc8d97;
@@ -177,8 +307,6 @@
         }
         .status-cancelled td:not(.row-actions) {
             background-color: #ff293c;
-        }
-        .status-cancelled td:not(.row-actions) {
             text-decoration: line-through;
         }
         .status-pending td:not(.row-actions) {
@@ -188,7 +316,6 @@
             background-color: #ffffff;
         }
 
-        /* עמודת הפעולות והצ'קבוקס נשארות לבנות */
         .row-actions {
             background-color: #ffffff !important;
         }
@@ -198,16 +325,22 @@
 
         .status-select,
         .type-select {
-            padding: 4px 8px;
+            padding: 3px 6px;
             border-radius: 30px;
             border: 1px solid #cbd5e1;
             background: white;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             cursor: pointer;
             outline: none;
             font-weight: 500;
-            width: 85px;
+            width: 75px;
+            min-height: 30px;
         }
+
+        .type-select {
+            width: 65px;
+        }
+
         .save-indicator {
             display: inline-block;
             width: 10px;
@@ -216,11 +349,14 @@
             background: #22c55e;
             margin-right: 8px;
             transition: 0.3s;
+            flex-shrink: 0;
         }
+
         .save-indicator.saving {
             background: #eab308;
             animation: pulse 0.5s ease-in-out;
         }
+
         @keyframes pulse {
             0%,
             100% {
@@ -230,42 +366,57 @@
                 transform: scale(1.4);
             }
         }
+
         .footer-info {
-            margin-top: 10px;
+            margin-top: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            font-size: 1 rem;
-            color: #ffffff;
+            font-size: 0.9rem;
+            color: #1e293b;
         }
+
         .counter {
             background: #002555;
             padding: 5px 18px;
             border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
         }
+
         .empty-row-msg {
             text-align: center;
             padding: 30px 0;
             color: #6a7c94;
         }
+
         .row-actions {
             display: flex;
-            gap: 4px;
+            gap: 3px;
             justify-content: center;
             align-items: center;
             background-color: #ffffff !important;
+            flex-wrap: nowrap;
         }
+
         .row-actions button {
             background: transparent;
             border: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 30px;
             transition: 0.1s;
+            min-width: 28px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .row-actions .delete-btn:hover {
             background: #fecaca;
             color: #b91c1c;
@@ -274,19 +425,352 @@
             background: #dbeafe;
             color: #1a3f6e;
         }
-        @media (max-width: 700px) {
-            .container {
-                padding: 12px;
+
+        .row-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .mobile-table-controls {
+            display: none;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .mobile-table-controls button {
+            padding: 8px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* מודל לטעינת אקסל */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-top: 0;
+            color: #0b1e33;
+        }
+
+        .modal .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 20px 0;
+        }
+
+        .modal .drop-zone:hover,
+        .modal .drop-zone.dragover {
+            border-color: #2563eb;
+            background: #f0f7ff;
+        }
+
+        .modal .drop-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .modal .drop-zone p {
+            margin: 5px 0;
+            color: #64748b;
+        }
+
+        .modal .drop-zone .file-name {
+            color: #0b1e33;
+            font-weight: 600;
+        }
+
+        .modal .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal .modal-actions .btn {
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        .modal .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .modal .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .modal .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .modal .progress-bar .progress-fill {
+            height: 100%;
+            background: #2563eb;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* התאמה למובייל */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
             }
+
+            .container {
+                padding: 12px 8px;
+                border-radius: 16px;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+            }
+
             .toolbar {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 10px;
+                padding-bottom: 12px;
             }
+
             .filter-area {
-                flex-wrap: wrap;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
             }
+
+            .filter-area select,
+            .filter-area input {
+                width: 100%;
+                max-width: 100%;
+                font-size: 0.85rem;
+                min-height: 38px;
+            }
+
+            .search-area {
+                width: 100%;
+            }
+
+            .search-area input {
+                width: 100%;
+                min-height: 38px;
+                font-size: 0.85rem;
+            }
+
             .action-buttons {
+                justify-content: stretch;
+                gap: 6px;
+            }
+
+            .action-buttons .btn {
+                flex: 1;
                 justify-content: center;
+                font-size: 0.75rem;
+                padding: 6px 10px;
+                min-height: 36px;
+                white-space: nowrap;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 6px;
+                padding: 10px 14px;
+                font-size: 0.8rem;
+            }
+
+            .stats-bar span {
+                font-size: 0.8rem;
+            }
+
+            .table-wrap {
+                border-radius: 10px;
+                font-size: 0.7rem;
+            }
+
+            table {
+                min-width: 900px;
+                font-size: 0.7rem;
+            }
+
+            th {
+                padding: 8px 4px;
+                font-size: 0.7rem;
+            }
+
+            td {
+                padding: 3px 2px;
+                font-size: 0.7rem;
+                min-height: 32px;
+            }
+
+            td[contenteditable="true"] {
+                padding: 2px 3px;
+                min-width: 30px;
+            }
+
+            .status-select,
+            .type-select {
+                width: 60px;
+                font-size: 0.65rem;
+                padding: 2px 4px;
+                min-height: 26px;
+            }
+
+            .type-select {
+                width: 50px;
+            }
+
+            .row-actions button {
+                font-size: 0.85rem;
+                min-width: 24px;
+                min-height: 24px;
+                padding: 1px 4px;
+            }
+
+            .row-checkbox {
+                width: 14px;
+                height: 14px;
+            }
+
+            .counter {
+                font-size: 0.75rem;
+                padding: 4px 14px;
+            }
+
+            .mobile-table-controls {
+                display: flex;
+            }
+
+            .filter-area label {
+                font-size: 0.8rem;
+            }
+
+            .modal {
+                padding: 20px;
+                width: 95%;
+            }
+
+            .modal .drop-zone {
+                padding: 25px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px 4px;
+                border-radius: 12px;
+            }
+
+            h1 {
+                font-size: 1rem;
+            }
+
+            .action-buttons .btn {
+                font-size: 0.65rem;
+                padding: 4px 8px;
+                min-height: 30px;
+                gap: 3px;
+            }
+
+            table {
+                min-width: 750px;
+                font-size: 0.6rem;
+            }
+
+            th {
+                padding: 6px 3px;
+                font-size: 0.6rem;
+            }
+
+            td {
+                padding: 2px 1px;
+                font-size: 0.6rem;
+                min-height: 28px;
+            }
+
+            .status-select,
+            .type-select {
+                width: 50px;
+                font-size: 0.55rem;
+                padding: 1px 3px;
+                min-height: 22px;
+            }
+
+            .type-select {
+                width: 42px;
+            }
+
+            .row-actions button {
+                font-size: 0.7rem;
+                min-width: 20px;
+                min-height: 20px;
+                padding: 1px 3px;
+            }
+
+            .stats-bar span {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (pointer: coarse) {
+            .btn,
+            .row-actions button,
+            .status-select,
+            .type-select,
+            .row-checkbox {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            @media (max-width: 768px) {
+                .btn,
+                .row-actions button,
+                .status-select,
+                .type-select,
+                .row-checkbox {
+                    min-height: 36px;
+                    min-width: 36px;
+                }
             }
         }
     </style>
@@ -296,33 +780,49 @@
         <div class="toolbar">
             <h1>📦 ניהול משלוחים</h1>
             <div class="filter-area">
-                <label for="statusFilter">🔎 סינון לפי סטטוס:</label>
+                <label for="statusFilter">🔎 סינון:</label>
                 <select id="statusFilter">
                     <option value="all">הכל</option>
                     <option value="arrived">הגיע</option>
                     <option value="onway">בדרך</option>
-                    <option value="inprogress">ביצוע</option>
+                    <option value="inprogress">בביצוע</option>
                     <option value="missing">חוסר</option>
                     <option value="preparing">הכנה</option>
                     <option value="cancelled">בוטל</option>
                     <option value="pending">המתנה</option>
                     <option value="empty">חדש</option>
                 </select>
+                <div class="search-area">
+                    <input type="text" id="searchInput" placeholder="🔍 חיפוש מהיר...">
+                </div>
                 <span class="save-indicator" id="saveIndicator" title="נשמר אוטומטית"></span>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-success" id="addRowBtn">➕ הוסף שורה</button>
-                <button class="btn btn-danger" id="deleteSelectedBtn">🗑️ מחק נבחרות</button>
-                <button class="btn btn-sort" id="sortBtn">🔽 מיון לפי סטטוס</button>
-                <button class="btn btn-excel" id="exportExcelBtn">📊 יצוא לאקסל</button>
+                <button class="btn btn-success" id="addRowBtn">➕ הוסף</button>
+                <button class="btn btn-danger" id="deleteSelectedBtn">🗑️ מחק</button>
+                <button class="btn btn-sort" id="sortBtn">🔽 מיון</button>
+                <button class="btn btn-excel" id="exportExcelBtn">📊 יצא אקסל</button>
+                <button class="btn btn-load" id="loadExcelBtn">📂 טען אקסל</button>
             </div>
+        </div>
+
+        <!-- סטטיסטיקות -->
+        <div class="stats-bar" id="statsBar">
+            <span>📊 סה"כ: <strong id="totalCount">0</strong></span>
+            <span>✅ הגיע: <strong id="arrivedCount">0</strong></span>
+            <span>🚚 בדרך: <strong id="onwayCount">0</strong></span>
+            <span>⚙️ בהכנה: <strong class="stat-preparing" id="preparingCount">0</strong></span>
+            <span>🔧 בביצוע: <strong class="stat-inprogress" id="inprogressCount">0</strong></span>
+            <span>❌ חוסר: <strong class="stat-missing" id="missingCount">0</strong></span>
+            <span>🚫 בוטל: <strong class="stat-cancelled" id="cancelledCount">0</strong></span>
+            <span>⏳ בהמתנה: <strong id="pendingCount">0</strong></span>
         </div>
 
         <div class="table-wrap">
             <table id="deliveryTable">
                 <thead>
                     <tr>
-                        <th style="width:40px;"><input type="checkbox" id="selectAllCheck"></th>
+                        <th style="width:32px;"><input type="checkbox" id="selectAllCheck"></th>
                         <th>סוג מכולה</th>
                         <th>20'</th>
                         <th>40'</th>
@@ -335,15 +835,45 @@
                         <th>סכום $</th>
                         <th>סטטוס</th>
                         <th>הערה</th>
-                        <th style="width:70px;">פעולות</th>
+                        <th style="width:60px;">פעולות</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
 
+        <div class="mobile-table-controls">
+            <button onclick="document.getElementById('addRowBtn').click()">➕ הוסף שורה</button>
+            <button onclick="document.getElementById('deleteSelectedBtn').click()">🗑️ מחק נבחרות</button>
+            <button onclick="document.getElementById('sortBtn').click()">🔽 מיון</button>
+        </div>
+
         <div class="footer-info">
             <span class="counter" id="rowCounter">0 שורות</span>
+            <span style="font-size:0.8rem; color:#64748b;">💾 נשמר אוטומטית בדפדפן</span>
+        </div>
+    </div>
+
+    <!-- מודל לטעינת אקסל -->
+    <div class="modal-overlay" id="loadModal">
+        <div class="modal">
+            <h2>📂 טעינת קובץ אקסל</h2>
+            <p style="color:#64748b; margin-bottom:5px;">בחר קובץ אקסל לטעינה. כל הנתונים הקיימים יוחלפו.</p>
+            <div class="drop-zone" id="dropZone">
+                <div class="icon">📁</div>
+                <p><strong>גרור קובץ לכאן</strong></p>
+                <p>או לחץ לבחירת קובץ</p>
+                <p style="font-size:0.8rem; color:#94a3b8;">תומך בקבצי .xlsx ו-.xls</p>
+                <p class="file-name" id="fileName" style="margin-top:10px;"></p>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+            </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelLoadBtn">ביטול</button>
+                <button class="btn btn-load" id="confirmLoadBtn" disabled>טען קובץ</button>
+            </div>
         </div>
     </div>
 
@@ -352,12 +882,25 @@
             const statusMap = {
                 'arrived': 'הגיע',
                 'onway': 'בדרך',
-                'inprogress': 'ביצוע',
+                'inprogress': 'בביצוע',
                 'missing': 'חוסר',
                 'preparing': 'הכנה',
                 'cancelled': 'בוטל',
                 'pending': 'המתנה',
                 'empty': 'חדש'
+            };
+
+            // מיפוי סטטוסים בעברית לאנגלית - כולל כל הווריאציות
+            const statusHebToEng = {
+                'הגיע': 'arrived',
+                'בדרך': 'onway',
+                'בביצוע': 'inprogress',
+                'ביצוע': 'inprogress',
+                'חוסר': 'missing',
+                'הכנה': 'preparing',
+                'בוטל': 'cancelled',
+                'המתנה': 'pending',
+                'חדש': 'empty'
             };
 
             const sortOrder = {
@@ -374,46 +917,55 @@
 
             const defaultData = [
                 { type: "FCL", q20: "0", q40: "1", order: "150118535", product: "אופנועים", file: "101260008",
-                supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-03-10", vendor: "24210046000", amount: "30074",
+                    supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-03-10", vendor: "24210046000",
+                    amount: "30074",
                     status: "arrived", note: "הגיע" },
                 { type: "LCL", q20: "0", q40: "0", order: "150118544", product: "מאשה והדוב", file: "101260011",
                     supplier: "GIOCHI PREZIOSI", date: "2026-03-22", vendor: "24210035000", amount: "20555",
                     status: "arrived", note: "הגיע" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118545", product: "מאשה והדוב", file: "101260007",
-                    supplier: "FABRICAS AGRUPADAS DE MUN", date: "2026-03-30", vendor: "24210052000", amount: "61277",
+                    supplier: "FABRICAS AGRUPADAS DE MUN", date: "2026-03-30", vendor: "24210052000",
+                    amount: "61277",
                     status: "arrived", note: "הגיע" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118555", product: "רכבות", file: "101260009",
-                    supplier: "SHANTOU SWEET TOYS COMPAN", date: "2026-03-30", vendor: "24210009000", amount: "32655",
+                    supplier: "SHANTOU SWEET TOYS COMPAN", date: "2026-03-30", vendor: "24210009000",
+                    amount: "32655",
                     status: "arrived", note: "הגיע" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118540", product: "משאיות", file: "101260010",
                     supplier: "SHANTOU SHENGQI IMP", date: "2026-04-04", vendor: "24210007000", amount: "23093",
                     status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118549", product: "אופני איזון פדאלים", file: "101260013",
+                { type: "FCL", q20: "0", q40: "1", order: "150118549", product: "אופני איזון פדאלים",
+                    file: "101260013",
                     supplier: "HEBEI JOYRIDE TOYS", date: "2026-04-21", vendor: "24210095000", amount: "20664",
                     status: "arrived", note: "הגיע" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118548", product: "אופני איזון", file: "101260014",
-                    supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-04-22", vendor: "24210008000", amount: "17088",
+                    supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-04-22", vendor: "24210008000",
+                    amount: "17088",
                     status: "arrived", note: "הגיע" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118551", product: "רובי ג'ל", file: "101260015",
                     supplier: "DOWELLIN GROUP", date: "2026-05-02", vendor: "24210012000", amount: "40219.04",
                     status: "arrived", note: "הגיע" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118547", product: "בימבה ג'וק", file: "101260016",
-                    supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-06-16", vendor: "24210008000", amount: "24541",
+                    supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-06-16", vendor: "24210008000",
+                    amount: "24541",
                     status: "arrived", note: "הגיע" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118559", product: "רובים פלסטיק", file: "101260018",
                     supplier: "ZING ZASIA LIMITED", date: "2026-07-09", vendor: "24210010000", amount: "47423.89",
                     status: "onway", note: "ממתין להגעה ושחרור" },
                 { type: "FCL", q20: "0", q40: "2", order: "150118556", product: "משחקי צבא", file: "101260017",
-                    supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-08-07", vendor: "24210046000", amount: "31915.32",
+                    supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-08-07", vendor: "24210046000",
+                    amount: "31915.32",
                     status: "onway", note: "ממתין להגעה ושחרור" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118564", product: "שטיחוני פעילות", file: "x",
                     supplier: "GUANGDONG FAIRNESS ENTRPRISE", date: "2026-08-06", vendor: "24210090000",
                     amount: "10096.5", status: "onway", note: "ממתין להגעה ושחרור" },
                 { type: "", q20: "", q40: "", order: "150118558", product: "בובות הפעלה", file: "x",
-                    supplier: "EOLO TOYS LTD", date: "", vendor: "24210037000", amount: "36087", status: "missing",
+                    supplier: "EOLO TOYS LTD", date: "", vendor: "24210037000", amount: "36087",
+                    status: "missing",
                     note: "בתהליך חוסר תעודות מעבדה" },
                 { type: "", q20: "", q40: "", order: "150118560", product: "רכבי פעלולים על שלט", file: "x",
-                    supplier: "KABOOM ASIA LIMITED", date: "", vendor: "24210011000", amount: "52152", status: "missing",
+                    supplier: "KABOOM ASIA LIMITED", date: "", vendor: "24210011000", amount: "52152",
+                    status: "missing",
                     note: "ממתין חוסר תעודות משרד התקשורת" },
                 { type: "", q20: "", q40: "", order: "150118562", product: "כלי עבודה", file: "x",
                     supplier: "SHANTOU SHENGQI IMP", date: "", vendor: "24210007000", amount: "38958.12",
@@ -434,28 +986,38 @@
                     supplier: "SHATOU FENGCHENGJIA TRAD -  HK FAIR TOYS", date: "", vendor: "24210355000",
                     amount: "19945.44", status: "onway", note: "ממתין להכנת הסטודיו" },
                 { type: "", q20: "", q40: "", order: "150118580", product: "חניונים", file: "x",
-                    supplier: "GUANGDONG ZHENLE TOYS FACTORY", date: "", vendor: "24210356000", amount: "25260.48",
+                    supplier: "GUANGDONG ZHENLE TOYS FACTORY", date: "", vendor: "24210356000",
+                    amount: "25260.48",
                     status: "onway", note: "ממתין להכנת הסטודיו" },
                 { type: "", q20: "", q40: "", order: "150118572", product: "משאיות עבודה קטן", file: "x",
                     supplier: "SHANTOU HUAHUAN IMPORTAND  -  HH TOYS", date: "", vendor: "24210365000",
                     amount: "27164.58", status: "onway", note: "ממתין להכנת הסטודיו" },
-                { type: "", q20: "", q40: "", order: "150118566", product: "ספיידי", file: "x", supplier: "JAZWARES",
-                    date: "", vendor: "24210058000", amount: "83944.78", status: "preparing", note: "בתהליך הכנה" },
-                { type: "", q20: "", q40: "", order: "150118567", product: "קוקומלון", file: "x", supplier: "JAZWARES",
-                    date: "", vendor: "24210058000", amount: "46145", status: "preparing", note: "בתהליך הכנה" },
-                { type: "", q20: "", q40: "", order: "150118563", product: "שונות", file: "x", supplier: "HASBRO   -    JULY",
-                    date: "", vendor: "24210361100", amount: "295492.98", status: "preparing", note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118566", product: "ספיידי", file: "x",
+                    supplier: "JAZWARES",
+                    date: "", vendor: "24210058000", amount: "83944.78", status: "preparing",
+                    note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118567", product: "קוקומלון", file: "x",
+                    supplier: "JAZWARES",
+                    date: "", vendor: "24210058000", amount: "46145", status: "preparing",
+                    note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118563", product: "שונות", file: "x",
+                    supplier: "HASBRO   -    JULY",
+                    date: "", vendor: "24210361100", amount: "295492.98", status: "preparing",
+                    note: "בתהליך הכנה" },
                 { type: "", q20: "", q40: "", order: "150118589", product: "שונות", file: "x",
                     supplier: "HASBRO   -    SEPTEMBER", date: "", vendor: "24210361100", amount: "162861.02",
                     status: "preparing", note: "בתהליך הכנה" },
                 { type: "", q20: "", q40: "", order: "150118588", product: "צבי נינג'ה", file: "x",
-                    supplier: "PLAYMATES", date: "", vendor: "24210336000", amount: "24822.57", status: "preparing",
+                    supplier: "PLAYMATES", date: "", vendor: "24210336000", amount: "24822.57",
+                    status: "preparing",
                     note: "בתהליך הכנה" },
                 { type: "", q20: "", q40: "", order: "150118587", product: "נשכן", file: "x",
-                    supplier: "GUANGDONG HUANGER BABY PRODUCTS", date: "", vendor: "24220008000", amount: "3769.52",
+                    supplier: "GUANGDONG HUANGER BABY PRODUCTS", date: "", vendor: "24220008000",
+                    amount: "3769.52",
                     status: "preparing", note: "בתהליך הכנה" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118591", product: "אופני איזון פדאלים", file: "x",
-                    supplier: "HEBEI JOYRIDE TOYS", date: "", vendor: "24210095000", amount: "20664", status: "preparing",
+                    supplier: "HEBEI JOYRIDE TOYS", date: "", vendor: "24210095000", amount: "20664",
+                    status: "preparing",
                     note: "בתהליך הכנה" },
                 { type: "FCL", q20: "0", q40: "1", order: "150118592", product: "אופני איזון", file: "x",
                     supplier: "SHIJIAZHUANG SENTER INTER", date: "", vendor: "24210008000", amount: "17837.4",
@@ -466,8 +1028,10 @@
                 { type: "", q20: "", q40: "", order: "150118557", product: "רכבות", file: "x",
                     supplier: "HANG WING INDUSTRY", date: "x", vendor: "24210061000", amount: "71228",
                     status: "cancelled", note: "בוטל לעת עתה" },
-                { type: "", q20: "", q40: "", order: "150118568", product: "קוקומלון", file: "x", supplier: "JAZWARES",
-                    date: "", vendor: "24210058000", amount: "30565", status: "cancelled", note: "בוטל לעת עתה" }
+                { type: "", q20: "", q40: "", order: "150118568", product: "קוקומלון", file: "x",
+                    supplier: "JAZWARES",
+                    date: "", vendor: "24210058000", amount: "30565", status: "cancelled",
+                    note: "בוטל לעת עתה" }
             ];
 
             const STORAGE_KEY = 'deliveryData';
@@ -491,6 +1055,7 @@
                 setTimeout(() => {
                     indicator.classList.remove('saving');
                 }, 400);
+                updateStats(data);
             }
 
             let currentData = loadData();
@@ -500,6 +1065,19 @@
             const filterSelect = document.getElementById('statusFilter');
             const rowCounter = document.getElementById('rowCounter');
             const selectAllCheck = document.getElementById('selectAllCheck');
+            const searchInput = document.getElementById('searchInput');
+
+            // מודל לטעינת אקסל
+            const loadModal = document.getElementById('loadModal');
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+            const confirmLoadBtn = document.getElementById('confirmLoadBtn');
+            const cancelLoadBtn = document.getElementById('cancelLoadBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+
+            let selectedFile = null;
 
             function getStatusClass(status) {
                 if (!status || status === 'empty') return 'status-empty';
@@ -508,9 +1086,10 @@
 
             function formatDateForDisplay(dateStr) {
                 if (!dateStr || dateStr === 'x' || dateStr === '') return '—';
-                const parts = dateStr.split('-');
+                const str = String(dateStr);
+                const parts = str.split('-');
                 if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-                return dateStr;
+                return str;
             }
 
             function saveAndUpdate() {
@@ -529,10 +1108,21 @@
             }
 
             function renderTable(filter = 'all') {
+                const searchTerm = searchInput.value.toLowerCase();
+
                 const filtered = currentData.filter(row => {
-                    if (filter === 'all') return true;
-                    if (filter === 'empty') return !row.status || row.status === 'empty';
-                    return row.status === filter;
+                    let statusMatch = true;
+                    if (filter === 'all') statusMatch = true;
+                    else if (filter === 'empty') statusMatch = !row.status || row.status === 'empty';
+                    else statusMatch = row.status === filter;
+
+                    let searchMatch = true;
+                    if (searchTerm) {
+                        const rowText = Object.values(row).join(' ').toLowerCase();
+                        searchMatch = rowText.includes(searchTerm);
+                    }
+
+                    return statusMatch && searchMatch;
                 });
 
                 tbody.innerHTML = '';
@@ -541,7 +1131,7 @@
                     const td = document.createElement('td');
                     td.colSpan = 14;
                     td.className = 'empty-row-msg';
-                    td.textContent = '🚫 אין שורות התואמות לסטטוס זה';
+                    td.textContent = searchTerm ? '🔍 אין תוצאות לחיפוש זה' : '🚫 אין שורות התואמות לסטטוס זה';
                     tr.appendChild(td);
                     tbody.appendChild(tr);
                     updateCounter(filtered.length);
@@ -560,7 +1150,6 @@
                     tdCheck.appendChild(checkbox);
                     tr.appendChild(tdCheck);
 
-                    // ----- סוג מכולה - תפריט בחירה עם "אחר" -----
                     const tdType = document.createElement('td');
                     const typeSelect = document.createElement('select');
                     typeSelect.className = 'type-select';
@@ -574,9 +1163,8 @@
                     });
                     typeSelect.addEventListener('change', function() {
                         const newVal = this.value;
-                        const rowId = tr.dataset.rowId;
                         const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                        rowId);
+                            tr.dataset.rowId);
                         if (rowData) {
                             rowData.type = newVal;
                             saveAndUpdate();
@@ -585,7 +1173,6 @@
                     tdType.appendChild(typeSelect);
                     tr.appendChild(tdType);
 
-                    // ----- 20' ו-40' - editable -----
                     const fields = ['q20', 'q40', 'order', 'product', 'file', 'supplier', 'date', 'vendor',
                         'amount'
                     ];
@@ -595,18 +1182,29 @@
                         const val = row[field] !== undefined ? row[field] : '';
                         td.textContent = (field === 'date' && val) ? formatDateForDisplay(val) : val;
                         td.setAttribute('data-field', field);
+
                         td.addEventListener('blur', function(e) {
                             const newVal = this.textContent.trim();
-                            const rowId = tr.dataset.rowId;
                             const rowData = currentData.find(r => (r._id ||
-                                `row-${currentData.indexOf(r)}`) === rowId);
+                                `row-${currentData.indexOf(r)}`) === tr.dataset.rowId);
                             if (rowData) {
                                 if (field === 'date') {
                                     const parts = newVal.split('/');
-                                    if (parts.length === 3) {
-                                        rowData[field] = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                    if (parts.length === 3 && parts[2].length === 4) {
+                                        rowData[field] =
+                                        `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                                    } else if (newVal.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                        rowData[field] = newVal;
                                     } else {
                                         rowData[field] = newVal;
+                                    }
+                                } else if (field === 'amount') {
+                                    const num = parseFloat(newVal.replace(/,/g, ''));
+                                    if (!isNaN(num) && num >= 0) {
+                                        rowData[field] = num.toString();
+                                    } else {
+                                        alert('אנא הזן מספר תקין');
+                                        this.textContent = rowData[field] || '0';
                                     }
                                 } else {
                                     rowData[field] = newVal;
@@ -614,6 +1212,7 @@
                                 saveAndUpdate();
                             }
                         });
+
                         td.addEventListener('keydown', function(e) {
                             if (e.key === 'Enter') {
                                 e.preventDefault();
@@ -623,7 +1222,6 @@
                         tr.appendChild(td);
                     });
 
-                    // ----- סטטוס - תפריט בחירה -----
                     const tdStatus = document.createElement('td');
                     const statusSelect = document.createElement('select');
                     statusSelect.className = 'status-select';
@@ -639,9 +1237,8 @@
                     });
                     statusSelect.addEventListener('change', function() {
                         const newStatus = this.value;
-                        const rowId = tr.dataset.rowId;
                         const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            rowId);
+                            tr.dataset.rowId);
                         if (rowData) {
                             rowData.status = newStatus === 'empty' ? '' : newStatus;
                             tr.className = getStatusClass(newStatus);
@@ -656,16 +1253,14 @@
                     tdStatus.appendChild(statusSelect);
                     tr.appendChild(tdStatus);
 
-                    // ----- הערה - editable -----
                     const tdNote = document.createElement('td');
                     tdNote.contentEditable = true;
                     tdNote.textContent = row.note || '';
                     tdNote.setAttribute('data-field', 'note');
                     tdNote.addEventListener('blur', function(e) {
                         const newVal = this.textContent.trim();
-                        const rowId = tr.dataset.rowId;
                         const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            rowId);
+                            tr.dataset.rowId);
                         if (rowData) {
                             rowData.note = newVal;
                             saveAndUpdate();
@@ -679,7 +1274,6 @@
                     });
                     tr.appendChild(tdNote);
 
-                    // ----- פעולות -----
                     const tdActions = document.createElement('td');
                     tdActions.className = 'row-actions';
                     const dupBtn = document.createElement('button');
@@ -688,9 +1282,8 @@
                     dupBtn.className = 'duplicate-btn';
                     dupBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const rowId = tr.dataset.rowId;
                         const original = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            rowId);
+                            tr.dataset.rowId);
                         if (original) {
                             const copy = JSON.parse(JSON.stringify(original));
                             copy._id = `row-${nextId++}`;
@@ -706,11 +1299,11 @@
                     delBtn.className = 'delete-btn';
                     delBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const rowId = tr.dataset.rowId;
-                        const index = currentData.findIndex(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            rowId);
-                        if (index !== -1) {
+                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
+                            tr.dataset.rowId);
+                        if (rowData) {
                             if (confirm('למחוק שורה זו?')) {
+                                const index = currentData.indexOf(rowData);
                                 currentData.splice(index, 1);
                                 renderTable(filterSelect.value);
                                 saveAndUpdate();
@@ -729,7 +1322,27 @@
             }
 
             function updateCounter(count) {
-                rowCounter.textContent = ` שורות סה"כ ${currentData.length}`;
+                rowCounter.textContent = `שורות סה"כ ${currentData.length}`;
+            }
+
+            function updateStats(data) {
+                const total = data.length;
+                const arrived = data.filter(r => r.status === 'arrived').length;
+                const onway = data.filter(r => r.status === 'onway').length;
+                const preparing = data.filter(r => r.status === 'preparing').length;
+                const inprogress = data.filter(r => r.status === 'inprogress').length;
+                const missing = data.filter(r => r.status === 'missing').length;
+                const cancelled = data.filter(r => r.status === 'cancelled').length;
+                const pending = data.filter(r => r.status === 'pending').length;
+
+                document.getElementById('totalCount').textContent = total;
+                document.getElementById('arrivedCount').textContent = arrived;
+                document.getElementById('onwayCount').textContent = onway;
+                document.getElementById('preparingCount').textContent = preparing;
+                document.getElementById('inprogressCount').textContent = inprogress;
+                document.getElementById('missingCount').textContent = missing;
+                document.getElementById('cancelledCount').textContent = cancelled;
+                document.getElementById('pendingCount').textContent = pending;
             }
 
             function addNewRow() {
@@ -773,7 +1386,182 @@
                 saveAndUpdate();
             }
 
-            // ---------- יצוא לאקסל ----------
+            // טעינת אקסל - פונקציה מעודכנת עם טיפול נכון בסטטוסים
+            function loadExcelFile(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        progressBar.style.display = 'block';
+                        progressFill.style.width = '30%';
+
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(sheet);
+
+                        progressFill.style.width = '70%';
+
+                        if (json.length === 0) {
+                            alert('הקובץ ריק');
+                            progressBar.style.display = 'none';
+                            return;
+                        }
+
+                        // המרת הנתונים עם טיפול נכון בסטטוסים
+                        const newRows = json.map(row => {
+                            // פונקציה בטוחה להמרת תאריך
+                            const safeDate = (val) => {
+                                if (!val || val === 'x' || val === '') return '';
+                                const str = String(val);
+                                const parts = str.split('/');
+                                if (parts.length === 3 && parts[2].length === 4) {
+                                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                                }
+                                if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                    return str;
+                                }
+                                return str;
+                            };
+
+                            // פונקציה לטיפול בסטטוס - ממירה מעברית לאנגלית
+                            const safeStatus = (val) => {
+                                if (!val) return '';
+                                const str = String(val).trim();
+                                
+                                // בדיקה אם זה כבר באנגלית (קיים ב-statusMap)
+                                if (statusMap[str]) return str;
+                                
+                                // בדיקה אם זה בעברית - המרה
+                                if (statusHebToEng[str]) return statusHebToEng[str];
+                                
+                                // ניסיון להתאים חלקית (למקרה שיש טקסט נוסף)
+                                for (const [heb, eng] of Object.entries(statusHebToEng)) {
+                                    if (str.includes(heb)) return eng;
+                                }
+                                
+                                return '';
+                            };
+
+                            return {
+                                _id: `row-${nextId++}`,
+                                type: String(row['סוג מכולה'] || ''),
+                                q20: String(row["20'"] || ''),
+                                q40: String(row["40'"] || ''),
+                                order: String(row['הזמנה'] || ''),
+                                product: String(row['סוג מוצר'] || ''),
+                                file: String(row['תיק'] || ''),
+                                supplier: String(row['שם ספק'] || ''),
+                                date: safeDate(row['תאריך הגעה']),
+                                vendor: String(row['ספק'] || ''),
+                                amount: String(row['סכום $'] || '0'),
+                                status: safeStatus(row['סטטוס']),
+                                note: String(row['הערה'] || '')
+                            };
+                        });
+
+                        progressFill.style.width = '100%';
+
+                        // החלפת כל הנתונים
+                        currentData = newRows;
+                        renderTable(filterSelect.value);
+                        saveAndUpdate();
+
+                        setTimeout(() => {
+                            progressBar.style.display = 'none';
+                            progressFill.style.width = '0%';
+                            loadModal.classList.remove('active');
+                            alert(`✅ נטענו ${newRows.length} שורות בהצלחה!`);
+                        }, 500);
+
+                    } catch (error) {
+                        console.error('שגיאה בטעינת הקובץ:', error);
+                        alert('שגיאה בטעינת הקובץ: ' + error.message);
+                        progressBar.style.display = 'none';
+                        progressFill.style.width = '0%';
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            // מודל טעינת אקסל - אירועים
+            document.getElementById('loadExcelBtn').addEventListener('click', function() {
+                loadModal.classList.add('active');
+                selectedFile = null;
+                fileName.textContent = '';
+                confirmLoadBtn.disabled = true;
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+            });
+
+            cancelLoadBtn.addEventListener('click', function() {
+                loadModal.classList.remove('active');
+                selectedFile = null;
+                fileName.textContent = '';
+                confirmLoadBtn.disabled = true;
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+            });
+
+            loadModal.addEventListener('click', function(e) {
+                if (e.target === loadModal) {
+                    loadModal.classList.remove('active');
+                    selectedFile = null;
+                    fileName.textContent = '';
+                    confirmLoadBtn.disabled = true;
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }
+            });
+
+            dropZone.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    selectedFile = this.files[0];
+                    fileName.textContent = '📄 ' + selectedFile.name;
+                    confirmLoadBtn.disabled = false;
+                }
+            });
+
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    const file = e.dataTransfer.files[0];
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    if (ext === 'xlsx' || ext === 'xls') {
+                        selectedFile = file;
+                        fileName.textContent = '📄 ' + file.name;
+                        confirmLoadBtn.disabled = false;
+                    } else {
+                        alert('אנא בחר קובץ אקסל (.xlsx או .xls)');
+                    }
+                }
+            });
+
+            confirmLoadBtn.addEventListener('click', function() {
+                if (selectedFile) {
+                    if (currentData.length > 0) {
+                        if (!confirm(`⚠️ פעולה זו תחליף את כל ${currentData.length} השורות הקיימות. להמשיך?`)) {
+                            return;
+                        }
+                    }
+                    loadExcelFile(selectedFile);
+                }
+            });
+
             function exportToExcel() {
                 try {
                     let html =
@@ -789,7 +1577,7 @@
                     const colorMap = {
                         'arrived': '#009953',
                         'onway': '#3bffa6',
-                        'inprogress': '#fff3cd',
+                        'inprogress': '#93c5fd',
                         'missing': '#fc8d97',
                         'preparing': '#ffe5b4',
                         'cancelled': '#ff293c',
@@ -801,7 +1589,6 @@
                         html += `.status-${status} td { background-color: ${colorMap[status]}; }`;
                     });
 
-                    // ביטול צבע לעמודה האחרונה
                     html += '.status-arrived td:last-child { background-color: #ffffff !important; }';
                     html += '.status-onway td:last-child { background-color: #ffffff !important; }';
                     html += '.status-inprogress td:last-child { background-color: #ffffff !important; }';
@@ -810,9 +1597,8 @@
                     html += '.status-cancelled td:last-child { background-color: #ffffff !important; }';
                     html += '.status-pending td:last-child { background-color: #ffffff !important; }';
                     html += '.status-empty td:last-child { background-color: #ffffff !important; }';
-
-                    html += '.status-cancelled td { text-decoration: line-through; }';
-                    html += '.status-cancelled td:last-child { text-decoration: none; }';
+                    html += '.status-cancelled td { text-decoration: line-through !important; }';
+                    html += '.status-cancelled td:last-child { text-decoration: none !important; }';
                     html += '</style>';
                     html += '</head><body>';
                     html += '<table>';
@@ -835,7 +1621,7 @@
                         fields.forEach(f => {
                             let val = row[f] !== undefined ? row[f] : '';
                             if (f === 'date' && val) {
-                                const parts = val.split('-');
+                                const parts = String(val).split('-');
                                 if (parts.length === 3) val = `${parts[2]}/${parts[1]}/${parts[0]}`;
                             }
                             html += `<td>${val}</td>`;
@@ -858,16 +1644,19 @@
                     link.click();
                     document.body.removeChild(link);
                     URL.revokeObjectURL(link.href);
-
-                    console.log('קובץ אקסל הורד בהצלחה!');
                 } catch (error) {
                     console.error('שגיאה ביצוא אקסל:', error);
-                    alert('אירעה שגיאה ביצוא הקובץ. אנא בדוק את המסוף.');
+                    alert('אירעה שגיאה ביצוא הקובץ');
                 }
             }
 
+            // אירועים
             filterSelect.addEventListener('change', function() {
                 renderTable(this.value);
+            });
+
+            searchInput.addEventListener('input', function() {
+                renderTable(filterSelect.value);
             });
 
             document.getElementById('addRowBtn').addEventListener('click', addNewRow);
@@ -880,8 +1669,9 @@
                 checkboxes.forEach(cb => cb.checked = this.checked);
             });
 
+            // אתחול
             renderTable('all');
-            updateCounter(currentData.length);
+            updateStats(currentData);
         })();
     </script>
 </body>
