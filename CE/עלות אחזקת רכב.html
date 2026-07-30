@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
+    />
+    <title>מחשבון עלות רכב</title>
+    <link rel="icon" type="image/png" href="ce.png" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", "Heebo", Arial, sans-serif;
+        background: #54a0ff;
+        display: flex;
+        justify-content: center;
+        padding: 12px;
+        direction: rtl;
+      }
+      .container {
+        text-align: center;
+        max-width: 1450px;
+        width: 100%;
+        background: #fdffbd;
+        border-radius: 32px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.07);
+        padding: 24px 18px 30px;
+      }
+      h1 {
+        font-size: clamp(20px, 5vw, 26px);
+        font-weight: 700;
+        color: #0b1b2b;
+        text-align: center;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+        flex-wrap: wrap;
+      }
+      .subtitle {
+        color: #4a5b6e;
+        font-size: clamp(13px, 2.5vw, 15px);
+        border-right: 3px solid #2c7a7b;
+        padding-right: 12px;
+        margin-bottom: 20px;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1.1fr;
+        gap: 24px;
+      }
+      @media (max-width: 1050px) {
+        .two-col {
+          grid-template-columns: 1fr;
+          gap: 22px;
+        }
+      }
+      .params {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .param-group {
+        background: #54a0ff;
+        border-radius: 18px;
+        padding: 12px 14px 14px;
+        border: 1px solid #e9edf2;
+      }
+      .param-group label {
+        font-weight: 600;
+        font-size: clamp(13px, 2vw, 14px);
+        color: #1f2a3a;
+        display: block;
+        margin-bottom: 4px;
+      }
+      .param-group .hint {
+        font-size: 11px;
+        color: #6b7d93;
+        margin-top: 3px;
+        line-height: 1.4;
+      }
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .slider-row input[type="range"] {
+        flex: 1;
+        min-width: 120px;
+        accent-color: #2c7a7b;
+        height: 5px;
+        background: #dce3ec;
+        border-radius: 4px;
+      }
+      .slider-row input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        background: #2c7a7b;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(44, 122, 123, 0.25);
+      }
+      .slider-row input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        background: #2c7a7b;
+        border-radius: 50%;
+        cursor: pointer;
+        border: none;
+      }
+      .value-badge {
+        min-width: 60px;
+        background: #fff;
+        padding: 2px 10px;
+        border-radius: 40px;
+        font-weight: 600;
+        font-size: clamp(12px, 1.8vw, 13px);
+        text-align: center;
+        border: 1px solid #dce3ec;
+        color: #0b1b2b;
+        white-space: nowrap;
+      }
+      .dep-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .dep-row .dep-item {
+        flex: 1;
+        min-width: 110px;
+      }
+      .dep-row .dep-item .slider-row {
+        flex-wrap: wrap;
+      }
+      .fuel-selector {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .fuel-selector button {
+        flex: 1;
+        min-width: 70px;
+        padding: 8px 4px;
+        border: 2px solid #dce3ec;
+        background: #fff;
+        border-radius: 60px;
+        font-weight: 600;
+        font-size: clamp(12px, 1.8vw, 14px);
+        color: #3a4c62;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: inherit;
+        text-align: center;
+      }
+      .fuel-selector button.active {
+        border-color: #2c7a7b;
+        background: #e6f2f2;
+        color: #1a4b4c;
+      }
+      .fuel-selector button:hover {
+        background: #eef4fa;
+      }
+      .results-panel {
+        background: #54a0ff;
+        border-radius: 24px;
+        padding: 18px 16px 22px;
+        border: 1px solid #e9edf2;
+      }
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #dce3ec;
+        padding-bottom: 12px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .result-header h3 {
+        font-size: clamp(18px, 3.5vw, 20px);
+        font-weight: 700;
+        color: #0b1b2b;
+      }
+      .total-big {
+        font-size: clamp(22px, 5vw, 26px);
+        font-weight: 800;
+        color: #0b1b2b;
+        background: #fff;
+        padding: 2px 16px;
+        border-radius: 60px;
+        border: 1px solid #dce3ec;
+        white-space: nowrap;
+      }
+      .breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-bottom: 14px;
+      }
+      .breakdown .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 2px 6px 2px;
+        border-bottom: 1px dashed #e2e8f0;
+        font-size: clamp(13px, 2vw, 15px);
+      }
+      .breakdown .row:last-child {
+        border-bottom: none;
+      }
+      .breakdown .label {
+        color: #2d3f57;
+        font-weight: 500;
+      }
+      .breakdown .value {
+        font-weight: 700;
+        color: #0b1b2b;
+      }
+      .compare-box {
+        background: #95fc9e;
+        border-radius: 18px;
+        padding: 12px 14px;
+        border: 1px solid #e2e8f0;
+        margin-top: 6px;
+      }
+      .compare-box .cmp-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #edf2f7;
+        font-size: clamp(13px, 2vw, 15px);
+      }
+      .compare-box .cmp-row:last-child {
+        border-bottom: none;
+      }
+      .cmp-row .type {
+        font-weight: 500;
+        color: #2d3f57;
+      }
+      .cmp-row .amt {
+        font-weight: 700;
+      }
+
+      /* NEW STYLES for podium ranking */
+      .ranking-section {
+        margin-top: 18px;
+        background: #e6f2f2;
+        border-radius: 18px;
+        padding: 14px 14px 10px;
+        border: 1px solid #cbdae0;
+      }
+      .ranking-title {
+        font-weight: 700;
+        font-size: clamp(14px, 2.2vw, 16px);
+        color: #0b2b2c;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .podium {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        gap: 6px;
+        padding: 8px 0 4px;
+        min-height: 90px;
+      }
+      .podium-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        transition: all 0.3s ease;
+        animation: fadeUp 0.5s ease;
+      }
+      .podium-item .rank-icon {
+        font-size: clamp(28px, 5vw, 38px);
+        line-height: 1.2;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+      }
+      .podium-item .rank-label {
+        font-size: clamp(11px, 1.6vw, 14px);
+        font-weight: 600;
+        color: #1f3a3b;
+        background: #fff;
+        padding: 2px 10px;
+        border-radius: 30px;
+        margin-top: 4px;
+        border: 1px solid #b0c8c9;
+        white-space: nowrap;
+      }
+      .podium-item .rank-cost {
+        font-size: clamp(10px, 1.4vw, 13px);
+        font-weight: 700;
+        color: #0b2b2c;
+        background: #f5fcfc;
+        padding: 0 8px;
+        border-radius: 20px;
+        margin-top: 2px;
+        border: 1px solid #b8d0d1;
+      }
+      .podium-item.gold .rank-icon {
+        animation: glowGold 1.2s infinite alternate;
+      }
+      .podium-item.silver .rank-icon {
+        animation: glowSilver 1.2s infinite alternate;
+      }
+      .podium-item.bronze .rank-icon {
+        animation: glowBronze 1.2s infinite alternate;
+      }
+      @keyframes glowGold {
+        0% {
+          filter: drop-shadow(0 0 2px #f5b342);
+        }
+        100% {
+          filter: drop-shadow(0 0 14px #f5b342);
+        }
+      }
+      @keyframes glowSilver {
+        0% {
+          filter: drop-shadow(0 0 2px #b0bcc2);
+        }
+        100% {
+          filter: drop-shadow(0 0 12px #b0bcc2);
+        }
+      }
+      @keyframes glowBronze {
+        0% {
+          filter: drop-shadow(0 0 2px #cd7f32);
+        }
+        100% {
+          filter: drop-shadow(0 0 12px #cd7f32);
+        }
+      }
+      @keyframes fadeUp {
+        0% {
+          opacity: 0.4;
+          transform: translateY(12px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .summary-message {
+        margin-top: 12px;
+        background: #d7e9e9;
+        padding: 10px 14px;
+        border-radius: 14px;
+        font-size: clamp(13px, 2vw, 15px);
+        font-weight: 500;
+        color: #0a3334;
+        border-right: 4px solid #2c7a7b;
+        text-align: center;
+        line-height: 1.5;
+        animation: fadeUp 0.5s ease;
+      }
+
+      /* footer centering */
+      .footer {
+        margin-top: 24px;
+        text-align: center;
+        font-size: clamp(20px, 1.8vw, 13px);
+        color: #00316e;
+        border-top: 1px solid #e9edf2;
+        padding-top: 16px;
+      }
+
+      /* mobile fine-tuning */
+      @media (max-width: 600px) {
+        .container {
+          padding: 14px 10px 20px;
+          border-radius: 20px;
+        }
+        .param-group {
+          padding: 10px 10px 12px;
+        }
+        .slider-row {
+          gap: 6px;
+        }
+        .value-badge {
+          min-width: 50px;
+          padding: 1px 6px;
+          font-size: 11px;
+        }
+        .dep-row .dep-item {
+          min-width: 80px;
+        }
+        .fuel-selector button {
+          min-width: 60px;
+          padding: 6px 2px;
+          font-size: 12px;
+        }
+        .results-panel {
+          padding: 14px 10px 16px;
+        }
+        .result-header h3 {
+          font-size: 17px;
+        }
+        .total-big {
+          font-size: 20px;
+          padding: 2px 12px;
+        }
+        .breakdown .row {
+          font-size: 13px;
+          padding: 6px 0;
+        }
+        .compare-box .cmp-row {
+          font-size: 13px;
+        }
+        .podium {
+          min-height: 70px;
+        }
+        .podium-item .rank-icon {
+          font-size: 28px;
+        }
+        .podium-item .rank-label {
+          font-size: 11px;
+          padding: 1px 8px;
+        }
+        .summary-message {
+          font-size: 13px;
+          padding: 8px 10px;
+        }
+      }
+      @media (max-width: 400px) {
+        .container {
+          padding: 10px 6px 16px;
+        }
+        .param-group {
+          padding: 8px 6px 10px;
+        }
+        .value-badge {
+          min-width: 44px;
+          font-size: 10px;
+          padding: 1px 4px;
+        }
+        .slider-row input[type="range"] {
+          min-width: 80px;
+        }
+        .fuel-selector button {
+          min-width: 50px;
+          font-size: 11px;
+          padding: 5px 2px;
+        }
+        .total-big {
+          font-size: 17px;
+          padding: 2px 8px;
+        }
+        .breakdown .row {
+          font-size: 12px;
+        }
+        .compare-box .cmp-row {
+          font-size: 12px;
+        }
+        .podium-item .rank-icon {
+          font-size: 24px;
+        }
+        .summary-message {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 עלות אחזקת רכב כתלות בשנים</h1>
+      <div class="subtitle">
+        כל הפרמטרים ניתנים לשינוי, כולל ירידת ערך שונה לכל סוג הנעה
+      </div>
+
+      <div class="two-col">
+        <!-- LEFT: all parameters -->
+        <div class="params">
+          <!-- fuel type -->
+          <div class="param-group">
+            <label>סוג הנעה</label>
+            <div class="fuel-selector" id="fuelSelector">
+              <button class="active" data-fuel="petrol">⛽ בנזין</button>
+              <button data-fuel="hybrid">🔋 היברידי</button>
+              <button data-fuel="electric">⚡ חשמלי</button>
+            </div>
+          </div>
+
+          <!-- price -->
+          <div class="param-group">
+            <label>מחיר רכישה (₪)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="priceSlider"
+                min="50000"
+                max="400000"
+                step="5000"
+                value="190000"
+              />
+              <span class="value-badge" id="priceDisplay">₪190,000</span>
+            </div>
+          </div>
+
+          <!-- km -->
+          <div class="param-group">
+            <label>נסועה שנתית (ק"מ)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="kmSlider"
+                min="3000"
+                max="50000"
+                step="1000"
+                value="12000"
+              />
+              <span class="value-badge" id="kmDisplay">12,000</span>
+            </div>
+          </div>
+
+          <!-- years -->
+          <div class="param-group">
+            <label>שנות החזקה</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="yearsSlider"
+                min="2"
+                max="12"
+                step="1"
+                value="3"
+              />
+              <span class="value-badge" id="yearsDisplay">3</span>
+            </div>
+          </div>
+
+          <!-- petrol efficiency -->
+          <div class="param-group">
+            <label>צריכת דלק – בנזין (ק"מ/ליטר)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="petrolEfficiency"
+                min="6"
+                max="25"
+                step="0.5"
+                value="12"
+              />
+              <span class="value-badge" id="petrolEfficiencyDisplay">12.0</span>
+            </div>
+          </div>
+
+          <!-- hybrid efficiency -->
+          <div class="param-group">
+            <label>צריכת דלק – היברידי (ק"מ/ליטר)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="hybridEfficiency"
+                min="10"
+                max="35"
+                step="0.5"
+                value="17"
+              />
+              <span class="value-badge" id="hybridEfficiencyDisplay">17.0</span>
+            </div>
+          </div>
+
+          <!-- petrol price -->
+          <div class="param-group">
+            <label>מחיר בנזין לליטר (₪)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="petrolPriceSlider"
+                min="5"
+                max="12"
+                step="0.1"
+                value="8.09"
+              />
+              <span class="value-badge" id="petrolPriceDisplay">8.09</span>
+            </div>
+          </div>
+
+          <!-- electric efficiency -->
+          <div class="param-group">
+            <label>צריכת חשמל (קוט"ש ל-100 ק"מ)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="electricEfficiency"
+                min="10"
+                max="30"
+                step="0.5"
+                value="16.5"
+              />
+              <span class="value-badge" id="efficiencyDisplay">16.5</span>
+            </div>
+          </div>
+
+          <!-- home electric -->
+          <div class="param-group">
+            <label>מחיר חשמל ביתי לקוט"ש (₪)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="homeElectricSlider"
+                min="0.3"
+                max="1.2"
+                step="0.01"
+                value="0.64"
+              />
+              <span class="value-badge" id="homeElectricDisplay">0.64</span>
+            </div>
+          </div>
+
+          <!-- fast charge -->
+          <div class="param-group">
+            <label>טעינה ציבורית מהירה לקוט"ש (₪)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="fastChargeSlider"
+                min="0.8"
+                max="3.0"
+                step="0.05"
+                value="1.80"
+              />
+              <span class="value-badge" id="fastChargeDisplay">1.80</span>
+            </div>
+          </div>
+
+          <!-- public charge pct -->
+          <div class="param-group">
+            <label>אחוז טעינה ציבורית (%)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="publicChargePct"
+                min="0"
+                max="100"
+                step="5"
+                value="20"
+              />
+              <span class="value-badge" id="publicChargeDisplay">20%</span>
+            </div>
+            <div class="hint">יתרת הטעינה היא ביתית</div>
+          </div>
+
+          <!-- insurance -->
+          <div class="param-group">
+            <label>ביטוח שנתי (₪)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="insuranceSlider"
+                min="1000"
+                max="8000"
+                step="100"
+                value="3800"
+              />
+              <span class="value-badge" id="insuranceDisplay">₪3,800</span>
+            </div>
+          </div>
+
+          <!-- license -->
+          <div class="param-group">
+            <label>אגרת רישוי שנתית (₪)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="licenseSlider"
+                min="400"
+                max="3500"
+                step="50"
+                value="1250"
+              />
+              <span class="value-badge" id="licenseDisplay">₪1,250</span>
+            </div>
+          </div>
+
+          <!-- maintenance -->
+          <div class="param-group">
+            <label>טיפולים ותחזוקה – בסיס שנתי (₪)</label>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="maintenanceSlider"
+                min="500"
+                max="6000"
+                step="100"
+                value="2800"
+              />
+              <span class="value-badge" id="maintenanceDisplay">₪2,800</span>
+            </div>
+            <div class="hint">
+              יוכפל במקדם: בנזין 1.0, היברידי 0.75, חשמלי 0.5
+            </div>
+          </div>
+
+          <!-- depreciation petrol -->
+          <div class="param-group">
+            <span class="section-label">📉 ירידת ערך – בנזין</span>
+            <div class="dep-row">
+              <div class="dep-item">
+                <label style="font-size: 13px; font-weight: 500"
+                  >שנה ראשונה (%)</label
+                >
+                <div class="slider-row">
+                  <input
+                    type="range"
+                    id="depPetrolFirst"
+                    min="5"
+                    max="35"
+                    step="0.5"
+                    value="16"
+                  />
+                  <span class="value-badge" id="depPetrolFirstDisplay"
+                    >16%</span
+                  >
+                </div>
+              </div>
+              <div class="dep-item">
+                <label style="font-size: 13px; font-weight: 500"
+                  >כל שנה נוספת (%)</label
+                >
+                <div class="slider-row">
+                  <input
+                    type="range"
+                    id="depPetrolSub"
+                    min="3"
+                    max="25"
+                    step="0.5"
+                    value="11"
+                  />
+                  <span class="value-badge" id="depPetrolSubDisplay">11%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- depreciation hybrid -->
+          <div class="param-group">
+            <span class="section-label">📉 ירידת ערך – היברידי</span>
+            <div class="dep-row">
+              <div class="dep-item">
+                <label style="font-size: 13px; font-weight: 500"
+                  >שנה ראשונה (%)</label
+                >
+                <div class="slider-row">
+                  <input
+                    type="range"
+                    id="depHybridFirst"
+                    min="5"
+                    max="35"
+                    step="0.5"
+                    value="16"
+                  />
+                  <span class="value-badge" id="depHybridFirstDisplay"
+                    >16%</span
+                  >
+                </div>
+              </div>
+              <div class="dep-item">
+                <label style="font-size: 13px; font-weight: 500"
+                  >כל שנה נוספת (%)</label
+                >
+                <div class="slider-row">
+                  <input
+                    type="range"
+                    id="depHybridSub"
+                    min="3"
+                    max="25"
+                    step="0.5"
+                    value="11"
+                  />
+                  <span class="value-badge" id="depHybridSubDisplay">11%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- depreciation electric -->
+          <div class="param-group">
+            <span class="section-label">📉 ירידת ערך – חשמלי</span>
+            <div class="dep-row">
+              <div class="dep-item">
+                <label style="font-size: 13px; font-weight: 500"
+                  >שנה ראשונה (%)</label
+                >
+                <div class="slider-row">
+                  <input
+                    type="range"
+                    id="depElectricFirst"
+                    min="5"
+                    max="40"
+                    step="0.5"
+                    value="21"
+                  />
+                  <span class="value-badge" id="depElectricFirstDisplay"
+                    >21%</span
+                  >
+                </div>
+              </div>
+              <div class="dep-item">
+                <label style="font-size: 13px; font-weight: 500"
+                  >כל שנה נוספת (%)</label
+                >
+                <div class="slider-row">
+                  <input
+                    type="range"
+                    id="depElectricSub"
+                    min="3"
+                    max="30"
+                    step="0.5"
+                    value="13"
+                  />
+                  <span class="value-badge" id="depElectricSubDisplay"
+                    >13%</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: results -->
+        <div class="results-panel">
+          <div class="result-header">
+            <h3 id="fuelLabel">בנזין</h3>
+            <span class="total-big" id="totalCost">₪0</span>
+          </div>
+
+          <div class="breakdown" id="breakdown">
+            <div class="row">
+              <span class="label">ירידת ערך</span
+              ><span class="value" id="depVal">₪0</span>
+            </div>
+            <div class="row">
+              <span class="label">אנרגיה (דלק/חשמל)</span
+              ><span class="value" id="energyVal">₪0</span>
+            </div>
+            <div class="row">
+              <span class="label">טיפולים</span
+              ><span class="value" id="maintVal">₪0</span>
+            </div>
+            <div class="row">
+              <span class="label">ביטוח</span
+              ><span class="value" id="insVal">₪0</span>
+            </div>
+            <div class="row">
+              <span class="label">אגרת רישוי</span
+              ><span class="value" id="licVal">₪0</span>
+            </div>
+          </div>
+
+          <div class="compare-box">
+            <div class="cmp-row">
+              <span class="type">⛽ בנזין</span
+              ><span class="amt" id="cmpPetrol">₪0</span>
+            </div>
+            <div class="cmp-row">
+              <span class="type">🔋 היברידי</span
+              ><span class="amt" id="cmpHybrid">₪0</span>
+            </div>
+            <div class="cmp-row">
+              <span class="type">⚡ חשמלי</span
+              ><span class="amt" id="cmpElectric">₪0</span>
+            </div>
+          </div>
+
+          <!-- PODIUM RANKING + SUMMARY (no duplicate tip) -->
+          <div class="ranking-section" id="rankingSection">
+            <div class="ranking-title">🏆 דירוג משתלמות</div>
+            <div class="podium" id="podium">
+              <div class="podium-item" id="rank1">
+                <span class="rank-icon" id="icon1">🥇</span
+                ><span class="rank-label" id="label1">ראשון</span
+                ><span class="rank-cost" id="cost1">₪0</span>
+              </div>
+              <div class="podium-item" id="rank2">
+                <span class="rank-icon" id="icon2">🥈</span
+                ><span class="rank-label" id="label2">שני</span
+                ><span class="rank-cost" id="cost2">₪0</span>
+              </div>
+              <div class="podium-item" id="rank3">
+                <span class="rank-icon" id="icon3">🥉</span
+                ><span class="rank-label" id="label3">שלישי</span
+                ><span class="rank-cost" id="cost3">₪0</span>
+              </div>
+            </div>
+            <div class="summary-message" id="summaryMessage">
+              💡 ב-3 שנות אחזקה, רכב חשמלי הוא המשתלם ביותר.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- footer centered -->
+      <div class="footer"><span>2026 כל הזכויות שמורות G©.</span></div>
+    </div>
+
+    <script>
+      (function () {
+        // DOM refs
+        const fuelBtns = document.querySelectorAll("#fuelSelector button");
+        const priceSlider = document.getElementById("priceSlider");
+        const kmSlider = document.getElementById("kmSlider");
+        const yearsSlider = document.getElementById("yearsSlider");
+        const petrolEfficiency = document.getElementById("petrolEfficiency");
+        const hybridEfficiency = document.getElementById("hybridEfficiency");
+        const petrolPriceSlider = document.getElementById("petrolPriceSlider");
+        const homeElectricSlider =
+          document.getElementById("homeElectricSlider");
+        const fastChargeSlider = document.getElementById("fastChargeSlider");
+        const publicChargePct = document.getElementById("publicChargePct");
+        const electricEfficiency =
+          document.getElementById("electricEfficiency");
+        const insuranceSlider = document.getElementById("insuranceSlider");
+        const licenseSlider = document.getElementById("licenseSlider");
+        const maintenanceSlider = document.getElementById("maintenanceSlider");
+
+        const depPetrolFirst = document.getElementById("depPetrolFirst");
+        const depPetrolSub = document.getElementById("depPetrolSub");
+        const depHybridFirst = document.getElementById("depHybridFirst");
+        const depHybridSub = document.getElementById("depHybridSub");
+        const depElectricFirst = document.getElementById("depElectricFirst");
+        const depElectricSub = document.getElementById("depElectricSub");
+
+        const priceDisplay = document.getElementById("priceDisplay");
+        const kmDisplay = document.getElementById("kmDisplay");
+        const yearsDisplay = document.getElementById("yearsDisplay");
+        const petrolEfficiencyDisplay = document.getElementById(
+          "petrolEfficiencyDisplay",
+        );
+        const hybridEfficiencyDisplay = document.getElementById(
+          "hybridEfficiencyDisplay",
+        );
+        const petrolPriceDisplay =
+          document.getElementById("petrolPriceDisplay");
+        const homeElectricDisplay = document.getElementById(
+          "homeElectricDisplay",
+        );
+        const fastChargeDisplay = document.getElementById("fastChargeDisplay");
+        const publicChargeDisplay = document.getElementById(
+          "publicChargeDisplay",
+        );
+        const efficiencyDisplay = document.getElementById("efficiencyDisplay");
+        const insuranceDisplay = document.getElementById("insuranceDisplay");
+        const licenseDisplay = document.getElementById("licenseDisplay");
+        const maintenanceDisplay =
+          document.getElementById("maintenanceDisplay");
+
+        const depPetrolFirstDisplay = document.getElementById(
+          "depPetrolFirstDisplay",
+        );
+        const depPetrolSubDisplay = document.getElementById(
+          "depPetrolSubDisplay",
+        );
+        const depHybridFirstDisplay = document.getElementById(
+          "depHybridFirstDisplay",
+        );
+        const depHybridSubDisplay = document.getElementById(
+          "depHybridSubDisplay",
+        );
+        const depElectricFirstDisplay = document.getElementById(
+          "depElectricFirstDisplay",
+        );
+        const depElectricSubDisplay = document.getElementById(
+          "depElectricSubDisplay",
+        );
+
+        const totalCost = document.getElementById("totalCost");
+        const fuelLabel = document.getElementById("fuelLabel");
+        const depVal = document.getElementById("depVal");
+        const energyVal = document.getElementById("energyVal");
+        const maintVal = document.getElementById("maintVal");
+        const insVal = document.getElementById("insVal");
+        const licVal = document.getElementById("licVal");
+        const cmpPetrol = document.getElementById("cmpPetrol");
+        const cmpHybrid = document.getElementById("cmpHybrid");
+        const cmpElectric = document.getElementById("cmpElectric");
+
+        // ranking elements
+        const rankItems = [
+          {
+            el: document.getElementById("rank1"),
+            icon: document.getElementById("icon1"),
+            label: document.getElementById("label1"),
+            cost: document.getElementById("cost1"),
+          },
+          {
+            el: document.getElementById("rank2"),
+            icon: document.getElementById("icon2"),
+            label: document.getElementById("label2"),
+            cost: document.getElementById("cost2"),
+          },
+          {
+            el: document.getElementById("rank3"),
+            icon: document.getElementById("icon3"),
+            label: document.getElementById("label3"),
+            cost: document.getElementById("cost3"),
+          },
+        ];
+        const summaryMsg = document.getElementById("summaryMessage");
+
+        let currentFuel = "petrol";
+
+        function getValues() {
+          return {
+            price: parseInt(priceSlider.value, 10),
+            km: parseInt(kmSlider.value, 10),
+            years: parseInt(yearsSlider.value, 10),
+            petrolKmPerLiter: parseFloat(petrolEfficiency.value),
+            hybridKmPerLiter: parseFloat(hybridEfficiency.value),
+            petrolPrice: parseFloat(petrolPriceSlider.value),
+            homeElectric: parseFloat(homeElectricSlider.value),
+            fastCharge: parseFloat(fastChargeSlider.value),
+            publicPct: parseInt(publicChargePct.value, 10),
+            electricEfficiency: parseFloat(electricEfficiency.value),
+            insurance: parseInt(insuranceSlider.value, 10),
+            license: parseInt(licenseSlider.value, 10),
+            maintenance: parseInt(maintenanceSlider.value, 10),
+            depPetrolFirst: parseFloat(depPetrolFirst.value) / 100,
+            depPetrolSub: parseFloat(depPetrolSub.value) / 100,
+            depHybridFirst: parseFloat(depHybridFirst.value) / 100,
+            depHybridSub: parseFloat(depHybridSub.value) / 100,
+            depElectricFirst: parseFloat(depElectricFirst.value) / 100,
+            depElectricSub: parseFloat(depElectricSub.value) / 100,
+          };
+        }
+
+        function computeFuel(fuelType, vals) {
+          const {
+            price,
+            km,
+            years,
+            petrolKmPerLiter,
+            hybridKmPerLiter,
+            petrolPrice,
+            homeElectric,
+            fastCharge,
+            publicPct,
+            electricEfficiency,
+            insurance,
+            license,
+            maintenance,
+            depPetrolFirst,
+            depPetrolSub,
+            depHybridFirst,
+            depHybridSub,
+            depElectricFirst,
+            depElectricSub,
+          } = vals;
+
+          let depFirst, depSub;
+          if (fuelType === "petrol") {
+            depFirst = depPetrolFirst;
+            depSub = depPetrolSub;
+          } else if (fuelType === "hybrid") {
+            depFirst = depHybridFirst;
+            depSub = depHybridSub;
+          } else {
+            depFirst = depElectricFirst;
+            depSub = depElectricSub;
+          }
+
+          let depTotal = 0;
+          let remaining = price;
+          for (let i = 0; i < years; i++) {
+            const rate = i === 0 ? depFirst : depSub;
+            const dep = remaining * rate;
+            depTotal += dep;
+            remaining -= dep;
+          }
+          const depreciation = Math.round(depTotal);
+
+          let energyCost = 0;
+          if (fuelType === "petrol") {
+            const totalLiters = (km * years) / petrolKmPerLiter;
+            energyCost = Math.round(totalLiters * petrolPrice);
+          } else if (fuelType === "hybrid") {
+            const totalLiters = (km * years) / hybridKmPerLiter;
+            energyCost = Math.round(totalLiters * petrolPrice);
+          } else {
+            const totalKm = km * years;
+            const totalKwh = (totalKm / 100) * electricEfficiency;
+            const homePct = (100 - publicPct) / 100;
+            const publicPctVal = publicPct / 100;
+            const blendedPrice =
+              homeElectric * homePct + fastCharge * publicPctVal;
+            energyCost = Math.round(totalKwh * blendedPrice);
+          }
+
+          let maintMultiplier = 1.0;
+          if (fuelType === "hybrid") maintMultiplier = 0.75;
+          else if (fuelType === "electric") maintMultiplier = 0.5;
+          const maintenanceCost = Math.round(
+            maintenance * years * maintMultiplier,
+          );
+
+          let insMultiplier = 1.0;
+          if (fuelType === "electric") insMultiplier = 1.2;
+          else if (fuelType === "hybrid") insMultiplier = 1.0;
+          const insuranceCost = Math.round(insurance * years * insMultiplier);
+
+          const licenseCost = license * years;
+
+          const total =
+            depreciation +
+            energyCost +
+            maintenanceCost +
+            insuranceCost +
+            licenseCost;
+          return {
+            depreciation,
+            energy: energyCost,
+            maintenance: maintenanceCost,
+            insurance: insuranceCost,
+            license: licenseCost,
+            total,
+          };
+        }
+
+        function updateAll() {
+          const vals = getValues();
+
+          priceDisplay.textContent = "₪" + vals.price.toLocaleString();
+          kmDisplay.textContent = vals.km.toLocaleString();
+          yearsDisplay.textContent = vals.years;
+          petrolEfficiencyDisplay.textContent =
+            vals.petrolKmPerLiter.toFixed(1);
+          hybridEfficiencyDisplay.textContent =
+            vals.hybridKmPerLiter.toFixed(1);
+          petrolPriceDisplay.textContent = vals.petrolPrice.toFixed(2);
+          homeElectricDisplay.textContent = vals.homeElectric.toFixed(2);
+          fastChargeDisplay.textContent = vals.fastCharge.toFixed(2);
+          publicChargeDisplay.textContent = vals.publicPct + "%";
+          efficiencyDisplay.textContent = vals.electricEfficiency.toFixed(1);
+          insuranceDisplay.textContent = "₪" + vals.insurance.toLocaleString();
+          licenseDisplay.textContent = "₪" + vals.license.toLocaleString();
+          maintenanceDisplay.textContent =
+            "₪" + vals.maintenance.toLocaleString();
+
+          depPetrolFirstDisplay.textContent =
+            (vals.depPetrolFirst * 100).toFixed(1) + "%";
+          depPetrolSubDisplay.textContent =
+            (vals.depPetrolSub * 100).toFixed(1) + "%";
+          depHybridFirstDisplay.textContent =
+            (vals.depHybridFirst * 100).toFixed(1) + "%";
+          depHybridSubDisplay.textContent =
+            (vals.depHybridSub * 100).toFixed(1) + "%";
+          depElectricFirstDisplay.textContent =
+            (vals.depElectricFirst * 100).toFixed(1) + "%";
+          depElectricSubDisplay.textContent =
+            (vals.depElectricSub * 100).toFixed(1) + "%";
+
+          const petrol = computeFuel("petrol", vals);
+          const hybrid = computeFuel("hybrid", vals);
+          const electric = computeFuel("electric", vals);
+
+          let current, label;
+          if (currentFuel === "petrol") {
+            current = petrol;
+            label = "בנזין";
+          } else if (currentFuel === "hybrid") {
+            current = hybrid;
+            label = "היברידי";
+          } else {
+            current = electric;
+            label = "חשמלי";
+          }
+
+          depVal.textContent = "₪" + current.depreciation.toLocaleString();
+          energyVal.textContent = "₪" + current.energy.toLocaleString();
+          maintVal.textContent = "₪" + current.maintenance.toLocaleString();
+          insVal.textContent = "₪" + current.insurance.toLocaleString();
+          licVal.textContent = "₪" + current.license.toLocaleString();
+          totalCost.textContent = "₪" + current.total.toLocaleString();
+          fuelLabel.textContent = label;
+
+          cmpPetrol.textContent = "₪" + petrol.total.toLocaleString();
+          cmpHybrid.textContent = "₪" + hybrid.total.toLocaleString();
+          cmpElectric.textContent = "₪" + electric.total.toLocaleString();
+
+          // --- PODIUM RANKING ---
+          const items = [
+            { type: "petrol", total: petrol.total, icon: "⛽", name: "בנזין" },
+            {
+              type: "hybrid",
+              total: hybrid.total,
+              icon: "🔋",
+              name: "היברידי",
+            },
+            {
+              type: "electric",
+              total: electric.total,
+              icon: "⚡",
+              name: "חשמלי",
+            },
+          ];
+          items.sort((a, b) => a.total - b.total);
+
+          const rankClasses = ["gold", "silver", "bronze"];
+          const rankLabels = ["🥇", "🥈", "🥉"];
+          const rankTexts = ["ראשון", "שני", "שלישי"];
+
+          // Clear previous classes
+          rankItems.forEach((r) => {
+            r.el.classList.remove("gold", "silver", "bronze");
+          });
+
+          for (let i = 0; i < 3; i++) {
+            const item = items[i];
+            const rankEl = rankItems[i];
+            rankEl.icon.textContent = rankLabels[i];
+            rankEl.label.textContent =
+              rankTexts[i] + " " + item.icon + " " + item.name;
+            rankEl.cost.textContent = "₪" + item.total.toLocaleString();
+            rankEl.el.classList.add(rankClasses[i]);
+          }
+
+          // dynamic summary message (only this, no duplicate tip)
+          const bestItem = items[0];
+          const years = vals.years;
+          summaryMsg.innerHTML = `💡 ב-<strong>${years}</strong> שנות אחזקה, העלויות המשוערות על פי הנתונים מצביעות על כך שרכב <strong>${bestItem.icon} ${bestItem.name}</strong><br> יהיה המשתלם ביותר (₪${bestItem.total.toLocaleString()}).`;
+        }
+
+        // event listeners
+        fuelBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            fuelBtns.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            currentFuel = this.dataset.fuel;
+            updateAll();
+          });
+        });
+
+        const sliders = [
+          priceSlider,
+          kmSlider,
+          yearsSlider,
+          petrolEfficiency,
+          hybridEfficiency,
+          petrolPriceSlider,
+          homeElectricSlider,
+          fastChargeSlider,
+          publicChargePct,
+          electricEfficiency,
+          insuranceSlider,
+          licenseSlider,
+          maintenanceSlider,
+          depPetrolFirst,
+          depPetrolSub,
+          depHybridFirst,
+          depHybridSub,
+          depElectricFirst,
+          depElectricSub,
+        ];
+        sliders.forEach((s) => s.addEventListener("input", updateAll));
+
+        updateAll();
+      })();
+    </script>
+  </body>
+</html>
