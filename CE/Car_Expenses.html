@@ -16,7 +16,7 @@
       }
       body {
         font-family: "Segoe UI", "Heebo", Arial, sans-serif;
-        background: #54a0ff;
+        background: #a7cfff;
         display: flex;
         justify-content: center;
         padding: 12px;
@@ -177,7 +177,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid #dce3ec;
+        border-bottom: 1px solid #dcece4;
         padding-bottom: 12px;
         margin-bottom: 14px;
         flex-wrap: wrap;
@@ -195,7 +195,7 @@
         background: #fff;
         padding: 2px 16px;
         border-radius: 60px;
-        border: 1px solid #dce3ec;
+        border: 1px solid #dcecdd;
         white-space: nowrap;
       }
       .breakdown {
@@ -349,7 +349,7 @@
       }
       .summary-message {
         margin-top: 12px;
-        background: #d7e9e9;
+        background: #d6cffa;
         padding: 10px 14px;
         border-radius: 14px;
         font-size: clamp(13px, 2vw, 15px);
@@ -366,9 +366,26 @@
         margin-top: 24px;
         text-align: center;
         font-size: clamp(20px, 1.8vw, 13px);
+        font-weight: 700;
         color: #00316e;
         border-top: 1px solid #e9edf2;
         padding-top: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .footer img {
+        height: 3em;
+        width: auto;
+        vertical-align: middle;
+        display: inline-block;
+      }
+      .footer span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
       }
 
       /* ===== MOBILE FIXES ===== */
@@ -383,7 +400,7 @@
         .slider-row {
           gap: 6px;
           flex-wrap: nowrap;
-          justify-content: center; /* מירכוז הסליידרים */
+          justify-content: center;
         }
         .slider-row input[type="range"] {
           min-width: 0;
@@ -399,7 +416,6 @@
           font-size: 11px;
           flex-shrink: 0;
         }
-        /* dep-row inside param-group: stack vertically on mobile */
         .dep-row {
           flex-direction: column;
           gap: 8px;
@@ -455,9 +471,11 @@
           font-size: 13px;
           padding: 8px 10px;
         }
-        /* fix for labels inside dep-item */
         .dep-item label {
           font-size: 12px !important;
+        }
+        .footer img {
+          height: 2em;
         }
       }
       @media (max-width: 400px) {
@@ -515,6 +533,9 @@
         }
         .param-group label {
           font-size: 11px !important;
+        }
+        .footer img {
+          height: 1.4em;
         }
       }
     </style>
@@ -955,8 +976,13 @@
         </div>
       </div>
 
-      <!-- footer centered -->
-      <div class="footer"><span>2026 כל הזכויות שמורות G©</span></div>
+      <!-- footer with logo image -->
+      <div class="footer">
+        <span>
+          2026 כל הזכויות שמורות
+          <img src="logo_black.png" alt="לוגו" />
+        </span>
+      </div>
     </div>
 
     <script>
