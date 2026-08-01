@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<!-- saved from url=(0038)https://ez1st.com/CE/Car_Expenses.html -->
-<html lang="he" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
+    />
     <title>מחשבון עלות רכב</title>
-    <link rel="icon" type="image/png" href="https://ez1st.com/CE/ce.png">
+    <link rel="icon" type="image/png" href="https://ez1st.com/CE/ce.png" />
     <style>
       * {
         margin: 0;
@@ -379,12 +382,16 @@
         }
         .slider-row {
           gap: 6px;
-          flex-wrap: nowrap; /* prevent wrapping on small screens */
+          flex-wrap: nowrap;
+          justify-content: center; /* מירכוז הסליידרים */
         }
         .slider-row input[type="range"] {
-          min-width: 0; /* allow flex shrink */
+          min-width: 0;
           flex: 1 1 auto;
           width: 100%;
+          touch-action: none;
+          max-width: 70%;
+          flex: 0 1 70%;
         }
         .value-badge {
           min-width: 44px;
@@ -403,6 +410,7 @@
         }
         .dep-row .dep-item .slider-row {
           flex-wrap: nowrap;
+          justify-content: center;
         }
         .fuel-selector button {
           min-width: 50px;
@@ -466,6 +474,8 @@
         }
         .slider-row input[type="range"] {
           min-width: 0;
+          max-width: 70%;
+          flex: 0 1 70%;
         }
         .fuel-selector button {
           min-width: 40px;
@@ -509,11 +519,11 @@
       }
     </style>
   </head>
-  <body data-new-gr-c-s-check-loaded="14.1140.0" data-gr-ext-installed="">
+  <body>
     <div class="container">
       <h1>🔧 עלות אחזקת רכב כתלות בשנים</h1>
       <div class="subtitle">
-        כל הפרמטרים ניתנים לשינוי, כולל ירידת ערך שונה לכל סוג הנעה
+        הפרמטרים ניתנים לשינוי, כולל ירידת ערך שונה לכל סוג הנעה
       </div>
 
       <div class="two-col">
@@ -533,7 +543,14 @@
           <div class="param-group">
             <label>מחיר רכישה (₪)</label>
             <div class="slider-row">
-              <input type="range" id="priceSlider" min="50000" max="400000" step="5000" value="190000">
+              <input
+                type="range"
+                id="priceSlider"
+                min="50000"
+                max="400000"
+                step="5000"
+                value="190000"
+              />
               <span class="value-badge" id="priceDisplay">₪190,000</span>
             </div>
           </div>
@@ -542,7 +559,14 @@
           <div class="param-group">
             <label>נסועה שנתית (ק"מ)</label>
             <div class="slider-row">
-              <input type="range" id="kmSlider" min="3000" max="50000" step="1000" value="12000">
+              <input
+                type="range"
+                id="kmSlider"
+                min="3000"
+                max="50000"
+                step="1000"
+                value="12000"
+              />
               <span class="value-badge" id="kmDisplay">12,000</span>
             </div>
           </div>
@@ -551,7 +575,14 @@
           <div class="param-group">
             <label>שנות החזקה</label>
             <div class="slider-row">
-              <input type="range" id="yearsSlider" min="2" max="12" step="1" value="3">
+              <input
+                type="range"
+                id="yearsSlider"
+                min="2"
+                max="12"
+                step="1"
+                value="3"
+              />
               <span class="value-badge" id="yearsDisplay">3</span>
             </div>
           </div>
@@ -560,7 +591,14 @@
           <div class="param-group">
             <label>צריכת דלק – בנזין (ק"מ/ליטר)</label>
             <div class="slider-row">
-              <input type="range" id="petrolEfficiency" min="6" max="25" step="0.5" value="12">
+              <input
+                type="range"
+                id="petrolEfficiency"
+                min="6"
+                max="25"
+                step="0.5"
+                value="12"
+              />
               <span class="value-badge" id="petrolEfficiencyDisplay">12.0</span>
             </div>
           </div>
@@ -569,7 +607,14 @@
           <div class="param-group">
             <label>צריכת דלק – היברידי (ק"מ/ליטר)</label>
             <div class="slider-row">
-              <input type="range" id="hybridEfficiency" min="10" max="35" step="0.5" value="17">
+              <input
+                type="range"
+                id="hybridEfficiency"
+                min="10"
+                max="35"
+                step="0.5"
+                value="17"
+              />
               <span class="value-badge" id="hybridEfficiencyDisplay">17.0</span>
             </div>
           </div>
@@ -578,7 +623,14 @@
           <div class="param-group">
             <label>מחיר בנזין לליטר (₪)</label>
             <div class="slider-row">
-              <input type="range" id="petrolPriceSlider" min="5" max="12" step="0.1" value="8.09">
+              <input
+                type="range"
+                id="petrolPriceSlider"
+                min="5"
+                max="12"
+                step="0.1"
+                value="8.09"
+              />
               <span class="value-badge" id="petrolPriceDisplay">8.10</span>
             </div>
           </div>
@@ -587,7 +639,14 @@
           <div class="param-group">
             <label>צריכת חשמל (קוט"ש ל-100 ק"מ)</label>
             <div class="slider-row">
-              <input type="range" id="electricEfficiency" min="10" max="30" step="0.5" value="16.5">
+              <input
+                type="range"
+                id="electricEfficiency"
+                min="10"
+                max="30"
+                step="0.5"
+                value="16.5"
+              />
               <span class="value-badge" id="efficiencyDisplay">16.5</span>
             </div>
           </div>
@@ -596,7 +655,14 @@
           <div class="param-group">
             <label>מחיר חשמל ביתי לקוט"ש (₪)</label>
             <div class="slider-row">
-              <input type="range" id="homeElectricSlider" min="0.3" max="1.2" step="0.01" value="0.64">
+              <input
+                type="range"
+                id="homeElectricSlider"
+                min="0.3"
+                max="1.2"
+                step="0.01"
+                value="0.64"
+              />
               <span class="value-badge" id="homeElectricDisplay">0.64</span>
             </div>
           </div>
@@ -605,7 +671,14 @@
           <div class="param-group">
             <label>טעינה ציבורית מהירה לקוט"ש (₪)</label>
             <div class="slider-row">
-              <input type="range" id="fastChargeSlider" min="0.8" max="3.0" step="0.05" value="1.80">
+              <input
+                type="range"
+                id="fastChargeSlider"
+                min="0.8"
+                max="3.0"
+                step="0.05"
+                value="1.80"
+              />
               <span class="value-badge" id="fastChargeDisplay">1.80</span>
             </div>
           </div>
@@ -614,7 +687,14 @@
           <div class="param-group">
             <label>אחוז טעינה ציבורית (%)</label>
             <div class="slider-row">
-              <input type="range" id="publicChargePct" min="0" max="100" step="5" value="20">
+              <input
+                type="range"
+                id="publicChargePct"
+                min="0"
+                max="100"
+                step="5"
+                value="20"
+              />
               <span class="value-badge" id="publicChargeDisplay">20%</span>
             </div>
             <div class="hint">יתרת הטעינה היא ביתית</div>
@@ -624,7 +704,14 @@
           <div class="param-group">
             <label>ביטוח שנתי (₪)</label>
             <div class="slider-row">
-              <input type="range" id="insuranceSlider" min="1000" max="8000" step="100" value="3800">
+              <input
+                type="range"
+                id="insuranceSlider"
+                min="1000"
+                max="8000"
+                step="100"
+                value="3800"
+              />
               <span class="value-badge" id="insuranceDisplay">₪3,800</span>
             </div>
           </div>
@@ -633,7 +720,14 @@
           <div class="param-group">
             <label>אגרת רישוי שנתית (₪)</label>
             <div class="slider-row">
-              <input type="range" id="licenseSlider" min="400" max="3500" step="50" value="1250">
+              <input
+                type="range"
+                id="licenseSlider"
+                min="400"
+                max="3500"
+                step="50"
+                value="1250"
+              />
               <span class="value-badge" id="licenseDisplay">₪1,250</span>
             </div>
           </div>
@@ -642,7 +736,14 @@
           <div class="param-group">
             <label>טיפולים ותחזוקה – בסיס שנתי (₪)</label>
             <div class="slider-row">
-              <input type="range" id="maintenanceSlider" min="500" max="6000" step="100" value="2800">
+              <input
+                type="range"
+                id="maintenanceSlider"
+                min="500"
+                max="6000"
+                step="100"
+                value="2800"
+              />
               <span class="value-badge" id="maintenanceDisplay">₪2,800</span>
             </div>
             <div class="hint">
@@ -655,17 +756,39 @@
             <span class="section-label">📉 ירידת ערך – בנזין</span>
             <div class="dep-row">
               <div class="dep-item">
-                <label style="font-size: 13px; font-weight: 500">שנה ראשונה (%)</label>
+                <label style="font-size: 13px; font-weight: 500"
+                  >שנה ראשונה (%)</label
+                >
                 <div class="slider-row">
-                  <input type="range" id="depPetrolFirst" min="5" max="35" step="0.5" value="16">
-                  <span class="value-badge" id="depPetrolFirstDisplay">17.0%</span>
+                  <input
+                    type="range"
+                    id="depPetrolFirst"
+                    min="5"
+                    max="35"
+                    step="0.5"
+                    value="16"
+                  />
+                  <span class="value-badge" id="depPetrolFirstDisplay"
+                    >17.0%</span
+                  >
                 </div>
               </div>
               <div class="dep-item">
-                <label style="font-size: 13px; font-weight: 500">כל שנה נוספת (%)</label>
+                <label style="font-size: 13px; font-weight: 500"
+                  >כל שנה נוספת (%)</label
+                >
                 <div class="slider-row">
-                  <input type="range" id="depPetrolSub" min="3" max="25" step="0.5" value="11">
-                  <span class="value-badge" id="depPetrolSubDisplay">11.0%</span>
+                  <input
+                    type="range"
+                    id="depPetrolSub"
+                    min="3"
+                    max="25"
+                    step="0.5"
+                    value="11"
+                  />
+                  <span class="value-badge" id="depPetrolSubDisplay"
+                    >11.0%</span
+                  >
                 </div>
               </div>
             </div>
@@ -676,17 +799,39 @@
             <span class="section-label">📉 ירידת ערך – היברידי</span>
             <div class="dep-row">
               <div class="dep-item">
-                <label style="font-size: 13px; font-weight: 500">שנה ראשונה (%)</label>
+                <label style="font-size: 13px; font-weight: 500"
+                  >שנה ראשונה (%)</label
+                >
                 <div class="slider-row">
-                  <input type="range" id="depHybridFirst" min="5" max="35" step="0.5" value="16">
-                  <span class="value-badge" id="depHybridFirstDisplay">16.0%</span>
+                  <input
+                    type="range"
+                    id="depHybridFirst"
+                    min="5"
+                    max="35"
+                    step="0.5"
+                    value="16"
+                  />
+                  <span class="value-badge" id="depHybridFirstDisplay"
+                    >16.0%</span
+                  >
                 </div>
               </div>
               <div class="dep-item">
-                <label style="font-size: 13px; font-weight: 500">כל שנה נוספת (%)</label>
+                <label style="font-size: 13px; font-weight: 500"
+                  >כל שנה נוספת (%)</label
+                >
                 <div class="slider-row">
-                  <input type="range" id="depHybridSub" min="3" max="25" step="0.5" value="11">
-                  <span class="value-badge" id="depHybridSubDisplay">11.0%</span>
+                  <input
+                    type="range"
+                    id="depHybridSub"
+                    min="3"
+                    max="25"
+                    step="0.5"
+                    value="11"
+                  />
+                  <span class="value-badge" id="depHybridSubDisplay"
+                    >11.0%</span
+                  >
                 </div>
               </div>
             </div>
@@ -697,17 +842,39 @@
             <span class="section-label">📉 ירידת ערך – חשמלי</span>
             <div class="dep-row">
               <div class="dep-item">
-                <label style="font-size: 13px; font-weight: 500">שנה ראשונה (%)</label>
+                <label style="font-size: 13px; font-weight: 500"
+                  >שנה ראשונה (%)</label
+                >
                 <div class="slider-row">
-                  <input type="range" id="depElectricFirst" min="5" max="40" step="0.5" value="21">
-                  <span class="value-badge" id="depElectricFirstDisplay">21.0%</span>
+                  <input
+                    type="range"
+                    id="depElectricFirst"
+                    min="5"
+                    max="40"
+                    step="0.5"
+                    value="21"
+                  />
+                  <span class="value-badge" id="depElectricFirstDisplay"
+                    >21.0%</span
+                  >
                 </div>
               </div>
               <div class="dep-item">
-                <label style="font-size: 13px; font-weight: 500">כל שנה נוספת (%)</label>
+                <label style="font-size: 13px; font-weight: 500"
+                  >כל שנה נוספת (%)</label
+                >
                 <div class="slider-row">
-                  <input type="range" id="depElectricSub" min="3" max="30" step="0.5" value="13">
-                  <span class="value-badge" id="depElectricSubDisplay">13.0%</span>
+                  <input
+                    type="range"
+                    id="depElectricSub"
+                    min="3"
+                    max="30"
+                    step="0.5"
+                    value="13"
+                  />
+                  <span class="value-badge" id="depElectricSubDisplay"
+                    >13.0%</span
+                  >
                 </div>
               </div>
             </div>
@@ -723,31 +890,39 @@
 
           <div class="breakdown" id="breakdown">
             <div class="row">
-              <span class="label">ירידת ערך</span><span class="value" id="depVal">₪65,086</span>
+              <span class="label">ירידת ערך</span
+              ><span class="value" id="depVal">₪65,086</span>
             </div>
             <div class="row">
-              <span class="label">אנרגיה (דלק/חשמל)</span><span class="value" id="energyVal">₪24,300</span>
+              <span class="label">אנרגיה (דלק/חשמל)</span
+              ><span class="value" id="energyVal">₪24,300</span>
             </div>
             <div class="row">
-              <span class="label">טיפולים</span><span class="value" id="maintVal">₪8,400</span>
+              <span class="label">טיפולים</span
+              ><span class="value" id="maintVal">₪8,400</span>
             </div>
             <div class="row">
-              <span class="label">ביטוח</span><span class="value" id="insVal">₪11,400</span>
+              <span class="label">ביטוח</span
+              ><span class="value" id="insVal">₪11,400</span>
             </div>
             <div class="row">
-              <span class="label">אגרת רישוי</span><span class="value" id="licVal">₪3,750</span>
+              <span class="label">אגרת רישוי</span
+              ><span class="value" id="licVal">₪3,750</span>
             </div>
           </div>
 
           <div class="compare-box">
             <div class="cmp-row">
-              <span class="type">⛽ בנזין</span><span class="amt" id="cmpPetrol">₪112,936</span>
+              <span class="type">⛽ בנזין</span
+              ><span class="amt" id="cmpPetrol">₪112,936</span>
             </div>
             <div class="cmp-row">
-              <span class="type">🔋 היברידי</span><span class="amt" id="cmpHybrid">₪102,184</span>
+              <span class="type">🔋 היברידי</span
+              ><span class="amt" id="cmpHybrid">₪102,184</span>
             </div>
             <div class="cmp-row">
-              <span class="type">⚡ חשמלי</span><span class="amt" id="cmpElectric">₪103,199</span>
+              <span class="type">⚡ חשמלי</span
+              ><span class="amt" id="cmpElectric">₪103,199</span>
             </div>
           </div>
 
@@ -756,22 +931,32 @@
             <div class="ranking-title">🏆 דירוג משתלמות</div>
             <div class="podium" id="podium">
               <div class="podium-item gold" id="rank1">
-                <span class="rank-icon" id="icon1">🥇</span><span class="rank-label" id="label1">ראשון 🔋 היברידי</span><span class="rank-cost" id="cost1">₪102,184</span>
+                <span class="rank-icon" id="icon1">🥇</span
+                ><span class="rank-label" id="label1">ראשון 🔋 היברידי</span
+                ><span class="rank-cost" id="cost1">₪102,184</span>
               </div>
               <div class="podium-item silver" id="rank2">
-                <span class="rank-icon" id="icon2">🥈</span><span class="rank-label" id="label2">שני ⚡ חשמלי</span><span class="rank-cost" id="cost2">₪103,199</span>
+                <span class="rank-icon" id="icon2">🥈</span
+                ><span class="rank-label" id="label2">שני ⚡ חשמלי</span
+                ><span class="rank-cost" id="cost2">₪103,199</span>
               </div>
               <div class="podium-item bronze" id="rank3">
-                <span class="rank-icon" id="icon3">🥉</span><span class="rank-label" id="label3">שלישי ⛽ בנזין</span><span class="rank-cost" id="cost3">₪112,936</span>
+                <span class="rank-icon" id="icon3">🥉</span
+                ><span class="rank-label" id="label3">שלישי ⛽ בנזין</span
+                ><span class="rank-cost" id="cost3">₪112,936</span>
               </div>
             </div>
-            <div class="summary-message" id="summaryMessage">💡 ב-<strong>3</strong> שנות אחזקה, העלויות המשוערות על פי הנתונים מצביעות על כך שרכב <strong>🔋 היברידי</strong><br> יהיה המשתלם ביותר (₪102,184).</div>
+            <div class="summary-message" id="summaryMessage">
+              💡 ב-<strong>3</strong> שנות אחזקה, העלויות המשוערות על פי הנתונים
+              מצביעות על כך שרכב <strong>🔋 היברידי</strong><br />
+              יהיה המשתלם ביותר (₪102,184).
+            </div>
           </div>
         </div>
       </div>
 
       <!-- footer centered -->
-      <div class="footer"><span>2026 כל הזכויות שמורות G©.</span></div>
+      <div class="footer"><span>2026 כל הזכויות שמורות G©</span></div>
     </div>
 
     <script>
@@ -1136,26 +1321,5 @@
         updateAll();
       })();
     </script>
-  
-
-</body><grammarly-desktop-integration data-grammarly-shadow-root="true" style="visibility: visible !important;"><template shadowrootmode="open"><style>
-      div.grammarly-desktop-integration {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select:none;
-        user-select:none;
-      }
-
-      div.grammarly-desktop-integration:before {
-        content: attr(data-content);
-      }
-    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
+  </body>
+</html>
