@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
@@ -89,8 +89,10 @@
         font-size: 2.2rem;
         margin-top: 50px;
         font-family: "Heebo", sans-serif;
-        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1),
-          4px 4px 0px rgba(78, 84, 200, 0.2), 6px 6px 0px rgba(78, 84, 200, 0.1);
+        text-shadow:
+          2px 2px 0px rgba(0, 0, 0, 0.1),
+          4px 4px 0px rgba(78, 84, 200, 0.2),
+          6px 6px 0px rgba(78, 84, 200, 0.1);
         margin-bottom: 1.5rem;
         position: relative;
         display: inline-block;
@@ -171,7 +173,9 @@
         transform: translate(-50%, -50%);
         background: rgba(255, 255, 255, 0.2);
         border-radius: 50%;
-        transition: width 0.3s ease, height 0.3s ease;
+        transition:
+          width 0.3s ease,
+          height 0.3s ease;
         z-index: -1;
       }
 
@@ -315,7 +319,9 @@
         transform: translate(-50%, -50%);
         background: rgba(255, 255, 255, 0.2);
         border-radius: 50%;
-        transition: width 0.3s ease, height 0.3s ease;
+        transition:
+          width 0.3s ease,
+          height 0.3s ease;
         z-index: -1;
       }
 
@@ -1021,6 +1027,37 @@
             ></a>
           </div>
         </div>
+
+        <!-- אפליקציה 23 -->
+        <div class="app-card" data-category="finance">
+          <div class="app-icon">
+            <i class="fa-solid fa-car"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון אחזקת רכב</h3>
+            <p>חישוב הוצאות אחזקת רכב כתלות במספר השנים וסוג ההינע.</p>
+            <a href="CE\Car_Expenses.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 24 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-file-signature"></i>
+          </div>
+          <div class="app-info">
+            <h3>החתמת מסמך PDF</h3>
+            <p>
+              קיבלתם מסמך PDF ויש צורך בהוספת חתימה סרוקה ושליחה חזרה , הכלי הזה
+              יקצר את התהליך .
+            </p>
+            <a href="SP/PDFS.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
       </div>
 
       <!-- אודותנו -->
@@ -1156,7 +1193,7 @@
         // טעינה פרוגרסיבית עם אנימציה
         function animateOnScroll() {
           const elements = document.querySelectorAll(
-            ".app-card, header, .filters"
+            ".app-card, header, .filters",
           );
 
           const observer = new IntersectionObserver(
@@ -1170,7 +1207,7 @@
                 }
               });
             },
-            { threshold: 0.01 }
+            { threshold: 0.01 },
           );
 
           elements.forEach((el, i) => {
