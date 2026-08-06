@@ -1,1645 +1,2823 @@
 <!DOCTYPE html>
+<html lang="he">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="images/slideshow.png" />
+    <meta name="application-name" content="יוצר מצגות" />
+
+    <title>מצגת תמונות</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        direction: rtl;
+        margin: 0;
+        padding: 20px;
+        background-color: #15b5ff;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background-color: #c7dbff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
+      }
+
+      h1 {
+        line-height: 2.2rem;
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #000;
+        text-align: center;
+        margin-top: 0px;
+        margin-bottom: 5px;
+        margin-top: -10px;
+        -webkit-text-stroke-width: 3px;
+        -webkit-text-stroke-color: rgb(255, 255, 0);
+      }
+
+      h2 {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        font-size: 18px;
+      }
+
+      h3 {
+        color: #000;
+        text-align: center;
+        margin-bottom: -10px;
+        margin-top: -20px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .control-group {
+        background-color: #c7dbff;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      input,
+      select,
+      button,
+      textarea {
+        width: 100%;
+        padding: 4px;
+        margin-bottom: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+
+      button {
+        background-color: #4caf50;
+        border-radius: 20px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .file-input-wrapper:hover button {
+        background-color: #2c632f;
+      }
+
+      #preview {
+        margin-top: -10px;
+        border: 2px dashed #666;
+        padding: 20px;
+        border-radius: 20px;
+        min-height: 400px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #slideshow-container {
+        width: 100%;
+        height: 400px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      .slide {
+        position: absolute;
+        width: 90%;
+        height: 80%;
+        opacity: 0;
+        transition: opacity 1s;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        top: 10%;
+        left: 5%;
+        right: 5%;
+        transform-origin: center center;
+      }
+
+      .slide.active {
+        opacity: 1;
+      }
+
+      #title-display {
+        position: absolute;
+        top: -18px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 3.5rem;
+        font-weight: 600;
+        z-index: 10;
+        -webkit-text-stroke-width: 2px;
+        -webkit-text-stroke-color: rgb(255, 255, 0);
+      }
+
+      .image-caption {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: white;
+        font-size: 24px;
+        z-index: 10;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      #export-section {
+        margin-top: 10px;
+        text-align: center;
+      }
+
+      #download-link {
+        display: none;
+        margin-top: 20px;
+      }
+
+      .compression-options {
+        width: 100%;
+        background-color: #c7dbff;
+        padding: 8px;
+        border-radius: 5px;
+        margin-bottom: 4px;
+      }
+
+      .image-list {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #c7dbff;
+        padding: 10px;
+        margin-bottom: 15px;
+        background-color: #c7dbff;
+      }
+
+      .image-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 5px;
+        background-color: #c7dbff;
+        border-radius: 4px;
+        gap: 15px;
+      }
+
+      .image-item img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin-left: 10px;
+        border-radius: 3px;
+      }
+
+      .image-item .caption-input {
+        flex-grow: 1;
+        margin-bottom: 0;
+        margin-left: 10px;
+      }
+
+      .image-item .transition-select {
+        width: 120px;
+        margin-bottom: 0;
+        margin-left: 15px;
+      }
+
+      .progress-bar {
+        width: 100%;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        display: contents;
+      }
+
+      .progress {
+        height: 20px;
+        background-color: #5e4caf;
+        width: 100%;
+        margin: auto;
+        margin-bottom: 20px;
+        margin-top: -5px;
+        border-radius: 20px;
+        text-align: center;
+        line-height: 20px;
+        color: white;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        margin-bottom: 0px;
+      }
+
+      .file-input-button {
+        padding: 10px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        margin: auto;
+        cursor: pointer;
+      }
+
+      .file-input-button:hover {
+        background-color: #45a049;
+      }
+
+      .file-input-real {
+        position: absolute;
+        font-size: 100px;
+        opacity: 0;
+        right: 0;
+        top: 0;
+        cursor: pointer;
+        height: 100%;
+      }
+
+      .file-input-filename {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #555;
+        text-align: right;
+        direction: rtl;
+      }
+
+      /* התאמה למסכים צרים */
+      .title-interval-row {
+        padding-right: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .title-interval-row label {
+        margin-bottom: 0;
+        white-space: nowrap;
+      }
+
+      #presentation-title {
+        flex: 1 1 100%;
+        min-width: 40px;
+        order: 1;
+      }
+
+      .interval-group {
+        display: flex;
+        align-items: center;
+        gap: 0px;
+        order: 2;
+      }
+
+      #interval {
+        width: 25px;
+      }
+
+      /* במסכים רחבים נסדר את השורה בצורה אופקית */
+      @media (min-width: 768px) {
+        .title-interval-row {
+          flex-wrap: nowrap;
+        }
+        #presentation-title {
+          flex: 1;
+          order: 0;
+        }
+        .interval-group {
+          order: 0;
+        }
+        .image-item .caption-input {
+          grid-area: caption;
+          margin-left: 0;
+          width: 100%;
+        }
+        .image-item .transition-select {
+          grid-area: transition;
+          width: 100px;
+          margin-left: 0;
+          margin-bottom: 0;
+        }
+        .image-item img {
+          grid-area: preview;
+          width: 40px;
+          height: 40px;
+          margin-left: 0;
+        }
+
+        .image-item .delete-image-btn {
+          margin: auto;
+          grid-area: delete;
+          width: 40px;
+          height: 40px;
+          margin-left: 0;
+        }
+
+        #title-display {
+          top: -10px;
+          font-size: 4rem;
+          font-weight: 700;
+        }
+      }
+
+      /* הוסף את זה בחלק ה-CSS */
+      @media (max-width: 650px) {
+        .image-item {
+          display: grid;
+          grid-template-columns: 1fr auto auto;
+          grid-template-areas:
+            "caption caption caption"
+            "transition preview delete";
+          gap: 5px;
+          padding: 5px;
+          margin-bottom: 8px;
+        }
+
+        .image-item .caption-input {
+          grid-area: caption;
+          margin-left: 0;
+          width: 100%;
+        }
+
+        .image-item .transition-select {
+          grid-area: transition;
+          width: 100px;
+          margin-left: 0;
+          margin-bottom: 0;
+        }
+
+        .image-item img {
+          grid-area: preview;
+          width: 40px;
+          height: 40px;
+          margin-left: 0;
+        }
+
+        .image-item .delete-image-btn {
+          grid-area: delete;
+          width: 40px;
+          height: 40px;
+          margin-left: 0;
+        }
+
+        #title-display {
+          top: -10px;
+          font-size: 2.2rem;
+          font-weight: 700;
+        }
+      }
+
+      /*      scrollbar          */
+      ::-webkit-scrollbar {
+        width: 20px;
+      }
+
+      ::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px grey;
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgb(255, 120, 0);
+        border: 4px solid rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgb(255, 80, 0);
+      }
+
+      #title-color {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 1px solid #c7dbff;
+        cursor: pointer;
+        background: #c7dbff;
+      }
+
+      .delete-image-btn {
+        margin: auto;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        width: 50px;
+        height: 50px;
+        cursor: pointer;
+        margin-left: 5px;
+        padding: 0;
+        font-size: 12px;
+        line-height: 20px;
+      }
+
+      .delete-image-btn:hover {
+        background-color: #d32f2f;
+        transform: translateY(-2px);
+        box-shadow: 0 0px 8px rgb(0, 0, 0);
+      }
+
+      #export-section {
+        margin-top: 10px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+      }
+
+      #refresh-btn {
+        flex: 1;
+        max-width: 35%;
+        background-color: #f44336;
+        border-radius: 20px;
+        padding: 12px 5px;
+        font-size: 22px;
+        font-weight: 700;
+        margin: auto;
+      }
+
+      #refresh-btn:hover {
+        background-color: #d32f2f;
+        transform: translateY(-2px);
+        box-shadow: 0 0px 8px rgb(0, 0, 0);
+      }
+
+      #export-btn {
+        flex: 2;
+        max-width: 60%;
+        background-color: #2196f3;
+        border-radius: 20px;
+        padding: 12px 16px;
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      #export-btn:hover {
+        background-color: #075ca1;
+        transform: translateY(-2px);
+        box-shadow: 0 0px 8px rgb(0, 0, 0);
+      }
+
+      /* כל אנימציות המעבר */
+
+      @keyframes ripple {
+        0% {
+          transform: scale(0, 0);
+          opacity: 0.5;
+        }
+        100% {
+          transform: scale(20, 20);
+          opacity: 0;
+        }
+      }
+
+      @keyframes blurOut {
+        from {
+          filter: blur(0);
+          opacity: 1;
+        }
+        to {
+          filter: blur(5px);
+          opacity: 0;
+        }
+      }
+
+      @keyframes blurIn {
+        from {
+          filter: blur(5px);
+          opacity: 0;
+        }
+        to {
+          filter: blur(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes swingOut {
+        from {
+          transform: rotate(0);
+        }
+        to {
+          transform: rotate(15deg) translateX(100%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes swingIn {
+        from {
+          transform: rotate(-15deg) translateX(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: rotate(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes wipeOut {
+        from {
+          clip-path: inset(0 0 0 0);
+        }
+        to {
+          clip-path: inset(0 100% 0 0);
+        }
+      }
+
+      @keyframes wipeIn {
+        from {
+          clip-path: inset(0 0 0 100%);
+        }
+        to {
+          clip-path: inset(0 0 0 0);
+        }
+      }
+
+      @keyframes splitOut {
+        from {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%),
+            polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+          transform: translateX(-50%) translateX(50%);
+        }
+      }
+
+      @keyframes splitIn {
+        from {
+          clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%),
+            polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+          transform: translateX(-50%) translateX(50%);
+        }
+        to {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+      }
+
+      @keyframes rippleOut {
+        from {
+          clip-path: circle(100%);
+        }
+        to {
+          clip-path: circle(0%);
+        }
+      }
+
+      @keyframes rippleIn {
+        from {
+          clip-path: circle(0%);
+        }
+        to {
+          clip-path: circle(100%);
+        }
+      }
+
+      @keyframes blindsOut {
+        from {
+          clip-path: inset(0 0 0 0);
+        }
+        to {
+          clip-path: inset(0 0 100% 0);
+        }
+      }
+
+      @keyframes blindsIn {
+        from {
+          clip-path: inset(100% 0 0 0);
+        }
+        to {
+          clip-path: inset(0 0 0 0);
+        }
+      }
+
+      @keyframes rainOut {
+        from {
+          transform: translateY(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateY(100%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes rainIn {
+        from {
+          transform: translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes pulseOut {
+        from {
+          transform: scale(1);
+          opacity: 1;
+        }
+        to {
+          transform: scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      @keyframes pulseIn {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes fireWorksOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.8),
+            0 0 10px 10px rgba(255, 0, 0, 0.6),
+            0 0 15px 15px rgba(0, 255, 0, 0.4);
+        }
+      }
+
+      @keyframes fireWorksIn {
+        from {
+          opacity: 0;
+          box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.8),
+            0 0 10px 10px rgba(255, 0, 0, 0.6),
+            0 0 15px 15px rgba(0, 255, 0, 0.4);
+        }
+        to {
+          opacity: 1;
+          box-shadow: none;
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-100%);
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes zoomOut {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(0);
+        }
+      }
+
+      @keyframes zoomIn {
+        from {
+          transform: scale(2);
+        }
+        to {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes rotateOut {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(180deg) scale(0);
+        }
+      }
+
+      @keyframes rotateIn {
+        from {
+          transform: rotate(-180deg) scale(0);
+        }
+        to {
+          transform: rotate(0deg) scale(1);
+        }
+      }
+
+      @keyframes flipOut {
+        from {
+          transform: rotateY(0);
+        }
+        to {
+          transform: rotateY(90deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes flipIn {
+        from {
+          transform: rotateY(-90deg);
+          opacity: 0;
+        }
+        to {
+          transform: rotateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes glowOut {
+        from {
+          opacity: 1;
+          filter: brightness(1);
+        }
+        to {
+          opacity: 0;
+          filter: brightness(3);
+        }
+      }
+
+      @keyframes glowIn {
+        from {
+          opacity: 0;
+          filter: brightness(3);
+        }
+        to {
+          opacity: 1;
+          filter: brightness(1);
+        }
+      }
+
+      @keyframes bounceOut {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(0.5) translateY(100%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes bounceIn {
+        from {
+          transform: scale(0.5) translateY(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes flipXOut {
+        from {
+          transform: rotateX(0);
+        }
+        to {
+          transform: rotateX(90deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes flipXIn {
+        from {
+          transform: rotateX(-90deg);
+          opacity: 0;
+        }
+        to {
+          transform: rotateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes flipYOut {
+        from {
+          transform: rotateY(0);
+        }
+        to {
+          transform: rotateY(90deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes flipYIn {
+        from {
+          transform: rotateY(-90deg);
+          opacity: 0;
+        }
+        to {
+          transform: rotateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes lightSpeedOut {
+        from {
+          transform: translateX(0) skewX(0);
+        }
+        to {
+          transform: translateX(100%) skewX(-30deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes lightSpeedIn {
+        from {
+          transform: translateX(-100%) skewX(30deg);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0) skewX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes rollOut {
+        from {
+          transform: translateX(0) rotate(0);
+        }
+        to {
+          transform: translateX(100%) rotate(120deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes rollIn {
+        from {
+          transform: translateX(-100%) rotate(-120deg);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0) rotate(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes floatOut {
+        from {
+          transform: translateY(0);
+        }
+        to {
+          transform: translateY(-100px) scale(0.8);
+          opacity: 0;
+        }
+      }
+
+      @keyframes floatIn {
+        from {
+          transform: translateY(100px) scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes shrinkOut {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(0);
+          opacity: 0;
+        }
+      }
+
+      @keyframes shrinkIn {
+        from {
+          transform: scale(1.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes expandOut {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      @keyframes expandIn {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes opacityIn {
+        from {
+          opacity: 0.3;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes pageFlipOut {
+        from {
+          transform: rotateY(0);
+        }
+        to {
+          transform: rotateY(-180deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes pageFlipIn {
+        from {
+          transform: rotateY(180deg);
+          opacity: 0;
+        }
+        to {
+          transform: rotateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes vortexOut {
+        from {
+          transform: scale(1) rotate(0);
+        }
+        to {
+          transform: scale(0) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes vortexIn {
+        from {
+          transform: scale(0) rotate(-720deg);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideDiagonalOut {
+        from {
+          transform: translate(0, 0);
+        }
+        to {
+          transform: translate(100%, 100%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes slideDiagonalIn {
+        from {
+          transform: translate(-100%, -100%);
+          opacity: 0;
+        }
+        to {
+          transform: translate(0, 0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes pixelateOut {
+        from {
+          filter: blur(0);
+        }
+        to {
+          filter: blur(10px) contrast(200%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes pixelateIn {
+        from {
+          filter: blur(10px) contrast(200%);
+          opacity: 0;
+        }
+        to {
+          filter: blur(0) contrast(100%);
+          opacity: 1;
+        }
+      }
+
+      @keyframes colorShiftOut {
+        from {
+          filter: hue-rotate(0);
+        }
+        to {
+          filter: hue-rotate(180deg) brightness(2);
+          opacity: 0;
+        }
+      }
+
+      @keyframes colorShiftIn {
+        from {
+          filter: hue-rotate(-180deg) brightness(2);
+          opacity: 0;
+        }
+        to {
+          filter: hue-rotate(0) brightness(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes curtainOut {
+        from {
+          clip-path: inset(0 0 0 0);
+        }
+        to {
+          clip-path: inset(0 50% 0 50%);
+        }
+      }
+
+      @keyframes curtainIn {
+        from {
+          clip-path: inset(0 50% 0 50%);
+        }
+        to {
+          clip-path: inset(0 0 0 0);
+        }
+      }
+
+      @keyframes explodeOut {
+        from {
+          clip-path: circle(100%);
+        }
+        to {
+          clip-path: circle(0%);
+          transform: scale(1.5);
+        }
+      }
+
+      @keyframes explodeIn {
+        from {
+          clip-path: circle(0%);
+          transform: scale(1.5);
+        }
+        to {
+          clip-path: circle(100%);
+          transform: scale(1);
+        }
+      }
+
+      @keyframes warpOut {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.2) skew(20deg, 20deg);
+          opacity: 0;
+        }
+      }
+
+      @keyframes warpIn {
+        from {
+          transform: scale(0.8) skew(-20deg, -20deg);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) skew(0, 0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes jigsawIn {
+        from {
+          clip-path: polygon(
+            0 0,
+            50% 0,
+            50% 50%,
+            0 50%,
+            0 50%,
+            50% 50%,
+            50% 100%,
+            0 100%,
+            50% 0,
+            100% 0,
+            100% 50%,
+            50% 50%,
+            50% 50%,
+            100% 50%,
+            100% 100%,
+            50% 100%
+          );
+        }
+        to {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+      }
+
+      @keyframes flashIn {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes thunderOut {
+        0% {
+          opacity: 1;
+          filter: brightness(1);
+        }
+        10% {
+          filter: brightness(3);
+        }
+        20% {
+          filter: brightness(1);
+        }
+        30% {
+          filter: brightness(4);
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes thunderIn {
+        0% {
+          opacity: 0;
+          filter: brightness(4);
+        }
+        70% {
+          filter: brightness(1);
+        }
+        80% {
+          filter: brightness(3);
+        }
+        90% {
+          filter: brightness(1);
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes smokeOut {
+        from {
+          filter: blur(0) opacity(1);
+        }
+        to {
+          filter: blur(20px) opacity(0);
+          transform: translateY(-50px);
+        }
+      }
+
+      @keyframes smokeIn {
+        from {
+          filter: blur(20px) opacity(0);
+          transform: translateY(50px);
+        }
+        to {
+          filter: blur(0) opacity(1);
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes hourglassOut {
+        from {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%);
+        }
+      }
+
+      @keyframes hourglassIn {
+        from {
+          clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%);
+        }
+        to {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+      }
+
+      @keyframes heartbeatIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.5);
+        }
+        25% {
+          transform: scale(0.6);
+        }
+        50% {
+          transform: scale(0.5);
+        }
+        75% {
+          transform: scale(0.4);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes starsOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.8),
+            0 0 10px 10px rgba(255, 255, 255, 0.6),
+            0 0 15px 15px rgba(255, 255, 255, 0.4);
+        }
+      }
+
+      @keyframes starsIn {
+        from {
+          opacity: 0;
+          box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.8),
+            0 0 10px 10px rgba(255, 255, 255, 0.6),
+            0 0 15px 15px rgba(255, 255, 255, 0.4);
+        }
+        to {
+          opacity: 1;
+          box-shadow: none;
+        }
+      }
+
+      @keyframes gridOut {
+        from {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        to {
+          clip-path: polygon(
+            0 0,
+            33% 0,
+            33% 33%,
+            0 33%,
+            0 33%,
+            33% 33%,
+            33% 66%,
+            0 66%,
+            0 66%,
+            33% 66%,
+            33% 100%,
+            0 100%,
+            33% 0,
+            66% 0,
+            66% 33%,
+            33% 33%,
+            33% 33%,
+            66% 33%,
+            66% 66%,
+            33% 66%,
+            33% 66%,
+            66% 66%,
+            66% 100%,
+            33% 100%,
+            66% 0,
+            100% 0,
+            100% 33%,
+            66% 33%,
+            66% 33%,
+            100% 33%,
+            100% 66%,
+            66% 66%,
+            66% 66%,
+            100% 66%,
+            100% 100%,
+            66% 100%
+          );
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="file-input-wrapper" style="width: 160px">
+        <button
+          id="help-btn"
+          class="file-input-button"
+          style="background-color: #005296"
+        >
+          מדריך שימוש
+        </button>
+      </div>
+      <br />
+      <h1>יוצר מצגות</h1>
+
+      <div
+        id="help-modal"
+        style="
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          z-index: 1000;
+          overflow: auto;
+        "
+      >
+        <div
+          style="
+            background: #c7dbff;
+            margin: 50px auto;
+            padding: 5px;
+            max-width: 400px;
+            border-radius: 10px;
+            direction: rtl;
+          "
+        >
+          <h2 style="text-align: center">מדריך שימוש ליוצר המצגות</h2>
+          <button
+            id="close-help"
+            style="
+              float: left;
+              padding: 5px 10px;
+              background: #f44336;
+              color: rgb(255, 255, 255);
+              border: none;
+              border-radius: 20px;
+              cursor: pointer;
+            "
+          >
+            סגור
+          </button>
+          <div style="clear: both"></div>
+          <h3>שלבים ליצירת מצגת:</h3>
+          <ol>
+            <li>הזן כותרת למצגת</li>
+            <li>הגדר מרווח זמן בין שקופיות (ברירת מחדל: 4 שניות)</li>
+            <li>בחר צבע לכותרת המצגת</li>
+            <li>העלה תמונות למצגת באמצעות הכפתור "בחר קבצי תמונות"</li>
+            <li>לכל תמונה ניתן להוסיף כותרת ולבחור אפקט מעבר</li>
+            <li>ניתן לגרור תמונות כדי לשנות את סדר הופעתן במצגת</li>
+            <li>ניתן להעלות תמונת רקע ומוסיקת רקע (אופציונלי)</li>
+            <li>לחץ על "יצא לקובץ HTML" כדי לשמור את המצגת</li>
+          </ol>
+          <br />
+          <h3>טיפים:</h3>
+          <ul>
+            <li>כדי למחוק תמונה - לחץ על הסמל 🗑️</li>
+            <li>ניתן להתאים את איכות התמונות כדי להקטין את גודל הקובץ</li>
+            <li>לצפייה מקדימה במצגת - השתמש באזור התצוגה למעלה</li>
+            <li>לניקוי הכל - לחץ על "ניקוי ורענון"</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <div class="title-interval-row">
+            <input
+              type="text"
+              id="presentation-title"
+              placeholder="כותרת המצגת"
+            />
+            <div class="interval-group">
+              <label for="interval">מרווח <br />בשניות:</label>
+              <input type="number" id="interval" value="4" min="1" max="10" />
+            </div>
+            <div class="interval-group">
+              <label for="title-color">צבע <br />כותרת:</label>
+              <input type="color" id="title-color" value="#FF0000" />
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>בחירת תמונות:</label>
+            <div class="file-input-wrapper">
+              <button class="file-input-button">בחר קבצי תמונות</button>
+              <input
+                type="file"
+                id="images"
+                class="file-input-real"
+                multiple
+                accept="image/*"
+              />
+            </div>
+            <div id="images-filename" class="file-input-filename"></div>
+
+            <div class="compression-options">
+              <label for="image-quality"
+                >איכות תמונות:<span id="quality-value"> 80%</span>
+              </label>
+              <input
+                type="range"
+                id="image-quality"
+                min="1"
+                max="100"
+                value="80"
+              />
+              <label for="resize-width">רוחב מקסימלי (בפיקסלים):</label>
+              <input
+                type="number"
+                id="resize-width"
+                value="1920"
+                min="100"
+                max="3840"
+              />
+            </div>
+
+            <label>רקע המצגת:</label>
+            <div class="file-input-wrapper">
+              <button class="file-input-button">בחר קובץ רקע</button>
+              <input
+                type="file"
+                id="background"
+                class="file-input-real"
+                accept="image/*"
+              />
+            </div>
+            <div id="background-filename" class="file-input-filename"></div>
+
+            <div class="compression-options">
+              <label for="bg-quality"
+                >איכות רקע: <span id="bg-quality-value">80%</span>
+              </label>
+              <input
+                type="range"
+                id="bg-quality"
+                min="1"
+                max="100"
+                value="80"
+              />
+            </div>
+
+            <label>מוסיקה רקע (אופציונלי):</label>
+            <div class="file-input-wrapper">
+              <button class="file-input-button">בחר קובץ מוסיקה</button>
+              <input
+                type="file"
+                id="music"
+                class="file-input-real"
+                accept="audio/*"
+              />
+            </div>
+            <div id="music-filename" class="file-input-filename"></div>
+          </div>
+        </div>
+
+        <div id="image-captions-container">
+          <h3>כותרות ומעברים לתמונות:</h3>
+          <div class="image-list" id="image-list">
+            <!-- כאן יופיעו התמונות והטקסטים -->
+          </div>
+        </div>
+
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress" id="progress">0%</div>
+        </div>
+
+        <div id="preview">
+          <div id="slideshow-container">
+            <div id="title-display">כותרת המצגת</div>
+            <!-- כאן יופיעו התמונות -->
+          </div>
+        </div>
+
+        <div id="export-section">
+          <button id="export-btn">יצא לקובץ HTML</button>
+          <button id="refresh-btn">ניקוי ורענון</button>
+        </div>
+      </div>
+
+      <script>
+        fetch("footer.html")
+          .then((response) => response.text())
+          .then((data) => {
+            document.body.insertAdjacentHTML("beforeend", data);
+          });
+      </script>
+
+      <script>
+        // אלמנטים מהדף
+        const titleInput = document.getElementById("presentation-title");
+        const titleColorInput = document.getElementById("title-color");
+        const intervalInput = document.getElementById("interval");
+        const imagesInput = document.getElementById("images");
+        const backgroundInput = document.getElementById("background");
+        const musicInput = document.getElementById("music");
+        const slideshowContainer = document.getElementById(
+          "slideshow-container"
+        );
+        const titleDisplay = document.getElementById("title-display");
+        const exportBtn = document.getElementById("export-btn");
+        const refreshBtn = document.getElementById("refresh-btn");
+        const imageList = document.getElementById("image-list");
+        const imageCaptionsContainer = document.getElementById(
+          "image-captions-container"
+        );
+        const progressBar = document.getElementById("progress-bar");
+        const progress = document.getElementById("progress");
+        const imagesFilename = document.getElementById("images-filename");
+        const backgroundFilename = document.getElementById(
+          "background-filename"
+        );
+        const musicFilename = document.getElementById("music-filename");
+
+        // הגדרות כיווץ
+        const imageQuality = document.getElementById("image-quality");
+        const qualityValue = document.getElementById("quality-value");
+        const resizeWidth = document.getElementById("resize-width");
+        const bgQuality = document.getElementById("bg-quality");
+        const bgQualityValue = document.getElementById("bg-quality-value");
+
+        // קביעת ברירת מחדל למעברים
+        const defaultTransition = "fade";
+
+        // עדכון תצוגת איכות
+        imageQuality.addEventListener("input", function () {
+          qualityValue.textContent = this.value + "%";
+        });
+
+        bgQuality.addEventListener("input", function () {
+          bgQualityValue.textContent = this.value + "%";
+        });
+
+        // עדכון צבע הכותרת
+        titleColorInput.addEventListener("input", function () {
+          titleDisplay.style.color = this.value;
+        });
+
+        // שמירת התמונות המקוריות
+        let originalImages = [];
+        let imageUrls = []; // לשמירת ה-URLs של התמונות לתצוגה מקדימה
+
+        // עדכון תצוגת שמות קבצים
+        imagesInput.addEventListener("change", function (e) {
+          const files = e.target.files;
+          if (files.length > 0) {
+            if (files.length === 1) {
+              imagesFilename.textContent = "נבחרה תמונה אחת: " + files[0].name;
+            } else {
+              imagesFilename.textContent = "נבחרו " + files.length + " תמונות";
+            }
+          } else {
+            imagesFilename.textContent = "";
+          }
+        });
+
+        backgroundInput.addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          backgroundFilename.textContent = file ? file.name : "";
+        });
+
+        musicInput.addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          musicFilename.textContent = file ? file.name : "";
+        });
+
+        // משתנים גלובליים
+        let slides = [];
+        let currentSlideIndex = 0;
+        let slideInterval;
+        let backgroundImage = "";
+        let musicFile = null;
+        let imageCaptions = [];
+        let transitions = [];
+
+        // עדכון כותרת בזמן אמת
+        titleInput.addEventListener("input", function () {
+          titleDisplay.textContent = this.value;
+        });
+
+        // טעינת תמונות - ללא דחיסה
+        imagesInput.addEventListener("change", function (e) {
+          const files = e.target.files;
+          if (slides.length === 0) {
+            slideshowContainer.innerHTML =
+              '<div id="title-display" style="color: ' +
+              titleColorInput.value +
+              '">' +
+              titleDisplay.textContent +
+              "</div>";
+          }
+
+          imageCaptionsContainer.style.display = "block";
+
+          if (files.length > 0) {
+            progressBar.style.display = "block";
+            progress.style.width = "0%";
+            progress.textContent = "0%";
+
+            const startIndex = slides.length;
+
+            for (let i = 0; i < files.length; i++) {
+              try {
+                progress.style.width = `${((i + 1) / files.length) * 100}%`;
+                progress.textContent = `${Math.round(
+                  ((i + 1) / files.length) * 100
+                )}%`;
+
+                // שמירת התמונה המקורית
+                originalImages.push(files[i]);
+
+                // יצירת URL לתצוגה מקדימה מהקובץ המקורי
+                const imgUrl = URL.createObjectURL(files[i]);
+                imageUrls.push(imgUrl);
+
+                const imageItem = document.createElement("div");
+                imageItem.className = "image-item";
+
+                const imgPreview = document.createElement("img");
+                imgPreview.src = imgUrl;
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "🗑️";
+                deleteBtn.className = "delete-image-btn";
+                deleteBtn.dataset.index = startIndex + i;
+                deleteBtn.addEventListener("click", function () {
+                  removeImage(parseInt(this.dataset.index));
+                });
+
+                const captionInput = document.createElement("input");
+                captionInput.type = "text";
+                captionInput.placeholder = "כותרת לתמונה זו";
+                captionInput.dataset.index = startIndex + i;
+                captionInput.className = "caption-input";
+                captionInput.addEventListener("input", updateCaption);
+
+                const transitionSelect = document.createElement("select");
+                transitionSelect.dataset.index = startIndex + i;
+                transitionSelect.className = "transition-select";
+                transitionSelect.innerHTML = `
+                  <option value="fade">עמעום</option>
+                  <option value="slide">החלקה</option>
+                  <option value="zoom">תקריב</option>
+                  <option value="rotate">סיבוב</option>
+                  <option value="flip">היפוך</option>
+                  <option value="glow">נצנוץ</option>
+                  <option value="bounce">קפיצה</option>
+                  <option value="flipX">היפוך אופקי</option>
+                  <option value="flipY">היפוך אנכי</option>
+                  <option value="lightSpeed">מהירות אור</option>
+                  <option value="roll">גלגול</option>
+                  <option value="blur">טשטוש</option>
+                  <option value="swing">נדנוד</option>
+                  <option value="wipe">ניגוב</option>
+                  <option value="split">פיצול</option>
+                  <option value="ripple">גלים</option>
+                  <option value="blinds">תריסים</option>
+                  <option value="rain">גשם</option>
+                  <option value="pulse">פעימה</option>
+                  <option value="fireWorks">זיקוקים</option>
+                  <option value="float">ציפה</option>
+                  <option value="shrink">התכווצות</option>
+                  <option value="expand">התרחבות</option>
+                  <option value="pageFlip">אנימציית ספר</option>
+                  <option value="vortex">מערבולת</option>
+                  <option value="slideDiagonal">החלקה אלכסונית</option>
+                  <option value="pixelate">פיקסלציה</option>
+                  <option value="colorShift">החלפת צבע</option>
+                  <option value="curtain">הורדת מסך</option>
+                  <option value="explode">התפוצצות</option>
+                  <option value="warp">התאבכות</option>
+                  <option value="thunder">רעם</option>
+                  <option value="smoke">עשן</option>
+                  <option value="hourglass">שעון חול</option>
+                  <option value="stars">כוכבים</option>
+                `;
+                transitionSelect.value = defaultTransition;
+                transitionSelect.addEventListener("change", updateTransition);
+
+                imageItem.appendChild(captionInput);
+                imageItem.appendChild(transitionSelect);
+                imageItem.appendChild(imgPreview);
+                imageItem.appendChild(deleteBtn);
+                imageList.appendChild(imageItem);
+                // הפעלת SortableJS אם זו התמונה הראשונה
+                if (slides.length === 1) {
+                  new Sortable(imageList, {
+                    animation: 150,
+                    handle: ".image-item img",
+                    onEnd: function (evt) {
+                      // עדכון המערכים לפי הסדר החדש
+                      const items = Array.from(imageList.children);
+
+                      // יצירת מערכים חדשים לפי הסדר המעודכן
+                      const newOriginalImages = [];
+                      const newImageUrls = [];
+                      const newSlides = [];
+                      const newImageCaptions = [];
+                      const newTransitions = [];
+
+                      items.forEach((item) => {
+                        const index = parseInt(
+                          item.querySelector(".caption-input").dataset.index
+                        );
+                        newOriginalImages.push(originalImages[index]);
+                        newImageUrls.push(imageUrls[index]);
+                        newSlides.push(slides[index]);
+                        newImageCaptions.push(imageCaptions[index]);
+                        newTransitions.push(transitions[index]);
+
+                        // עדכון האינדקסים
+                        item.querySelector(".caption-input").dataset.index =
+                          newOriginalImages.length - 1;
+                        item.querySelector(".transition-select").dataset.index =
+                          newOriginalImages.length - 1;
+                        item.querySelector(".delete-image-btn").dataset.index =
+                          newOriginalImages.length - 1;
+                      });
+
+                      // עדכון המערכים המקוריים
+                      originalImages = newOriginalImages;
+                      imageUrls = newImageUrls;
+                      slides = newSlides;
+                      imageCaptions = newImageCaptions;
+                      transitions = newTransitions;
+
+                      // עדכון הסדר בשקופיות
+                      slideshowContainer.innerHTML =
+                        '<div id="title-display" style="color: ' +
+                        titleColorInput.value +
+                        '">' +
+                        titleDisplay.textContent +
+                        "</div>";
+                      slides.forEach((slide) => {
+                        slideshowContainer.appendChild(slide);
+                      });
+
+                      // הפעלת השקופית הראשונה
+                      if (slides.length > 0) {
+                        slides[0].classList.add("active");
+                        currentSlideIndex = 0;
+                      }
+                    },
+                  });
+                }
+
+                const slide = document.createElement("div");
+                slide.className = "slide";
+                slide.style.backgroundImage = `url(${imgUrl})`;
+
+                const caption = document.createElement("div");
+                caption.className = "image-caption";
+                caption.textContent = "";
+                caption.id = `caption-${startIndex + i}`;
+                slide.appendChild(caption);
+
+                slideshowContainer.appendChild(slide);
+                slides.push(slide);
+                transitions.push(defaultTransition);
+                imageCaptions.push("");
+
+                if (slides.length === 1) {
+                  slide.classList.add("active");
+                }
+              } catch (error) {
+                console.error("Error processing image:", error);
+              }
+            }
+
+            progress.style.width = "100%";
+            progress.textContent = "100%";
+            setTimeout(() => (progressBar.style.display = "none"), 1000);
+
+            startSlideshow();
+          }
+        });
+
+        function removeImage(index) {
+          // הסרת האלמנטים מהדף
+          slides[index].remove();
+          imageList.children[index].remove();
+
+          // שחרור ה-URL של התמונה
+          URL.revokeObjectURL(imageUrls[index]);
+
+          // עדכון המערכים
+          slides.splice(index, 1);
+          originalImages.splice(index, 1);
+          imageUrls.splice(index, 1);
+          imageCaptions.splice(index, 1);
+          transitions.splice(index, 1);
+
+          // עדכון האינדקסים של האלמנטים הנותרים
+          const items = imageList.querySelectorAll(".image-item");
+          items.forEach((item, i) => {
+            item.querySelector(".caption-input").dataset.index = i;
+            item.querySelector(".transition-select").dataset.index = i;
+            item.querySelector(".delete-image-btn").dataset.index = i;
+          });
+
+          // אם זו הייתה השקופית הפעילה, נעבור לשקופית 0
+          if (currentSlideIndex === index) {
+            currentSlideIndex = 0;
+            if (slides.length > 0) {
+              slides[0].classList.add("active");
+            }
+          } else if (currentSlideIndex > index) {
+            currentSlideIndex--;
+          }
+
+          // אם אין יותר שקופיות, נקה את התצוגה המקדימה
+          if (slides.length === 0) {
+            slideshowContainer.innerHTML =
+              '<div id="title-display" style="color: ' +
+              titleColorInput.value +
+              '">' +
+              titleDisplay.textContent +
+              "</div>";
+            imageCaptionsContainer.style.display = "none";
+          }
+        }
+
+        function updateCaption(e) {
+          const index = parseInt(e.target.dataset.index);
+          imageCaptions[index] = e.target.value;
+          document.getElementById(`caption-${index}`).textContent =
+            e.target.value;
+        }
+
+        function updateTransition(e) {
+          const index = parseInt(e.target.dataset.index);
+          transitions[index] = e.target.value;
+        }
+
+        async function compressImage(file, quality, maxWidth) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+              const img = new Image();
+              img.onload = function () {
+                const canvas = document.createElement("canvas");
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth) {
+                  height = (maxWidth / width) * height;
+                  width = maxWidth;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(
+                  function (blob) {
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                      resolve(reader.result);
+                    };
+                    reader.readAsDataURL(blob);
+                  },
+                  "image/jpeg",
+                  quality / 100
+                );
+              };
+              img.onerror = reject;
+              img.src = event.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        }
+
+        backgroundInput.addEventListener("change", async function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            try {
+              backgroundImage = await compressImage(
+                file,
+                bgQuality.value,
+                resizeWidth.value
+              );
+              document.getElementById(
+                "preview"
+              ).style.backgroundImage = `url(${backgroundImage})`;
+              document.getElementById("preview").style.backgroundSize = "cover";
+            } catch (error) {
+              console.error("Error processing background:", error);
+            }
+          }
+        });
+
+        musicInput.addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+              if (confirm("קובץ המוסיקה גדול מ-5MB. רצון להמשיך ללא דחיסה?")) {
+                readMusicFile(file);
+              }
+            } else {
+              readMusicFile(file);
+            }
+          }
+        });
+
+        function readMusicFile(file) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            musicFile = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function startSlideshow() {
+          clearInterval(slideInterval);
+
+          const interval = intervalInput.value * 1000;
+          slideInterval = setInterval(nextSlide, interval);
+        }
+
+        function nextSlide() {
+          if (slides.length === 0) return;
+
+          const currentSlide = slides[currentSlideIndex];
+          currentSlide.classList.remove("active");
+
+          currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+          const nextSlide = slides[currentSlideIndex];
+          nextSlide.classList.add("active");
+
+          const transition =
+            transitions[currentSlideIndex] || defaultTransition;
+          applyTransition(currentSlide, nextSlide, transition);
+        }
+
+        function applyTransition(current, next, transition) {
+          current.style.animation = "";
+          next.style.animation = "";
+
+          switch (transition) {
+            case "fade":
+              break;
+            case "slide":
+              current.style.animation = "slideOut 2s forwards";
+              next.style.animation = "slideIn 2s forwards";
+              break;
+            case "zoom":
+              current.style.animation = "zoomOut 2s forwards";
+              next.style.animation = "zoomIn 2s forwards";
+              break;
+            case "rotate":
+              current.style.animation = "rotateOut 2s forwards";
+              next.style.animation = "rotateIn 2s forwards";
+              break;
+            case "flip":
+              current.style.animation = "flipOut 2s forwards";
+              next.style.animation = "flipIn 2s forwards";
+              break;
+            case "glow":
+              current.style.animation = "glowOut 2s forwards";
+              next.style.animation = "glowIn 2s forwards";
+              break;
+            case "bounce":
+              current.style.animation = "bounceOut 2s forwards";
+              next.style.animation = "bounceIn 2s forwards";
+              break;
+            case "flipX":
+              current.style.animation = "flipXOut 2s forwards";
+              next.style.animation = "flipXIn 2s forwards";
+              break;
+            case "flipY":
+              current.style.animation = "flipYOut 2s forwards";
+              next.style.animation = "flipYIn 2s forwards";
+              break;
+            case "lightSpeed":
+              current.style.animation = "lightSpeedOut 2s forwards";
+              next.style.animation = "lightSpeedIn 2s forwards";
+              break;
+            case "roll":
+              current.style.animation = "rollOut 2s forwards";
+              next.style.animation = "rollIn 2s forwards";
+              break;
+            case "blur":
+              current.style.animation = "blurOut 2s forwards";
+              next.style.animation = "blurIn 2s forwards";
+              break;
+            case "swing":
+              current.style.animation = "swingOut 2s forwards";
+              next.style.animation = "swingIn 2s forwards";
+              break;
+            case "wipe":
+              current.style.animation = "wipeOut 2s forwards";
+              next.style.animation = "wipeIn 2s forwards";
+              break;
+            case "split":
+              current.style.animation = "splitOut 2s forwards";
+              next.style.animation = "splitIn 2s forwards";
+              break;
+            case "ripple":
+              current.style.animation = "rippleOut 2s forwards";
+              next.style.animation = "rippleIn 2s forwards";
+              break;
+            case "blinds":
+              current.style.animation = "blindsOut 2s forwards";
+              next.style.animation = "blindsIn 2s forwards";
+              break;
+            case "rain":
+              current.style.animation = "rainOut 2s forwards";
+              next.style.animation = "rainIn 2s forwards";
+              break;
+            case "pulse":
+              current.style.animation = "pulseOut 2s forwards";
+              next.style.animation = "pulseIn 2s forwards";
+              break;
+            case "fireWorks":
+              current.style.animation = "fireWorksOut 2s forwards";
+              next.style.animation = "fireWorksIn 2s forwards";
+              break;
+            case "float":
+              current.style.animation = "floatOut 2s forwards";
+              next.style.animation = "floatIn 2s forwards";
+              break;
+            case "shrink":
+              current.style.animation = "shrinkOut 2s forwards";
+              next.style.animation = "shrinkIn 2s forwards";
+              break;
+            case "expand":
+              current.style.animation = "expandOut 2s forwards";
+              next.style.animation = "expandIn 2s forwards";
+              break;
+            case "pageFlip":
+              current.style.animation = "pageFlipOut 2s forwards";
+              next.style.animation = "pageFlipIn 2s forwards";
+              break;
+            case "vortex":
+              current.style.animation = "vortexOut 2s forwards";
+              next.style.animation = "vortexIn 2s forwards";
+              break;
+            case "slideDiagonal":
+              current.style.animation = "slideDiagonalOut 2s forwards";
+              next.style.animation = "slideDiagonalIn 2s forwards";
+              break;
+            case "pixelate":
+              current.style.animation = "pixelateOut 2s forwards";
+              next.style.animation = "pixelateIn 2s forwards";
+              break;
+            case "colorShift":
+              current.style.animation = "colorShiftOut 2s forwards";
+              next.style.animation = "colorShiftIn 2s forwards";
+              break;
+            case "curtain":
+              current.style.animation = "curtainOut 2s forwards";
+              next.style.animation = "curtainIn 2s forwards";
+              break;
+            case "explode":
+              current.style.animation = "explodeOut 2s forwards";
+              next.style.animation = "explodeIn 2s forwards";
+              break;
+            case "warp":
+              current.style.animation = "warpOut 2s forwards";
+              next.style.animation = "warpIn 2s forwards";
+              break;
+            case "jigsaw":
+              current.style.animation = "jigsawOut 2s forwards";
+              next.style.animation = "jigsawIn 2s forwards";
+              break;
+            case "thunder":
+              current.style.animation = "thunderOut 2s forwards";
+              next.style.animation = "thunderIn 2s forwards";
+              break;
+            case "smoke":
+              current.style.animation = "smokeOut 2s forwards";
+              next.style.animation = "smokeIn 2s forwards";
+              break;
+            case "hourglass":
+              current.style.animation = "hourglassOut 2s forwards";
+              next.style.animation = "hourglassIn 2s forwards";
+              break;
+            case "stars":
+              current.style.animation = "starsOut 2s forwards";
+              next.style.animation = "starsIn 2s forwards";
+              break;
+          }
+        }
+
+        refreshBtn.addEventListener("click", function () {
+          // שחרור כל ה-URLs של התמונות לפני רענון הדף
+          imageUrls.forEach((url) => URL.revokeObjectURL(url));
+          location.reload();
+        });
+
+        exportBtn.addEventListener("click", async function () {
+          if (slides.length === 0) {
+            alert("אנא העלה לפחות תמונה אחת לפני היצוא");
+            return;
+          }
+
+          progressBar.style.display = "block";
+          progress.style.width = "0%";
+          progress.textContent = "0%";
+
+          try {
+            // דחיסת התמונות לפי הפרמטרים שנבחרו
+            const exportImages = [];
+            for (let i = 0; i < originalImages.length; i++) {
+              progress.style.width = `${
+                ((i + 1) / originalImages.length) * 100
+              }%`;
+              progress.textContent = `${Math.round(
+                ((i + 1) / originalImages.length) * 100
+              )}%`;
+
+              const compressedImg = await compressImage(
+                originalImages[i],
+                imageQuality.value,
+                resizeWidth.value
+              );
+              exportImages.push(compressedImg);
+            }
+
+            // יצירת קובץ ה-HTML עם התמונות הדחוסות
+            // החלק הזה צריך להחליף את חלק הקוד התואם בפונקציית exportBtn.addEventListener
+            // שמתחיל ב-let htmlContent = `<!DOCTYPE html>` ועד סוף ה-HTML
+
+            let htmlContent = `<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
-    <title>ניהול משלוחים</title>
-    <!-- Favicon מקומי -->
-    <link rel="icon" href="SS.png" type="image/x-icon">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/x-icon" href="images/slide.png" />
+    <title>${titleInput.value || "מצגת תמונות"}</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
         body {
-            background: #90c0fc;
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
             margin: 0;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1550px;
-            width: 100%;
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-            padding: 20px 15px 25px;
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin: 0 0 8px 0;
-            color: #0b1e33;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            gap: 12px;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 15px;
-        }
-        .filter-area {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            flex: 1;
-        }
-        .filter-area label {
-            font-weight: 600;
-            color: #1e293b;
-            font-size: 0.9rem;
-        }
-        .filter-area select,
-        .filter-area input {
-            padding: 8px 14px;
-            border-radius: 40px;
-            border: 1px solid #cbd5e1;
-            background: white;
-            font-size: 0.9rem;
-            cursor: pointer;
-            outline: none;
-            min-height: 40px;
-        }
-        .filter-area select {
-            min-width: 100px;
-            flex: 1;
-            max-width: 180px;
-        }
-        .search-area {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            min-width: 150px;
-        }
-        .search-area input {
-            width: 100%;
-            min-width: 120px;
-            padding: 8px 14px;
-            border-radius: 40px;
-            border: 1px solid #cbd5e1;
-            background: white;
-            font-size: 0.9rem;
-            outline: none;
-            min-height: 40px;
-        }
-        .search-area input:focus {
-            border-color: #1e3a5f;
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-        }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            background: #eef2f6;
-            color: #1e293b;
-            cursor: pointer;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-            min-height: 40px;
-            white-space: nowrap;
-        }
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        .btn:active {
-            transform: translateY(0);
-        }
-        .btn-success {
-            background: #0f7b3a;
-            color: white;
-        }
-        .btn-success:hover {
-            background: #0b662f;
-        }
-        .btn-danger {
-            background: #b91c1c;
-            color: white;
-        }
-        .btn-danger:hover {
-            background: #991515;
-        }
-        .btn-excel {
-            background: #1d6f42;
-            color: white;
-        }
-        .btn-excel:hover {
-            background: #155a34;
-        }
-        .btn-sort {
-            background: #6c5b7b;
-            color: white;
-        }
-        .btn-sort:hover {
-            background: #5a4a68;
-        }
-        .btn-load {
-            background: #7c3aed;
-            color: white;
-        }
-        .btn-load:hover {
-            background: #6d28d9;
-        }
-        .btn-move {
-            background: #d97706;
-            color: white;
-        }
-        .btn-move:hover {
-            background: #b45309;
-        }
-        .stats-bar {
-            display: flex;
-            gap: 12px;
-            margin: 10px 0 15px 0;
-            flex-wrap: wrap;
-            background: #f8fafc;
-            padding: 12px 18px;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-        }
-        .stats-bar span {
-            font-size: 0.9rem;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .stats-bar strong {
-            color: #0b1e33;
-            font-size: 1rem;
-        }
-        .stats-bar .stat-amount {
-            color: #0f7b3a;
-            font-weight: 700;
-        }
-        .stats-bar .stat-preparing {
-            color: #eab308;
-            font-weight: 700;
-        }
-        .stats-bar .stat-missing {
-            color: #dc2626;
-            font-weight: 700;
-        }
-        .stats-bar .stat-cancelled {
-            color: #7f1d1d;
-            font-weight: 700;
-        }
-        .stats-bar .stat-inprogress {
-            color: #2563eb;
-            font-weight: 700;
-        }
-        .table-wrap {
-            overflow-x: auto;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            -webkit-overflow-scrolling: touch;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 1000px;
-        }
-        th {
-            background: #969696;
-            color: #1a2c44;
-            font-weight: 700;
-            padding: 12px 6px;
-            border-bottom: 2px solid #d0dbe8;
-            text-align: center;
-            white-space: nowrap;
-            position: sticky;
-            top: 0;
-            z-index: 5;
-            font-size: 0.8rem;
-        }
-        td {
-            padding: 4px 3px;
-            border-bottom: 1px solid #e9edf3;
-            text-align: center;
-            vertical-align: middle;
-            min-height: 38px;
-            font-size: 0.8rem;
-        }
-        td[contenteditable="true"] {
-            outline: none;
-            transition: background 0.1s;
-            border-radius: 4px;
-            min-width: 40px;
-            padding: 3px 4px;
-        }
-        td[contenteditable="true"]:hover {
-            background: rgba(30, 58, 95, 0.05);
-        }
-        td[contenteditable="true"]:focus {
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: inset 0 0 0 2px #1e3a5f;
-        }
-        .status-arrived td:not(.row-actions) {
-            background-color: #009953;
-        }
-        .status-onway td:not(.row-actions) {
-            background-color: #3bffa6;
-        }
-        .status-inprogress td:not(.row-actions) {
-            background-color: #93c5fd;
-        }
-        .status-missing td:not(.row-actions) {
-            background-color: #fc8d97;
-        }
-        .status-preparing td:not(.row-actions) {
-            background-color: #ffe5b4;
-        }
-        .status-cancelled td:not(.row-actions) {
-            background-color: #ff293c;
-            text-decoration: line-through;
-        }
-        .status-pending td:not(.row-actions) {
-            background-color: #e0e0e0;
-        }
-        .status-empty td:not(.row-actions) {
-            background-color: #ffffff;
-        }
-        .row-actions {
-            background-color: #ffffff !important;
-        }
-        td:first-child {
-            background-color: #ffffff !important;
-        }
-        .status-select,
-        .type-select {
-            padding: 3px 6px;
-            border-radius: 30px;
-            border: 1px solid #cbd5e1;
-            background: white;
-            font-size: 0.75rem;
-            cursor: pointer;
-            outline: none;
-            font-weight: 500;
-            width: 75px;
-            min-height: 30px;
-        }
-        .type-select {
-            width: 65px;
-        }
-        .save-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #22c55e;
-            margin-right: 8px;
-            transition: 0.3s;
-            flex-shrink: 0;
-        }
-        .save-indicator.saving {
-            background: #eab308;
-            animation: pulse 0.5s ease-in-out;
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.4);
-            }
-        }
-        .footer-info {
-            margin-top: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            font-size: 0.9rem;
-            color: #1e293b;
-        }
-        .footer-bottom {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .footer-bottom .copyright {
-            font-size: 1.2rem;
-            color: #475569;
-            font-weight: 500;
-        }
-        .footer-bottom .logo img {
-            height: 35px;
-            width: auto;
-            display: block;
-        }
-        .counter {
-            background: #002555;
-            padding: 5px 18px;
-            border-radius: 30px;
-            color: white;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .empty-row-msg {
-            text-align: center;
-            padding: 30px 0;
-            color: #6a7c94;
-        }
-        .row-actions {
-            display: flex;
-            gap: 3px;
-            justify-content: center;
-            align-items: center;
-            background-color: #ffffff !important;
-            flex-wrap: nowrap;
-        }
-        .row-actions button {
-            background: transparent;
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 30px;
-            transition: 0.1s;
-            min-width: 28px;
-            min-height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .row-actions .delete-btn:hover {
-            background: #fecaca;
-            color: #b91c1c;
-        }
-        .row-actions .move-up-btn:hover {
-            background: #dbeafe;
-            color: #1a3f6e;
-        }
-        .row-actions .move-down-btn:hover {
-            background: #dbeafe;
-            color: #1a3f6e;
-        }
-        .row-checkbox {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        .mobile-table-controls {
-            display: none;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .mobile-table-controls button {
-            padding: 8px 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 30px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .modal {
-            background: white;
-            border-radius: 24px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal h2 {
-            margin-top: 0;
-            color: #0b1e33;
-        }
-        .modal .drop-zone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            margin: 20px 0;
-        }
-        .modal .drop-zone:hover,
-        .modal .drop-zone.dragover {
-            border-color: #2563eb;
-            background: #f0f7ff;
-        }
-        .modal .drop-zone .icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        .modal .drop-zone p {
-            margin: 5px 0;
-            color: #64748b;
-        }
-        .modal .drop-zone .file-name {
-            color: #0b1e33;
-            font-weight: 600;
-        }
-        .modal .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-        .modal .modal-actions .btn {
-            min-width: 100px;
-            justify-content: center;
-        }
-        .modal .btn-secondary {
-            background: #e2e8f0;
-            color: #1e293b;
-        }
-        .modal .btn-secondary:hover {
-            background: #cbd5e1;
-        }
-        .modal .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #e2e8f0;
-            border-radius: 3px;
+            padding: 0;
             overflow: hidden;
-            margin: 10px 0;
-            display: none;
         }
-        .modal .progress-bar .progress-fill {
-            height: 100%;
-            background: #2563eb;
-            width: 0%;
-            transition: width 0.3s;
+        
+        #slideshow-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            ${
+              backgroundImage
+                ? `background-image: url(${backgroundImage}); background-size: cover;`
+                : ""
+            }
         }
-        @media (max-width: 768px) {
-            body {
+        
+        .slide {
+            position: absolute;
+            width: 90%;
+            height: 80%;
+            opacity: 0;
+            transition: opacity 1s;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            top: 10%;
+            left: 5%;
+            right: 5%;
+        }
+        
+        .slide.active {
+            opacity: 1;
+        }
+        
+        #title-display {
+            position: absolute;
+            top: 20px;
+            left: 10%;
+            right: 10%;
+            text-align: center;
+            color: ${titleColorInput.value};
+            font-size: 3.5rem;
+            font-weight: 700;
+            z-index: 10;
+        -webkit-text-stroke-width: 2px;
+        -webkit-text-stroke-color: rgb(255, 255, 0);        }
+        
+        .image-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 10%;
+            right: 10%;
+            text-align: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 600;
+            z-index: 10;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8), -1px -1px 2px rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* מדיה קוורי למכשירים ניידים */
+        @media screen and (max-width: 768px) {
+            #title-display {
+                top: 10px;
+                font-size: 2rem;
+                left: 5%;
+                right: 5%;
+            }
+
+            .image-caption {
+                bottom: 10px;
+                font-size: 1.5rem;
+                left: 5%;
+                right: 5%;
+            }
+            
+            .slide {
+                width: 95%;
+                height: 75%;
+                left: 2.5%;
+                right: 2.5%;
+            }
+        }
+        
+        /* מדיה קוורי למכשירים קטנים במיוחד */
+        @media screen and (max-width: 480px) {
+            #title-display {
+                top: 5px;
+                font-size: 1.5rem;
+            }
+
+            .image-caption {
+                bottom: 5px;
+                font-size: 1.2rem;
                 padding: 5px;
             }
-            .container {
-                padding: 12px 8px;
-                border-radius: 16px;
-            }
-            h1 {
-                font-size: 1.2rem;
-            }
-            .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-                padding-bottom: 12px;
-            }
-            .filter-area {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            .filter-area select,
-            .filter-area input {
-                width: 100%;
-                max-width: 100%;
-                font-size: 0.85rem;
-                min-height: 38px;
-            }
-            .search-area {
-                width: 100%;
-            }
-            .search-area input {
-                width: 100%;
-                min-height: 38px;
-                font-size: 0.85rem;
-            }
-            .action-buttons {
-                justify-content: stretch;
-                gap: 6px;
-            }
-            .action-buttons .btn {
-                flex: 1;
-                justify-content: center;
-                font-size: 0.75rem;
-                padding: 6px 10px;
-                min-height: 36px;
-                white-space: nowrap;
-            }
-            .stats-bar {
-                flex-direction: column;
-                gap: 6px;
-                padding: 10px 14px;
-                font-size: 0.8rem;
-            }
-            .stats-bar span {
-                font-size: 0.8rem;
-            }
-            .table-wrap {
-                border-radius: 10px;
-                font-size: 0.7rem;
-            }
-            table {
-                min-width: 900px;
-                font-size: 0.7rem;
-            }
-            th {
-                padding: 8px 4px;
-                font-size: 0.7rem;
-            }
-            td {
-                padding: 3px 2px;
-                font-size: 0.7rem;
-                min-height: 32px;
-            }
-            td[contenteditable="true"] {
-                padding: 2px 3px;
-                min-width: 30px;
-            }
-            .status-select,
-            .type-select {
-                width: 60px;
-                font-size: 0.65rem;
-                padding: 2px 4px;
-                min-height: 26px;
-            }
-            .type-select {
-                width: 50px;
-            }
-            .row-actions button {
-                font-size: 0.85rem;
-                min-width: 24px;
-                min-height: 24px;
-                padding: 1px 4px;
-            }
-            .row-checkbox {
-                width: 14px;
-                height: 14px;
-            }
-            .counter {
-                font-size: 0.75rem;
-                padding: 4px 14px;
-            }
-            .mobile-table-controls {
-                display: flex;
-            }
-            .filter-area label {
-                font-size: 0.8rem;
-            }
-            .modal {
-                padding: 20px;
-                width: 95%;
-            }
-            .modal .drop-zone {
-                padding: 25px 15px;
-            }
-            .footer-bottom {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .footer-bottom .logo img {
-                height: 20px;
+            
+            .slide {
+                width: 98%;
+                height: 70%;
+                top: 15%;
+                left: 1%;
+                right: 1%;
             }
         }
-        @media (max-width: 480px) {
-            .container {
-                padding: 8px 4px;
-                border-radius: 12px;
+        
+        /* מדיה קוורי למצב אופקי במובייל */
+        @media screen and (max-height: 500px) {
+            #title-display {
+                top: 5px;
+                font-size: 1.3rem;
             }
-            h1 {
+
+            .image-caption {
+                bottom: 5px;
                 font-size: 1rem;
+                padding: 3px;
             }
-            .action-buttons .btn {
-                font-size: 0.65rem;
-                padding: 4px 8px;
-                min-height: 30px;
-                gap: 3px;
-            }
-            table {
-                min-width: 750px;
-                font-size: 0.6rem;
-            }
-            th {
-                padding: 6px 3px;
-                font-size: 0.6rem;
-            }
-            td {
-                padding: 2px 1px;
-                font-size: 0.6rem;
-                min-height: 28px;
-            }
-            .status-select,
-            .type-select {
-                width: 50px;
-                font-size: 0.55rem;
-                padding: 1px 3px;
-                min-height: 22px;
-            }
-            .type-select {
-                width: 42px;
-            }
-            .row-actions button {
-                font-size: 0.7rem;
-                min-width: 20px;
-                min-height: 20px;
-                padding: 1px 3px;
-            }
-            .stats-bar span {
-                font-size: 0.7rem;
-            }
-            .footer-bottom .logo img {
-                height: 25px;
+            
+            .slide {
+                height: 65%;
+                top: 20%;
             }
         }
-        @media (pointer: coarse) {
-            .btn,
-            .row-actions button,
-            .status-select,
-            .type-select,
-            .row-checkbox {
-                min-height: 44px;
-                min-width: 44px;
+
+        #music-controls {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        #play-music-btn, #pause-music-btn {
+            padding: 8px 12px;
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        #pause-music-btn {
+            background: rgba(244, 67, 54, 0.8);
+        }
+        
+        @media screen and (max-width: 480px) {
+            #music-controls {
+                bottom: 5px;
+                right: 5px;
+                gap: 5px;
             }
-            @media (max-width: 768px) {
-                .btn,
-                .row-actions button,
-                .status-select,
-                .type-select,
-                .row-checkbox {
-                    min-height: 36px;
-                    min-width: 36px;
-                }
+            
+            #play-music-btn, #pause-music-btn {
+                padding: 5px 8px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* כל אנימציות המעבר */
+        @keyframes slideOut {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100%); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        @keyframes zoomOut {
+            from { transform: scale(1); }
+            to { transform: scale(0); }
+        }
+        
+        @keyframes zoomIn {
+            from { transform: scale(2); }
+            to { transform: scale(1); }
+        }
+        
+        @keyframes rotateOut {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(180deg) scale(0); }
+        }
+        
+        @keyframes rotateIn {
+            from { transform: rotate(-180deg) scale(0); }
+            to { transform: rotate(0deg) scale(1); }
+        }
+        
+        @keyframes flipOut {
+            from { transform: rotateY(0); }
+            to { transform: rotateY(90deg); opacity: 0; }
+        }
+        
+        @keyframes flipIn {
+            from { transform: rotateY(-90deg); opacity: 0; }
+            to { transform: rotateY(0); opacity: 1; }
+        }
+        
+        @keyframes glowOut {
+            from { opacity: 1; filter: brightness(1); }
+            to { opacity: 0; filter: brightness(3); }
+        }
+        
+        @keyframes glowIn {
+            from { opacity: 0; filter: brightness(3); }
+            to { opacity: 1; filter: brightness(1); }
+        }
+        
+        @keyframes bounceOut {
+            from { transform: scale(1); }
+            to { transform: scale(0.5) translateY(100%); opacity: 0; }
+        }
+        
+        @keyframes bounceIn {
+            from { transform: scale(0.5) translateY(-100%); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes flipXOut {
+            from { transform: rotateX(0); }
+            to { transform: rotateX(90deg); opacity: 0; }
+        }
+        
+        @keyframes flipXIn {
+            from { transform: rotateX(-90deg); opacity: 0; }
+            to { transform: rotateX(0); opacity: 1; }
+        }
+        
+        @keyframes flipYOut {
+            from { transform: rotateY(0); }
+            to { transform: rotateY(90deg); opacity: 0; }
+        }
+        
+        @keyframes flipYIn {
+            from { transform: rotateY(-90deg); opacity: 0; }
+            to { transform: rotateY(0); opacity: 1; }
+        }
+        
+        @keyframes lightSpeedOut {
+            from { transform: translateX(0) skewX(0); }
+            to { transform: translateX(100%) skewX(-30deg); opacity: 0; }
+        }
+        
+        @keyframes lightSpeedIn {
+            from { transform: translateX(-100%) skewX(30deg); opacity: 0; }
+            to { transform: translateX(0) skewX(0); opacity: 1; }
+        }
+        
+        @keyframes rollOut {
+            from { transform: translateX(0) rotate(0); }
+            to { transform: translateX(100%) rotate(120deg); opacity: 0; }
+        }
+        
+        @keyframes rollIn {
+            from { transform: translateX(-100%) rotate(-120deg); opacity: 0; }
+            to { transform: translateX(0) rotate(0); opacity: 1; }
+        }
+        
+        @keyframes blurOut {
+            from { filter: blur(0); opacity: 1; }
+            to { filter: blur(5px); opacity: 0; }
+        }
+        
+        @keyframes blurIn {
+            from { filter: blur(5px); opacity: 0; }
+            to { filter: blur(0); opacity: 1; }
+        }
+        
+        @keyframes swingOut {
+            from { transform: rotate(0); }
+            to { transform: rotate(15deg) translateX(100%); opacity: 0; }
+        }
+        
+        @keyframes swingIn {
+            from { transform: rotate(-15deg) translateX(-100%); opacity: 0; }
+            to { transform: rotate(0); opacity: 1; }
+        }
+        
+        @keyframes wipeOut {
+            from { clip-path: inset(0 0 0 0); }
+            to { clip-path: inset(0 100% 0 0); }
+        }
+        
+        @keyframes wipeIn {
+            from { clip-path: inset(0 0 0 100%); }
+            to { clip-path: inset(0 0 0 0); }
+        }
+        
+        @keyframes splitOut {
+            from { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+            to { 
+              clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%),
+                         polygon(50% 0, 100% 0, 100% 100%, 50% 100%); 
+              transform: translateX(-50%) translateX(50%);
+            }
+        }
+        
+        @keyframes splitIn {
+            from { 
+              clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%),
+                         polygon(50% 0, 100% 0, 100% 100%, 50% 100%); 
+              transform: translateX(-50%) translateX(50%);
+            }
+            to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        }
+        
+        @keyframes rippleOut {
+            from { clip-path: circle(100%); }
+            to { clip-path: circle(0%); }
+        }
+        
+        @keyframes rippleIn {
+            from { clip-path: circle(0%); }
+            to { clip-path: circle(100%); }
+        }
+        
+        @keyframes blindsOut {
+            from { clip-path: inset(0 0 0 0); }
+            to { clip-path: inset(0 0 100% 0); }
+        }
+        
+        @keyframes blindsIn {
+            from { clip-path: inset(100% 0 0 0); }
+            to { clip-path: inset(0 0 0 0); }
+        }
+        
+        @keyframes rainOut {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(100%); opacity: 0; }
+        }
+        
+        @keyframes rainIn {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes pulseOut {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.5); opacity: 0; }
+        }
+        
+        @keyframes pulseIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes fireWorksOut {
+            from { opacity: 1; }
+            to { 
+              opacity: 0; 
+              box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.8),
+                          0 0 10px 10px rgba(255, 0, 0, 0.6),
+                          0 0 15px 15px rgba(0, 255, 0, 0.4);
+            }
+        }
+        
+        @keyframes fireWorksIn {
+            from { 
+              opacity: 0; 
+              box-shadow: 0 0 5px 5px rgba(255, 255, 0, 0.8),
+                          0 0 10px 10px rgba(255, 0, 0, 0.6),
+                          0 0 15px 15px rgba(0, 255, 0, 0.4);
+            }
+            to { 
+              opacity: 1; 
+              box-shadow: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="toolbar">
-            <h1>📦 ניהול משלוחים</h1>
-            <div class="filter-area">
-                <label for="statusFilter">🔎 סינון:</label>
-                <select id="statusFilter">
-                    <option value="all">הכל</option>
-                    <option value="arrived">הגיע</option>
-                    <option value="onway">בדרך</option>
-                    <option value="inprogress">בביצוע</option>
-                    <option value="missing">חוסר</option>
-                    <option value="preparing">הכנה</option>
-                    <option value="cancelled">בוטל</option>
-                    <option value="pending">המתנה</option>
-                    <option value="empty">חדש</option>
-                </select>
-                <div class="search-area">
-                    <input type="text" id="searchInput" placeholder="🔍 חיפוש מהיר...">
-                </div>
-                <span class="save-indicator" id="saveIndicator" title="💾 נשמר אוטומטית"></span>
-            </div>
-            <div class="action-buttons">
-                <button class="btn btn-success" id="addRowBtn">➕ הוסף</button>
-                <button class="btn btn-danger" id="deleteSelectedBtn">🗑️ מחק</button>
-                <button class="btn btn-sort" id="sortBtn">🔽 מיון</button>
-                <button class="btn btn-excel" id="exportExcelBtn">📊 יצא אקסל</button>
-                <button class="btn btn-load" id="loadExcelBtn">📂 יבא אקסל</button>
-            </div>
-        </div>
+    <div id="slideshow-container">
+        <div id="title-display" style="color: ${titleColorInput.value}">${
+              titleInput.value || "כותרת המצגת"
+            }</div>`;
 
-        <div class="stats-bar" id="statsBar">
-            <span>📊 סה"כ: <strong id="totalCount">0</strong></span>
-            <span>✅ הגיע: <strong id="arrivedCount">0</strong></span>
-            <span>🚚 בדרך: <strong id="onwayCount">0</strong></span>
-            <span>⚙️ בהכנה: <strong class="stat-preparing" id="preparingCount">0</strong></span>
-            <span>🔧 בביצוע: <strong class="stat-inprogress" id="inprogressCount">0</strong></span>
-            <span>❌ חוסר: <strong class="stat-missing" id="missingCount">0</strong></span>
-            <span>🚫 בוטל: <strong class="stat-cancelled" id="cancelledCount">0</strong></span>
-            <span>⏳ בהמתנה: <strong id="pendingCount">0</strong></span>
-        </div>
+            // הוספת התמונות הדחוסות לקובץ ה-HTML
+            for (let i = 0; i < exportImages.length; i++) {
+              const imgUrl = exportImages[i];
+              const caption = imageCaptions[i] || "";
+              htmlContent += `
+              <div class="slide${
+                i === 0 ? " active" : ""
+              }" style="background-image: url(${imgUrl})">
+                  <div class="image-caption">${caption}</div>
+              </div>`;
+            }
 
-        <div class="table-wrap">
-            <table id="deliveryTable">
-                <thead>
-                    <tr>
-                        <th style="width:32px;"><input type="checkbox" id="selectAllCheck"></th>
-                        <th>סוג מכולה</th>
-                        <th>20'</th>
-                        <th>40'</th>
-                        <th>הזמנה</th>
-                        <th>סוג מוצר</th>
-                        <th>תיק</th>
-                        <th>שם ספק</th>
-                        <th>תאריך הגעה</th>
-                        <th>ספק</th>
-                        <th>סכום $</th>
-                        <th>סטטוס</th>
-                        <th>הערה</th>
-                        <th style="width:60px;">פעולות</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
+            htmlContent += `
+          </div>
+          
+          ${
+            musicFile
+              ? `<audio id="bg-music" loop autoplay><source src="${musicFile}" type="audio/mpeg"></audio>
+              <div id="music-controls">
+                  <button id="play-music-btn">הפעל מוסיקה</button>
+                  <button id="pause-music-btn">השתק מוסיקה</button>
+              </div>`
+              : ""
+          }
+          
+          <script>
+          const slides = document.querySelectorAll('.slide');
+          let currentSlideIndex = 0;
+          const interval = ${intervalInput.value * 1000};
+          const transitions = ${JSON.stringify(transitions)};
+          let musicPlaying = false;
+          
+          window.onload = function() {
+              if (slides.length > 0) {
+                  slides[0].classList.add('active');
+              }
+              
+              const bgMusic = document.getElementById('bg-music');
+              const playBtn = document.getElementById('play-music-btn');
+              const pauseBtn = document.getElementById('pause-music-btn');
+              
+              if (bgMusic) {
+                  bgMusic.play().then(() => {
+                      musicPlaying = true;
+                      playBtn.style.display = 'none';
+                      pauseBtn.style.display = 'block';
+                  }).catch(e => {
+                      console.log('הפעלה אוטומטית נכשלה (מגבלות דפדפן):', e);
+                  });
+                  
+                  document.addEventListener('click', function playOnFirstInteraction() {
+                      if (!musicPlaying) {
+                          bgMusic.play().then(() => {
+                              musicPlaying = true;
+                              playBtn.style.display = 'none';
+                              pauseBtn.style.display = 'block';
+                          }).catch(e => {
+                              console.log('הפעלת מוסיקה נכשלה:', e);
+                          });
+                          document.removeEventListener('click', playOnFirstInteraction);
+                      }
+                  }, { once: true });
+                  
+                  document.addEventListener('keydown', function playOnFirstKey() {
+                      if (!musicPlaying) {
+                          bgMusic.play().then(() => {
+                              musicPlaying = true;
+                              playBtn.style.display = 'none';
+                              pauseBtn.style.display = 'block';
+                          }).catch(e => {
+                              console.log('הפעלת מוסיקה נכשלה:', e);
+                          });
+                          document.removeEventListener('keydown', playOnFirstKey);
+                      }
+                  }, { once: true });
+                  
+                  playBtn.addEventListener('click', function() {
+                      bgMusic.play();
+                      musicPlaying = true;
+                      playBtn.style.display = 'none';
+                      pauseBtn.style.display = 'block';
+                  });
+                  
+                  pauseBtn.addEventListener('click', function() {
+                      bgMusic.pause();
+                      musicPlaying = false;
+                      playBtn.style.display = 'block';
+                      pauseBtn.style.display = 'none';
+                  });
+              }
+          };
+          
+          function nextSlide() {
+              const currentSlide = slides[currentSlideIndex];
+              currentSlide.classList.remove('active');
+              
+              currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+              const nextSlide = slides[currentSlideIndex];
+              nextSlide.classList.add('active');
+              
+              const transition = transitions[currentSlideIndex] || 'fade';
+              applyTransition(currentSlide, nextSlide, transition);
+          }
+          
+          function applyTransition(current, next, transition) {
+              current.style.animation = '';
+              next.style.animation = '';
+              
+              switch (transition) {
+                  case 'fade':
+                      break;
+                  case 'slide':
+                      current.style.animation = 'slideOut 2s forwards';
+                      next.style.animation = 'slideIn 2s forwards';
+                      break;
+                  case 'zoom':
+                      current.style.animation = 'zoomOut 2s forwards';
+                      next.style.animation = 'zoomIn 2s forwards';
+                      break;
+                  case 'rotate':
+                      current.style.animation = 'rotateOut 2s forwards';
+                      next.style.animation = 'rotateIn 2s forwards';
+                      break;
+                  case 'flip':
+                      current.style.animation = 'flipOut 2s forwards';
+                      next.style.animation = 'flipIn 2s forwards';
+                      break;
+                  case 'glow':
+                      current.style.animation = 'glowOut 2s forwards';
+                      next.style.animation = 'glowIn 2s forwards';
+                      break;
+                  case 'bounce':
+                      current.style.animation = 'bounceOut 2s forwards';
+                      next.style.animation = 'bounceIn 2s forwards';
+                      break;
+                  case 'flipX':
+                      current.style.animation = 'flipXOut 2s forwards';
+                      next.style.animation = 'flipXIn 2s forwards';
+                      break;
+                  case 'flipY':
+                      current.style.animation = 'flipYOut 2s forwards';
+                      next.style.animation = 'flipYIn 2s forwards';
+                      break;
+                  case 'lightSpeed':
+                      current.style.animation = 'lightSpeedOut 2s forwards';
+                      next.style.animation = 'lightSpeedIn 2s forwards';
+                      break;
+                  case 'roll':
+                      current.style.animation = 'rollOut 2s forwards';
+                      next.style.animation = 'rollIn 2s forwards';
+                      break;
+                  case 'blur':
+                      current.style.animation = 'blurOut 2s forwards';
+                      next.style.animation = 'blurIn 2s forwards';
+                      break;
+                  case 'swing':
+                      current.style.animation = 'swingOut 2s forwards';
+                      next.style.animation = 'swingIn 2s forwards';
+                      break;
+                  case 'wipe':
+                      current.style.animation = 'wipeOut 2s forwards';
+                      next.style.animation = 'wipeIn 2s forwards';
+                      break;
+                  case 'split':
+                      current.style.animation = 'splitOut 2s forwards';
+                      next.style.animation = 'splitIn 2s forwards';
+                      break;
+                  case 'ripple':
+                      current.style.animation = 'rippleOut 2s forwards';
+                      next.style.animation = 'rippleIn 2s forwards';
+                      break;
+                  case 'blinds':
+                      current.style.animation = 'blindsOut 2s forwards';
+                      next.style.animation = 'blindsIn 2s forwards';
+                      break;
+                  case 'rain':
+                      current.style.animation = 'rainOut 2s forwards';
+                      next.style.animation = 'rainIn 2s forwards';
+                      break;
+                  case 'pulse':
+                      current.style.animation = 'pulseOut 2s forwards';
+                      next.style.animation = 'pulseIn 2s forwards';
+                      break;
+                  case 'fireWorks':
+                      current.style.animation = 'fireWorksOut 2s forwards';
+                      next.style.animation = 'fireWorksIn 2s forwards';
+                      break;
+              }
+          }
+          
+          setInterval(nextSlide, interval);
+          <\/script>
+      </body>
+      </html>`;
 
-        <div class="mobile-table-controls">
-            <button onclick="document.getElementById('addRowBtn').click()">➕ הוסף שורה</button>
-            <button onclick="document.getElementById('deleteSelectedBtn').click()">🗑️ מחק נבחרות</button>
-            <button onclick="document.getElementById('sortBtn').click()">🔽 מיון</button>
-        </div>
+            try {
+              const blob = new Blob([htmlContent], { type: "text/html" });
+              const url = URL.createObjectURL(blob);
 
-        <div class="footer-info">
-            <span class="counter" id="rowCounter">0 שורות</span>
-        </div>
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = (titleInput.value || "slideshow") + ".html";
+              document.body.appendChild(a);
+              a.click();
 
-        <!-- תחתית עם זכויות יוצרים ולוגו -->
-        <div class="footer-bottom">
-            <div class="copyright">© 2026 כל הזכויות שמורות</div>
-            <div class="logo">
-                <img src="OG_Blue_Logo2.png" alt="OG Blue Logo">
-            </div>
-        </div>
+              setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                progressBar.style.display = "none";
+              }, 100);
+            } catch (e) {
+              console.error("שגיאה ביצירת הקובץ:", e);
+              alert("אירעה שגיאה ביצירת הקובץ");
+              progressBar.style.display = "none";
+            }
+          } catch (error) {
+            console.error("שגיאה בעיבוד התמונות:", error);
+            alert("אירעה שגיאה בעיבוד התמונות");
+            progressBar.style.display = "none";
+          }
+        });
+
+        document
+          .getElementById("help-btn")
+          .addEventListener("click", function () {
+            document.getElementById("help-modal").style.display = "block";
+          });
+
+        document
+          .getElementById("close-help")
+          .addEventListener("click", function () {
+            document.getElementById("help-modal").style.display = "none";
+          });
+
+        // סגירת החלון בלחיצה מחוץ לתוכן
+        document
+          .getElementById("help-modal")
+          .addEventListener("click", function (e) {
+            if (e.target === this) {
+              this.style.display = "none";
+            }
+          });
+      </script>
     </div>
-
-    <!-- מודל לטעינת אקסל -->
-    <div class="modal-overlay" id="loadModal">
-        <div class="modal">
-            <h2>📂 טעינת קובץ אקסל</h2>
-            <p style="color:#64748b; margin-bottom:5px;">בחר קובץ אקסל לטעינה. כל הנתונים הקיימים יוחלפו.</p>
-            <div class="drop-zone" id="dropZone">
-                <div class="icon">📁</div>
-                <p><strong>גרור קובץ לכאן</strong></p>
-                <p>או לחץ לבחירת קובץ</p>
-                <p style="font-size:0.8rem; color:#94a3b8;">תומך בקבצי .xlsx ו-.xls</p>
-                <p class="file-name" id="fileName" style="margin-top:10px;"></p>
-                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
-            </div>
-            <div class="progress-bar" id="progressBar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" id="cancelLoadBtn">ביטול</button>
-                <button class="btn btn-load" id="confirmLoadBtn" disabled>טען קובץ</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        (function() {
-            const statusMap = {
-                'arrived': 'הגיע',
-                'onway': 'בדרך',
-                'inprogress': 'בביצוע',
-                'missing': 'חוסר',
-                'preparing': 'הכנה',
-                'cancelled': 'בוטל',
-                'pending': 'המתנה',
-                'empty': 'חדש'
-            };
-
-            const statusHebToEng = {
-                'הגיע': 'arrived',
-                'בדרך': 'onway',
-                'בביצוע': 'inprogress',
-                'ביצוע': 'inprogress',
-                'חוסר': 'missing',
-                'הכנה': 'preparing',
-                'בוטל': 'cancelled',
-                'המתנה': 'pending',
-                'חדש': 'empty'
-            };
-
-            const sortOrder = {
-                'arrived': 1,
-                'onway': 2,
-                'inprogress': 3,
-                'preparing': 4,
-                'missing': 5,
-                'cancelled': 6,
-                'pending': 7,
-                'empty': 8,
-                '': 8
-            };
-
-            const defaultData = [
-                { type: "FCL", q20: "0", q40: "1", order: "150118535", product: "אופנועים", file: "101260008",
-                    supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-03-10", vendor: "24210046000",
-                    amount: "30074.00", status: "arrived", note: "הגיע" },
-                { type: "LCL", q20: "0", q40: "0", order: "150118544", product: "מאשה והדוב", file: "101260011",
-                    supplier: "GIOCHI PREZIOSI", date: "2026-03-22", vendor: "24210035000", amount: "20555.00",
-                    status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118545", product: "מאשה והדוב", file: "101260007",
-                    supplier: "FABRICAS AGRUPADAS DE MUN", date: "2026-03-30", vendor: "24210052000",
-                    amount: "61277.00", status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118555", product: "רכבות", file: "101260009",
-                    supplier: "SHANTOU SWEET TOYS COMPAN", date: "2026-03-30", vendor: "24210009000",
-                    amount: "32655.00", status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118540", product: "משאיות", file: "101260010",
-                    supplier: "SHANTOU SHENGQI IMP", date: "2026-04-04", vendor: "24210007000", amount: "23093.00",
-                    status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118549", product: "אופני איזון פדאלים",
-                    file: "101260013",
-                    supplier: "HEBEI JOYRIDE TOYS", date: "2026-04-21", vendor: "24210095000", amount: "20664.00",
-                    status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118548", product: "אופני איזון", file: "101260014",
-                    supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-04-22", vendor: "24210008000",
-                    amount: "17088.00", status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118551", product: "רובי ג'ל", file: "101260015",
-                    supplier: "DOWELLIN GROUP", date: "2026-05-02", vendor: "24210012000", amount: "40219.04",
-                    status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118547", product: "בימבה ג'וק", file: "101260016",
-                    supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-06-16", vendor: "24210008000",
-                    amount: "24541.00", status: "arrived", note: "הגיע" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118559", product: "רובים פלסטיק", file: "101260018",
-                    supplier: "ZING ZASIA LIMITED", date: "2026-07-09", vendor: "24210010000", amount: "47423.89",
-                    status: "onway", note: "ממתין להגעה ושחרור" },
-                { type: "FCL", q20: "0", q40: "2", order: "150118556", product: "משחקי צבא", file: "101260017",
-                    supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-08-07", vendor: "24210046000",
-                    amount: "31915.32", status: "onway", note: "ממתין להגעה ושחרור" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118564", product: "שטיחוני פעילות", file: "x",
-                    supplier: "GUANGDONG FAIRNESS ENTRPRISE", date: "2026-08-06", vendor: "24210090000",
-                    amount: "10096.50", status: "onway", note: "ממתין להגעה ושחרור" },
-                { type: "", q20: "", q40: "", order: "150118558", product: "בובות הפעלה", file: "x",
-                    supplier: "EOLO TOYS LTD", date: "", vendor: "24210037000", amount: "36087.00",
-                    status: "missing", note: "בתהליך חוסר תעודות מעבדה" },
-                { type: "", q20: "", q40: "", order: "150118560", product: "רכבי פעלולים על שלט", file: "x",
-                    supplier: "KABOOM ASIA LIMITED", date: "", vendor: "24210011000", amount: "52152.00",
-                    status: "missing", note: "ממתין חוסר תעודות משרד התקשורת" },
-                { type: "", q20: "", q40: "", order: "150118562", product: "כלי עבודה", file: "x",
-                    supplier: "SHANTOU SHENGQI IMP", date: "", vendor: "24210007000", amount: "38958.12",
-                    status: "inprogress", note: "נשלח לספק לביצוע" },
-                { type: "", q20: "", q40: "", order: "150118565", product: "שולחנות פעילות", file: "x",
-                    supplier: "WENZHOU RUIZHI CRAFTS", date: "", vendor: "24210900000", amount: "34318.50",
-                    status: "inprogress", note: "נשלח לספק לביצוע" },
-                { type: "", q20: "", q40: "", order: "150118571", product: "תלת אופן (בימבה יטבתה)", file: "x",
-                    supplier: "YONGKANG YULIEN INDUSTRY", date: "", vendor: "24210396000", amount: "20037.60",
-                    status: "inprogress", note: "נשלח לספק לביצוע" },
-                { type: "", q20: "", q40: "", order: "150118584", product: "שולחנות משחק", file: "x",
-                    supplier: "SPEEDINDUSTIAL INTERNATIONAL", date: "", vendor: "24220007000", amount: "17820.00",
-                    status: "inprogress", note: "נשלח לספק לביצוע" },
-                { type: "", q20: "", q40: "", order: "150118585", product: "שולחנות משחק", file: "x",
-                    supplier: "SPEEDINDUSTIAL INTERNATIONAL", date: "", vendor: "24220007000", amount: "21300.00",
-                    status: "inprogress", note: "נשלח לספק לביצוע - (קיבל מקדמה להכנת תעודת מעבדה)" },
-                { type: "", q20: "", q40: "", order: "150118579", product: "משאיות גדול", file: "x",
-                    supplier: "SHATOU FENGCHENGJIA TRAD -  HK FAIR TOYS", date: "", vendor: "24210355000",
-                    amount: "19945.44", status: "onway", note: "ממתין להכנת הסטודיו" },
-                { type: "", q20: "", q40: "", order: "150118580", product: "חניונים", file: "x",
-                    supplier: "GUANGDONG ZHENLE TOYS FACTORY", date: "", vendor: "24210356000",
-                    amount: "25260.48", status: "onway", note: "ממתין להכנת הסטודיו" },
-                { type: "", q20: "", q40: "", order: "150118572", product: "משאיות עבודה קטן", file: "x",
-                    supplier: "SHANTOU HUAHUAN IMPORTAND  -  HH TOYS", date: "", vendor: "24210365000",
-                    amount: "27164.58", status: "onway", note: "ממתין להכנת הסטודיו" },
-                { type: "", q20: "", q40: "", order: "150118566", product: "ספיידי", file: "x",
-                    supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "83944.78",
-                    status: "preparing", note: "בתהליך הכנה" },
-                { type: "", q20: "", q40: "", order: "150118567", product: "קוקומלון", file: "x",
-                    supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "46145.00",
-                    status: "preparing", note: "בתהליך הכנה" },
-                { type: "", q20: "", q40: "", order: "150118563", product: "שונות", file: "x",
-                    supplier: "HASBRO   -    JULY", date: "", vendor: "24210361100", amount: "295492.98",
-                    status: "preparing", note: "בתהליך הכנה" },
-                { type: "", q20: "", q40: "", order: "150118589", product: "שונות", file: "x",
-                    supplier: "HASBRO   -    SEPTEMBER", date: "", vendor: "24210361100", amount: "162861.02",
-                    status: "preparing", note: "בתהליך הכנה" },
-                { type: "", q20: "", q40: "", order: "150118588", product: "צבי נינג'ה", file: "x",
-                    supplier: "PLAYMATES", date: "", vendor: "24210336000", amount: "24822.57",
-                    status: "preparing", note: "בתהליך הכנה" },
-                { type: "", q20: "", q40: "", order: "150118587", product: "נשכן", file: "x",
-                    supplier: "GUANGDONG HUANGER BABY PRODUCTS", date: "", vendor: "24220008000",
-                    amount: "3769.52", status: "preparing", note: "בתהליך הכנה" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118591", product: "אופני איזון פדאלים", file: "x",
-                    supplier: "HEBEI JOYRIDE TOYS", date: "", vendor: "24210095000", amount: "20664.00",
-                    status: "preparing", note: "בתהליך הכנה" },
-                { type: "FCL", q20: "0", q40: "1", order: "150118592", product: "אופני איזון", file: "x",
-                    supplier: "SHIJIAZHUANG SENTER INTER", date: "", vendor: "24210008000", amount: "17837.40",
-                    status: "preparing", note: "בתהליך הכנה" },
-                { type: "", q20: "", q40: "", order: "150118550", product: "שולחנות משחק", file: "x",
-                    supplier: "GUANGDONG HUANGGUAN TECHN", date: "x", vendor: "24210005000", amount: "43940.00",
-                    status: "cancelled", note: "בוטל לעת עתה" },
-                { type: "", q20: "", q40: "", order: "150118557", product: "רכבות", file: "x",
-                    supplier: "HANG WING INDUSTRY", date: "x", vendor: "24210061000", amount: "71228.00",
-                    status: "cancelled", note: "בוטל לעת עתה" },
-                { type: "", q20: "", q40: "", order: "150118568", product: "קוקומלון", file: "x",
-                    supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "30565.00",
-                    status: "cancelled", note: "בוטל לעת עתה" }
-            ];
-
-            const STORAGE_KEY = 'deliveryData';
-
-            // פונקציות עזר לעיצוב מספרים
-            function formatNumber(value) {
-                if (value === undefined || value === null || value === '') return '';
-                const num = parseFloat(String(value).replace(/,/g, ''));
-                if (isNaN(num)) return String(value);
-                return num.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-            }
-
-            function parseNumberFromDisplay(value) {
-                if (value === undefined || value === null || value === '') return '';
-                const cleaned = String(value).replace(/,/g, '');
-                const num = parseFloat(cleaned);
-                if (isNaN(num)) return String(value);
-                return num.toFixed(2);
-            }
-
-            function loadData() {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    try {
-                        return JSON.parse(saved);
-                    } catch (e) {
-                        return JSON.parse(JSON.stringify(defaultData));
-                    }
-                }
-                return JSON.parse(JSON.stringify(defaultData));
-            }
-
-            function saveData(data) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                const indicator = document.getElementById('saveIndicator');
-                indicator.classList.add('saving');
-                setTimeout(() => {
-                    indicator.classList.remove('saving');
-                }, 400);
-                updateStats(data);
-            }
-
-            let currentData = loadData();
-            let nextId = currentData.length + 1000;
-
-            const tbody = document.getElementById('tableBody');
-            const filterSelect = document.getElementById('statusFilter');
-            const rowCounter = document.getElementById('rowCounter');
-            const selectAllCheck = document.getElementById('selectAllCheck');
-            const searchInput = document.getElementById('searchInput');
-
-            const loadModal = document.getElementById('loadModal');
-            const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
-            const fileName = document.getElementById('fileName');
-            const confirmLoadBtn = document.getElementById('confirmLoadBtn');
-            const cancelLoadBtn = document.getElementById('cancelLoadBtn');
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-
-            let selectedFile = null;
-
-            function getStatusClass(status) {
-                if (!status || status === 'empty') return 'status-empty';
-                return `status-${status}`;
-            }
-
-            function formatDateForDisplay(dateStr) {
-                if (!dateStr || dateStr === 'x' || dateStr === '') return '—';
-                const str = String(dateStr);
-                const parts = str.split('-');
-                if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-                return str;
-            }
-
-            function saveAndUpdate() {
-                saveData(currentData);
-                updateCounter(document.querySelectorAll('#tableBody tr').length);
-            }
-
-            function sortData() {
-                currentData.sort((a, b) => {
-                    const orderA = sortOrder[a.status] || 8;
-                    const orderB = sortOrder[b.status] || 8;
-                    return orderA - orderB;
-                });
-                renderTable(filterSelect.value);
-                saveAndUpdate();
-            }
-
-            function moveRow(rowId, direction) {
-                const index = currentData.findIndex(r => (r._id || `row-${currentData.indexOf(r)}`) === rowId);
-                if (index === -1) return;
-                const newIndex = direction === 'up' ? index - 1 : index + 1;
-                if (newIndex < 0 || newIndex >= currentData.length) return;
-                const temp = currentData[index];
-                currentData[index] = currentData[newIndex];
-                currentData[newIndex] = temp;
-                renderTable(filterSelect.value);
-                saveAndUpdate();
-            }
-
-            function renderTable(filter = 'all') {
-                const searchTerm = searchInput.value.toLowerCase();
-
-                const filtered = currentData.filter(row => {
-                    let statusMatch = true;
-                    if (filter === 'all') statusMatch = true;
-                    else if (filter === 'empty') statusMatch = !row.status || row.status === 'empty';
-                    else statusMatch = row.status === filter;
-
-                    let searchMatch = true;
-                    if (searchTerm) {
-                        const rowText = Object.values(row).join(' ').toLowerCase();
-                        searchMatch = rowText.includes(searchTerm);
-                    }
-
-                    return statusMatch && searchMatch;
-                });
-
-                tbody.innerHTML = '';
-                if (filtered.length === 0) {
-                    const tr = document.createElement('tr');
-                    const td = document.createElement('td');
-                    td.colSpan = 14;
-                    td.className = 'empty-row-msg';
-                    td.textContent = searchTerm ? '🔍 אין תוצאות לחיפוש זה' : '🚫 אין שורות התואמות לסטטוס זה';
-                    tr.appendChild(td);
-                    tbody.appendChild(tr);
-                    updateCounter(filtered.length);
-                    return;
-                }
-
-                filtered.forEach((row, index) => {
-                    const tr = document.createElement('tr');
-                    tr.dataset.rowId = row._id || `row-${index}`;
-                    tr.className = getStatusClass(row.status);
-
-                    const tdCheck = document.createElement('td');
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.className = 'row-checkbox';
-                    tdCheck.appendChild(checkbox);
-                    tr.appendChild(tdCheck);
-
-                    const tdType = document.createElement('td');
-                    const typeSelect = document.createElement('select');
-                    typeSelect.className = 'type-select';
-                    const typeOptions = ['', 'FCL', 'LCL', 'אחר'];
-                    typeOptions.forEach(opt => {
-                        const option = document.createElement('option');
-                        option.value = opt;
-                        option.textContent = opt || '';
-                        if (row.type === opt || (!row.type && opt === '')) option.selected = true;
-                        typeSelect.appendChild(option);
-                    });
-                    typeSelect.addEventListener('change', function() {
-                        const newVal = this.value;
-                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            tr.dataset.rowId);
-                        if (rowData) {
-                            rowData.type = newVal;
-                            saveAndUpdate();
-                        }
-                    });
-                    tdType.appendChild(typeSelect);
-                    tr.appendChild(tdType);
-
-                    const fields = ['q20', 'q40', 'order', 'product', 'file', 'supplier', 'date', 'vendor',
-                        'amount'
-                    ];
-                    fields.forEach((field) => {
-                        const td = document.createElement('td');
-                        td.contentEditable = true;
-                        let val = row[field] !== undefined ? row[field] : '';
-                        if (field === 'date' && val) {
-                            td.textContent = formatDateForDisplay(val);
-                        } else if (field === 'amount') {
-                            td.textContent = formatNumber(val);
-                            td.setAttribute('data-raw', val);
-                        } else {
-                            td.textContent = val;
-                        }
-                        td.setAttribute('data-field', field);
-
-                        td.addEventListener('blur', function(e) {
-                            const newVal = this.textContent.trim();
-                            const rowData = currentData.find(r => (r._id ||
-                                `row-${currentData.indexOf(r)}`) === tr.dataset.rowId);
-                            if (rowData) {
-                                if (field === 'date') {
-                                    const parts = newVal.split('/');
-                                    if (parts.length === 3 && parts[2].length === 4) {
-                                        rowData[field] =
-                                        `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                                    } else if (newVal.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                                        rowData[field] = newVal;
-                                    } else {
-                                        rowData[field] = newVal;
-                                    }
-                                } else if (field === 'amount') {
-                                    const parsed = parseNumberFromDisplay(newVal);
-                                    const num = parseFloat(parsed);
-                                    if (!isNaN(num) && num >= 0) {
-                                        rowData[field] = parsed;
-                                        this.textContent = formatNumber(parsed);
-                                        this.setAttribute('data-raw', parsed);
-                                    } else if (newVal === '' || newVal === '—') {
-                                        rowData[field] = '';
-                                        this.textContent = '';
-                                        this.setAttribute('data-raw', '');
-                                    } else {
-                                        alert('אנא הזן מספר תקין (לדוגמה: 1234.56)');
-                                        const raw = this.getAttribute('data-raw') || rowData[field] || '';
-                                        this.textContent = formatNumber(raw);
-                                    }
-                                } else {
-                                    rowData[field] = newVal;
-                                }
-                                saveAndUpdate();
-                            }
-                        });
-
-                        td.addEventListener('keydown', function(e) {
-                            if (e.key === 'Enter') {
-                                e.preventDefault();
-                                this.blur();
-                            }
-                        });
-                        tr.appendChild(td);
-                    });
-
-                    const tdStatus = document.createElement('td');
-                    const statusSelect = document.createElement('select');
-                    statusSelect.className = 'status-select';
-                    const statusOptions = ['empty', 'arrived', 'onway', 'inprogress', 'missing', 'preparing',
-                        'cancelled', 'pending'
-                    ];
-                    statusOptions.forEach(opt => {
-                        const option = document.createElement('option');
-                        option.value = opt;
-                        option.textContent = statusMap[opt] || opt;
-                        if (row.status === opt || (!row.status && opt === 'empty')) option.selected = true;
-                        statusSelect.appendChild(option);
-                    });
-                    statusSelect.addEventListener('change', function() {
-                        const newStatus = this.value;
-                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            tr.dataset.rowId);
-                        if (rowData) {
-                            rowData.status = newStatus === 'empty' ? '' : newStatus;
-                            tr.className = getStatusClass(newStatus);
-                            if (!rowData.note || rowData.note === '') {
-                                rowData.note = statusMap[newStatus] || '';
-                                const noteTd = tr.querySelector('td[data-field="note"]');
-                                if (noteTd) noteTd.textContent = rowData.note;
-                            }
-                            saveAndUpdate();
-                        }
-                    });
-                    tdStatus.appendChild(statusSelect);
-                    tr.appendChild(tdStatus);
-
-                    const tdNote = document.createElement('td');
-                    tdNote.contentEditable = true;
-                    tdNote.textContent = row.note || '';
-                    tdNote.setAttribute('data-field', 'note');
-                    tdNote.addEventListener('blur', function(e) {
-                        const newVal = this.textContent.trim();
-                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            tr.dataset.rowId);
-                        if (rowData) {
-                            rowData.note = newVal;
-                            saveAndUpdate();
-                        }
-                    });
-                    tdNote.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            this.blur();
-                        }
-                    });
-                    tr.appendChild(tdNote);
-
-                    const tdActions = document.createElement('td');
-                    tdActions.className = 'row-actions';
-
-                    const moveUpBtn = document.createElement('button');
-                    moveUpBtn.textContent = '⬆';
-                    moveUpBtn.title = 'הזז למעלה';
-                    moveUpBtn.className = 'move-up-btn';
-                    moveUpBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        moveRow(tr.dataset.rowId, 'up');
-                    });
-
-                    const moveDownBtn = document.createElement('button');
-                    moveDownBtn.textContent = '⬇';
-                    moveDownBtn.title = 'הזז למטה';
-                    moveDownBtn.className = 'move-down-btn';
-                    moveDownBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        moveRow(tr.dataset.rowId, 'down');
-                    });
-
-                    const delBtn = document.createElement('button');
-                    delBtn.textContent = '🗑️';
-                    delBtn.title = 'מחק שורה';
-                    delBtn.className = 'delete-btn';
-                    delBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            tr.dataset.rowId);
-                        if (rowData) {
-                            if (confirm('למחוק שורה זו?')) {
-                                const index = currentData.indexOf(rowData);
-                                currentData.splice(index, 1);
-                                renderTable(filterSelect.value);
-                                saveAndUpdate();
-                            }
-                        }
-                    });
-
-                    tdActions.appendChild(moveUpBtn);
-                    tdActions.appendChild(moveDownBtn);
-                    tdActions.appendChild(delBtn);
-                    tr.appendChild(tdActions);
-
-                    tbody.appendChild(tr);
-                });
-
-                updateCounter(filtered.length);
-                selectAllCheck.checked = false;
-            }
-
-            function updateCounter(count) {
-                rowCounter.textContent = `שורות סה"כ ${currentData.length}`;
-            }
-
-            function updateStats(data) {
-                const total = data.length;
-                const arrived = data.filter(r => r.status === 'arrived').length;
-                const onway = data.filter(r => r.status === 'onway').length;
-                const preparing = data.filter(r => r.status === 'preparing').length;
-                const inprogress = data.filter(r => r.status === 'inprogress').length;
-                const missing = data.filter(r => r.status === 'missing').length;
-                const cancelled = data.filter(r => r.status === 'cancelled').length;
-                const pending = data.filter(r => r.status === 'pending').length;
-
-                document.getElementById('totalCount').textContent = total;
-                document.getElementById('arrivedCount').textContent = arrived;
-                document.getElementById('onwayCount').textContent = onway;
-                document.getElementById('preparingCount').textContent = preparing;
-                document.getElementById('inprogressCount').textContent = inprogress;
-                document.getElementById('missingCount').textContent = missing;
-                document.getElementById('cancelledCount').textContent = cancelled;
-                document.getElementById('pendingCount').textContent = pending;
-            }
-
-            function addNewRow() {
-                const newRow = {
-                    _id: `row-${nextId++}`,
-                    type: '',
-                    q20: '',
-                    q40: '',
-                    order: 'חדש',
-                    product: 'מוצר חדש',
-                    file: 'x',
-                    supplier: 'ספק חדש',
-                    date: '',
-                    vendor: '24210000000',
-                    amount: '0.00',
-                    status: '',
-                    note: ''
-                };
-                currentData.push(newRow);
-                renderTable(filterSelect.value);
-                saveAndUpdate();
-            }
-
-            function deleteSelectedRows() {
-                const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-                if (checkboxes.length === 0) {
-                    alert('לא נבחרו שורות למחיקה');
-                    return;
-                }
-                if (!confirm(`למחוק ${checkboxes.length} שורות?`)) return;
-                const idsToRemove = [];
-                checkboxes.forEach(cb => {
-                    const tr = cb.closest('tr');
-                    if (tr) idsToRemove.push(tr.dataset.rowId);
-                });
-                currentData = currentData.filter(r => {
-                    const id = r._id || `row-${currentData.indexOf(r)}`;
-                    return !idsToRemove.includes(id);
-                });
-                renderTable(filterSelect.value);
-                saveAndUpdate();
-            }
-
-            function loadExcelFile(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        progressBar.style.display = 'block';
-                        progressFill.style.width = '30%';
-
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                        const json = XLSX.utils.sheet_to_json(sheet);
-
-                        progressFill.style.width = '70%';
-
-                        if (json.length === 0) {
-                            alert('הקובץ ריק');
-                            progressBar.style.display = 'none';
-                            return;
-                        }
-
-                        const newRows = json.map(row => {
-                            const safeDate = (val) => {
-                                if (!val || val === 'x' || val === '') return '';
-                                const str = String(val);
-                                const parts = str.split('/');
-                                if (parts.length === 3 && parts[2].length === 4) {
-                                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                                }
-                                if (str.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                                    return str;
-                                }
-                                return str;
-                            };
-
-                            const safeAmount = (val) => {
-                                if (!val) return '0.00';
-                                const num = parseFloat(String(val).replace(/,/g, ''));
-                                if (!isNaN(num)) return num.toFixed(2);
-                                return '0.00';
-                            };
-
-                            const safeStatus = (val) => {
-                                if (!val) return '';
-                                const str = String(val).trim();
-                                if (statusMap[str]) return str;
-                                if (statusHebToEng[str]) return statusHebToEng[str];
-                                for (const [heb, eng] of Object.entries(statusHebToEng)) {
-                                    if (str.includes(heb)) return eng;
-                                }
-                                return '';
-                            };
-
-                            return {
-                                _id: `row-${nextId++}`,
-                                type: String(row['סוג מכולה'] || ''),
-                                q20: String(row["20'"] || ''),
-                                q40: String(row["40'"] || ''),
-                                order: String(row['הזמנה'] || ''),
-                                product: String(row['סוג מוצר'] || ''),
-                                file: String(row['תיק'] || ''),
-                                supplier: String(row['שם ספק'] || ''),
-                                date: safeDate(row['תאריך הגעה']),
-                                vendor: String(row['ספק'] || ''),
-                                amount: safeAmount(row['סכום $']),
-                                status: safeStatus(row['סטטוס']),
-                                note: String(row['הערה'] || '')
-                            };
-                        });
-
-                        progressFill.style.width = '100%';
-
-                        currentData = newRows;
-                        renderTable(filterSelect.value);
-                        saveAndUpdate();
-
-                        setTimeout(() => {
-                            progressBar.style.display = 'none';
-                            progressFill.style.width = '0%';
-                            loadModal.classList.remove('active');
-                            alert(`✅ נטענו ${newRows.length} שורות בהצלחה!`);
-                        }, 500);
-
-                    } catch (error) {
-                        console.error('שגיאה בטעינת הקובץ:', error);
-                        alert('שגיאה בטעינת הקובץ: ' + error.message);
-                        progressBar.style.display = 'none';
-                        progressFill.style.width = '0%';
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            }
-
-            document.getElementById('loadExcelBtn').addEventListener('click', function() {
-                loadModal.classList.add('active');
-                selectedFile = null;
-                fileName.textContent = '';
-                confirmLoadBtn.disabled = true;
-                progressBar.style.display = 'none';
-                progressFill.style.width = '0%';
-            });
-
-            cancelLoadBtn.addEventListener('click', function() {
-                loadModal.classList.remove('active');
-                selectedFile = null;
-                fileName.textContent = '';
-                confirmLoadBtn.disabled = true;
-                progressBar.style.display = 'none';
-                progressFill.style.width = '0%';
-            });
-
-            loadModal.addEventListener('click', function(e) {
-                if (e.target === loadModal) {
-                    loadModal.classList.remove('active');
-                    selectedFile = null;
-                    fileName.textContent = '';
-                    confirmLoadBtn.disabled = true;
-                    progressBar.style.display = 'none';
-                    progressFill.style.width = '0%';
-                }
-            });
-
-            dropZone.addEventListener('click', function() {
-                fileInput.click();
-            });
-
-            fileInput.addEventListener('change', function(e) {
-                if (this.files && this.files[0]) {
-                    selectedFile = this.files[0];
-                    fileName.textContent = '📄 ' + selectedFile.name;
-                    confirmLoadBtn.disabled = false;
-                }
-            });
-
-            dropZone.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.classList.add('dragover');
-            });
-
-            dropZone.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                this.classList.remove('dragover');
-            });
-
-            dropZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('dragover');
-                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                    const file = e.dataTransfer.files[0];
-                    const ext = file.name.split('.').pop().toLowerCase();
-                    if (ext === 'xlsx' || ext === 'xls') {
-                        selectedFile = file;
-                        fileName.textContent = '📄 ' + file.name;
-                        confirmLoadBtn.disabled = false;
-                    } else {
-                        alert('אנא בחר קובץ אקסל (.xlsx או .xls)');
-                    }
-                }
-            });
-
-            confirmLoadBtn.addEventListener('click', function() {
-                if (selectedFile) {
-                    if (currentData.length > 0) {
-                        if (!confirm(`⚠️ פעולה זו תחליף את כל ${currentData.length} השורות הקיימות. להמשיך?`)) {
-                            return;
-                        }
-                    }
-                    loadExcelFile(selectedFile);
-                }
-            });
-
-            function exportToExcel() {
-                try {
-                    let html =
-                        '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-                    html += '<head><meta charset="UTF-8">';
-                    html +=
-                        '<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>סטטוס משלוחים</x:Name><x:WorksheetOptions><x:DisplayRightToLeft/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->';
-                    html += '<style>';
-                    html += 'table { border-collapse: collapse; direction: rtl; }';
-                    html += 'th, td { border: 1px solid #999; padding: 6px 8px; text-align: center; font-size: 12px; }';
-                    html += 'th { background-color: #d0dbe8; font-weight: bold; }';
-
-                    const colorMap = {
-                        'arrived': '#009953',
-                        'onway': '#3bffa6',
-                        'inprogress': '#93c5fd',
-                        'missing': '#fc8d97',
-                        'preparing': '#ffe5b4',
-                        'cancelled': '#ff293c',
-                        'pending': '#e0e0e0',
-                        'empty': '#ffffff'
-                    };
-
-                    Object.keys(colorMap).forEach(status => {
-                        html += `.status-${status} td { background-color: ${colorMap[status]}; }`;
-                    });
-
-                    html += '.status-arrived td:last-child { background-color: #ffffff !important; }';
-                    html += '.status-onway td:last-child { background-color: #ffffff !important; }';
-                    html += '.status-inprogress td:last-child { background-color: #ffffff !important; }';
-                    html += '.status-missing td:last-child { background-color: #ffffff !important; }';
-                    html += '.status-preparing td:last-child { background-color: #ffffff !important; }';
-                    html += '.status-cancelled td:last-child { background-color: #ffffff !important; }';
-                    html += '.status-pending td:last-child { background-color: #ffffff !important; }';
-                    html += '.status-empty td:last-child { background-color: #ffffff !important; }';
-                    html += '.status-cancelled td { text-decoration: line-through !important; }';
-                    html += '.status-cancelled td:last-child { text-decoration: none !important; }';
-                    html += '</style>';
-                    html += '</head><body>';
-                    html += '<table>';
-
-                    const headers = ['סוג מכולה', '20\'', '40\'', 'הזמנה', 'סוג מוצר', 'תיק', 'שם ספק', 'תאריך הגעה',
-                        'ספק', 'סכום $', 'סטטוס', 'הערה'
-                    ];
-                    html += '<tr>';
-                    headers.forEach(h => {
-                        html += `<th>${h}</th>`;
-                    });
-                    html += '</tr>';
-
-                    currentData.forEach(row => {
-                        const status = row.status || 'empty';
-                        html += `<tr class="status-${status}">`;
-                        const fields = ['type', 'q20', 'q40', 'order', 'product', 'file', 'supplier', 'date',
-                            'vendor', 'amount'
-                        ];
-                        fields.forEach(f => {
-                            let val = row[f] !== undefined ? row[f] : '';
-                            if (f === 'date' && val) {
-                                const parts = String(val).split('-');
-                                if (parts.length === 3) val = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                            }
-                            if (f === 'amount') {
-                                val = formatNumber(val);
-                            }
-                            html += `<td>${val}</td>`;
-                        });
-                        html += `<td>${statusMap[row.status] || row.status || ''}</td>`;
-                        html += `<td>${row.note || ''}</td>`;
-                        html += '</tr>';
-                    });
-
-                    html += '</table>';
-                    html += '</body></html>';
-
-                    const blob = new Blob([html], {
-                        type: 'application/vnd.ms-excel;charset=UTF-8'
-                    });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'סטטוס משלוחים.xls';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(link.href);
-                } catch (error) {
-                    console.error('שגיאה ביצוא אקסל:', error);
-                    alert('אירעה שגיאה ביצוא הקובץ');
-                }
-            }
-
-            filterSelect.addEventListener('change', function() {
-                renderTable(this.value);
-            });
-
-            searchInput.addEventListener('input', function() {
-                renderTable(filterSelect.value);
-            });
-
-            document.getElementById('addRowBtn').addEventListener('click', addNewRow);
-            document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedRows);
-            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
-            document.getElementById('sortBtn').addEventListener('click', sortData);
-
-            selectAllCheck.addEventListener('change', function() {
-                const checkboxes = document.querySelectorAll('.row-checkbox');
-                checkboxes.forEach(cb => cb.checked = this.checked);
-            });
-
-            renderTable('all');
-            updateStats(currentData);
-        })();
-    </script>
-</body>
+  </body>
 </html>
