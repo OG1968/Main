@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
+    />
+    <title>מקטין תמונות</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          "IBM Plex Sans Hebrew",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #90dcfc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 16px;
+      }
+      .container {
+        max-width: 1100px;
+        width: 100%;
+        background: #ffe699;
+        border-radius: 24px;
+        padding: 20px 18px 18px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      }
+
+      /* ---- new center header ---- */
+      .header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 14px;
+        gap: 2px;
+      }
+      .header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        letter-spacing: -0.5px;
+        text-align: center;
+        margin: 0;
+      }
+      .header h2 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+        text-align: center;
+        margin: 0;
+        letter-spacing: -0.3px;
+      }
+
+      /* header-actions row stays as is */
+      .header-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 6px;
+      }
+      .eyebrow {
+        font-family: "IBM Plex Mono", arial, sans-serif;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        color: #703efa;
+        padding: 4px 14px;
+        border-radius: 40px;
+        font-weight: 600;
+      }
+      .btn {
+        border: none;
+        border-radius: 40px;
+        padding: 8px 18px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        font-family: inherit;
+      }
+      .btn:active {
+        transform: scale(0.96);
+      }
+      .btn-primary {
+        background: #28a745;
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #218838;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .btn-ghost {
+        background: #ffffff;
+        border: 2px solid #703efa;
+        color: #703efa;
+      }
+      .btn-ghost:hover {
+        background: #703efa;
+        color: #fff;
+        border-color: #703efa;
+      }
+      .btn-outline {
+        background: #ffffff;
+        border: 2px solid #0d6efd;
+        color: #0d6efd;
+      }
+      .btn-outline:hover {
+        background: #0d6efd;
+        color: #fff;
+      }
+      .btn-danger {
+        background: #ffffff;
+        border: 2px solid #dc3545;
+        color: #dc3545;
+      }
+      .btn-danger:hover {
+        background: #dc3545;
+        color: #fff;
+      }
+
+      .dropzone {
+        background: #f8f9fa;
+        border: 2px dashed #d0d0d0;
+        border-radius: 16px;
+        padding: 28px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 12px;
+      }
+      .dropzone:hover,
+      .dropzone.drag {
+        border-color: #0d6efd;
+        background: #f0f4ff;
+      }
+      .dropzone .dz-title {
+        font-weight: 700;
+        font-size: 18px;
+        color: #1a1a1a;
+      }
+      .dropzone .dz-sub {
+        font-size: 13px;
+        color: #555;
+        margin-top: 4px;
+      }
+      .dropzone input {
+        display: none;
+      }
+
+      .panel {
+        background: #f1f3f5;
+        border-radius: 20px;
+        padding: 18px 16px;
+        margin: 6px 0 12px;
+      }
+      .panel-title {
+        font-weight: 700;
+        font-size: 13px;
+        color: #444;
+        margin-bottom: 10px;
+        font-family: "IBM Plex Mono", monospace;
+        letter-spacing: 0.04em;
+      }
+      .modes {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .modes button {
+        background: #fff;
+        border: 2px solid #d0d0d0;
+        border-radius: 40px;
+        padding: 6px 16px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: 0.15s;
+        color: #333;
+        font-family: inherit;
+      }
+      .modes button.active {
+        border-color: #703efa;
+        background: #703efa;
+        color: #fff;
+      }
+      .modes button:not(.active):hover {
+        border-color: #703efa;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .field label {
+        font-weight: 600;
+        font-size: 12px;
+        color: #333;
+        letter-spacing: 0.03em;
+      }
+      .field input[type="number"],
+      .field select {
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 30px;
+        padding: 8px 14px;
+        font-size: 14px;
+        font-family: inherit;
+        width: 100%;
+        transition: 0.15s;
+      }
+      .field input[type="number"]:focus,
+      .field select:focus {
+        outline: none;
+        border-color: #703efa;
+        box-shadow: 0 0 0 3px rgba(112, 62, 250, 0.15);
+      }
+      .field .input-group {
+        display: flex;
+        gap: 6px;
+      }
+      .field .input-group input {
+        flex: 1;
+      }
+      .field .input-group select {
+        width: 80px;
+        flex-shrink: 0;
+      }
+
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .slider-row input[type="range"] {
+        flex: 1;
+        accent-color: #703efa;
+        height: 6px;
+      }
+      .slider-val {
+        font-weight: 700;
+        font-size: 14px;
+        color: #703efa;
+        min-width: 40px;
+        text-align: left;
+      }
+
+      .hint {
+        font-size: 12px;
+        color: #000000;
+        line-height: 1.5;
+        margin: 4px 0 10px;
+        background: #e8ecf0;
+        padding: 6px 14px;
+        border-radius: 30px;
+        text-align: center;
+      }
+
+      .run-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-top: 6px;
+      }
+      .status {
+        font-size: 13px;
+        color: #444;
+        font-weight: 600;
+      }
+      .status .n {
+        color: #703efa;
+      }
+
+      .filmstrip {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+      }
+      .frame {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 10px 10px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+      }
+      .frame-img-wrap {
+        background: #fff;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        height: 110px;
+        margin-bottom: 8px;
+        border: 1px solid #eee;
+      }
+      .frame-img-wrap img {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+      }
+      .frame-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1a1a1a;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .frame-dims {
+        font-size: 11px;
+        color: #666;
+        font-family: "IBM Plex Mono", monospace;
+        margin: 2px 0 4px;
+      }
+      .frame-meta {
+        font-size: 11px;
+        color: #555;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+      .frame-meta .new {
+        color: #28a745;
+      }
+      .frame-dl {
+        display: block;
+        text-align: center;
+        border-radius: 40px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.15s;
+        border: 2px solid #d0d0d0;
+        color: #999;
+        cursor: default;
+        margin-top: auto;
+      }
+      .frame-dl.ready {
+        border-color: #28a745;
+        color: #28a745;
+        cursor: pointer;
+      }
+      .frame-dl.ready:hover {
+        background: #28a745;
+        color: #fff;
+      }
+
+      .footer-wrap {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding-top: 10px;
+        border-top: 1px solid #d0d0d0;
+      }
+      .footer-copy {
+        font-family: "Oswald", sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        color: #2c3e50;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .footer-logo img {
+        display: block;
+        max-width: 70px;
+        height: auto;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #1a1a1a;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        font-size: 14px;
+        font-weight: 500;
+        z-index: 9999;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 12px 10px;
+        }
+        .header h1 {
+          font-size: 22px;
+        }
+        .header h2 {
+          font-size: 14px;
+        }
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .filmstrip {
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+        .run-row .btn {
+          font-size: 12px;
+          padding: 6px 14px;
+        }
+        .dropzone .dz-title {
+          font-size: 16px;
+        }
+      }
+      @media (max-width: 480px) {
+        .header h1 {
+          font-size: 20px;
+        }
+        .header h2 {
+          font-size: 13px;
+        }
+        .filmstrip {
+          grid-template-columns: 1fr 1fr;
+        }
+        .frame-img-wrap {
+          height: 90px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- header: everything centered -->
+      <div class="header">
+        <h1>🖼️ עורך תמונות</h1>
+        <h2>שינוי גודל דחיסה / כיווץ תמונות</h2>
+        <div class="header-actions">
+          <button class="btn btn-primary" id="runBtn">📦 עבד הכל</button>
+          <button
+            class="btn btn-ghost"
+            id="downloadAllBtn"
+            style="display: none"
+          >
+            📥 ZIP
+          </button>
+          <button class="btn btn-danger" id="clearBtn">🗑️ נקה</button>
+        </div>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" multiple accept="image/*" />
+        <div class="dz-title">📂 גררו תמונות לכאן, או לחצו לבחירה</div>
+        <div class="dz-sub">בפורמטים: JPG · PNG · WEBP</div>
+      </div>
+
+      <div class="panel" id="panel" style="display: none">
+        <div class="panel-title">⚙️ הגדרות עיבוד</div>
+        <div class="modes">
+          <button id="modeDim" class="active">לפי מידה</button>
+          <button id="modeSize">לפי משקל</button>
+        </div>
+
+        <div id="dimFields">
+          <div class="grid-2">
+            <div class="field">
+              <label>רוחב מקסימלי (px)</label>
+              <input type="number" id="maxW" value="1600" min="16" />
+            </div>
+            <div class="field">
+              <label>גובה מקסימלי (px)</label>
+              <input type="number" id="maxH" value="1600" min="16" />
+            </div>
+          </div>
+          <div class="hint">
+            📐 התמונה תוקטן כך שתיכנס בתוך המידות, תוך שמירת יחס. תמונות קטנות
+            יותר לא יוגדלו.
+          </div>
+        </div>
+
+        <div id="sizeFields" style="display: none">
+          <div class="grid-2">
+            <div class="field">
+              <label>משקל יעד</label>
+              <div class="input-group">
+                <input type="number" id="targetSize" value="200" min="5" />
+                <select id="targetUnit">
+                  <option value="KB">KB</option>
+                  <option value="MB">MB</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>מגבלת מידה (px, אופציונלי)</label>
+              <input type="number" id="capDim" value="2400" min="16" />
+            </div>
+          </div>
+          <div class="hint">
+            ⚡ האיכות (ובמידת הצורך גם המידות) יכוונו אוטומטית כדי להתקרב כמה
+            שיותר למשקל היעד מלמטה. PNG לא תומך בדחיסת איכות — יוקטן במידות
+            בלבד.
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>פורמט פלט</label>
+            <select id="format">
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/webp">WEBP</option>
+              <option value="image/png">PNG</option>
+            </select>
+          </div>
+          <div class="field" id="qualityField">
+            <label>איכות</label>
+            <div class="slider-row">
+              <input type="range" id="quality" min="10" max="100" value="82" />
+              <span class="slider-val" id="qualityVal">82%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="run-row">
+          <span class="status" id="statusLine"></span>
+        </div>
+      </div>
+      <div class="filmstrip" id="filmstrip"></div>
+      <div class="eyebrow">⚡ כל התוכן הינו מקומי ואינו עולה לשרת</div>
+      <div class="footer-wrap">
+        <div class="footer-copy">© 2026 כל הזכויות שמורות</div>
+        <div class="footer-logo">
+          <img src="OG_Blue_Logo2.png" alt="לוגו" />
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        const dropzone = document.getElementById("dropzone");
+        const fileInput = document.getElementById("fileInput");
+        const panel = document.getElementById("panel");
+        const filmstrip = document.getElementById("filmstrip");
+        const modeDim = document.getElementById("modeDim");
+        const modeSize = document.getElementById("modeSize");
+        const dimFields = document.getElementById("dimFields");
+        const sizeFields = document.getElementById("sizeFields");
+        const qualityField = document.getElementById("qualityField");
+        const formatSel = document.getElementById("format");
+        const qualitySlider = document.getElementById("quality");
+        const qualityVal = document.getElementById("qualityVal");
+        const runBtn = document.getElementById("runBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        const downloadAllBtn = document.getElementById("downloadAllBtn");
+        const statusLine = document.getElementById("statusLine");
+        const toastEl = document.getElementById("toast");
+
+        let mode = "dim";
+        let items = [];
+
+        function showToast(msg, dur = 3000) {
+          toastEl.textContent = msg;
+          toastEl.classList.add("show");
+          clearTimeout(toastEl._timeout);
+          toastEl._timeout = setTimeout(
+            () => toastEl.classList.remove("show"),
+            dur,
+          );
+        }
+
+        function fmtBytes(b) {
+          if (b < 1024) return b + " B";
+          if (b < 1048576) return (b / 1024).toFixed(1) + " KB";
+          return (b / 1048576).toFixed(2) + " MB";
+        }
+
+        function resetResults() {
+          items.forEach((item) => {
+            if (item.resultUrl) {
+              URL.revokeObjectURL(item.resultUrl);
+              item.resultUrl = null;
+            }
+            item.resultBlob = null;
+            item.resultW = 0;
+            item.resultH = 0;
+            item.resultType = null;
+
+            const newEl = document.getElementById("new-" + item.id);
+            if (newEl) newEl.textContent = "—";
+
+            const dl = document.getElementById("dl-" + item.id);
+            if (dl) {
+              dl.classList.remove("ready");
+              dl.classList.add("pending");
+              dl.textContent = "⏳ ממתין";
+              dl.removeAttribute("href");
+              dl.removeAttribute("download");
+            }
+          });
+          updateStatus();
+        }
+
+        modeDim.onclick = () => {
+          mode = "dim";
+          modeDim.classList.add("active");
+          modeSize.classList.remove("active");
+          dimFields.style.display = "block";
+          sizeFields.style.display = "none";
+          qualityField.style.display = "block";
+          resetResults();
+        };
+        modeSize.onclick = () => {
+          mode = "size";
+          modeSize.classList.add("active");
+          modeDim.classList.remove("active");
+          dimFields.style.display = "none";
+          sizeFields.style.display = "block";
+          qualityField.style.display = "none";
+          resetResults();
+        };
+
+        qualitySlider.oninput = () => {
+          qualityVal.textContent = qualitySlider.value + "%";
+          resetResults();
+        };
+
+        [
+          "maxW",
+          "maxH",
+          "targetSize",
+          "targetUnit",
+          "capDim",
+          "format",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.addEventListener("change", resetResults);
+            el.addEventListener("input", resetResults);
+          }
+        });
+
+        dropzone.onclick = () => fileInput.click();
+        dropzone.ondragover = (e) => {
+          e.preventDefault();
+          dropzone.classList.add("drag");
+        };
+        dropzone.ondragleave = () => dropzone.classList.remove("drag");
+        dropzone.ondrop = (e) => {
+          e.preventDefault();
+          dropzone.classList.remove("drag");
+          handleFiles(e.dataTransfer.files);
+        };
+        fileInput.onchange = () => handleFiles(fileInput.files);
+
+        function handleFiles(fileList) {
+          const files = Array.from(fileList).filter((f) =>
+            f.type.startsWith("image/"),
+          );
+          if (!files.length) {
+            showToast("⚠️ לא נמצאו תמונות");
+            return;
+          }
+          panel.style.display = "block";
+          let loaded = 0;
+          files.forEach((file) => {
+            const id = "f" + Math.random().toString(36).slice(2);
+            const origUrl = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+              const item = {
+                file,
+                id,
+                origUrl,
+                origSize: file.size,
+                w: img.naturalWidth,
+                h: img.naturalHeight,
+                resultBlob: null,
+                resultUrl: null,
+                resultW: 0,
+                resultH: 0,
+                resultType: null,
+              };
+              items.push(item);
+              renderFrame(item);
+              updateStatus();
+              loaded++;
+              if (loaded === files.length)
+                showToast("✅ " + files.length + " תמונות נטענו");
+            };
+            img.onerror = () => {
+              showToast("⚠️ שגיאה בטעינת תמונה");
+            };
+            img.src = origUrl;
+          });
+          fileInput.value = "";
+        }
+
+        function renderFrame(item) {
+          const el = document.createElement("div");
+          el.className = "frame";
+          el.id = "frame-" + item.id;
+          el.innerHTML = `
+      <div class="frame-img-wrap"><img src="${item.origUrl}" loading="lazy"></div>
+      <div class="frame-name" title="${item.file.name}">${item.file.name}</div>
+      <div class="frame-dims">${item.w} × ${item.h}px</div>
+      <div class="frame-meta"><span>${fmtBytes(item.origSize)}</span><span class="new" id="new-${item.id}">—</span></div>
+      <a class="frame-dl pending" id="dl-${item.id}">⏳ ממתין</a>
+    `;
+          filmstrip.appendChild(el);
+        }
+
+        function updateStatus() {
+          const done = items.filter((i) => i.resultBlob).length;
+          statusLine.innerHTML = `<span class="n">${items.length}</span> תמונות · <span class="n">${done}</span> עובדו`;
+          downloadAllBtn.style.display = done ? "inline-flex" : "none";
+          runBtn.disabled = !items.length;
+        }
+
+        clearBtn.onclick = () => {
+          items.forEach((i) => {
+            URL.revokeObjectURL(i.origUrl);
+            if (i.resultUrl) URL.revokeObjectURL(i.resultUrl);
+          });
+          items = [];
+          filmstrip.innerHTML = "";
+          updateStatus();
+          panel.style.display = "none";
+          showToast("🧹 נוקה");
+        };
+
+        function loadImage(url) {
+          return new Promise((res, rej) => {
+            const i = new Image();
+            i.onload = () => res(i);
+            i.onerror = rej;
+            i.src = url;
+          });
+        }
+
+        function canvasToBlob(canvas, type, quality) {
+          return new Promise((res) => {
+            if (type === "image/png") {
+              canvas.toBlob(res, type);
+            } else {
+              canvas.toBlob(res, type, quality);
+            }
+          });
+        }
+
+        function createCanvas(w, h, img) {
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(img, 0, 0, w, h);
+          return canvas;
+        }
+
+        async function resizeByDimension(item, maxW, maxH, type, quality) {
+          const img = await loadImage(item.origUrl);
+          let w = img.naturalWidth,
+            h = img.naturalHeight;
+          const scale = Math.min(1, maxW / w, maxH / h);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+          const canvas = createCanvas(w, h, img);
+          const q = type === "image/png" ? undefined : quality;
+          const blob = await canvasToBlob(canvas, type, q);
+          return { blob, w, h, type };
+        }
+
+        async function resizeByTargetSize(
+          item,
+          targetBytes,
+          capDim,
+          selectedType,
+        ) {
+          const isPng = selectedType === "image/png";
+          const effType = isPng
+            ? "image/png"
+            : selectedType === "image/webp"
+              ? "image/webp"
+              : "image/jpeg";
+
+          const img = await loadImage(item.origUrl);
+          const origW = img.naturalWidth;
+          const origH = img.naturalHeight;
+
+          let softMax = 0;
+          if (capDim && capDim > 0) softMax = capDim;
+
+          async function encode(w, h, quality) {
+            const canvas = createCanvas(w, h, img);
+            return canvasToBlob(canvas, effType, isPng ? undefined : quality);
+          }
+
+          async function bestQualityUnder(w, h) {
+            if (isPng) {
+              const blob = await encode(w, h);
+              return blob.size <= targetBytes ? blob : null;
+            }
+
+            const maxBlob = await encode(w, h, 1.0);
+            if (maxBlob.size <= targetBytes) {
+              return maxBlob;
+            }
+
+            let lo = 0.05;
+            let hi = 1.0;
+            let best = null;
+            for (let i = 0; i < 12; i++) {
+              const mid = (lo + hi) / 2;
+              const blob = await encode(w, h, mid);
+              if (blob.size <= targetBytes) {
+                best = blob;
+                lo = mid;
+              } else {
+                hi = mid;
+              }
+            }
+            return best;
+          }
+
+          // 1) original dimensions
+          {
+            const fullBest = await bestQualityUnder(origW, origH);
+            if (fullBest) {
+              return { blob: fullBest, w: origW, h: origH, type: effType };
+            }
+          }
+
+          let startW = origW;
+          let startH = origH;
+          if (softMax > 0 && (origW > softMax || origH > softMax)) {
+            const sc = Math.min(softMax / origW, softMax / origH);
+            startW = Math.round(origW * sc);
+            startH = Math.round(origH * sc);
+            const cappedBest = await bestQualityUnder(startW, startH);
+            if (cappedBest) {
+              return { blob: cappedBest, w: startW, h: startH, type: effType };
+            }
+          }
+
+          let bestBlob = null;
+          let bestW = startW;
+          let bestH = startH;
+
+          const scales = [];
+          for (let s = 0.92; s >= 0.15; s -= 0.04) {
+            scales.push(Math.round(s * 100) / 100);
+          }
+          scales.push(0.12, 0.1, 0.08);
+
+          for (const scale of scales) {
+            const w = Math.max(48, Math.round(startW * scale));
+            const h = Math.max(48, Math.round(startH * scale));
+            const candidate = await bestQualityUnder(w, h);
+            if (candidate) {
+              if (!bestBlob || candidate.size > bestBlob.size) {
+                bestBlob = candidate;
+                bestW = w;
+                bestH = h;
+              }
+              break;
+            }
+          }
+
+          if (!bestBlob) {
+            const w = Math.max(48, Math.round(startW * 0.12));
+            const h = Math.max(48, Math.round(startH * 0.12));
+            bestBlob = await encode(w, h, isPng ? undefined : 0.1);
+            bestW = w;
+            bestH = h;
+          }
+
+          return { blob: bestBlob, w: bestW, h: bestH, type: effType };
+        }
+
+        runBtn.onclick = async () => {
+          if (!items.length) return;
+          runBtn.disabled = true;
+          runBtn.textContent = "⏳ מעבד...";
+          const format = formatSel.value;
+          const quality = parseInt(qualitySlider.value, 10) / 100;
+          let processed = 0;
+
+          for (const item of items) {
+            try {
+              let result;
+              if (mode === "dim") {
+                const maxW =
+                  parseInt(document.getElementById("maxW").value, 10) || item.w;
+                const maxH =
+                  parseInt(document.getElementById("maxH").value, 10) || item.h;
+                result = await resizeByDimension(
+                  item,
+                  maxW,
+                  maxH,
+                  format,
+                  quality,
+                );
+              } else {
+                const val =
+                  parseFloat(document.getElementById("targetSize").value) ||
+                  200;
+                const unit = document.getElementById("targetUnit").value;
+                const targetBytes = unit === "MB" ? val * 1048576 : val * 1024;
+                const capDim =
+                  parseInt(document.getElementById("capDim").value, 10) || 0;
+                result = await resizeByTargetSize(
+                  item,
+                  targetBytes,
+                  capDim,
+                  format,
+                );
+              }
+
+              if (item.resultUrl) URL.revokeObjectURL(item.resultUrl);
+              item.resultBlob = result.blob;
+              item.resultW = result.w;
+              item.resultH = result.h;
+              item.resultType = result.type;
+              item.resultUrl = URL.createObjectURL(result.blob);
+
+              const sizeDisplay = fmtBytes(result.blob.size);
+
+              document.getElementById("new-" + item.id).textContent =
+                "✅ " + sizeDisplay;
+              const dl = document.getElementById("dl-" + item.id);
+              dl.classList.remove("pending");
+              dl.classList.add("ready");
+              dl.textContent = "⬇️ הורד";
+              dl.href = item.resultUrl;
+              const ext = result.type.split("/")[1].replace("jpeg", "jpg");
+              const base = item.file.name.replace(/\.[^.]+$/, "");
+              dl.download = base + "_resized." + ext;
+              processed++;
+            } catch (err) {
+              console.error(err);
+              showToast("❌ שגיאה בעיבוד תמונה: " + err.message);
+            }
+            updateStatus();
+          }
+          runBtn.disabled = false;
+          runBtn.textContent = "📦 עבד הכל";
+          showToast("✅ " + processed + " תמונות עובדו");
+        };
+
+        downloadAllBtn.onclick = async () => {
+          const done = items.filter((i) => i.resultBlob);
+          if (!done.length) return;
+          downloadAllBtn.disabled = true;
+          downloadAllBtn.textContent = "⏳ אורז...";
+          const zip = new JSZip();
+          done.forEach((item) => {
+            const ext = item.resultType.split("/")[1].replace("jpeg", "jpg");
+            const base = item.file.name.replace(/\.[^.]+$/, "");
+            zip.file(base + "_resized." + ext, item.resultBlob);
+          });
+          const content = await zip.generateAsync({ type: "blob" });
+          const url = URL.createObjectURL(content);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "resized_images.zip";
+          a.click();
+          URL.revokeObjectURL(url);
+          downloadAllBtn.disabled = false;
+          downloadAllBtn.textContent = "📥 ZIP";
+          showToast("📦 ZIP הורד");
+        };
+
+        updateStatus();
+        showToast("📸 העלה תמונות להתחלה", 3500);
+      })();
+    </script>
+  </body>
+</html>
