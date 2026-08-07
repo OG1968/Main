@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
     />
     <link rel="icon" href="IR.png" type="image/png">
-    <title>עורך תמונות</title>
+    <title>מקטין תמונות</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
@@ -182,10 +182,10 @@
       }
       .panel-title {
         font-weight: 700;
-        font-size: 13px;
-        color: #444;
+        font-size: 20px;
+        color: #000000;
         margin-bottom: 10px;
-        font-family: "IBM Plex Mono", monospace;
+        font-family: "IBM Plex Mono",arial, sans-serif;
         letter-spacing: 0.04em;
       }
       .modes {
@@ -219,7 +219,7 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 12px;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
       }
       .field {
         display: flex;
@@ -228,8 +228,8 @@
       }
       .field label {
         font-weight: 600;
-        font-size: 12px;
-        color: #333;
+        font-size: 16px;
+        color: #000000;
         letter-spacing: 0.03em;
       }
       .field input[type="number"],
@@ -492,12 +492,30 @@
 
       <div class="dropzone" id="dropzone">
         <input type="file" id="fileInput" multiple accept="image/*" />
+        <input
+          type="file"
+          id="folderInput"
+          webkitdirectory
+          directory
+          multiple
+          style="display: none"
+        />
         <div class="dz-title">📂 גררו תמונות לכאן, או לחצו לבחירה</div>
         <div class="dz-sub">בפורמטים: JPG · PNG · WEBP</div>
+        <div style="margin-top: 12px">
+          <button
+            type="button"
+            class="btn btn-outline"
+            id="folderBtn"
+            style="font-size: 13px; padding: 6px 14px"
+          >
+            📁 בחר תיקיה שלמה
+          </button>
+        </div>
       </div>
 
       <div class="panel" id="panel" style="display: none">
-        <div class="panel-title">⚙️ הגדרות עיבוד</div>
+        <div class="field">⚙️ הגדרות עיבוד</div></br>
         <div class="modes">
           <button id="modeDim" class="active">לפי מידה</button>
           <button id="modeSize">לפי משקל</button>
@@ -545,7 +563,7 @@
         </div>
 
         <div class="grid-2">
-          <div class="field">
+          <div class="field"></br>
             <label>פורמט פלט</label>
             <select id="format">
               <option value="image/jpeg">JPEG</option>
@@ -584,6 +602,8 @@
 
         const dropzone = document.getElementById("dropzone");
         const fileInput = document.getElementById("fileInput");
+        const folderInput = document.getElementById("folderInput");
+        const folderBtn = document.getElementById("folderBtn");
         const panel = document.getElementById("panel");
         const filmstrip = document.getElementById("filmstrip");
         const modeDim = document.getElementById("modeDim");
@@ -684,22 +704,143 @@
           }
         });
 
-        dropzone.onclick = () => fileInput.click();
+        dropzone.onclick = (e) => {
+          if (e.target.closest("#folderBtn")) return;
+          fileInput.click();
+        };
+
+        // Modern directory picker (Chrome/Edge) with fallback to webkitdirectory
+        folderBtn.onclick = async (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+
+          if (window.showDirectoryPicker) {
+            try {
+              const dirHandle = await window.showDirectoryPicker();
+              showToast("⏳ טוען תיקיה...");
+              const files = await collectFilesFromDirHandle(dirHandle);
+              handleFiles(files);
+            } catch (err) {
+              if (err.name !== "AbortError") {
+                console.error(err);
+                // fallback
+                folderInput.click();
+              }
+            }
+          } else {
+            folderInput.click();
+          }
+        };
+
         dropzone.ondragover = (e) => {
           e.preventDefault();
           dropzone.classList.add("drag");
         };
         dropzone.ondragleave = () => dropzone.classList.remove("drag");
-        dropzone.ondrop = (e) => {
+        dropzone.ondrop = async (e) => {
           e.preventDefault();
           dropzone.classList.remove("drag");
-          handleFiles(e.dataTransfer.files);
+          const files = await getFilesFromDataTransfer(e.dataTransfer);
+          handleFiles(files);
         };
         fileInput.onchange = () => handleFiles(fileInput.files);
+        folderInput.onchange = () => {
+          handleFiles(folderInput.files);
+          folderInput.value = "";
+        };
+
+        // Collect all files recursively from a FileSystemDirectoryHandle
+        async function collectFilesFromDirHandle(dirHandle) {
+          const files = [];
+          async function walk(handle) {
+            for await (const entry of handle.values()) {
+              if (entry.kind === "file") {
+                try {
+                  const file = await entry.getFile();
+                  files.push(file);
+                } catch (_) {}
+              } else if (entry.kind === "directory") {
+                await walk(entry);
+              }
+            }
+          }
+          await walk(dirHandle);
+          return files;
+        }
+
+        // Collect files from drag-and-drop (supports folders via webkitGetAsEntry)
+        async function getFilesFromDataTransfer(dt) {
+          const items = dt.items;
+          if (!items || items.length === 0) {
+            return Array.from(dt.files || []);
+          }
+
+          const entries = [];
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.webkitGetAsEntry) {
+              const entry = item.webkitGetAsEntry();
+              if (entry) entries.push(entry);
+            }
+          }
+
+          if (entries.length === 0) {
+            return Array.from(dt.files || []);
+          }
+
+          const files = [];
+
+          function readAllEntries(reader) {
+            return new Promise((resolve, reject) => {
+              const result = [];
+              const doRead = () => {
+                reader.readEntries((batch) => {
+                  if (batch.length === 0) {
+                    resolve(result);
+                  } else {
+                    result.push(...batch);
+                    doRead();
+                  }
+                }, reject);
+              };
+              doRead();
+            });
+          }
+
+          async function walk(entry) {
+            if (entry.isFile) {
+              return new Promise((resolve) => {
+                entry.file(
+                  (f) => resolve([f]),
+                  () => resolve([]),
+                );
+              });
+            }
+            if (entry.isDirectory) {
+              const reader = entry.createReader();
+              const children = await readAllEntries(reader);
+              const all = [];
+              for (const child of children) {
+                const childFiles = await walk(child);
+                all.push(...childFiles);
+              }
+              return all;
+            }
+            return [];
+          }
+
+          for (const entry of entries) {
+            const found = await walk(entry);
+            files.push(...found);
+          }
+          return files;
+        }
 
         function handleFiles(fileList) {
-          const files = Array.from(fileList).filter((f) =>
-            f.type.startsWith("image/"),
+          const files = Array.from(fileList || []).filter(
+            (f) =>
+              (f.type && f.type.startsWith("image/")) ||
+              /\.(jpe?g|png|webp|gif|bmp|tiff?)$/i.test(f.name || ""),
           );
           if (!files.length) {
             showToast("⚠️ לא נמצאו תמונות");
@@ -707,6 +848,7 @@
           }
           panel.style.display = "block";
           let loaded = 0;
+          const total = files.length;
           files.forEach((file) => {
             const id = "f" + Math.random().toString(36).slice(2);
             const origUrl = URL.createObjectURL(file);
@@ -729,11 +871,15 @@
               renderFrame(item);
               updateStatus();
               loaded++;
-              if (loaded === files.length)
-                showToast("✅ " + files.length + " תמונות נטענו");
+              if (loaded === total) {
+                showToast("✅ " + total + " תמונות נטענו");
+              }
             };
             img.onerror = () => {
-              showToast("⚠️ שגיאה בטעינת תמונה");
+              loaded++;
+              if (loaded === total) {
+                showToast("✅ " + items.length + " תמונות נטענו");
+              }
             };
             img.src = origUrl;
           });
