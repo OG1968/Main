@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>כניסה מאובטחת</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f2f5;
+        }
+        .box {
+            background: white;
+            padding: 35px 45px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+            text-align: center;
+            width: 320px;
+        }
+        h2 { margin-top: 0; color: #1c1e21; }
+        input {
+            padding: 12px;
+            width: 100%;
+            margin: 12px 0;
+            border: 1px solid #ccd0d5;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 12px 0;
+            width: 100%;
+            background: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        button:hover { background: #166fe5; }
+        #msg {
+            color: #e41e3f;
+            margin-top: 14px;
+            height: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>הזן סיסמה</h2>
+        <input type="password" id="pass" placeholder="סיסמה" autocomplete="off">
+        <button onclick="check()">כניסה</button>
+        <div id="msg"></div>
+    </div>
+
+    <script>
+        const KEY = "! My Name Is Oren";
+        const ENCRYPTED_PASSWORD = "ExV9Tm8p";
+        const ENCRYPTED_URL = "cnNiKnNgCRkITA==";
+
+        function xorDecrypt(encoded, key) {
+            try {
+                const str = atob(encoded);
+                let result = '';
+                for (let i = 0; i < str.length; i++) {
+                    result += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+                }
+                return result;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function check() {
+            const input = document.getElementById("pass").value;
+            const correctPassword = xorDecrypt(ENCRYPTED_PASSWORD, KEY);
+            const targetUrl = xorDecrypt(ENCRYPTED_URL, KEY);
+
+            if (input === correctPassword && targetUrl) {
+                window.location.href = targetUrl;
+            } else {
+                document.getElementById("msg").textContent = "סיסמה שגויה";
+                document.getElementById("pass").value = "";
+                document.getElementById("pass").focus();
+            }
+        }
+
+        document.getElementById("pass").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") check();
+        });
+    </script>
+</body>
+</html>
