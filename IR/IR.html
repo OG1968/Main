@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
     />
     <link rel="icon" href="IR.png" type="image/png">
-    <title>עורך תמונות</title>
+    <title>מקטין תמונות</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
@@ -349,7 +349,15 @@
         font-size: 11px;
         color: #666;
         font-family: "IBM Plex Mono", monospace;
-        margin: 2px 0 4px;
+        margin: 2px 0 2px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+      }
+      .frame-dims .new-dims {
+        color: #28a745;
+        font-weight: 600;
       }
       .frame-meta {
         font-size: 11px;
@@ -477,17 +485,6 @@
       <div class="header">
         <h1>🖼️ עורך תמונות</h1>
         <h2>שינוי גודל דחיסה / כיווץ תמונות</h2>
-        <div class="header-actions">
-          <button class="btn btn-primary" id="runBtn">📦 עבד הכל</button>
-          <button
-            class="btn btn-ghost"
-            id="downloadAllBtn"
-            style="display: none"
-          >
-            📥 ZIP
-          </button>
-          <button class="btn btn-danger" id="clearBtn">🗑️ נקה</button>
-        </div>
       </div>
 
       <div class="dropzone" id="dropzone">
@@ -584,6 +581,19 @@
           <span class="status" id="statusLine"></span>
         </div>
       </div>
+
+      <div class="header-actions" id="actionsBar" style="display: none; margin: 12px 0;">
+        <button class="btn btn-primary" id="runBtn">📦 עבד הכל</button>
+        <button
+          class="btn btn-ghost"
+          id="downloadAllBtn"
+          style="display: none"
+        >
+          📥 ZIP
+        </button>
+        <button class="btn btn-danger" id="clearBtn">🗑️ נקה</button>
+      </div>
+
       <div class="filmstrip" id="filmstrip"></div>
       <div class="eyebrow">⚡ כל התוכן הינו מקומי ואינו עולה לשרת</div>
       <div class="footer-wrap">
@@ -605,6 +615,7 @@
         const folderInput = document.getElementById("folderInput");
         const folderBtn = document.getElementById("folderBtn");
         const panel = document.getElementById("panel");
+        const actionsBar = document.getElementById("actionsBar");
         const filmstrip = document.getElementById("filmstrip");
         const modeDim = document.getElementById("modeDim");
         const modeSize = document.getElementById("modeSize");
@@ -652,6 +663,9 @@
 
             const newEl = document.getElementById("new-" + item.id);
             if (newEl) newEl.textContent = "—";
+
+            const dimsEl = document.getElementById("dims-" + item.id);
+            if (dimsEl) dimsEl.textContent = "—";
 
             const dl = document.getElementById("dl-" + item.id);
             if (dl) {
@@ -739,9 +753,19 @@
         dropzone.ondragleave = () => dropzone.classList.remove("drag");
         dropzone.ondrop = async (e) => {
           e.preventDefault();
+          e.stopPropagation();
           dropzone.classList.remove("drag");
-          const files = await getFilesFromDataTransfer(e.dataTransfer);
-          handleFiles(files);
+          try {
+            let files = await getFilesFromDataTransfer(e.dataTransfer);
+            // Extra safety: if still empty, force classic FileList
+            if ((!files || files.length === 0) && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+              files = Array.from(e.dataTransfer.files);
+            }
+            handleFiles(files || []);
+          } catch (err) {
+            console.error(err);
+            showToast("⚠️ שגיאה בגרירה: " + (err.message || err));
+          }
         };
         fileInput.onchange = () => handleFiles(fileInput.files);
         folderInput.onchange = () => {
@@ -770,83 +794,107 @@
 
         // Collect files from drag-and-drop (supports folders via webkitGetAsEntry)
         async function getFilesFromDataTransfer(dt) {
-          const items = dt.items;
-          if (!items || items.length === 0) {
-            return Array.from(dt.files || []);
-          }
-
-          const entries = [];
-          for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            if (item.webkitGetAsEntry) {
-              const entry = item.webkitGetAsEntry();
-              if (entry) entries.push(entry);
-            }
-          }
-
-          if (entries.length === 0) {
-            return Array.from(dt.files || []);
-          }
-
           const files = [];
 
-          function readAllEntries(reader) {
-            return new Promise((resolve, reject) => {
-              const result = [];
-              const doRead = () => {
-                reader.readEntries((batch) => {
-                  if (batch.length === 0) {
-                    resolve(result);
-                  } else {
-                    result.push(...batch);
-                    doRead();
-                  }
-                }, reject);
-              };
-              doRead();
-            });
-          }
-
-          async function walk(entry) {
-            if (entry.isFile) {
-              return new Promise((resolve) => {
-                entry.file(
-                  (f) => resolve([f]),
-                  () => resolve([]),
-                );
+          // Prefer DataTransferItemList when available
+          if (dt.items && dt.items.length > 0) {
+            const readAllEntries = (reader) =>
+              new Promise((resolve, reject) => {
+                const result = [];
+                const doRead = () => {
+                  reader.readEntries((batch) => {
+                    if (batch.length === 0) resolve(result);
+                    else {
+                      result.push(...batch);
+                      doRead();
+                    }
+                  }, reject);
+                };
+                doRead();
               });
-            }
-            if (entry.isDirectory) {
-              const reader = entry.createReader();
-              const children = await readAllEntries(reader);
-              const all = [];
-              for (const child of children) {
-                const childFiles = await walk(child);
-                all.push(...childFiles);
+
+            const walk = async (entry) => {
+              if (!entry) return [];
+              if (entry.isFile) {
+                return new Promise((resolve) => {
+                  entry.file(
+                    (f) => resolve(f ? [f] : []),
+                    () => resolve([]),
+                  );
+                });
               }
-              return all;
+              if (entry.isDirectory) {
+                try {
+                  const reader = entry.createReader();
+                  const children = await readAllEntries(reader);
+                  const all = [];
+                  for (const child of children) {
+                    all.push(...(await walk(child)));
+                  }
+                  return all;
+                } catch (_) {
+                  return [];
+                }
+              }
+              return [];
+            };
+
+            for (let i = 0; i < dt.items.length; i++) {
+              const item = dt.items[i];
+              if (item.kind !== "file") continue;
+
+              // Fast path for regular files – getAsFile() is synchronous & reliable
+              let asFile = null;
+              try {
+                asFile = item.getAsFile();
+              } catch (_) {}
+
+              if (asFile && asFile.size >= 0) {
+                const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+                if (!entry || entry.isFile) {
+                  files.push(asFile);
+                  continue;
+                }
+                if (entry.isDirectory) {
+                  files.push(...(await walk(entry)));
+                  continue;
+                }
+              }
+
+              // Fallback: pure entry walk
+              const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+              if (entry) {
+                files.push(...(await walk(entry)));
+              }
             }
-            return [];
           }
 
-          for (const entry of entries) {
-            const found = await walk(entry);
-            files.push(...found);
+          // Ultimate fallback – classic FileList
+          if (files.length === 0 && dt.files && dt.files.length > 0) {
+            return Array.from(dt.files);
           }
+
           return files;
         }
 
         function handleFiles(fileList) {
-          const files = Array.from(fileList || []).filter(
+          const raw = Array.from(fileList || []);
+          const files = raw.filter(
             (f) =>
               (f.type && f.type.startsWith("image/")) ||
-              /\.(jpe?g|png|webp|gif|bmp|tiff?)$/i.test(f.name || ""),
+              /\.(jpe?g|png|webp|gif|bmp|tiff?|heic|heif|avif)$/i.test(f.name || "") ||
+              (!f.type && f.size > 100) // last-resort: nameless/typeless files that look binary
           );
           if (!files.length) {
-            showToast("⚠️ לא נמצאו תמונות");
+            if (raw.length > 0) {
+              showToast("⚠️ " + raw.length + " קבצים התקבלו אך אף אחד לא זוהה כתמונה");
+            } else {
+              showToast("⚠️ לא נמצאו תמונות");
+            }
             return;
           }
           panel.style.display = "block";
+          actionsBar.style.display = "flex";
           let loaded = 0;
           const total = files.length;
           files.forEach((file) => {
@@ -893,7 +941,10 @@
           el.innerHTML = `
       <div class="frame-img-wrap"><img src="${item.origUrl}" loading="lazy"></div>
       <div class="frame-name" title="${item.file.name}">${item.file.name}</div>
-      <div class="frame-dims">${item.w} × ${item.h}px</div>
+      <div class="frame-dims">
+        <span>${item.w} × ${item.h}px</span>
+        <span class="new-dims" id="dims-${item.id}">—</span>
+      </div>
       <div class="frame-meta"><span>${fmtBytes(item.origSize)}</span><span class="new" id="new-${item.id}">—</span></div>
       <a class="frame-dl pending" id="dl-${item.id}">⏳ ממתין</a>
     `;
@@ -916,6 +967,7 @@
           filmstrip.innerHTML = "";
           updateStatus();
           panel.style.display = "none";
+          actionsBar.style.display = "none";
           showToast("🧹 נוקה");
         };
 
@@ -1119,6 +1171,10 @@
 
               document.getElementById("new-" + item.id).textContent =
                 "✅ " + sizeDisplay;
+              const dimsEl = document.getElementById("dims-" + item.id);
+              if (dimsEl) {
+                dimsEl.textContent = result.w + " × " + result.h + "px";
+              }
               const dl = document.getElementById("dl-" + item.id);
               dl.classList.remove("pending");
               dl.classList.add("ready");
