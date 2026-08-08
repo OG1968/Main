@@ -6,8 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
     />
-    <link rel="icon" href="IR.png" type="image/png">
-    <title>מקטין תמונות</title>
+    <link rel="icon" href="IR.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
@@ -41,7 +40,6 @@
         padding: 20px 18px 18px;
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       }
-
       /* ---- new center header ---- */
       .header {
         display: flex;
@@ -66,7 +64,6 @@
         margin: 0;
         letter-spacing: -0.3px;
       }
-
       /* header-actions row stays as is */
       .header-actions {
         display: flex;
@@ -144,7 +141,6 @@
         background: #dc3545;
         color: #fff;
       }
-
       .dropzone {
         background: #f8f9fa;
         border: 2px dashed #d0d0d0;
@@ -173,7 +169,6 @@
       .dropzone input {
         display: none;
       }
-
       .panel {
         background: #f1f3f5;
         border-radius: 20px;
@@ -214,7 +209,6 @@
       .modes button:not(.active):hover {
         border-color: #703efa;
       }
-
       .grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -260,7 +254,6 @@
         width: 80px;
         flex-shrink: 0;
       }
-
       .slider-row {
         display: flex;
         align-items: center;
@@ -278,7 +271,6 @@
         min-width: 40px;
         text-align: left;
       }
-
       .hint {
         font-size: 12px;
         color: #000000;
@@ -289,7 +281,6 @@
         border-radius: 30px;
         text-align: center;
       }
-
       .run-row {
         display: flex;
         flex-wrap: wrap;
@@ -301,11 +292,51 @@
         font-size: 13px;
         color: #444;
         font-weight: 600;
+        width: 100%;
       }
-      .status .n {
-        color: #703efa;
+      .progress-bar {
+        width: 100%;
+        height: 28px;
+        background: #555;
+        border-radius: 14px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
       }
-
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: #dc3545;
+        border-radius: 14px;
+        transition: width 0.25s ease, background 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+      }
+      .progress-fill.done {
+        background: #28a745;
+      }
+      .progress-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        color: #fff;
+        pointer-events: none;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+        transition: color 0.3s ease;
+      }
+      .progress-bar.done .progress-text {
+        color: #000;
+        text-shadow: none;
+      }
       .filmstrip {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -393,7 +424,6 @@
         background: #28a745;
         color: #fff;
       }
-
       .footer-wrap {
         margin-top: 20px;
         display: flex;
@@ -416,7 +446,6 @@
         max-width: 70px;
         height: auto;
       }
-
       .toast {
         position: fixed;
         bottom: 30px;
@@ -438,7 +467,6 @@
         opacity: 1;
         transform: translateY(0);
       }
-
       @media (max-width: 768px) {
         .container {
           padding: 12px 10px;
@@ -486,7 +514,6 @@
         <h1>🖼️ עורך תמונות</h1>
         <h2>שינוי גודל דחיסה / כיווץ תמונות</h2>
       </div>
-
       <div class="dropzone" id="dropzone">
         <input type="file" id="fileInput" multiple accept="image/*" />
         <input
@@ -510,14 +537,12 @@
           </button>
         </div>
       </div>
-
       <div class="panel" id="panel" style="display: none">
         <div class="field">⚙️ הגדרות עיבוד</div></br>
         <div class="modes">
           <button id="modeDim" class="active">לפי מידה</button>
           <button id="modeSize">לפי משקל</button>
         </div>
-
         <div id="dimFields">
           <div class="grid-2">
             <div class="field">
@@ -534,7 +559,6 @@
             יותר לא יוגדלו.
           </div>
         </div>
-
         <div id="sizeFields" style="display: none">
           <div class="grid-2">
             <div class="field">
@@ -558,7 +582,6 @@
             בלבד.
           </div>
         </div>
-
         <div class="grid-2">
           <div class="field"></br>
             <label>פורמט פלט</label>
@@ -576,12 +599,15 @@
             </div>
           </div>
         </div>
-
         <div class="run-row">
-          <span class="status" id="statusLine"></span>
+          <div class="status" id="statusLine">
+            <div class="progress-bar" id="progressBar">
+              <div class="progress-fill" id="progressFill"></div>
+              <div class="progress-text" id="progressText">0 / 0</div>
+            </div>
+          </div>
         </div>
       </div>
-
       <div class="header-actions" id="actionsBar" style="display: none; margin: 12px 0;">
         <button class="btn btn-primary" id="runBtn">📦 עבד הכל</button>
         <button
@@ -593,23 +619,18 @@
         </button>
         <button class="btn btn-danger" id="clearBtn">🗑️ נקה</button>
       </div>
-
       <div class="filmstrip" id="filmstrip"></div>
       <div class="eyebrow">⚡ כל התוכן הינו מקומי ואינו עולה לשרת</div>
       <div class="footer-wrap">
         <div class="footer-copy">© 2026 כל הזכויות שמורות</div>
         <div class="footer-logo">
-          <img src="OG_Blue_Logo2.png" alt="לוגו" />
-        </div>
+          <img src="OG_Blue_Logo2.png" alt="Logo" />
       </div>
     </div>
-
     <div class="toast" id="toast"></div>
-
     <script>
       (function () {
         "use strict";
-
         const dropzone = document.getElementById("dropzone");
         const fileInput = document.getElementById("fileInput");
         const folderInput = document.getElementById("folderInput");
@@ -630,10 +651,8 @@
         const downloadAllBtn = document.getElementById("downloadAllBtn");
         const statusLine = document.getElementById("statusLine");
         const toastEl = document.getElementById("toast");
-
         let mode = "dim";
         let items = [];
-
         function showToast(msg, dur = 3000) {
           toastEl.textContent = msg;
           toastEl.classList.add("show");
@@ -643,13 +662,11 @@
             dur,
           );
         }
-
         function fmtBytes(b) {
           if (b < 1024) return b + " B";
           if (b < 1048576) return (b / 1024).toFixed(1) + " KB";
           return (b / 1048576).toFixed(2) + " MB";
         }
-
         function resetResults() {
           items.forEach((item) => {
             if (item.resultUrl) {
@@ -660,13 +677,10 @@
             item.resultW = 0;
             item.resultH = 0;
             item.resultType = null;
-
             const newEl = document.getElementById("new-" + item.id);
             if (newEl) newEl.textContent = "—";
-
             const dimsEl = document.getElementById("dims-" + item.id);
             if (dimsEl) dimsEl.textContent = "—";
-
             const dl = document.getElementById("dl-" + item.id);
             if (dl) {
               dl.classList.remove("ready");
@@ -678,7 +692,6 @@
           });
           updateStatus();
         }
-
         modeDim.onclick = () => {
           mode = "dim";
           modeDim.classList.add("active");
@@ -697,12 +710,10 @@
           qualityField.style.display = "none";
           resetResults();
         };
-
         qualitySlider.oninput = () => {
           qualityVal.textContent = qualitySlider.value + "%";
           resetResults();
         };
-
         [
           "maxW",
           "maxH",
@@ -717,17 +728,14 @@
             el.addEventListener("input", resetResults);
           }
         });
-
         dropzone.onclick = (e) => {
           if (e.target.closest("#folderBtn")) return;
           fileInput.click();
         };
-
         // Modern directory picker (Chrome/Edge) with fallback to webkitdirectory
         folderBtn.onclick = async (e) => {
           e.stopPropagation();
           e.preventDefault();
-
           if (window.showDirectoryPicker) {
             try {
               const dirHandle = await window.showDirectoryPicker();
@@ -745,7 +753,6 @@
             folderInput.click();
           }
         };
-
         dropzone.ondragover = (e) => {
           e.preventDefault();
           dropzone.classList.add("drag");
@@ -772,7 +779,6 @@
           handleFiles(folderInput.files);
           folderInput.value = "";
         };
-
         // Collect all files recursively from a FileSystemDirectoryHandle
         async function collectFilesFromDirHandle(dirHandle) {
           const files = [];
@@ -791,11 +797,9 @@
           await walk(dirHandle);
           return files;
         }
-
         // Collect files from drag-and-drop (supports folders via webkitGetAsEntry)
         async function getFilesFromDataTransfer(dt) {
           const files = [];
-
           // Prefer DataTransferItemList when available
           if (dt.items && dt.items.length > 0) {
             const readAllEntries = (reader) =>
@@ -812,7 +816,6 @@
                 };
                 doRead();
               });
-
             const walk = async (entry) => {
               if (!entry) return [];
               if (entry.isFile) {
@@ -838,17 +841,14 @@
               }
               return [];
             };
-
             for (let i = 0; i < dt.items.length; i++) {
               const item = dt.items[i];
               if (item.kind !== "file") continue;
-
               // Fast path for regular files – getAsFile() is synchronous & reliable
               let asFile = null;
               try {
                 asFile = item.getAsFile();
               } catch (_) {}
-
               if (asFile && asFile.size >= 0) {
                 const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
                 if (!entry || entry.isFile) {
@@ -860,7 +860,6 @@
                   continue;
                 }
               }
-
               // Fallback: pure entry walk
               const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
               if (entry) {
@@ -868,15 +867,12 @@
               }
             }
           }
-
           // Ultimate fallback – classic FileList
           if (files.length === 0 && dt.files && dt.files.length > 0) {
             return Array.from(dt.files);
           }
-
           return files;
         }
-
         function handleFiles(fileList) {
           const raw = Array.from(fileList || []);
           const files = raw.filter(
@@ -933,7 +929,6 @@
           });
           fileInput.value = "";
         }
-
         function renderFrame(item) {
           const el = document.createElement("div");
           el.className = "frame";
@@ -950,14 +945,25 @@
     `;
           filmstrip.appendChild(el);
         }
-
         function updateStatus() {
+          const total = items.length;
           const done = items.filter((i) => i.resultBlob).length;
-          statusLine.innerHTML = `<span class="n">${items.length}</span> תמונות · <span class="n">${done}</span> עובדו`;
+          const fill = document.getElementById("progressFill");
+          const text = document.getElementById("progressText");
+          const bar = document.getElementById("progressBar");
+          const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+          fill.style.width = pct + "%";
+          text.textContent = done + " / " + total;
+          if (total > 0 && done === total) {
+            fill.classList.add("done");
+            bar.classList.add("done");
+          } else {
+            fill.classList.remove("done");
+            bar.classList.remove("done");
+          }
           downloadAllBtn.style.display = done ? "inline-flex" : "none";
           runBtn.disabled = !items.length;
         }
-
         clearBtn.onclick = () => {
           items.forEach((i) => {
             URL.revokeObjectURL(i.origUrl);
@@ -970,7 +976,6 @@
           actionsBar.style.display = "none";
           showToast("🧹 נוקה");
         };
-
         function loadImage(url) {
           return new Promise((res, rej) => {
             const i = new Image();
@@ -979,7 +984,6 @@
             i.src = url;
           });
         }
-
         function canvasToBlob(canvas, type, quality) {
           return new Promise((res) => {
             if (type === "image/png") {
@@ -989,7 +993,6 @@
             }
           });
         }
-
         function createCanvas(w, h, img) {
           const canvas = document.createElement("canvas");
           canvas.width = w;
@@ -1000,7 +1003,6 @@
           ctx.drawImage(img, 0, 0, w, h);
           return canvas;
         }
-
         async function resizeByDimension(item, maxW, maxH, type, quality) {
           const img = await loadImage(item.origUrl);
           let w = img.naturalWidth,
@@ -1013,7 +1015,6 @@
           const blob = await canvasToBlob(canvas, type, q);
           return { blob, w, h, type };
         }
-
         async function resizeByTargetSize(
           item,
           targetBytes,
@@ -1026,30 +1027,24 @@
             : selectedType === "image/webp"
               ? "image/webp"
               : "image/jpeg";
-
           const img = await loadImage(item.origUrl);
           const origW = img.naturalWidth;
           const origH = img.naturalHeight;
-
           let softMax = 0;
           if (capDim && capDim > 0) softMax = capDim;
-
           async function encode(w, h, quality) {
             const canvas = createCanvas(w, h, img);
             return canvasToBlob(canvas, effType, isPng ? undefined : quality);
           }
-
           async function bestQualityUnder(w, h) {
             if (isPng) {
               const blob = await encode(w, h);
               return blob.size <= targetBytes ? blob : null;
             }
-
             const maxBlob = await encode(w, h, 1.0);
             if (maxBlob.size <= targetBytes) {
               return maxBlob;
             }
-
             let lo = 0.05;
             let hi = 1.0;
             let best = null;
@@ -1065,7 +1060,6 @@
             }
             return best;
           }
-
           // 1) original dimensions
           {
             const fullBest = await bestQualityUnder(origW, origH);
@@ -1073,7 +1067,6 @@
               return { blob: fullBest, w: origW, h: origH, type: effType };
             }
           }
-
           let startW = origW;
           let startH = origH;
           if (softMax > 0 && (origW > softMax || origH > softMax)) {
@@ -1085,17 +1078,14 @@
               return { blob: cappedBest, w: startW, h: startH, type: effType };
             }
           }
-
           let bestBlob = null;
           let bestW = startW;
           let bestH = startH;
-
           const scales = [];
           for (let s = 0.92; s >= 0.15; s -= 0.04) {
             scales.push(Math.round(s * 100) / 100);
           }
           scales.push(0.12, 0.1, 0.08);
-
           for (const scale of scales) {
             const w = Math.max(48, Math.round(startW * scale));
             const h = Math.max(48, Math.round(startH * scale));
@@ -1109,7 +1099,6 @@
               break;
             }
           }
-
           if (!bestBlob) {
             const w = Math.max(48, Math.round(startW * 0.12));
             const h = Math.max(48, Math.round(startH * 0.12));
@@ -1117,10 +1106,8 @@
             bestW = w;
             bestH = h;
           }
-
           return { blob: bestBlob, w: bestW, h: bestH, type: effType };
         }
-
         runBtn.onclick = async () => {
           if (!items.length) return;
           runBtn.disabled = true;
@@ -1128,7 +1115,6 @@
           const format = formatSel.value;
           const quality = parseInt(qualitySlider.value, 10) / 100;
           let processed = 0;
-
           for (const item of items) {
             try {
               let result;
@@ -1159,16 +1145,13 @@
                   format,
                 );
               }
-
               if (item.resultUrl) URL.revokeObjectURL(item.resultUrl);
               item.resultBlob = result.blob;
               item.resultW = result.w;
               item.resultH = result.h;
               item.resultType = result.type;
               item.resultUrl = URL.createObjectURL(result.blob);
-
               const sizeDisplay = fmtBytes(result.blob.size);
-
               document.getElementById("new-" + item.id).textContent =
                 "✅ " + sizeDisplay;
               const dimsEl = document.getElementById("dims-" + item.id);
@@ -1194,7 +1177,6 @@
           runBtn.textContent = "📦 עבד הכל";
           showToast("✅ " + processed + " תמונות עובדו");
         };
-
         downloadAllBtn.onclick = async () => {
           const done = items.filter((i) => i.resultBlob);
           if (!done.length) return;
@@ -1217,7 +1199,6 @@
           downloadAllBtn.textContent = "📥 ZIP";
           showToast("📦 ZIP הורד");
         };
-
         updateStatus();
         showToast("📸 העלה תמונות להתחלה", 3500);
       })();
