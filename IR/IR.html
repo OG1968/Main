@@ -631,23 +631,26 @@
       .sticky-actions {
         display: none;
         position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
         z-index: 900;
-        background: transparent;
-        border-top: none;
-        padding: 12px 16px;
-        box-shadow: none;
+        background: #ffe699;
+        border: 1.5px solid #2c3e50;
+        border-radius: 20px;
+        padding: 12px 18px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
         justify-content: center;
         gap: 10px;
         flex-wrap: wrap;
+        max-width: calc(100% - 24px);
+        width: auto;
       }
       .sticky-actions.visible {
         display: flex;
       }
       body.has-sticky {
-        padding-bottom: 80px;
+        padding-bottom: 88px;
       }
 
       /* ---- Theme toggle ---- */
@@ -843,9 +846,9 @@
         background: #16a34a;
       }
       body.dark .sticky-actions {
-        background: transparent;
-        border-top: none;
-        box-shadow: none;
+        background: #3a4150;
+        border-color: #c8cdd6;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
       }
       body.dark .theme-toggle {
         background: #2a2e38;
@@ -1053,7 +1056,7 @@
         let isProcessing = false;
         let cancelRequested = false;
         const CONCURRENCY = 3;
-        const STICKY_THRESHOLD = 4; // show sticky bar when >= this many images
+        let actionsBarVisible = true; // true = upper buttons in view → hide sticky
 
         // ---- Dark mode ----
         function applyTheme(dark) {
@@ -1077,9 +1080,10 @@
           applyTheme(!document.body.classList.contains("dark"));
         };
 
-        // ---- Sticky bar visibility ----
+        // ---- Sticky bar: show only when upper actionsBar is scrolled out of view ----
         function updateStickyBar() {
-          const show = items.length >= STICKY_THRESHOLD;
+          const hasItems = items.length > 0;
+          const show = hasItems && !actionsBarVisible;
           stickyActions.classList.toggle("visible", show);
           document.body.classList.toggle("has-sticky", show);
           stickyZipBtn.style.display = items.some((i) => i.resultBlob) ? "inline-flex" : "none";
@@ -1088,6 +1092,31 @@
           stickyRunBtn.style.display = isProcessing ? "none" : "inline-flex";
           stickyCancelBtn.style.display = isProcessing ? "inline-flex" : "none";
         }
+
+        function checkActionsBarVisibility() {
+          if (!items.length || actionsBar.style.display === "none") {
+            actionsBarVisible = true;
+          } else {
+            const rect = actionsBar.getBoundingClientRect();
+            actionsBarVisible = rect.bottom > 0 && rect.top < window.innerHeight;
+          }
+          updateStickyBar();
+        }
+
+        if (typeof IntersectionObserver !== "undefined") {
+          const stickyObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                actionsBarVisible = entry.isIntersecting;
+                updateStickyBar();
+              });
+            },
+            { threshold: 0, rootMargin: "0px" }
+          );
+          stickyObserver.observe(actionsBar);
+        }
+        window.addEventListener("scroll", checkActionsBarVisibility, { passive: true });
+        window.addEventListener("resize", checkActionsBarVisibility, { passive: true });
 
         function setProcessingUI(active) {
           isProcessing = active;
