@@ -8,7 +8,7 @@
     />
     <title>עריכת תמונות</title>
 
-    <link rel="icon" href="IR/IR.png" type="image/png" />
+    <link rel="icon" href="IR.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
@@ -43,7 +43,6 @@
         padding: 20px 18px 18px;
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
       }
-      /* ---- new center header ---- */
       .header {
         display: flex;
         flex-direction: column;
@@ -67,7 +66,6 @@
         margin: 0;
         letter-spacing: -0.3px;
       }
-      /* header-actions row stays as is */
       .header-actions {
         display: flex;
         gap: 8px;
@@ -144,6 +142,15 @@
         background: #dc3545;
         color: #fff;
       }
+      .btn-secondary {
+        background: #ffffff;
+        border: 2px solid #6c757d;
+        color: #6c757d;
+      }
+      .btn-secondary:hover {
+        background: #6c757d;
+        color: #fff;
+      }
       .dropzone {
         background: #f8f9fa;
         border: 2px dashed #d0d0d0;
@@ -180,10 +187,10 @@
       }
       .panel-title {
         font-weight: 700;
-        font-size: 20px;
+        font-size: 18px;
         color: #000000;
-        margin-bottom: 10px;
-        font-family: "IBM Plex Mono",arial, sans-serif;
+        margin-bottom: 12px;
+        font-family: "IBM Plex Mono", arial, sans-serif;
         letter-spacing: 0.04em;
       }
       .modes {
@@ -305,6 +312,9 @@
         flex-direction: column;
         gap: 3px;
       }
+      .progress-row.hidden {
+        display: none;
+      }
       .progress-label {
         font-size: 12px;
         font-weight: 600;
@@ -370,11 +380,20 @@
         display: flex;
         flex-direction: column;
         position: relative;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .frame.processed {
+        border-color: #28a745;
+        box-shadow: 0 2px 10px rgba(40, 167, 69, 0.15);
+      }
+      .frame.error {
+        border-color: #dc3545;
+        box-shadow: 0 2px 10px rgba(220, 53, 69, 0.12);
       }
       .frame-remove {
         position: absolute;
         top: 6px;
-        left: 6px; /* RTL: left side looks like "corner" for remove */
+        left: 6px;
         width: 26px;
         height: 26px;
         border-radius: 50%;
@@ -397,6 +416,26 @@
         background: #c82333;
         transform: scale(1.1);
       }
+      .frame-badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        z-index: 4;
+        background: #28a745;
+        color: #fff;
+        display: none;
+      }
+      .frame.processed .frame-badge {
+        display: block;
+      }
+      .frame.error .frame-badge {
+        display: block;
+        background: #dc3545;
+      }
       .frame-img-wrap {
         background: #fff;
         border-radius: 10px;
@@ -407,6 +446,7 @@
         height: 110px;
         margin-bottom: 8px;
         border: 1px solid #eee;
+        position: relative;
       }
       .frame-img-wrap img {
         max-width: 100%;
@@ -440,11 +480,22 @@
         color: #555;
         display: flex;
         justify-content: space-between;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
         font-weight: 500;
       }
       .frame-meta .new {
         color: #28a745;
+      }
+      .frame-savings {
+        font-size: 11px;
+        font-weight: 700;
+        color: #28a745;
+        text-align: center;
+        margin-bottom: 6px;
+        min-height: 16px;
+      }
+      .frame-savings.neutral {
+        color: #888;
       }
       .frame-dl {
         display: block;
@@ -468,6 +519,10 @@
       .frame-dl.ready:hover {
         background: #28a745;
         color: #fff;
+      }
+      .frame-dl.error {
+        border-color: #dc3545;
+        color: #dc3545;
       }
       .footer-wrap {
         margin-top: 20px;
@@ -507,6 +562,7 @@
         transform: translateY(20px);
         transition: all 0.3s ease;
         pointer-events: none;
+        max-width: 320px;
       }
       .toast.show {
         opacity: 1;
@@ -550,11 +606,271 @@
           height: 90px;
         }
       }
+
+      /* ---- Card entrance animation ---- */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .frame {
+        animation: fadeIn 0.35s ease-out both;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .frame {
+          animation: none;
+        }
+      }
+
+      /* ---- Sticky bottom action bar ---- */
+      .sticky-actions {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 900;
+        background: transparent;
+        border-top: none;
+        padding: 12px 16px;
+        box-shadow: none;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .sticky-actions.visible {
+        display: flex;
+      }
+      body.has-sticky {
+        padding-bottom: 80px;
+      }
+
+      /* ---- Theme toggle ---- */
+      .theme-toggle {
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 1000;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid #703efa;
+        background: #fff;
+        color: #703efa;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+        transition: all 0.2s;
+      }
+      .theme-toggle:hover {
+        background: #703efa;
+        color: #fff;
+        transform: scale(1.08);
+      }
+
+      /* ---- Dark mode ---- */
+      body.dark {
+        background: #1a1d23;
+      }
+      body.dark .container {
+        background: #2a2e38;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      }
+      body.dark .header h1 {
+        color: #f0f0f0;
+      }
+      body.dark .header h2 {
+        color: #b0b8c4;
+      }
+      body.dark .dropzone {
+        background: #343a46;
+        border-color: #4a5160;
+      }
+      body.dark .dropzone:hover,
+      body.dark .dropzone.drag {
+        border-color: #8b7cf7;
+        background: #3a4150;
+      }
+      body.dark .dropzone .dz-title {
+        color: #f0f0f0;
+      }
+      body.dark .dropzone .dz-sub {
+        color: #9aa3b2;
+      }
+      body.dark .panel {
+        background: #343a46;
+      }
+      body.dark .panel-title {
+        color: #f0f0f0;
+      }
+      body.dark .modes button {
+        background: #2a2e38;
+        border-color: #4a5160;
+        color: #d0d5dd;
+      }
+      body.dark .modes button.active {
+        border-color: #8b7cf7;
+        background: #8b7cf7;
+        color: #fff;
+      }
+      body.dark .modes button:not(.active):hover {
+        border-color: #8b7cf7;
+      }
+      body.dark .field label {
+        color: #e0e4ea;
+      }
+      body.dark .field input[type="number"],
+      body.dark .field select {
+        background: #2a2e38;
+        border-color: #4a5160;
+        color: #f0f0f0;
+      }
+      body.dark .field input[type="number"]:focus,
+      body.dark .field select:focus {
+        border-color: #8b7cf7;
+        box-shadow: 0 0 0 3px rgba(139, 124, 247, 0.25);
+      }
+      body.dark .hint {
+        background: #3a4150;
+        color: #c8cdd6;
+      }
+      body.dark .slider-val {
+        color: #a78bfa;
+      }
+      body.dark .slider-row input[type="range"] {
+        accent-color: #8b7cf7;
+      }
+      body.dark .frame {
+        background: #343a46;
+        border-color: #4a5160;
+      }
+      body.dark .frame.processed {
+        border-color: #34d399;
+        box-shadow: 0 2px 10px rgba(52, 211, 153, 0.15);
+      }
+      body.dark .frame.error {
+        border-color: #f87171;
+      }
+      body.dark .frame-img-wrap {
+        background: #2a2e38;
+        border-color: #4a5160;
+      }
+      body.dark .frame-name {
+        color: #e8eaed;
+      }
+      body.dark .frame-dims {
+        color: #9aa3b2;
+      }
+      body.dark .frame-dims .new-dims {
+        color: #34d399;
+      }
+      body.dark .frame-meta {
+        color: #9aa3b2;
+      }
+      body.dark .frame-meta .new {
+        color: #34d399;
+      }
+      body.dark .frame-savings {
+        color: #34d399;
+      }
+      body.dark .frame-savings.neutral {
+        color: #9aa3b2;
+      }
+      body.dark .frame-dl {
+        border-color: #4a5160;
+        color: #6b7280;
+      }
+      body.dark .frame-dl.ready {
+        border-color: #34d399;
+        color: #34d399;
+      }
+      body.dark .frame-dl.ready:hover {
+        background: #34d399;
+        color: #111;
+      }
+      body.dark .frame-dl.error {
+        border-color: #f87171;
+        color: #f87171;
+      }
+      body.dark .eyebrow {
+        color: #a78bfa;
+      }
+      body.dark .footer-wrap {
+        border-top-color: #4a5160;
+      }
+      body.dark .footer-copy {
+        color: #9aa3b2;
+      }
+      body.dark .btn-ghost {
+        background: #2a2e38;
+        border-color: #8b7cf7;
+        color: #a78bfa;
+      }
+      body.dark .btn-ghost:hover {
+        background: #8b7cf7;
+        color: #fff;
+      }
+      body.dark .btn-outline {
+        background: #2a2e38;
+        border-color: #60a5fa;
+        color: #60a5fa;
+      }
+      body.dark .btn-outline:hover {
+        background: #60a5fa;
+        color: #111;
+      }
+      body.dark .btn-danger {
+        background: #2a2e38;
+        border-color: #f87171;
+        color: #f87171;
+      }
+      body.dark .btn-danger:hover {
+        background: #f87171;
+        color: #111;
+      }
+      body.dark .btn-primary {
+        background: #22c55e;
+      }
+      body.dark .btn-primary:hover {
+        background: #16a34a;
+      }
+      body.dark .sticky-actions {
+        background: transparent;
+        border-top: none;
+        box-shadow: none;
+      }
+      body.dark .theme-toggle {
+        background: #2a2e38;
+        border-color: #8b7cf7;
+        color: #a78bfa;
+      }
+      body.dark .theme-toggle:hover {
+        background: #8b7cf7;
+        color: #fff;
+      }
+      body.dark .toast {
+        background: #e8eaed;
+        color: #1a1d23;
+      }
+      body.dark .progress-label {
+        color: #9aa3b2;
+      }
+      body.dark .status {
+        color: #c8cdd6;
+      }
     </style>
   </head>
   <body>
+    <button class="theme-toggle" id="themeToggle" title="מצב כהה / בהיר" aria-label="החלף מצב תצוגה">🌙</button>
     <div class="container">
-      <!-- header: everything centered -->
       <div class="header">
         <h1>🖼️ עורך תמונות</h1>
         <h2>שינוי גודל דחיסה / כיווץ תמונות</h2>
@@ -583,7 +899,7 @@
         </div>
       </div>
       <div class="panel" id="panel" style="display: none">
-        <div class="field">⚙️ הגדרות עיבוד</div></br>
+        <div class="panel-title">⚙️ הגדרות עיבוד</div>
         <div class="modes">
           <button id="modeDim" class="active">לפי מידה</button>
           <button id="modeSize">לפי משקל</button>
@@ -628,7 +944,7 @@
           </div>
         </div>
         <div class="grid-2">
-          <div class="field"></br>
+          <div class="field">
             <label>פורמט פלט</label>
             <select id="format">
               <option value="image/jpeg">JPEG</option>
@@ -646,7 +962,7 @@
         </div>
         <div class="run-row">
           <div class="status" id="statusLine">
-            <div class="progress-row" id="loadProgressRow">
+            <div class="progress-row hidden" id="loadProgressRow">
               <div class="progress-label">
                 <span>📥 טעינה</span>
                 <span id="loadProgressLabel">0 / 0</span>
@@ -656,7 +972,7 @@
                 <div class="progress-text" id="loadProgressText">0 / 0</div>
               </div>
             </div>
-            <div class="progress-row" id="processProgressRow">
+            <div class="progress-row hidden" id="processProgressRow">
               <div class="progress-label">
                 <span>⚙️ עיבוד</span>
                 <span id="processProgressLabel">0 / 0</span>
@@ -686,7 +1002,13 @@
         <div class="footer-copy">© 2026 כל הזכויות שמורות</div>
         <div class="footer-logo">
           <img src="OG_Blue_Logo2.png" alt="Logo" />
+        </div>
       </div>
+    </div>
+    <div class="sticky-actions" id="stickyActions">
+      <button class="btn btn-primary" id="stickyRunBtn">📦 עבד הכל</button>
+      <button class="btn btn-ghost" id="stickyZipBtn" style="display: none">📥 ZIP</button>
+      <button class="btn btn-danger" id="stickyClearBtn">🗑️ נקה</button>
     </div>
     <div class="toast" id="toast"></div>
     <script>
@@ -712,8 +1034,52 @@
         const downloadAllBtn = document.getElementById("downloadAllBtn");
         const statusLine = document.getElementById("statusLine");
         const toastEl = document.getElementById("toast");
+        const loadProgressRow = document.getElementById("loadProgressRow");
+        const processProgressRow = document.getElementById("processProgressRow");
+        const stickyActions = document.getElementById("stickyActions");
+        const stickyRunBtn = document.getElementById("stickyRunBtn");
+        const stickyZipBtn = document.getElementById("stickyZipBtn");
+        const stickyClearBtn = document.getElementById("stickyClearBtn");
+        const themeToggle = document.getElementById("themeToggle");
+
         let mode = "dim";
         let items = [];
+        let isProcessing = false;
+        const CONCURRENCY = 3;
+        const STICKY_THRESHOLD = 4; // show sticky bar when >= this many images
+
+        // ---- Dark mode ----
+        function applyTheme(dark) {
+          document.body.classList.toggle("dark", dark);
+          themeToggle.textContent = dark ? "☀️" : "🌙";
+          themeToggle.title = dark ? "מצב בהיר" : "מצב כהה";
+          try {
+            localStorage.setItem("imgEditorTheme", dark ? "dark" : "light");
+          } catch (_) {}
+        }
+        (function initTheme() {
+          let preferDark = false; // ברירת מחדל: מצב בהיר
+          try {
+            const saved = localStorage.getItem("imgEditorTheme");
+            if (saved === "dark") preferDark = true;
+            // אם אין שמירה / light – נשארים במצב בהיר
+          } catch (_) {}
+          applyTheme(preferDark);
+        })();
+        themeToggle.onclick = () => {
+          applyTheme(!document.body.classList.contains("dark"));
+        };
+
+        // ---- Sticky bar visibility ----
+        function updateStickyBar() {
+          const show = items.length >= STICKY_THRESHOLD;
+          stickyActions.classList.toggle("visible", show);
+          document.body.classList.toggle("has-sticky", show);
+          stickyZipBtn.style.display = items.some((i) => i.resultBlob) ? "inline-flex" : "none";
+          stickyRunBtn.disabled = !items.length || isProcessing;
+          stickyRunBtn.textContent = isProcessing ? "⏳ מעבד..." : "📦 עבד הכל";
+        }
+
         function showToast(msg, dur = 3000) {
           toastEl.textContent = msg;
           toastEl.classList.add("show");
@@ -723,11 +1089,20 @@
             dur,
           );
         }
+
         function fmtBytes(b) {
           if (b < 1024) return b + " B";
           if (b < 1048576) return (b / 1024).toFixed(1) + " KB";
-          return (b / 1048576).toFixed(2) + " MB";
+          if (b < 1073741824) return (b / 1048576).toFixed(2) + " MB";
+          return (b / 1073741824).toFixed(2) + " GB";
         }
+
+        function calcSavings(orig, next) {
+          if (!orig || orig <= 0) return null;
+          const pct = Math.round(((orig - next) / orig) * 100);
+          return pct;
+        }
+
         function resetResults() {
           items.forEach((item) => {
             if (item.resultUrl) {
@@ -738,13 +1113,32 @@
             item.resultW = 0;
             item.resultH = 0;
             item.resultType = null;
+            item.error = null;
+
+            const frame = document.getElementById("frame-" + item.id);
+            if (frame) {
+              frame.classList.remove("processed", "error");
+              const badge = frame.querySelector(".frame-badge");
+              if (badge) badge.textContent = "";
+            }
+
+            const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
+            if (imgEl && item.origUrl) {
+              imgEl.src = item.origUrl;
+            }
+
             const newEl = document.getElementById("new-" + item.id);
             if (newEl) newEl.textContent = "—";
             const dimsEl = document.getElementById("dims-" + item.id);
             if (dimsEl) dimsEl.textContent = "—";
+            const savingsEl = document.getElementById("savings-" + item.id);
+            if (savingsEl) {
+              savingsEl.textContent = "";
+              savingsEl.classList.remove("neutral");
+            }
             const dl = document.getElementById("dl-" + item.id);
             if (dl) {
-              dl.classList.remove("ready");
+              dl.classList.remove("ready", "error");
               dl.classList.add("pending");
               dl.textContent = "⏳ ממתין";
               dl.removeAttribute("href");
@@ -752,8 +1146,11 @@
             }
           });
           updateStatus();
+          processProgressRow.classList.add("hidden");
         }
+
         modeDim.onclick = () => {
+          if (isProcessing) return;
           mode = "dim";
           modeDim.classList.add("active");
           modeSize.classList.remove("active");
@@ -762,7 +1159,9 @@
           qualityField.style.display = "block";
           resetResults();
         };
+
         modeSize.onclick = () => {
+          if (isProcessing) return;
           mode = "size";
           modeSize.classList.add("active");
           modeDim.classList.remove("active");
@@ -771,29 +1170,25 @@
           qualityField.style.display = "none";
           resetResults();
         };
+
         qualitySlider.oninput = () => {
           qualityVal.textContent = qualitySlider.value + "%";
-          resetResults();
+          if (!isProcessing) resetResults();
         };
-        [
-          "maxW",
-          "maxH",
-          "targetSize",
-          "targetUnit",
-          "capDim",
-          "format",
-        ].forEach((id) => {
+
+        ["maxW", "maxH", "targetSize", "targetUnit", "capDim", "format"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) {
-            el.addEventListener("change", resetResults);
-            el.addEventListener("input", resetResults);
+            el.addEventListener("change", () => { if (!isProcessing) resetResults(); });
+            el.addEventListener("input", () => { if (!isProcessing) resetResults(); });
           }
         });
+
         dropzone.onclick = (e) => {
           if (e.target.closest("#folderBtn")) return;
           fileInput.click();
         };
-        // Modern directory picker (Chrome/Edge) with fallback to webkitdirectory
+
         folderBtn.onclick = async (e) => {
           e.stopPropagation();
           e.preventDefault();
@@ -806,7 +1201,6 @@
             } catch (err) {
               if (err.name !== "AbortError") {
                 console.error(err);
-                // fallback
                 folderInput.click();
               }
             }
@@ -814,6 +1208,7 @@
             folderInput.click();
           }
         };
+
         dropzone.ondragover = (e) => {
           e.preventDefault();
           dropzone.classList.add("drag");
@@ -825,7 +1220,6 @@
           dropzone.classList.remove("drag");
           try {
             let files = await getFilesFromDataTransfer(e.dataTransfer);
-            // Extra safety: if still empty, force classic FileList
             if ((!files || files.length === 0) && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
               files = Array.from(e.dataTransfer.files);
             }
@@ -835,12 +1229,13 @@
             showToast("⚠️ שגיאה בגרירה: " + (err.message || err));
           }
         };
+
         fileInput.onchange = () => handleFiles(fileInput.files);
         folderInput.onchange = () => {
           handleFiles(folderInput.files);
           folderInput.value = "";
         };
-        // Collect all files recursively from a FileSystemDirectoryHandle
+
         async function collectFilesFromDirHandle(dirHandle) {
           const files = [];
           async function walk(handle) {
@@ -858,10 +1253,9 @@
           await walk(dirHandle);
           return files;
         }
-        // Collect files from drag-and-drop (supports folders via webkitGetAsEntry)
+
         async function getFilesFromDataTransfer(dt) {
           const files = [];
-          // Prefer DataTransferItemList when available
           if (dt.items && dt.items.length > 0) {
             const readAllEntries = (reader) =>
               new Promise((resolve, reject) => {
@@ -905,7 +1299,6 @@
             for (let i = 0; i < dt.items.length; i++) {
               const item = dt.items[i];
               if (item.kind !== "file") continue;
-              // Fast path for regular files – getAsFile() is synchronous & reliable
               let asFile = null;
               try {
                 asFile = item.getAsFile();
@@ -921,42 +1314,57 @@
                   continue;
                 }
               }
-              // Fallback: pure entry walk
               const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
               if (entry) {
                 files.push(...(await walk(entry)));
               }
             }
           }
-          // Ultimate fallback – classic FileList
           if (files.length === 0 && dt.files && dt.files.length > 0) {
             return Array.from(dt.files);
           }
           return files;
         }
+
+        function isSupportedImage(file) {
+          const name = (file.name || "").toLowerCase();
+          const type = (file.type || "").toLowerCase();
+          // Explicitly supported formats (no HEIC/HEIF – no decoder available)
+          if (type.startsWith("image/") && !type.includes("heic") && !type.includes("heif")) {
+            return true;
+          }
+          return /\.(jpe?g|png|webp|gif|bmp|tiff?)$/i.test(name);
+        }
+
         function handleFiles(fileList) {
           const raw = Array.from(fileList || []);
-          const files = raw.filter(
-            (f) =>
-              (f.type && f.type.startsWith("image/")) ||
-              /\.(jpe?g|png|webp|gif|bmp|tiff?|heic|heif|avif)$/i.test(f.name || "") ||
-              (!f.type && f.size > 100) // last-resort: nameless/typeless files that look binary
-          );
+          const files = raw.filter(isSupportedImage);
+          const skipped = raw.length - files.length;
+
           if (!files.length) {
             if (raw.length > 0) {
-              showToast("⚠️ " + raw.length + " קבצים התקבלו אך אף אחד לא זוהה כתמונה");
+              showToast("⚠️ " + raw.length + " קבצים התקבלו אך אף אחד לא זוהה כתמונה נתמכת");
             } else {
               showToast("⚠️ לא נמצאו תמונות");
             }
             return;
           }
+
+          if (skipped > 0) {
+            showToast("ℹ️ " + skipped + " קבצים דולגו (פורמט לא נתמך)");
+          }
+
           panel.style.display = "block";
           actionsBar.style.display = "flex";
+          loadProgressRow.classList.remove("hidden");
+
           let loaded = 0;
-          const baseCount = items.length;          // כמה כבר היו לפני ההעלאה הנוכחית
+          let failed = 0;
+          const baseCount = items.length;
           const totalToLoad = files.length;
           const expectedTotal = baseCount + totalToLoad;
           updateLoadProgress(baseCount, expectedTotal);
+
           function isTiff(file) {
             const name = (file.name || "").toLowerCase();
             return (
@@ -965,13 +1373,16 @@
               (file.type && (file.type === "image/tiff" || file.type === "image/tif"))
             );
           }
+
           async function loadOne(file) {
             const id = "f" + Math.random().toString(36).slice(2);
+            let origUrl = null;
             try {
               if (isTiff(file) && typeof UTIF !== "undefined") {
                 const buffer = await file.arrayBuffer();
                 const ifds = UTIF.decode(buffer);
                 if (!ifds || !ifds.length) throw new Error("לא ניתן לפענח קובץ TIFF");
+                // First page only (multi-page TIFF: use first frame)
                 UTIF.decodeImage(buffer, ifds[0]);
                 const rgba = UTIF.toRGBA8(ifds[0]);
                 const w = ifds[0].width;
@@ -986,7 +1397,7 @@
                 ctx.putImageData(imgData, 0, 0);
                 const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
                 if (!blob) throw new Error("כשל ביצירת תצוגה מקדימה");
-                const origUrl = URL.createObjectURL(blob);
+                origUrl = URL.createObjectURL(blob);
                 const item = {
                   file,
                   id,
@@ -1000,11 +1411,12 @@
                   resultH: 0,
                   resultType: null,
                   isTiff: true,
+                  error: null,
                 };
                 items.push(item);
                 renderFrame(item);
               } else {
-                const origUrl = URL.createObjectURL(file);
+                origUrl = URL.createObjectURL(file);
                 const img = new Image();
                 await new Promise((resolve, reject) => {
                   img.onload = resolve;
@@ -1023,45 +1435,55 @@
                   resultW: 0,
                   resultH: 0,
                   resultType: null,
+                  error: null,
                 };
                 items.push(item);
                 renderFrame(item);
               }
             } catch (err) {
               console.error("Failed to load", file.name, err);
+              if (origUrl) {
+                try { URL.revokeObjectURL(origUrl); } catch (_) {}
+              }
+              failed++;
               showToast("⚠️ לא ניתן לטעון: " + (file.name || "קובץ") + " (" + (err.message || err) + ")");
             } finally {
               loaded++;
-              // התקדמות מצטברת: הקיימות + מה שנטען עד כה
-              updateLoadProgress(baseCount + loaded, expectedTotal);
+              updateLoadProgress(baseCount + loaded - failed, expectedTotal - failed);
               updateStatus();
               if (loaded === totalToLoad) {
-                // בסיום – מעדכנים לכמות האמיתית שנשארה (אחרי כשלונות אפשריים)
                 const realTotal = items.length;
                 updateLoadProgress(realTotal, realTotal);
+                if (realTotal === 0) {
+                  loadProgressRow.classList.add("hidden");
+                }
                 const msg = realTotal > 0
-                  ? "✅ " + realTotal + " תמונות נטענו"
-                  : "⚠️ 0 תמונות נטענו – בדוק את סוג הקבצים או את הקונסול";
+                  ? "✅ " + realTotal + " תמונות נטענו" + (failed ? " (" + failed + " נכשלו)" : "")
+                  : "⚠️ 0 תמונות נטענו – בדוק את סוג הקבצים";
                 showToast(msg);
               }
             }
           }
+
           files.forEach((file) => loadOne(file));
           fileInput.value = "";
         }
+
         function renderFrame(item) {
           const el = document.createElement("div");
           el.className = "frame";
           el.id = "frame-" + item.id;
           el.innerHTML = `
       <button class="frame-remove" title="הסר מהרשימה" aria-label="הסר">×</button>
-      <div class="frame-img-wrap"><img src="${item.origUrl}" loading="lazy"></div>
+      <span class="frame-badge"></span>
+      <div class="frame-img-wrap"><img src="${item.origUrl}" loading="lazy" alt=""></div>
       <div class="frame-name" title="${item.file.name}">${item.file.name}</div>
       <div class="frame-dims">
         <span>${item.w} × ${item.h}px</span>
         <span class="new-dims" id="dims-${item.id}">—</span>
       </div>
       <div class="frame-meta"><span>${fmtBytes(item.origSize)}</span><span class="new" id="new-${item.id}">—</span></div>
+      <div class="frame-savings" id="savings-${item.id}"></div>
       <a class="frame-dl pending" id="dl-${item.id}">⏳ ממתין</a>
     `;
           const removeBtn = el.querySelector(".frame-remove");
@@ -1071,6 +1493,7 @@
           });
           filmstrip.appendChild(el);
         }
+
         function removeItem(id) {
           const idx = items.findIndex((i) => i.id === id);
           if (idx === -1) return;
@@ -1080,29 +1503,32 @@
           items.splice(idx, 1);
           const el = document.getElementById("frame-" + id);
           if (el) el.remove();
-          // עדכון סרגל הטעינה לכמות הנוכחית בפועל
           const current = items.length;
           updateLoadProgress(current, current);
           updateStatus();
           if (items.length === 0) {
             panel.style.display = "none";
             actionsBar.style.display = "none";
+            loadProgressRow.classList.add("hidden");
+            processProgressRow.classList.add("hidden");
             showToast("🧹 כל התמונות הוסרו");
           } else {
             showToast("🗑️ תמונה הוסרה");
           }
         }
+
         function updateLoadProgress(done, total) {
           const fill = document.getElementById("loadProgressFill");
           const text = document.getElementById("loadProgressText");
           const bar = document.getElementById("loadProgressBar");
           const label = document.getElementById("loadProgressLabel");
           if (!fill) return;
+          if (total > 0) loadProgressRow.classList.remove("hidden");
           const pct = total === 0 ? 0 : Math.round((done / total) * 100);
           fill.style.width = pct + "%";
           text.textContent = done + " / " + total;
           if (label) label.textContent = done + " / " + total;
-          if (total > 0 && done === total) {
+          if (total > 0 && done >= total) {
             fill.classList.add("done");
             bar.classList.add("done");
           } else {
@@ -1110,6 +1536,7 @@
             bar.classList.remove("done");
           }
         }
+
         function updateStatus() {
           const total = items.length;
           const done = items.filter((i) => i.resultBlob).length;
@@ -1121,7 +1548,7 @@
           fill.style.width = pct + "%";
           text.textContent = done + " / " + total;
           if (label) label.textContent = done + " / " + total;
-          if (total > 0 && done === total) {
+          if (total > 0 && done === total && done > 0) {
             fill.classList.add("done");
             bar.classList.add("done");
           } else {
@@ -1129,11 +1556,14 @@
             bar.classList.remove("done");
           }
           downloadAllBtn.style.display = done ? "inline-flex" : "none";
-          runBtn.disabled = !items.length;
+          runBtn.disabled = !items.length || isProcessing;
+          updateStickyBar();
         }
+
         clearBtn.onclick = () => {
+          if (isProcessing) return;
           items.forEach((i) => {
-            URL.revokeObjectURL(i.origUrl);
+            if (i.origUrl) URL.revokeObjectURL(i.origUrl);
             if (i.resultUrl) URL.revokeObjectURL(i.resultUrl);
           });
           items = [];
@@ -1142,8 +1572,11 @@
           updateLoadProgress(0, 0);
           panel.style.display = "none";
           actionsBar.style.display = "none";
+          loadProgressRow.classList.add("hidden");
+          processProgressRow.classList.add("hidden");
           showToast("🧹 נוקה");
         };
+
         function loadImage(url) {
           return new Promise((res, rej) => {
             const i = new Image();
@@ -1152,6 +1585,7 @@
             i.src = url;
           });
         }
+
         function canvasToBlob(canvas, type, quality) {
           return new Promise((res) => {
             if (type === "image/png") {
@@ -1161,6 +1595,7 @@
             }
           });
         }
+
         function createCanvas(w, h, img) {
           const canvas = document.createElement("canvas");
           canvas.width = w;
@@ -1171,6 +1606,7 @@
           ctx.drawImage(img, 0, 0, w, h);
           return canvas;
         }
+
         async function resizeByDimension(item, maxW, maxH, type, quality) {
           const img = await loadImage(item.origUrl);
           let w = img.naturalWidth,
@@ -1183,6 +1619,7 @@
           const blob = await canvasToBlob(canvas, type, q);
           return { blob, w, h, type };
         }
+
         async function resizeByTargetSize(
           item,
           targetBytes,
@@ -1200,10 +1637,12 @@
           const origH = img.naturalHeight;
           let softMax = 0;
           if (capDim && capDim > 0) softMax = capDim;
+
           async function encode(w, h, quality) {
             const canvas = createCanvas(w, h, img);
             return canvasToBlob(canvas, effType, isPng ? undefined : quality);
           }
+
           async function bestQualityUnder(w, h) {
             if (isPng) {
               const blob = await encode(w, h);
@@ -1228,13 +1667,14 @@
             }
             return best;
           }
-          // 1) original dimensions
+
           {
             const fullBest = await bestQualityUnder(origW, origH);
             if (fullBest) {
               return { blob: fullBest, w: origW, h: origH, type: effType };
             }
           }
+
           let startW = origW;
           let startH = origH;
           if (softMax > 0 && (origW > softMax || origH > softMax)) {
@@ -1246,6 +1686,7 @@
               return { blob: cappedBest, w: startW, h: startH, type: effType };
             }
           }
+
           let bestBlob = null;
           let bestW = startW;
           let bestH = startH;
@@ -1254,6 +1695,7 @@
             scales.push(Math.round(s * 100) / 100);
           }
           scales.push(0.12, 0.1, 0.08);
+
           for (const scale of scales) {
             const w = Math.max(48, Math.round(startW * scale));
             const h = Math.max(48, Math.round(startH * scale));
@@ -1267,6 +1709,7 @@
               break;
             }
           }
+
           if (!bestBlob) {
             const w = Math.max(48, Math.round(startW * 0.12));
             const h = Math.max(48, Math.round(startH * 0.12));
@@ -1276,97 +1719,250 @@
           }
           return { blob: bestBlob, w: bestW, h: bestH, type: effType };
         }
-        runBtn.onclick = async () => {
-          if (!items.length) return;
-          runBtn.disabled = true;
-          runBtn.textContent = "⏳ מעבד...";
+
+        function applyResultToFrame(item, result) {
+          if (item.resultUrl) URL.revokeObjectURL(item.resultUrl);
+          item.resultBlob = result.blob;
+          item.resultW = result.w;
+          item.resultH = result.h;
+          item.resultType = result.type;
+          item.resultUrl = URL.createObjectURL(result.blob);
+          item.error = null;
+
+          const frame = document.getElementById("frame-" + item.id);
+          if (frame) {
+            frame.classList.remove("error");
+            frame.classList.add("processed");
+            const badge = frame.querySelector(".frame-badge");
+            if (badge) badge.textContent = "✓";
+          }
+
+          // Show processed image as preview
+          const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
+          if (imgEl) {
+            imgEl.src = item.resultUrl;
+          }
+
+          const sizeDisplay = fmtBytes(result.blob.size);
+          document.getElementById("new-" + item.id).textContent = "✅ " + sizeDisplay;
+
+          const dimsEl = document.getElementById("dims-" + item.id);
+          if (dimsEl) {
+            dimsEl.textContent = result.w + " × " + result.h + "px";
+          }
+
+          const savingsEl = document.getElementById("savings-" + item.id);
+          if (savingsEl) {
+            const pct = calcSavings(item.origSize, result.blob.size);
+            if (pct !== null) {
+              if (pct > 0) {
+                savingsEl.textContent = "↓ " + pct + "% חיסכון";
+                savingsEl.classList.remove("neutral");
+              } else if (pct < 0) {
+                savingsEl.textContent = "↑ " + Math.abs(pct) + "% גידול";
+                savingsEl.classList.add("neutral");
+              } else {
+                savingsEl.textContent = "אותו גודל";
+                savingsEl.classList.add("neutral");
+              }
+            }
+          }
+
+          const dl = document.getElementById("dl-" + item.id);
+          dl.classList.remove("pending", "error");
+          dl.classList.add("ready");
+          dl.textContent = "⬇️ הורד";
+          dl.href = item.resultUrl;
+          const ext = result.type.split("/")[1].replace("jpeg", "jpg");
+          const base = item.file.name.replace(/\.[^.]+$/, "");
+          dl.download = base + "_resized." + ext;
+        }
+
+        function applyErrorToFrame(item, errMsg) {
+          item.error = errMsg || "שגיאה";
+          const frame = document.getElementById("frame-" + item.id);
+          if (frame) {
+            frame.classList.remove("processed");
+            frame.classList.add("error");
+            const badge = frame.querySelector(".frame-badge");
+            if (badge) badge.textContent = "!";
+          }
+          const dl = document.getElementById("dl-" + item.id);
+          if (dl) {
+            dl.classList.remove("pending", "ready");
+            dl.classList.add("error");
+            dl.textContent = "❌ שגיאה";
+            dl.removeAttribute("href");
+            dl.removeAttribute("download");
+          }
+          const savingsEl = document.getElementById("savings-" + item.id);
+          if (savingsEl) {
+            savingsEl.textContent = errMsg || "כשל בעיבוד";
+            savingsEl.classList.add("neutral");
+          }
+        }
+
+        async function processOne(item) {
           const format = formatSel.value;
           const quality = parseInt(qualitySlider.value, 10) / 100;
-          let processed = 0;
-          for (const item of items) {
-            try {
-              let result;
-              if (mode === "dim") {
-                const maxW =
-                  parseInt(document.getElementById("maxW").value, 10) || item.w;
-                const maxH =
-                  parseInt(document.getElementById("maxH").value, 10) || item.h;
-                result = await resizeByDimension(
-                  item,
-                  maxW,
-                  maxH,
-                  format,
-                  quality,
-                );
-              } else {
-                const val =
-                  parseFloat(document.getElementById("targetSize").value) ||
-                  200;
-                const unit = document.getElementById("targetUnit").value;
-                const targetBytes = unit === "MB" ? val * 1048576 : val * 1024;
-                const capDim =
-                  parseInt(document.getElementById("capDim").value, 10) || 0;
-                result = await resizeByTargetSize(
-                  item,
-                  targetBytes,
-                  capDim,
-                  format,
-                );
+          let result;
+          if (mode === "dim") {
+            const maxW = parseInt(document.getElementById("maxW").value, 10) || item.w;
+            const maxH = parseInt(document.getElementById("maxH").value, 10) || item.h;
+            result = await resizeByDimension(item, maxW, maxH, format, quality);
+          } else {
+            const val = parseFloat(document.getElementById("targetSize").value) || 200;
+            const unit = document.getElementById("targetUnit").value;
+            const targetBytes = unit === "MB" ? val * 1048576 : val * 1024;
+            const capDim = parseInt(document.getElementById("capDim").value, 10) || 0;
+            result = await resizeByTargetSize(item, targetBytes, capDim, format);
+          }
+          return result;
+        }
+
+        // Concurrent processor with fixed concurrency limit
+        async function processAllConcurrent(list, concurrency) {
+          let nextIndex = 0;
+          let completed = 0;
+          const total = list.length;
+
+          async function worker() {
+            while (nextIndex < total) {
+              const idx = nextIndex++;
+              const item = list[idx];
+              try {
+                const result = await processOne(item);
+                applyResultToFrame(item, result);
+              } catch (err) {
+                console.error(err);
+                applyErrorToFrame(item, err.message || "שגיאה");
               }
-              if (item.resultUrl) URL.revokeObjectURL(item.resultUrl);
-              item.resultBlob = result.blob;
-              item.resultW = result.w;
-              item.resultH = result.h;
-              item.resultType = result.type;
-              item.resultUrl = URL.createObjectURL(result.blob);
-              const sizeDisplay = fmtBytes(result.blob.size);
-              document.getElementById("new-" + item.id).textContent =
-                "✅ " + sizeDisplay;
-              const dimsEl = document.getElementById("dims-" + item.id);
-              if (dimsEl) {
-                dimsEl.textContent = result.w + " × " + result.h + "px";
-              }
-              const dl = document.getElementById("dl-" + item.id);
-              dl.classList.remove("pending");
-              dl.classList.add("ready");
-              dl.textContent = "⬇️ הורד";
-              dl.href = item.resultUrl;
-              const ext = result.type.split("/")[1].replace("jpeg", "jpg");
-              const base = item.file.name.replace(/\.[^.]+$/, "");
-              dl.download = base + "_resized." + ext;
-              processed++;
-            } catch (err) {
-              console.error(err);
-              showToast("❌ שגיאה בעיבוד תמונה: " + err.message);
+              completed++;
+              updateStatus();
             }
+          }
+
+          const workers = [];
+          const n = Math.min(concurrency, total);
+          for (let i = 0; i < n; i++) {
+            workers.push(worker());
+          }
+          await Promise.all(workers);
+          return completed;
+        }
+
+        async function doProcessAll() {
+          if (!items.length || isProcessing) return;
+          isProcessing = true;
+          runBtn.disabled = true;
+          stickyRunBtn.disabled = true;
+          runBtn.textContent = "⏳ מעבד...";
+          stickyRunBtn.textContent = "⏳ מעבד...";
+          processProgressRow.classList.remove("hidden");
+          updateStickyBar();
+
+          // Reset previous results before new run
+          items.forEach((item) => {
+            if (item.resultUrl) {
+              URL.revokeObjectURL(item.resultUrl);
+              item.resultUrl = null;
+            }
+            item.resultBlob = null;
+            item.resultW = 0;
+            item.resultH = 0;
+            item.resultType = null;
+            item.error = null;
+            const frame = document.getElementById("frame-" + item.id);
+            if (frame) {
+              frame.classList.remove("processed", "error");
+              const badge = frame.querySelector(".frame-badge");
+              if (badge) badge.textContent = "";
+            }
+            const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
+            if (imgEl && item.origUrl) imgEl.src = item.origUrl;
+            const newEl = document.getElementById("new-" + item.id);
+            if (newEl) newEl.textContent = "—";
+            const dimsEl = document.getElementById("dims-" + item.id);
+            if (dimsEl) dimsEl.textContent = "—";
+            const savingsEl = document.getElementById("savings-" + item.id);
+            if (savingsEl) {
+              savingsEl.textContent = "";
+              savingsEl.classList.remove("neutral");
+            }
+            const dl = document.getElementById("dl-" + item.id);
+            if (dl) {
+              dl.classList.remove("ready", "error");
+              dl.classList.add("pending");
+              dl.textContent = "⏳ ממתין";
+              dl.removeAttribute("href");
+              dl.removeAttribute("download");
+            }
+          });
+          updateStatus();
+
+          try {
+            await processAllConcurrent(items, CONCURRENCY);
+            const ok = items.filter((i) => i.resultBlob).length;
+            const failed = items.length - ok;
+            let msg = "✅ " + ok + " תמונות עובדו";
+            if (failed) msg += " (" + failed + " נכשלו)";
+            showToast(msg);
+          } catch (err) {
+            console.error(err);
+            showToast("❌ שגיאה כללית בעיבוד");
+          } finally {
+            isProcessing = false;
+            runBtn.disabled = !items.length;
+            stickyRunBtn.disabled = !items.length;
+            runBtn.textContent = "📦 עבד הכל";
+            stickyRunBtn.textContent = "📦 עבד הכל";
             updateStatus();
           }
-          runBtn.disabled = false;
-          runBtn.textContent = "📦 עבד הכל";
-          showToast("✅ " + processed + " תמונות עובדו");
-        };
-        downloadAllBtn.onclick = async () => {
+        }
+
+        runBtn.onclick = doProcessAll;
+        stickyRunBtn.onclick = doProcessAll;
+
+        async function doDownloadZip() {
           const done = items.filter((i) => i.resultBlob);
           if (!done.length) return;
           downloadAllBtn.disabled = true;
+          stickyZipBtn.disabled = true;
           downloadAllBtn.textContent = "⏳ אורז...";
-          const zip = new JSZip();
-          done.forEach((item) => {
-            const ext = item.resultType.split("/")[1].replace("jpeg", "jpg");
-            const base = item.file.name.replace(/\.[^.]+$/, "");
-            zip.file(base + "_resized." + ext, item.resultBlob);
-          });
-          const content = await zip.generateAsync({ type: "blob" });
-          const url = URL.createObjectURL(content);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "resized_images.zip";
-          a.click();
-          URL.revokeObjectURL(url);
-          downloadAllBtn.disabled = false;
-          downloadAllBtn.textContent = "📥 ZIP";
-          showToast("📦 ZIP הורד");
+          stickyZipBtn.textContent = "⏳ אורז...";
+          try {
+            const zip = new JSZip();
+            done.forEach((item) => {
+              const ext = item.resultType.split("/")[1].replace("jpeg", "jpg");
+              const base = item.file.name.replace(/\.[^.]+$/, "");
+              zip.file(base + "_resized." + ext, item.resultBlob);
+            });
+            const content = await zip.generateAsync({ type: "blob" });
+            const url = URL.createObjectURL(content);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "resized_images.zip";
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("📦 ZIP הורד");
+          } catch (err) {
+            console.error(err);
+            showToast("❌ שגיאה ביצירת ZIP");
+          } finally {
+            downloadAllBtn.disabled = false;
+            stickyZipBtn.disabled = false;
+            downloadAllBtn.textContent = "📥 ZIP";
+            stickyZipBtn.textContent = "📥 ZIP";
+          }
+        }
+
+        downloadAllBtn.onclick = doDownloadZip;
+        stickyZipBtn.onclick = doDownloadZip;
+
+        stickyClearBtn.onclick = () => {
+          clearBtn.click();
         };
+
         updateStatus();
         showToast("📸 העלה תמונות להתחלה", 3500);
       })();
