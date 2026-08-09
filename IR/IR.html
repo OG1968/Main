@@ -2,7 +2,10 @@
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
+    />
     <title>עריכת תמונות</title>
 
     <link rel="icon" href="IR.png" type="image/png" />
@@ -326,23 +329,65 @@
         border-radius: 14px;
         overflow: hidden;
         position: relative;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
       }
       .progress-fill {
         height: 100%;
         width: 0%;
         background: #dc3545;
         border-radius: 14px;
-        transition:
-          width 0.25s ease,
-          background 0.3s ease;
+        transition: width 0.25s ease, background 0.35s ease;
         display: flex;
         align-items: center;
         justify-content: center;
         min-width: 0;
+        position: relative;
+        overflow: hidden;
+      }
+      /* Dynamic color stages (set via JS class or inline; CSS fallbacks) */
+      .progress-fill.stage-low {
+        background: #dc3545;
+      }
+      .progress-fill.stage-mid {
+        background: #fd7e14;
+      }
+      .progress-fill.stage-high {
+        background: #ffc107;
       }
       .progress-fill.done {
         background: #28a745;
+      }
+      /* Shimmer overlay while actively processing */
+      .progress-fill.shimmer::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          105deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.35) 50%,
+          transparent 70%
+        );
+        background-size: 200% 100%;
+        animation: shimmerMove 1.4s ease-in-out infinite;
+        pointer-events: none;
+      }
+      @keyframes shimmerMove {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+      .progress-fill.paused-fill {
+        opacity: 0.7;
+      }
+      .progress-fill.paused-fill::after {
+        animation-play-state: paused;
       }
       .progress-text {
         position: absolute;
@@ -357,8 +402,9 @@
         font-size: 13px;
         color: #fff;
         pointer-events: none;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        text-shadow: 0 1px 2px rgba(0,0,0,0.25);
         transition: color 0.3s ease;
+        z-index: 1;
       }
       .progress-bar.done .progress-text {
         color: #000;
@@ -379,9 +425,7 @@
         display: flex;
         flex-direction: column;
         position: relative;
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
+        transition: border-color 0.2s, box-shadow 0.2s;
       }
       .frame.processed {
         border-color: #28a745;
@@ -409,10 +453,8 @@
         align-items: center;
         justify-content: center;
         z-index: 5;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        transition:
-          transform 0.15s,
-          background 0.15s;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        transition: transform 0.15s, background 0.15s;
         padding: 0;
       }
       .frame-remove:hover {
@@ -632,11 +674,11 @@
 
       /* ---- Sticky bottom action bar ---- */
       .sticky-actions {
-        display: none;
+        display: flex;
         position: fixed;
         bottom: 12px;
         left: 50%;
-        transform: translateX(-50%);
+        transform: translateX(-50%) translateY(120%);
         z-index: 900;
         background: #ffe699;
         border: 1.5px solid #2c3e50;
@@ -648,12 +690,31 @@
         flex-wrap: wrap;
         max-width: calc(100% - 24px);
         width: auto;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+          opacity 0.3s ease;
+        will-change: transform, opacity;
       }
       .sticky-actions.visible {
-        display: flex;
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        pointer-events: auto;
       }
       body.has-sticky {
         padding-bottom: 88px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .sticky-actions {
+          transition: none;
+        }
+        .progress-fill.shimmer::after {
+          animation: none;
+        }
+        .theme-toggle .theme-icon {
+          transition: none;
+        }
       }
 
       /* ---- Theme toggle ---- */
@@ -674,12 +735,20 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-        transition: all 0.2s;
+        transition: background 0.2s, color 0.2s, transform 0.2s, border-color 0.2s;
       }
       .theme-toggle:hover {
         background: #703efa;
         color: #fff;
         transform: scale(1.08);
+      }
+      .theme-toggle .theme-icon {
+        display: inline-block;
+        transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        line-height: 1;
+      }
+      .theme-toggle.spinning .theme-icon {
+        transform: rotate(360deg);
       }
 
       /* ---- Dark mode ---- */
@@ -875,26 +944,14 @@
     </style>
   </head>
   <body>
-    <button
-      class="theme-toggle"
-      id="themeToggle"
-      title="מצב כהה / בהיר"
-      aria-label="החלף מצב תצוגה"
-    >
-      🌙
-    </button>
+    <button class="theme-toggle" id="themeToggle" title="מצב כהה / בהיר" aria-label="החלף מצב תצוגה"><span class="theme-icon" id="themeIcon">🌙</span></button>
     <div class="container">
       <div class="header">
         <h1>🖼️ עורך תמונות</h1>
         <h2>שינוי גודל דחיסה / כיווץ תמונות</h2>
       </div>
       <div class="dropzone" id="dropzone">
-        <input
-          type="file"
-          id="fileInput"
-          multiple
-          accept="image/*,.tif,.tiff,image/tiff,.bmp,image/bmp"
-        />
+        <input type="file" id="fileInput" multiple accept="image/*,.tif,.tiff,image/tiff,.bmp,image/bmp" />
         <input
           type="file"
           id="folderInput"
@@ -992,7 +1049,7 @@
             </div>
             <div class="progress-row hidden" id="processProgressRow">
               <div class="progress-label">
-                <span>⚙️ עיבוד</span>
+                <span id="processProgressTitle">🛠️ עיבוד</span>
                 <span id="processProgressLabel">0 / 0</span>
               </div>
               <div class="progress-bar" id="progressBar">
@@ -1003,16 +1060,22 @@
           </div>
         </div>
       </div>
-      <div
-        class="header-actions"
-        id="actionsBar"
-        style="display: none; margin: 12px 0"
-      >
-        <button class="btn btn-primary" id="runBtn">📦 התחל עיבוד</button>
+      <div class="header-actions" id="actionsBar" style="display: none; margin: 12px 0;">
+        <button class="btn btn-primary" id="runBtn">🛠️ התחל עיבוד</button>
+        <button class="btn btn-outline" id="pauseBtn" style="display: none">
+          ⏸️ השהה
+        </button>
+        <button class="btn btn-outline" id="resumeBtn" style="display: none">
+          ▶️ המשך
+        </button>
         <button class="btn btn-danger" id="cancelBtn" style="display: none">
           ⏹️ בטל עיבוד
         </button>
-        <button class="btn btn-ghost" id="downloadAllBtn" style="display: none">
+        <button
+          class="btn btn-ghost"
+          id="downloadAllBtn"
+          style="display: none"
+        >
           📥 ZIP
         </button>
         <button class="btn btn-danger" id="clearBtn">🗑️ נקה</button>
@@ -1027,13 +1090,11 @@
       </div>
     </div>
     <div class="sticky-actions" id="stickyActions">
-      <button class="btn btn-primary" id="stickyRunBtn">📦 התחל עיבוד</button>
-      <button class="btn btn-danger" id="stickyCancelBtn" style="display: none">
-        ⏹️ בטל עיבוד
-      </button>
-      <button class="btn btn-ghost" id="stickyZipBtn" style="display: none">
-        📥 ZIP
-      </button>
+      <button class="btn btn-primary" id="stickyRunBtn">🛠️ התחל עיבוד</button>
+      <button class="btn btn-outline" id="stickyPauseBtn" style="display: none">⏸️ השהה</button>
+      <button class="btn btn-outline" id="stickyResumeBtn" style="display: none">▶️ המשך</button>
+      <button class="btn btn-danger" id="stickyCancelBtn" style="display: none">⏹️ בטל עיבוד</button>
+      <button class="btn btn-ghost" id="stickyZipBtn" style="display: none">📥 ZIP</button>
       <button class="btn btn-danger" id="stickyClearBtn">🗑️ נקה</button>
     </div>
     <div class="toast" id="toast"></div>
@@ -1056,16 +1117,19 @@
         const qualitySlider = document.getElementById("quality");
         const qualityVal = document.getElementById("qualityVal");
         const runBtn = document.getElementById("runBtn");
+        const pauseBtn = document.getElementById("pauseBtn");
+        const resumeBtn = document.getElementById("resumeBtn");
         const cancelBtn = document.getElementById("cancelBtn");
         const clearBtn = document.getElementById("clearBtn");
         const downloadAllBtn = document.getElementById("downloadAllBtn");
         const statusLine = document.getElementById("statusLine");
         const toastEl = document.getElementById("toast");
         const loadProgressRow = document.getElementById("loadProgressRow");
-        const processProgressRow =
-          document.getElementById("processProgressRow");
+        const processProgressRow = document.getElementById("processProgressRow");
         const stickyActions = document.getElementById("stickyActions");
         const stickyRunBtn = document.getElementById("stickyRunBtn");
+        const stickyPauseBtn = document.getElementById("stickyPauseBtn");
+        const stickyResumeBtn = document.getElementById("stickyResumeBtn");
         const stickyCancelBtn = document.getElementById("stickyCancelBtn");
         const stickyZipBtn = document.getElementById("stickyZipBtn");
         const stickyClearBtn = document.getElementById("stickyClearBtn");
@@ -1074,18 +1138,35 @@
         let mode = "dim";
         let items = [];
         let isProcessing = false;
+        let isPaused = false;
         let cancelRequested = false;
+        let pauseWaiters = []; // resolve callbacks waiting while paused
         const CONCURRENCY = 3;
         let actionsBarVisible = true; // true = upper buttons in view → hide sticky
 
         // ---- Dark mode ----
-        function applyTheme(dark) {
+        const themeIcon = document.getElementById("themeIcon");
+        function applyTheme(dark, animate) {
           document.body.classList.toggle("dark", dark);
-          themeToggle.textContent = dark ? "☀️" : "🌙";
+          if (themeIcon) {
+            themeIcon.textContent = dark ? "☀️" : "🌙";
+          } else {
+            themeToggle.textContent = dark ? "☀️" : "🌙";
+          }
           themeToggle.title = dark ? "מצב בהיר" : "מצב כהה";
           try {
             localStorage.setItem("imgEditorTheme", dark ? "dark" : "light");
           } catch (_) {}
+          if (animate) {
+            themeToggle.classList.remove("spinning");
+            // Force reflow so the animation restarts
+            void themeToggle.offsetWidth;
+            themeToggle.classList.add("spinning");
+            clearTimeout(themeToggle._spinTimeout);
+            themeToggle._spinTimeout = setTimeout(() => {
+              themeToggle.classList.remove("spinning");
+            }, 500);
+          }
         }
         (function initTheme() {
           let preferDark = false; // ברירת מחדל: מצב בהיר
@@ -1094,27 +1175,44 @@
             if (saved === "dark") preferDark = true;
             // אם אין שמירה / light – נשארים במצב בהיר
           } catch (_) {}
-          applyTheme(preferDark);
+          applyTheme(preferDark, false);
         })();
         themeToggle.onclick = () => {
-          applyTheme(!document.body.classList.contains("dark"));
+          applyTheme(!document.body.classList.contains("dark"), true);
         };
 
         // ---- Sticky bar: show only when upper actionsBar is scrolled out of view ----
+        function updateControlButtons() {
+          const processing = isProcessing;
+          const paused = isPaused;
+
+          // Main bar
+          runBtn.style.display = processing ? "none" : "inline-flex";
+          runBtn.disabled = processing || !items.length;
+          pauseBtn.style.display = processing && !paused ? "inline-flex" : "none";
+          resumeBtn.style.display = processing && paused ? "inline-flex" : "none";
+          cancelBtn.style.display = processing ? "inline-flex" : "none";
+          cancelBtn.disabled = cancelRequested;
+          clearBtn.disabled = processing;
+
+          // Sticky bar
+          stickyRunBtn.style.display = processing ? "none" : "inline-flex";
+          stickyRunBtn.disabled = processing || !items.length;
+          stickyRunBtn.textContent = "🛠️ התחל עיבוד";
+          stickyPauseBtn.style.display = processing && !paused ? "inline-flex" : "none";
+          stickyResumeBtn.style.display = processing && paused ? "inline-flex" : "none";
+          stickyCancelBtn.style.display = processing ? "inline-flex" : "none";
+          stickyCancelBtn.disabled = cancelRequested;
+          stickyClearBtn.disabled = processing;
+          stickyZipBtn.style.display = items.some((i) => i.resultBlob) ? "inline-flex" : "none";
+        }
+
         function updateStickyBar() {
           const hasItems = items.length > 0;
           const show = hasItems && !actionsBarVisible;
           stickyActions.classList.toggle("visible", show);
           document.body.classList.toggle("has-sticky", show);
-          stickyZipBtn.style.display = items.some((i) => i.resultBlob)
-            ? "inline-flex"
-            : "none";
-          stickyRunBtn.disabled = !items.length || isProcessing;
-          stickyRunBtn.textContent = isProcessing
-            ? "⏳ מעבד..."
-            : "📦 התחל עיבוד";
-          stickyRunBtn.style.display = isProcessing ? "none" : "inline-flex";
-          stickyCancelBtn.style.display = isProcessing ? "inline-flex" : "none";
+          updateControlButtons();
         }
 
         function checkActionsBarVisibility() {
@@ -1122,8 +1220,7 @@
             actionsBarVisible = true;
           } else {
             const rect = actionsBar.getBoundingClientRect();
-            actionsBarVisible =
-              rect.bottom > 0 && rect.top < window.innerHeight;
+            actionsBarVisible = rect.bottom > 0 && rect.top < window.innerHeight;
           }
           updateStickyBar();
         }
@@ -1136,28 +1233,27 @@
                 updateStickyBar();
               });
             },
-            { threshold: 0, rootMargin: "0px" },
+            { threshold: 0, rootMargin: "0px" }
           );
           stickyObserver.observe(actionsBar);
         }
-        window.addEventListener("scroll", checkActionsBarVisibility, {
-          passive: true,
-        });
-        window.addEventListener("resize", checkActionsBarVisibility, {
-          passive: true,
-        });
+        window.addEventListener("scroll", checkActionsBarVisibility, { passive: true });
+        window.addEventListener("resize", checkActionsBarVisibility, { passive: true });
 
         function setProcessingUI(active) {
           isProcessing = active;
-          runBtn.style.display = active ? "none" : "inline-flex";
-          cancelBtn.style.display = active ? "inline-flex" : "none";
-          runBtn.disabled = active || !items.length;
-          stickyRunBtn.disabled = active || !items.length;
-          clearBtn.disabled = active;
-          stickyClearBtn.disabled = active;
           if (!active) {
-            runBtn.textContent = "📦 התחל עיבוד";
-            stickyRunBtn.textContent = "📦 התחל עיבוד";
+            isPaused = false;
+            // Resolve any waiting pause promises so workers can exit cleanly
+            const waiters = pauseWaiters.slice();
+            pauseWaiters = [];
+            waiters.forEach((r) => r());
+            runBtn.textContent = "🛠️ התחל עיבוד";
+            stickyRunBtn.textContent = "🛠️ התחל עיבוד";
+            cancelBtn.textContent = "⏹️ בטל עיבוד";
+            stickyCancelBtn.textContent = "⏹️ בטל עיבוד";
+            cancelBtn.disabled = false;
+            stickyCancelBtn.disabled = false;
           }
           updateStickyBar();
         }
@@ -1204,9 +1300,7 @@
               if (badge) badge.textContent = "";
             }
 
-            const imgEl = document.querySelector(
-              "#frame-" + item.id + " .frame-img-wrap img",
-            );
+            const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
             if (imgEl && item.origUrl) {
               imgEl.src = item.origUrl;
             }
@@ -1260,22 +1354,11 @@
           if (!isProcessing) resetResults();
         };
 
-        [
-          "maxW",
-          "maxH",
-          "targetSize",
-          "targetUnit",
-          "capDim",
-          "format",
-        ].forEach((id) => {
+        ["maxW", "maxH", "targetSize", "targetUnit", "capDim", "format"].forEach((id) => {
           const el = document.getElementById(id);
           if (el) {
-            el.addEventListener("change", () => {
-              if (!isProcessing) resetResults();
-            });
-            el.addEventListener("input", () => {
-              if (!isProcessing) resetResults();
-            });
+            el.addEventListener("change", () => { if (!isProcessing) resetResults(); });
+            el.addEventListener("input", () => { if (!isProcessing) resetResults(); });
           }
         });
 
@@ -1315,11 +1398,7 @@
           dropzone.classList.remove("drag");
           try {
             let files = await getFilesFromDataTransfer(e.dataTransfer);
-            if (
-              (!files || files.length === 0) &&
-              e.dataTransfer.files &&
-              e.dataTransfer.files.length > 0
-            ) {
+            if ((!files || files.length === 0) && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
               files = Array.from(e.dataTransfer.files);
             }
             handleFiles(files || []);
@@ -1403,9 +1482,7 @@
                 asFile = item.getAsFile();
               } catch (_) {}
               if (asFile && asFile.size >= 0) {
-                const entry = item.webkitGetAsEntry
-                  ? item.webkitGetAsEntry()
-                  : null;
+                const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
                 if (!entry || entry.isFile) {
                   files.push(asFile);
                   continue;
@@ -1415,9 +1492,7 @@
                   continue;
                 }
               }
-              const entry = item.webkitGetAsEntry
-                ? item.webkitGetAsEntry()
-                : null;
+              const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
               if (entry) {
                 files.push(...(await walk(entry)));
               }
@@ -1467,14 +1542,9 @@
                 const r = getUnsupportedReason(f) || "אחר";
                 reasons[r] = (reasons[r] || 0) + 1;
               });
-              const parts = Object.keys(reasons).map(
-                (k) => k + " ×" + reasons[k],
-              );
+              const parts = Object.keys(reasons).map((k) => k + " ×" + reasons[k]);
               showToast(
-                "⚠️ " +
-                  raw.length +
-                  " קבצים לא נתמכים: " +
-                  parts.join(", ") +
+                "⚠️ " + raw.length + " קבצים לא נתמכים: " + parts.join(", ") +
                   " (GIF ו-HEIC/HEIF אינם נתמכים)",
                 5000,
               );
@@ -1486,15 +1556,10 @@
 
           if (skipped > 0) {
             const unsupported = raw.filter((f) => !isSupportedImage(f));
-            const hasGif = unsupported.some(
-              (f) => getUnsupportedReason(f) === "GIF",
-            );
-            const hasHeic = unsupported.some(
-              (f) => getUnsupportedReason(f) === "HEIC/HEIF",
-            );
+            const hasGif = unsupported.some((f) => getUnsupportedReason(f) === "GIF");
+            const hasHeic = unsupported.some((f) => getUnsupportedReason(f) === "HEIC/HEIF");
             let detail = "";
-            if (hasGif && hasHeic)
-              detail = " (כולל GIF ו-HEIC/HEIF שאינם נתמכים)";
+            if (hasGif && hasHeic) detail = " (כולל GIF ו-HEIC/HEIF שאינם נתמכים)";
             else if (hasGif) detail = " (GIF אינו נתמך)";
             else if (hasHeic) detail = " (HEIC/HEIF אינו נתמך)";
             else detail = " (פורמט לא נתמך)";
@@ -1517,8 +1582,7 @@
             return (
               name.endsWith(".tif") ||
               name.endsWith(".tiff") ||
-              (file.type &&
-                (file.type === "image/tiff" || file.type === "image/tif"))
+              (file.type && (file.type === "image/tiff" || file.type === "image/tif"))
             );
           }
 
@@ -1529,8 +1593,7 @@
               if (isTiff(file) && typeof UTIF !== "undefined") {
                 const buffer = await file.arrayBuffer();
                 const ifds = UTIF.decode(buffer);
-                if (!ifds || !ifds.length)
-                  throw new Error("לא ניתן לפענח קובץ TIFF");
+                if (!ifds || !ifds.length) throw new Error("לא ניתן לפענח קובץ TIFF");
                 // First page only (multi-page TIFF: use first frame)
                 UTIF.decodeImage(buffer, ifds[0]);
                 const rgba = UTIF.toRGBA8(ifds[0]);
@@ -1544,9 +1607,7 @@
                 const imgData = ctx.createImageData(w, h);
                 imgData.data.set(rgba);
                 ctx.putImageData(imgData, 0, 0);
-                const blob = await new Promise((res) =>
-                  canvas.toBlob(res, "image/png"),
-                );
+                const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
                 if (!blob) throw new Error("כשל ביצירת תצוגה מקדימה");
                 origUrl = URL.createObjectURL(blob);
                 const item = {
@@ -1594,24 +1655,13 @@
             } catch (err) {
               console.error("Failed to load", file.name, err);
               if (origUrl) {
-                try {
-                  URL.revokeObjectURL(origUrl);
-                } catch (_) {}
+                try { URL.revokeObjectURL(origUrl); } catch (_) {}
               }
               failed++;
-              showToast(
-                "⚠️ לא ניתן לטעון: " +
-                  (file.name || "קובץ") +
-                  " (" +
-                  (err.message || err) +
-                  ")",
-              );
+              showToast("⚠️ לא ניתן לטעון: " + (file.name || "קובץ") + " (" + (err.message || err) + ")");
             } finally {
               loaded++;
-              updateLoadProgress(
-                baseCount + loaded - failed,
-                expectedTotal - failed,
-              );
+              updateLoadProgress(baseCount + loaded - failed, expectedTotal - failed);
               updateStatus();
               if (loaded === totalToLoad) {
                 const realTotal = items.length;
@@ -1619,13 +1669,9 @@
                 if (realTotal === 0) {
                   loadProgressRow.classList.add("hidden");
                 }
-                const msg =
-                  realTotal > 0
-                    ? "✅ " +
-                      realTotal +
-                      " תמונות נטענו" +
-                      (failed ? " (" + failed + " נכשלו)" : "")
-                    : "⚠️ 0 תמונות נטענו – בדוק את סוג הקבצים";
+                const msg = realTotal > 0
+                  ? "✅ " + realTotal + " תמונות נטענו" + (failed ? " (" + failed + " נכשלו)" : "")
+                  : "⚠️ 0 תמונות נטענו – בדוק את סוג הקבצים";
                 showToast(msg);
               }
             }
@@ -1683,6 +1729,28 @@
           }
         }
 
+        function applyProgressVisual(fill, bar, pct, opts) {
+          if (!fill) return;
+          const { active, paused, complete } = opts || {};
+          fill.style.width = pct + "%";
+
+          fill.classList.remove("stage-low", "stage-mid", "stage-high", "done", "shimmer", "paused-fill");
+          if (bar) bar.classList.remove("done");
+
+          if (complete) {
+            fill.classList.add("done");
+            if (bar) bar.classList.add("done");
+            return;
+          }
+
+          if (pct < 35) fill.classList.add("stage-low");
+          else if (pct < 70) fill.classList.add("stage-mid");
+          else fill.classList.add("stage-high");
+
+          if (active) fill.classList.add("shimmer");
+          if (paused) fill.classList.add("paused-fill");
+        }
+
         function updateLoadProgress(done, total) {
           const fill = document.getElementById("loadProgressFill");
           const text = document.getElementById("loadProgressText");
@@ -1691,16 +1759,13 @@
           if (!fill) return;
           if (total > 0) loadProgressRow.classList.remove("hidden");
           const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-          fill.style.width = pct + "%";
+          const complete = total > 0 && done >= total;
+          applyProgressVisual(fill, bar, pct, {
+            active: !complete && total > 0,
+            complete: complete,
+          });
           text.textContent = done + " / " + total;
           if (label) label.textContent = done + " / " + total;
-          if (total > 0 && done >= total) {
-            fill.classList.add("done");
-            bar.classList.add("done");
-          } else {
-            fill.classList.remove("done");
-            bar.classList.remove("done");
-          }
         }
 
         function updateStatus() {
@@ -1711,18 +1776,22 @@
           const bar = document.getElementById("progressBar");
           const label = document.getElementById("processProgressLabel");
           const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-          fill.style.width = pct + "%";
-          text.textContent = done + " / " + total;
-          if (label) label.textContent = done + " / " + total;
-          if (total > 0 && done === total && done > 0) {
-            fill.classList.add("done");
-            bar.classList.add("done");
-          } else {
-            fill.classList.remove("done");
-            bar.classList.remove("done");
+          const complete = total > 0 && done === total && done > 0;
+          applyProgressVisual(fill, bar, pct, {
+            active: isProcessing && !isPaused && !complete,
+            paused: isPaused,
+            complete: complete,
+          });
+          const countStr = done + " / " + total;
+          text.textContent = isPaused ? countStr + " ⏸️" : countStr;
+          if (label) {
+            label.textContent = isPaused ? countStr + " (מושהה)" : countStr;
+          }
+          const titleEl = document.getElementById("processProgressTitle");
+          if (titleEl) {
+            titleEl.textContent = isPaused ? "⏸️ מושהה" : "🛠️ עיבוד";
           }
           downloadAllBtn.style.display = done ? "inline-flex" : "none";
-          runBtn.disabled = !items.length || isProcessing;
           updateStickyBar();
         }
 
@@ -1904,16 +1973,13 @@
           }
 
           // Show processed image as preview
-          const imgEl = document.querySelector(
-            "#frame-" + item.id + " .frame-img-wrap img",
-          );
+          const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
           if (imgEl) {
             imgEl.src = item.resultUrl;
           }
 
           const sizeDisplay = fmtBytes(result.blob.size);
-          document.getElementById("new-" + item.id).textContent =
-            "✅ " + sizeDisplay;
+          document.getElementById("new-" + item.id).textContent = "✅ " + sizeDisplay;
 
           const dimsEl = document.getElementById("dims-" + item.id);
           if (dimsEl) {
@@ -1976,29 +2042,28 @@
           const quality = parseInt(qualitySlider.value, 10) / 100;
           let result;
           if (mode === "dim") {
-            const maxW =
-              parseInt(document.getElementById("maxW").value, 10) || item.w;
-            const maxH =
-              parseInt(document.getElementById("maxH").value, 10) || item.h;
+            const maxW = parseInt(document.getElementById("maxW").value, 10) || item.w;
+            const maxH = parseInt(document.getElementById("maxH").value, 10) || item.h;
             result = await resizeByDimension(item, maxW, maxH, format, quality);
           } else {
-            const val =
-              parseFloat(document.getElementById("targetSize").value) || 200;
+            const val = parseFloat(document.getElementById("targetSize").value) || 200;
             const unit = document.getElementById("targetUnit").value;
             const targetBytes = unit === "MB" ? val * 1048576 : val * 1024;
-            const capDim =
-              parseInt(document.getElementById("capDim").value, 10) || 0;
-            result = await resizeByTargetSize(
-              item,
-              targetBytes,
-              capDim,
-              format,
-            );
+            const capDim = parseInt(document.getElementById("capDim").value, 10) || 0;
+            result = await resizeByTargetSize(item, targetBytes, capDim, format);
           }
           return result;
         }
 
-        // Concurrent processor with fixed concurrency limit + cancel support
+        // Wait while paused (resolves immediately if not paused / cancelled)
+        function waitIfPaused() {
+          if (!isPaused || cancelRequested) return Promise.resolve();
+          return new Promise((resolve) => {
+            pauseWaiters.push(resolve);
+          });
+        }
+
+        // Concurrent processor with fixed concurrency limit + pause/cancel support
         async function processAllConcurrent(list, concurrency) {
           let nextIndex = 0;
           let completed = 0;
@@ -2007,11 +2072,15 @@
           async function worker() {
             while (nextIndex < total) {
               if (cancelRequested) break;
+              await waitIfPaused();
+              if (cancelRequested) break;
               const idx = nextIndex++;
+              if (idx >= total) break;
               const item = list[idx];
               if (cancelRequested) break;
               try {
                 const result = await processOne(item);
+                if (cancelRequested) break;
                 applyResultToFrame(item, result);
               } catch (err) {
                 if (cancelRequested) break;
@@ -2032,19 +2101,51 @@
           return completed;
         }
 
+        function requestPause() {
+          if (!isProcessing || isPaused || cancelRequested) return;
+          isPaused = true;
+          updateControlButtons();
+          updateStatus();
+          showToast("⏸️ העיבוד מושהה – לחץ ▶️ המשך כדי להמשיך", 3500);
+        }
+
+        function requestResume() {
+          if (!isProcessing || !isPaused) return;
+          isPaused = false;
+          const waiters = pauseWaiters.slice();
+          pauseWaiters = [];
+          waiters.forEach((r) => r());
+          updateControlButtons();
+          updateStatus();
+          showToast("▶️ ממשיך בעיבוד...", 2500);
+        }
+
         function requestCancel() {
           if (!isProcessing || cancelRequested) return;
           cancelRequested = true;
+          // If paused, wake workers so they can see the cancel flag and exit
+          if (isPaused) {
+            isPaused = false;
+            const waiters = pauseWaiters.slice();
+            pauseWaiters = [];
+            waiters.forEach((r) => r());
+          }
           cancelBtn.textContent = "⏳ מבטל...";
           stickyCancelBtn.textContent = "⏳ מבטל...";
           cancelBtn.disabled = true;
           stickyCancelBtn.disabled = true;
+          pauseBtn.style.display = "none";
+          resumeBtn.style.display = "none";
+          stickyPauseBtn.style.display = "none";
+          stickyResumeBtn.style.display = "none";
           showToast("⏹️ מבטל עיבוד... (ממתין לסיום תמונות שכבר בעיבוד)", 4000);
         }
 
         async function doProcessAll() {
           if (!items.length || isProcessing) return;
           cancelRequested = false;
+          isPaused = false;
+          pauseWaiters = [];
           cancelBtn.disabled = false;
           stickyCancelBtn.disabled = false;
           cancelBtn.textContent = "⏹️ בטל עיבוד";
@@ -2069,9 +2170,7 @@
               const badge = frame.querySelector(".frame-badge");
               if (badge) badge.textContent = "";
             }
-            const imgEl = document.querySelector(
-              "#frame-" + item.id + " .frame-img-wrap img",
-            );
+            const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
             if (imgEl && item.origUrl) imgEl.src = item.origUrl;
             const newEl = document.getElementById("new-" + item.id);
             if (newEl) newEl.textContent = "—";
@@ -2124,6 +2223,10 @@
 
         runBtn.onclick = doProcessAll;
         stickyRunBtn.onclick = doProcessAll;
+        pauseBtn.onclick = requestPause;
+        stickyPauseBtn.onclick = requestPause;
+        resumeBtn.onclick = requestResume;
+        stickyResumeBtn.onclick = requestResume;
         cancelBtn.onclick = requestCancel;
         stickyCancelBtn.onclick = requestCancel;
 
