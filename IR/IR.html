@@ -986,7 +986,10 @@
         </div>
       </div>
       <div class="header-actions" id="actionsBar" style="display: none; margin: 12px 0;">
-        <button class="btn btn-primary" id="runBtn">📦 עבד הכל</button>
+        <button class="btn btn-primary" id="runBtn">📦 התחל עיבוד</button>
+        <button class="btn btn-danger" id="cancelBtn" style="display: none">
+          ⏹️ בטל עיבוד
+        </button>
         <button
           class="btn btn-ghost"
           id="downloadAllBtn"
@@ -1006,7 +1009,8 @@
       </div>
     </div>
     <div class="sticky-actions" id="stickyActions">
-      <button class="btn btn-primary" id="stickyRunBtn">📦 עבד הכל</button>
+      <button class="btn btn-primary" id="stickyRunBtn">📦 התחל עיבוד</button>
+      <button class="btn btn-danger" id="stickyCancelBtn" style="display: none">⏹️ בטל עיבוד</button>
       <button class="btn btn-ghost" id="stickyZipBtn" style="display: none">📥 ZIP</button>
       <button class="btn btn-danger" id="stickyClearBtn">🗑️ נקה</button>
     </div>
@@ -1030,6 +1034,7 @@
         const qualitySlider = document.getElementById("quality");
         const qualityVal = document.getElementById("qualityVal");
         const runBtn = document.getElementById("runBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
         const clearBtn = document.getElementById("clearBtn");
         const downloadAllBtn = document.getElementById("downloadAllBtn");
         const statusLine = document.getElementById("statusLine");
@@ -1038,6 +1043,7 @@
         const processProgressRow = document.getElementById("processProgressRow");
         const stickyActions = document.getElementById("stickyActions");
         const stickyRunBtn = document.getElementById("stickyRunBtn");
+        const stickyCancelBtn = document.getElementById("stickyCancelBtn");
         const stickyZipBtn = document.getElementById("stickyZipBtn");
         const stickyClearBtn = document.getElementById("stickyClearBtn");
         const themeToggle = document.getElementById("themeToggle");
@@ -1045,6 +1051,7 @@
         let mode = "dim";
         let items = [];
         let isProcessing = false;
+        let cancelRequested = false;
         const CONCURRENCY = 3;
         const STICKY_THRESHOLD = 4; // show sticky bar when >= this many images
 
@@ -1077,7 +1084,24 @@
           document.body.classList.toggle("has-sticky", show);
           stickyZipBtn.style.display = items.some((i) => i.resultBlob) ? "inline-flex" : "none";
           stickyRunBtn.disabled = !items.length || isProcessing;
-          stickyRunBtn.textContent = isProcessing ? "⏳ מעבד..." : "📦 עבד הכל";
+          stickyRunBtn.textContent = isProcessing ? "⏳ מעבד..." : "📦 התחל עיבוד";
+          stickyRunBtn.style.display = isProcessing ? "none" : "inline-flex";
+          stickyCancelBtn.style.display = isProcessing ? "inline-flex" : "none";
+        }
+
+        function setProcessingUI(active) {
+          isProcessing = active;
+          runBtn.style.display = active ? "none" : "inline-flex";
+          cancelBtn.style.display = active ? "inline-flex" : "none";
+          runBtn.disabled = active || !items.length;
+          stickyRunBtn.disabled = active || !items.length;
+          clearBtn.disabled = active;
+          stickyClearBtn.disabled = active;
+          if (!active) {
+            runBtn.textContent = "📦 התחל עיבוד";
+            stickyRunBtn.textContent = "📦 התחל עיבוד";
+          }
+          updateStickyBar();
         }
 
         function showToast(msg, dur = 3000) {
@@ -1326,14 +1350,30 @@
           return files;
         }
 
+        function getUnsupportedReason(file) {
+          const name = (file.name || "").toLowerCase();
+          const type = (file.type || "").toLowerCase();
+          if (
+            type.includes("heic") ||
+            type.includes("heif") ||
+            name.endsWith(".heic") ||
+            name.endsWith(".heif")
+          ) {
+            return "HEIC/HEIF";
+          }
+          if (type === "image/gif" || name.endsWith(".gif")) {
+            return "GIF";
+          }
+          return null;
+        }
+
         function isSupportedImage(file) {
           const name = (file.name || "").toLowerCase();
           const type = (file.type || "").toLowerCase();
-          // Explicitly supported formats (no HEIC/HEIF – no decoder available)
-          if (type.startsWith("image/") && !type.includes("heic") && !type.includes("heif")) {
-            return true;
-          }
-          return /\.(jpe?g|png|webp|gif|bmp|tiff?)$/i.test(name);
+          // GIF / HEIC / HEIF – לא נתמכים
+          if (getUnsupportedReason(file)) return false;
+          if (type.startsWith("image/")) return true;
+          return /\.(jpe?g|png|webp|bmp|tiff?)$/i.test(name);
         }
 
         function handleFiles(fileList) {
@@ -1343,7 +1383,17 @@
 
           if (!files.length) {
             if (raw.length > 0) {
-              showToast("⚠️ " + raw.length + " קבצים התקבלו אך אף אחד לא זוהה כתמונה נתמכת");
+              const reasons = {};
+              raw.forEach((f) => {
+                const r = getUnsupportedReason(f) || "אחר";
+                reasons[r] = (reasons[r] || 0) + 1;
+              });
+              const parts = Object.keys(reasons).map((k) => k + " ×" + reasons[k]);
+              showToast(
+                "⚠️ " + raw.length + " קבצים לא נתמכים: " + parts.join(", ") +
+                  " (GIF ו-HEIC/HEIF אינם נתמכים)",
+                5000,
+              );
             } else {
               showToast("⚠️ לא נמצאו תמונות");
             }
@@ -1351,7 +1401,15 @@
           }
 
           if (skipped > 0) {
-            showToast("ℹ️ " + skipped + " קבצים דולגו (פורמט לא נתמך)");
+            const unsupported = raw.filter((f) => !isSupportedImage(f));
+            const hasGif = unsupported.some((f) => getUnsupportedReason(f) === "GIF");
+            const hasHeic = unsupported.some((f) => getUnsupportedReason(f) === "HEIC/HEIF");
+            let detail = "";
+            if (hasGif && hasHeic) detail = " (כולל GIF ו-HEIC/HEIF שאינם נתמכים)";
+            else if (hasGif) detail = " (GIF אינו נתמך)";
+            else if (hasHeic) detail = " (HEIC/HEIF אינו נתמך)";
+            else detail = " (פורמט לא נתמך)";
+            showToast("ℹ️ " + skipped + " קבצים דולגו" + detail, 4500);
           }
 
           panel.style.display = "block";
@@ -1820,7 +1878,7 @@
           return result;
         }
 
-        // Concurrent processor with fixed concurrency limit
+        // Concurrent processor with fixed concurrency limit + cancel support
         async function processAllConcurrent(list, concurrency) {
           let nextIndex = 0;
           let completed = 0;
@@ -1828,12 +1886,15 @@
 
           async function worker() {
             while (nextIndex < total) {
+              if (cancelRequested) break;
               const idx = nextIndex++;
               const item = list[idx];
+              if (cancelRequested) break;
               try {
                 const result = await processOne(item);
                 applyResultToFrame(item, result);
               } catch (err) {
+                if (cancelRequested) break;
                 console.error(err);
                 applyErrorToFrame(item, err.message || "שגיאה");
               }
@@ -1851,15 +1912,25 @@
           return completed;
         }
 
+        function requestCancel() {
+          if (!isProcessing || cancelRequested) return;
+          cancelRequested = true;
+          cancelBtn.textContent = "⏳ מבטל...";
+          stickyCancelBtn.textContent = "⏳ מבטל...";
+          cancelBtn.disabled = true;
+          stickyCancelBtn.disabled = true;
+          showToast("⏹️ מבטל עיבוד... (ממתין לסיום תמונות שכבר בעיבוד)", 4000);
+        }
+
         async function doProcessAll() {
           if (!items.length || isProcessing) return;
-          isProcessing = true;
-          runBtn.disabled = true;
-          stickyRunBtn.disabled = true;
-          runBtn.textContent = "⏳ מעבד...";
-          stickyRunBtn.textContent = "⏳ מעבד...";
+          cancelRequested = false;
+          cancelBtn.disabled = false;
+          stickyCancelBtn.disabled = false;
+          cancelBtn.textContent = "⏹️ בטל עיבוד";
+          stickyCancelBtn.textContent = "⏹️ בטל עיבוד";
+          setProcessingUI(true);
           processProgressRow.classList.remove("hidden");
-          updateStickyBar();
 
           // Reset previous results before new run
           items.forEach((item) => {
@@ -1903,25 +1974,36 @@
           try {
             await processAllConcurrent(items, CONCURRENCY);
             const ok = items.filter((i) => i.resultBlob).length;
-            const failed = items.length - ok;
-            let msg = "✅ " + ok + " תמונות עובדו";
-            if (failed) msg += " (" + failed + " נכשלו)";
-            showToast(msg);
+            const failed = items.filter((i) => i.error).length;
+            const pending = items.length - ok - failed;
+            if (cancelRequested) {
+              let msg = "⏹️ עיבוד בוטל – " + ok + " הושלמו";
+              if (pending > 0) msg += ", " + pending + " לא עובדו";
+              if (failed) msg += ", " + failed + " נכשלו";
+              showToast(msg, 4500);
+            } else {
+              let msg = "✅ " + ok + " תמונות עובדו";
+              if (failed) msg += " (" + failed + " נכשלו)";
+              showToast(msg);
+            }
           } catch (err) {
             console.error(err);
             showToast("❌ שגיאה כללית בעיבוד");
           } finally {
-            isProcessing = false;
-            runBtn.disabled = !items.length;
-            stickyRunBtn.disabled = !items.length;
-            runBtn.textContent = "📦 עבד הכל";
-            stickyRunBtn.textContent = "📦 עבד הכל";
+            cancelRequested = false;
+            cancelBtn.disabled = false;
+            stickyCancelBtn.disabled = false;
+            cancelBtn.textContent = "⏹️ בטל עיבוד";
+            stickyCancelBtn.textContent = "⏹️ בטל עיבוד";
+            setProcessingUI(false);
             updateStatus();
           }
         }
 
         runBtn.onclick = doProcessAll;
         stickyRunBtn.onclick = doProcessAll;
+        cancelBtn.onclick = requestCancel;
+        stickyCancelBtn.onclick = requestCancel;
 
         async function doDownloadZip() {
           const done = items.filter((i) => i.resultBlob);
