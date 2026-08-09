@@ -6,13 +6,16 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes"
     />
-    <link rel="icon" href="IR.png" type="image/png" />
+    <title>עריכת תמונות</title>
+
+    <link rel="icon" href="IR/IR.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -293,6 +296,21 @@
         color: #444;
         font-weight: 600;
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .progress-row {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .progress-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #555;
+        display: flex;
+        justify-content: space-between;
       }
       .progress-bar {
         width: 100%;
@@ -351,6 +369,33 @@
         border: 1px solid #e0e0e0;
         display: flex;
         flex-direction: column;
+        position: relative;
+      }
+      .frame-remove {
+        position: absolute;
+        top: 6px;
+        left: 6px; /* RTL: left side looks like "corner" for remove */
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(220, 53, 69, 0.9);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        transition: transform 0.15s, background 0.15s;
+        padding: 0;
+      }
+      .frame-remove:hover {
+        background: #c82333;
+        transform: scale(1.1);
       }
       .frame-img-wrap {
         background: #fff;
@@ -515,7 +560,7 @@
         <h2>שינוי גודל דחיסה / כיווץ תמונות</h2>
       </div>
       <div class="dropzone" id="dropzone">
-        <input type="file" id="fileInput" multiple accept="image/*" />
+        <input type="file" id="fileInput" multiple accept="image/*,.tif,.tiff,image/tiff,.bmp,image/bmp" />
         <input
           type="file"
           id="folderInput"
@@ -525,7 +570,7 @@
           style="display: none"
         />
         <div class="dz-title">📂 גררו תמונות לכאן, או לחצו לבחירה</div>
-        <div class="dz-sub">בפורמטים: JPG · PNG · WEBP</div>
+        <div class="dz-sub">תומך בפורמטים: JPG · PNG · WEBP · TIFF · BMP</div>
         <div style="margin-top: 12px">
           <button
             type="button"
@@ -601,9 +646,25 @@
         </div>
         <div class="run-row">
           <div class="status" id="statusLine">
-            <div class="progress-bar" id="progressBar">
-              <div class="progress-fill" id="progressFill"></div>
-              <div class="progress-text" id="progressText">0 / 0</div>
+            <div class="progress-row" id="loadProgressRow">
+              <div class="progress-label">
+                <span>📥 טעינה</span>
+                <span id="loadProgressLabel">0 / 0</span>
+              </div>
+              <div class="progress-bar" id="loadProgressBar">
+                <div class="progress-fill" id="loadProgressFill"></div>
+                <div class="progress-text" id="loadProgressText">0 / 0</div>
+              </div>
+            </div>
+            <div class="progress-row" id="processProgressRow">
+              <div class="progress-label">
+                <span>⚙️ עיבוד</span>
+                <span id="processProgressLabel">0 / 0</span>
+              </div>
+              <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-text" id="progressText">0 / 0</div>
+              </div>
             </div>
           </div>
         </div>
@@ -892,41 +953,100 @@
           panel.style.display = "block";
           actionsBar.style.display = "flex";
           let loaded = 0;
-          const total = files.length;
-          files.forEach((file) => {
+          const baseCount = items.length;          // כמה כבר היו לפני ההעלאה הנוכחית
+          const totalToLoad = files.length;
+          const expectedTotal = baseCount + totalToLoad;
+          updateLoadProgress(baseCount, expectedTotal);
+          function isTiff(file) {
+            const name = (file.name || "").toLowerCase();
+            return (
+              name.endsWith(".tif") ||
+              name.endsWith(".tiff") ||
+              (file.type && (file.type === "image/tiff" || file.type === "image/tif"))
+            );
+          }
+          async function loadOne(file) {
             const id = "f" + Math.random().toString(36).slice(2);
-            const origUrl = URL.createObjectURL(file);
-            const img = new Image();
-            img.onload = () => {
-              const item = {
-                file,
-                id,
-                origUrl,
-                origSize: file.size,
-                w: img.naturalWidth,
-                h: img.naturalHeight,
-                resultBlob: null,
-                resultUrl: null,
-                resultW: 0,
-                resultH: 0,
-                resultType: null,
-              };
-              items.push(item);
-              renderFrame(item);
+            try {
+              if (isTiff(file) && typeof UTIF !== "undefined") {
+                const buffer = await file.arrayBuffer();
+                const ifds = UTIF.decode(buffer);
+                if (!ifds || !ifds.length) throw new Error("לא ניתן לפענח קובץ TIFF");
+                UTIF.decodeImage(buffer, ifds[0]);
+                const rgba = UTIF.toRGBA8(ifds[0]);
+                const w = ifds[0].width;
+                const h = ifds[0].height;
+                if (!w || !h) throw new Error("מימדים לא תקינים ב-TIFF");
+                const canvas = document.createElement("canvas");
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+                const imgData = ctx.createImageData(w, h);
+                imgData.data.set(rgba);
+                ctx.putImageData(imgData, 0, 0);
+                const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+                if (!blob) throw new Error("כשל ביצירת תצוגה מקדימה");
+                const origUrl = URL.createObjectURL(blob);
+                const item = {
+                  file,
+                  id,
+                  origUrl,
+                  origSize: file.size,
+                  w,
+                  h,
+                  resultBlob: null,
+                  resultUrl: null,
+                  resultW: 0,
+                  resultH: 0,
+                  resultType: null,
+                  isTiff: true,
+                };
+                items.push(item);
+                renderFrame(item);
+              } else {
+                const origUrl = URL.createObjectURL(file);
+                const img = new Image();
+                await new Promise((resolve, reject) => {
+                  img.onload = resolve;
+                  img.onerror = () => reject(new Error("שגיאת טעינת תמונה"));
+                  img.src = origUrl;
+                });
+                const item = {
+                  file,
+                  id,
+                  origUrl,
+                  origSize: file.size,
+                  w: img.naturalWidth,
+                  h: img.naturalHeight,
+                  resultBlob: null,
+                  resultUrl: null,
+                  resultW: 0,
+                  resultH: 0,
+                  resultType: null,
+                };
+                items.push(item);
+                renderFrame(item);
+              }
+            } catch (err) {
+              console.error("Failed to load", file.name, err);
+              showToast("⚠️ לא ניתן לטעון: " + (file.name || "קובץ") + " (" + (err.message || err) + ")");
+            } finally {
+              loaded++;
+              // התקדמות מצטברת: הקיימות + מה שנטען עד כה
+              updateLoadProgress(baseCount + loaded, expectedTotal);
               updateStatus();
-              loaded++;
-              if (loaded === total) {
-                showToast("✅ " + total + " תמונות נטענו");
+              if (loaded === totalToLoad) {
+                // בסיום – מעדכנים לכמות האמיתית שנשארה (אחרי כשלונות אפשריים)
+                const realTotal = items.length;
+                updateLoadProgress(realTotal, realTotal);
+                const msg = realTotal > 0
+                  ? "✅ " + realTotal + " תמונות נטענו"
+                  : "⚠️ 0 תמונות נטענו – בדוק את סוג הקבצים או את הקונסול";
+                showToast(msg);
               }
-            };
-            img.onerror = () => {
-              loaded++;
-              if (loaded === total) {
-                showToast("✅ " + items.length + " תמונות נטענו");
-              }
-            };
-            img.src = origUrl;
-          });
+            }
+          }
+          files.forEach((file) => loadOne(file));
           fileInput.value = "";
         }
         function renderFrame(item) {
@@ -934,6 +1054,7 @@
           el.className = "frame";
           el.id = "frame-" + item.id;
           el.innerHTML = `
+      <button class="frame-remove" title="הסר מהרשימה" aria-label="הסר">×</button>
       <div class="frame-img-wrap"><img src="${item.origUrl}" loading="lazy"></div>
       <div class="frame-name" title="${item.file.name}">${item.file.name}</div>
       <div class="frame-dims">
@@ -943,7 +1064,51 @@
       <div class="frame-meta"><span>${fmtBytes(item.origSize)}</span><span class="new" id="new-${item.id}">—</span></div>
       <a class="frame-dl pending" id="dl-${item.id}">⏳ ממתין</a>
     `;
+          const removeBtn = el.querySelector(".frame-remove");
+          removeBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeItem(item.id);
+          });
           filmstrip.appendChild(el);
+        }
+        function removeItem(id) {
+          const idx = items.findIndex((i) => i.id === id);
+          if (idx === -1) return;
+          const item = items[idx];
+          if (item.origUrl) URL.revokeObjectURL(item.origUrl);
+          if (item.resultUrl) URL.revokeObjectURL(item.resultUrl);
+          items.splice(idx, 1);
+          const el = document.getElementById("frame-" + id);
+          if (el) el.remove();
+          // עדכון סרגל הטעינה לכמות הנוכחית בפועל
+          const current = items.length;
+          updateLoadProgress(current, current);
+          updateStatus();
+          if (items.length === 0) {
+            panel.style.display = "none";
+            actionsBar.style.display = "none";
+            showToast("🧹 כל התמונות הוסרו");
+          } else {
+            showToast("🗑️ תמונה הוסרה");
+          }
+        }
+        function updateLoadProgress(done, total) {
+          const fill = document.getElementById("loadProgressFill");
+          const text = document.getElementById("loadProgressText");
+          const bar = document.getElementById("loadProgressBar");
+          const label = document.getElementById("loadProgressLabel");
+          if (!fill) return;
+          const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+          fill.style.width = pct + "%";
+          text.textContent = done + " / " + total;
+          if (label) label.textContent = done + " / " + total;
+          if (total > 0 && done === total) {
+            fill.classList.add("done");
+            bar.classList.add("done");
+          } else {
+            fill.classList.remove("done");
+            bar.classList.remove("done");
+          }
         }
         function updateStatus() {
           const total = items.length;
@@ -951,9 +1116,11 @@
           const fill = document.getElementById("progressFill");
           const text = document.getElementById("progressText");
           const bar = document.getElementById("progressBar");
+          const label = document.getElementById("processProgressLabel");
           const pct = total === 0 ? 0 : Math.round((done / total) * 100);
           fill.style.width = pct + "%";
           text.textContent = done + " / " + total;
+          if (label) label.textContent = done + " / " + total;
           if (total > 0 && done === total) {
             fill.classList.add("done");
             bar.classList.add("done");
@@ -972,6 +1139,7 @@
           items = [];
           filmstrip.innerHTML = "";
           updateStatus();
+          updateLoadProgress(0, 0);
           panel.style.display = "none";
           actionsBar.style.display = "none";
           showToast("🧹 נוקה");
