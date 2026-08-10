@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>מחולל נוסחאות חיפוש באקסל</title>
+    <link rel="icon" href="ESF.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #703efa;
+            --primary-dark: #5a2fd4;
+            --primary-light: #f0ebff;
+            --accent: #28a745;
+            --bg: #90dcfc;
+            --card: #ffe699;
+            --panel: #f1f3f5;
+            --text: #1a1a1a;
+            --muted: #555;
+            --border: #d0d0d0;
+            --success: #28a745;
+            --blue: #0d6efd;
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            --xlookup: #703efa;
+            --vlookup: #28a745;
+            --hlookup: #fd7e14;
+            --indexmatch: #0d6efd;
+            --input-bg: #fff;
+            --hint-bg: #e8ecf0;
+            --result-bg: #1a1a1a;
+            --result-text: #d4d4d4;
+            --result-formula: #ce9178;
+            --warning-bg: #fff3cd;
+            --warning-border: #ffc107;
+            --warning-text: #856404;
+            --error-bg: #ffe0e3;
+            --error-text: #dc3545;
+            --ok-text: #137333;
+            --toast-bg: #1a1a1a;
+            --footer-text: #2c3e50;
+            --radio-bg: #fff;
+            --tab-bg: #fff;
+            --tab-text: #333;
+            --secondary-btn-bg: #fff;
+            --secondary-btn-text: #6c757d;
+            --secondary-btn-border: #6c757d;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --panel: #334155;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --border: #475569;
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+            --primary-light: #2e1065;
+            --input-bg: #1e293b;
+            --hint-bg: #475569;
+            --result-bg: #0f172a;
+            --result-text: #e2e8f0;
+            --result-formula: #fbbf24;
+            --warning-bg: #422006;
+            --warning-border: #b45309;
+            --warning-text: #fcd34d;
+            --error-bg: #450a0a;
+            --error-text: #fca5a5;
+            --ok-text: #86efac;
+            --toast-bg: #1e293b;
+            --footer-text: #94a3b8;
+            --radio-bg: #1e293b;
+            --tab-bg: #1e293b;
+            --tab-text: #e2e8f0;
+            --secondary-btn-bg: #334155;
+            --secondary-btn-text: #cbd5e1;
+            --secondary-btn-border: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: "IBM Plex Sans Hebrew", system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            line-height: 1.35;
+            padding: 10px 8px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            transition: background 0.25s, color 0.25s;
+        }
+
+        .container {
+            max-width: 720px;
+            width: 100%;
+            background: var(--card);
+            border-radius: 24px;
+            padding: 14px 14px 12px;
+            box-shadow: var(--shadow);
+            margin: 0 auto;
+            transition: background 0.25s, box-shadow 0.25s;
+        }
+
+        /* כפתור מצב כהה — צף בפינה השמאלית העליונה */
+        .theme-toggle {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 9999;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.9);
+            transition: background 0.2s, border-color 0.2s, transform 0.15s, color 0.2s;
+        }
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            transform: scale(1.08);
+        }
+        .theme-toggle:active { transform: scale(0.95); }
+        .theme-toggle svg {
+            width: 22px;
+            height: 22px;
+        }
+        .theme-toggle .icon-moon { fill: currentColor; display: block; }
+        .theme-toggle .icon-sun { display: none; }
+        [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+        [data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+        header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        header p {
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .excel-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .excel-icon svg { width: 15px; height: 15px; }
+
+        .card {
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 12px 12px;
+            margin-bottom: 8px;
+            border: none;
+            box-shadow: none;
+            transition: background 0.25s;
+        }
+
+        .card h2 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-family: "IBM Plex Sans Hebrew", sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        .func-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .func-tab {
+            flex: 1;
+            min-width: 80px;
+            padding: 7px 6px;
+            border: 2px solid var(--border);
+            border-radius: 40px;
+            background: var(--tab-bg);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: var(--tab-text);
+            font-family: inherit;
+        }
+
+        .func-tab:hover { border-color: var(--primary); }
+
+        .func-tab.active {
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .func-tab.active[data-func="XLOOKUP"] { background: var(--xlookup); border-color: var(--xlookup); }
+        .func-tab.active[data-func="VLOOKUP"] { background: var(--vlookup); border-color: var(--vlookup); }
+        .func-tab.active[data-func="HLOOKUP"] { background: var(--hlookup); border-color: var(--hlookup); }
+        .func-tab.active[data-func="INDEXMATCH"] { background: var(--indexmatch); border-color: var(--indexmatch); }
+
+        .func-tab .func-name {
+            display: block;
+            font-size: 0.88rem;
+            margin-bottom: 0;
+        }
+
+        .func-tab .func-desc {
+            display: block;
+            font-size: 0.62rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .form-group { margin-bottom: 8px; }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 3px;
+            color: var(--text);
+            font-size: 0.85rem;
+        }
+
+        .hint {
+            font-size: 0.72rem;
+            color: var(--text);
+            margin-top: 2px;
+            font-weight: 400;
+            background: var(--hint-bg);
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 7px 12px;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            font-size: 0.88rem;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.2s, color 0.2s;
+            background: var(--input-bg);
+            direction: rtl;
+            text-align: right;
+            font-family: inherit;
+            color: var(--text);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+            background: var(--input-bg);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--radio-bg);
+            padding: 5px 10px;
+            border-radius: 40px;
+            cursor: pointer;
+            border: 2px solid var(--border);
+            transition: all 0.15s;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--tab-text);
+        }
+
+        .radio-option:hover { border-color: var(--primary); }
+
+        .radio-option input {
+            accent-color: var(--primary);
+            width: 13px;
+            height: 13px;
+        }
+
+        .radio-option.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn:active { transform: scale(0.96); }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 35%, transparent);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-btn-bg);
+            color: var(--secondary-btn-text);
+            border: 2px solid var(--secondary-btn-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary-btn-border);
+            color: #fff;
+        }
+
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            border-radius: 20px;
+            background: var(--input-bg);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        .btn-small:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .result-box {
+            background: var(--result-bg);
+            color: var(--result-text);
+            border-radius: 14px;
+            padding: 12px;
+            font-family: "IBM Plex Mono", "Consolas", monospace;
+            font-size: 0.92rem;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            min-height: 44px;
+            word-break: break-all;
+            border: 2px solid var(--primary);
+            transition: border-color 0.2s, background 0.25s;
+        }
+
+        .result-box .formula {
+            color: var(--result-formula);
+            padding-left: 78px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: "IBM Plex Sans Hebrew", sans-serif;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+
+        .copy-btn:hover { background: var(--primary-dark); }
+        .copy-btn.copied { background: var(--success); }
+
+        .explanation {
+            margin-top: 8px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+
+        .explanation h3 {
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+        }
+
+        .explanation ul {
+            padding-right: 16px;
+            color: var(--muted);
+        }
+
+        .explanation li { margin-bottom: 2px; }
+
+        .warning-box {
+            margin-top: 6px;
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            border-radius: 10px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            color: var(--warning-text);
+            display: none;
+        }
+
+        .warning-box.visible { display: block; }
+
+        .advanced { margin-top: 4px; }
+
+        .toggle-advanced {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.82rem;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+
+        .advanced-content {
+            display: none;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .advanced-content.open { display: block; }
+
+        .examples {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+            align-items: center;
+        }
+
+        .example-chip {
+            background: var(--input-bg);
+            color: var(--primary);
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border: 2px solid var(--primary);
+            transition: all 0.15s;
+            font-weight: 600;
+        }
+
+        .example-chip:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .range-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            direction: rtl;
+        }
+
+        .range-row .range-input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .range-row .sheet-input {
+            width: 145px;
+            flex-shrink: 0;
+            font-size: 0.82rem;
+            padding: 7px 10px;
+        }
+
+        .sheet-label-inline {
+            font-size: 0.72rem;
+            color: var(--muted);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .field-group { display: none; }
+        .field-group.visible { display: block; }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.62rem;
+            padding: 1px 7px;
+            border-radius: 40px;
+            background: var(--primary-light);
+            color: var(--primary);
+            margin-right: 4px;
+            vertical-align: middle;
+            font-weight: 600;
+            font-family: "IBM Plex Mono", monospace;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .badge.recommended {
+            background: #e6f4ea;
+            color: #137333;
+        }
+        [data-theme="dark"] .badge.recommended {
+            background: #14532d;
+            color: #86efac;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--toast-bg);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            pointer-events: none;
+            border: 1px solid var(--border);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Live validation */
+        input.invalid {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2) !important;
+            background: var(--error-bg) !important;
+        }
+        input.valid {
+            border-color: #28a745 !important;
+        }
+        .field-error {
+            display: none;
+            font-size: 0.72rem;
+            color: var(--error-text);
+            margin-top: 3px;
+            font-weight: 500;
+            padding: 2px 8px;
+            background: var(--error-bg);
+            border-radius: 12px;
+        }
+        .field-error.visible {
+            display: inline-block;
+        }
+        .field-ok {
+            display: none;
+            font-size: 0.72rem;
+            color: var(--ok-text);
+            margin-top: 3px;
+            font-weight: 500;
+        }
+        .field-ok.visible {
+            display: inline-block;
+        }
+        .suggest-btn {
+            display: inline-block;
+            background: var(--input-bg);
+            color: var(--error-text);
+            border: 2px solid var(--error-text);
+            border-radius: 20px;
+            padding: 1px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            font-family: "IBM Plex Mono", monospace;
+            cursor: pointer;
+            margin-right: 4px;
+            direction: ltr;
+            transition: all 0.15s;
+        }
+        .suggest-btn:hover {
+            background: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 6px 5px; }
+            .container { padding: 10px 10px; border-radius: 18px; }
+            .card { padding: 10px 10px; border-radius: 14px; }
+            header h1 { font-size: 1.1rem; }
+            .func-tab { min-width: 0; padding: 6px 4px; }
+            .func-tab .func-name { font-size: 0.78rem; }
+            .func-tab .func-desc { font-size: 0.55rem; }
+            .radio-option { padding: 4px 8px; font-size: 0.72rem; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 4px 3px; }
+            .container { padding: 8px 8px; border-radius: 16px; }
+            header { margin-bottom: 6px; }
+            header h1 { font-size: 1rem; gap: 5px; }
+            header p { font-size: 0.75rem; }
+            .excel-icon { width: 22px; height: 22px; }
+            .excel-icon svg { width: 12px; height: 12px; }
+            .card { padding: 8px 8px; margin-bottom: 6px; }
+            .card h2 { font-size: 0.85rem; margin-bottom: 6px; }
+            .func-tabs { gap: 4px; margin-bottom: 8px; }
+            .func-tab { padding: 5px 3px; }
+            .func-tab .func-name { font-size: 0.72rem; }
+            .func-tab .func-desc { font-size: 0.52rem; }
+            .form-group { margin-bottom: 6px; }
+            label { font-size: 0.78rem; }
+            .hint { font-size: 0.65rem; padding: 2px 8px; }
+            input[type="text"], input[type="number"], select {
+                padding: 6px 10px; font-size: 0.82rem;
+            }
+            .radio-option { padding: 3px 7px; font-size: 0.68rem; }
+            .btn { padding: 7px 14px; font-size: 0.82rem; }
+            .result-box { padding: 10px; font-size: 0.82rem; }
+            .result-box .formula { padding-left: 68px; }
+            .copy-btn { padding: 4px 10px; font-size: 0.68rem; }
+            .example-chip { font-size: 0.65rem; padding: 1px 8px; }
+            .range-row .sheet-input { width: 110px; padding: 6px 8px; font-size: 0.75rem; }
+            .sheet-label-inline { font-size: 0.62rem; }
+        }
+
+        @media (max-width: 360px) {
+            header h1 { font-size: 0.92rem; }
+            .func-tab .func-desc { display: none; }
+            .range-row .sheet-input { width: 95px; }
+        }
+
+        /* Footer */
+        .site-footer {
+            width: 100%;
+            max-width: 720px;
+            margin: 4px auto 2px;
+            padding: 12px 8px;
+            text-align: center;
+            color: var(--footer-text);
+            font-size: 1.0rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .site-footer img {
+            height: 36px;
+            width: auto;
+            opacity: 0.9;
+        }
+        [data-theme="dark"] .site-footer img {
+            opacity: 0.85;
+            filter: brightness(1.15);
+        }
+        .site-footer .copy {
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="החלף מצב כהה/בהיר" title="מצב כהה / בהיר">
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="excel-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path fill="rgb(255, 255, 255)" d="M128 128C128 92.7 156.7 64 192 64L341.5 64C358.5 64 374.8 70.7 386.8 82.7L493.3 189.3C505.3 201.3 512 217.6 512 234.6L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 128zM336 122.5L336 216C336 229.3 346.7 240 360 240L453.5 240L336 122.5zM292 330.7C284.6 319.7 269.7 316.7 258.7 324C247.7 331.3 244.7 346.3 252 357.3L291.2 416L252 474.7C244.6 485.7 247.6 500.6 258.7 508C269.8 515.4 284.6 512.4 292 501.3L320 459.3L348 501.3C355.4 512.3 370.3 515.3 381.3 508C392.3 500.7 395.3 485.7 388 474.7L348.8 416L388 357.3C395.4 346.3 392.4 331.4 381.3 324C370.2 316.6 355.4 319.6 348 330.7L320 372.7L292 330.7z"/></svg></span>
+                מחולל נוסחאות חיפוש באקסל
+            </h1>
+            <p>בחר סוג נוסחת חיפוש, מלא פרטים וקבל נוסחה מוכנה</p>
+        </header>
+
+        <div class="card">
+            <div class="func-tabs" role="tablist" aria-label="סוג נוסחת חיפוש">
+                <button type="button" class="func-tab active" data-func="XLOOKUP" role="tab" aria-selected="true" id="tab-XLOOKUP">
+                    <span class="func-name">XLOOKUP</span>
+                    <span class="func-desc">מומלץ · גמיש וחדש</span>
+                </button>
+                <button type="button" class="func-tab" data-func="VLOOKUP" role="tab" aria-selected="false" id="tab-VLOOKUP">
+                    <span class="func-name">VLOOKUP</span>
+                    <span class="func-desc">חיפוש אנכי קלאסי</span>
+                </button>
+                <button type="button" class="func-tab" data-func="HLOOKUP" role="tab" aria-selected="false" id="tab-HLOOKUP">
+                    <span class="func-name">HLOOKUP</span>
+                    <span class="func-desc">חיפוש אופקי</span>
+                </button>
+                <button type="button" class="func-tab" data-func="INDEXMATCH" role="tab" aria-selected="false" id="tab-INDEXMATCH">
+                    <span class="func-name">INDEX+MATCH</span>
+                    <span class="func-desc">גמיש וחזק</span>
+                </button>
+            </div>
+
+            <h2 id="paramsTitle">📝 פרמטרים — XLOOKUP</h2>
+
+            <!-- Common: lookup value -->
+            <div class="form-group">
+                <label for="lookupValue">הערך לחיפוש <span class="badge">lookup_value</span></label>
+                <input type="text" id="lookupValue" placeholder='לדוגמה: A2 או "מזהה123"' autocomplete="off" aria-describedby="lookupValueHint lookupValueError">
+                <div class="hint" id="lookupValueHint">תא שמכיל את הערך, או ערך קבוע במרכאות</div>
+                <div class="field-error" id="lookupValueError" role="alert"></div>
+                <div class="examples">
+                    <span class="example-chip" data-target="lookupValue" data-value="A2">A2</span>
+                    <span class="example-chip" data-target="lookupValue" data-value="B5">B5</span>
+                    <span class="example-chip" data-target="lookupValue" data-value='"תעודת זהות"'>"טקסט"</span>
+                </div>
+            </div>
+
+            <!-- ========== XLOOKUP fields ========== -->
+            <div id="fields-XLOOKUP" class="field-group visible" role="tabpanel" aria-labelledby="tab-XLOOKUP">
+                <div class="form-group">
+                    <label for="lookupArray">טווח החיפוש <span class="badge">lookup_array</span></label>
+                    <div class="range-row">
+                        <input type="text" id="lookupArray" class="range-input" placeholder="לדוגמה: A2:A100" autocomplete="off" aria-describedby="lookupArrayError">
+                        <input type="text" id="sheetNameX" class="sheet-input" placeholder="לשונית אם לא זהה" title="שם הלשונית בגיליון (אופציונלי)" autocomplete="off">
+                    </div>
+                    <div class="hint">העמודה/השורה שבה מחפשים את הערך · <span class="sheet-label-inline">שם לשונית (אופציונלי)</span></div>
+                    <div class="field-error" id="lookupArrayError" role="alert"></div>
+                    <div class="examples">
+                        <span class="example-chip" data-target="lookupArray" data-value="A2:A100">A2:A100</span>
+                        <span class="example-chip" data-target="lookupArray" data-value="A:A">A:A</span>
+                        <button type="button" class="btn-small" data-abs="lookupArray">$ מוחלט</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="returnArray">טווח ההחזרה <span class="badge">return_array</span></label>
+                    <div class="range-row">
+                        <input type="text" id="returnArray" class="range-input" placeholder="לדוגמה: B2:B100 או C2:E100" autocomplete="off" aria-describedby="returnArrayError">
+                        <input type="text" id="sheetNameXReturn" class="sheet-input" placeholder="לשונית אחרת?" title="אם טווח ההחזרה בלשונית שונה" autocomplete="off">
+                    </div>
+                    <div class="hint">העמודה/השורה שממנה יוחזר הערך (יכול להיות מרובה עמודות)</div>
+                    <div class="field-error" id="returnArrayError" role="alert"></div>
+                    <div class="examples">
+                        <span class="example-chip" data-target="returnArray" data-value="B2:B100">B2:B100</span>
+                        <span class="example-chip" data-target="returnArray" data-value="C2:E100">C2:E100</span>
+                        <button type="button" class="btn-small" data-abs="returnArray">$ מוחלט</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ifNotFound">ערך אם לא נמצא <span class="badge">if_not_found</span> (אופציונלי)</label>
+                    <input type="text" id="ifNotFound" placeholder='לדוגמה: "לא נמצא" או ""' autocomplete="off" aria-describedby="ifNotFoundError">
+                    <div class="hint">מה להציג כשהערך לא נמצא (במקום #N/A)</div>
+                    <div class="field-error" id="ifNotFoundError" role="alert"></div>
+                    <div class="examples">
+                        <span class="example-chip" data-target="ifNotFound" data-value='""'>"" (ריק)</span>
+                        <span class="example-chip" data-target="ifNotFound" data-value='"לא נמצא"'>"לא נמצא"</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== VLOOKUP fields ========== -->
+            <div id="fields-VLOOKUP" class="field-group" role="tabpanel" aria-labelledby="tab-VLOOKUP">
+                <div class="form-group">
+                    <label for="tableArrayV">טווח הטבלה <span class="badge">table_array</span></label>
+                    <div class="range-row">
+                        <input type="text" id="tableArrayV" class="range-input" placeholder="לדוגמה: A1:D100" autocomplete="off" aria-describedby="tableArrayVError">
+                        <input type="text" id="sheetNameV" class="sheet-input" placeholder="לשונית" title="שם הלשונית בגיליון (אופציונלי)" autocomplete="off">
+                    </div>
+                    <div class="hint">הטווח שבו נמצאים הנתונים. העמודה הראשונה חייבת להכיל את ערכי החיפוש</div>
+                    <div class="field-error" id="tableArrayVError" role="alert"></div>
+                    <div class="examples">
+                        <span class="example-chip" data-target="tableArrayV" data-value="A1:D100">A1:D100</span>
+                        <span class="example-chip" data-target="tableArrayV" data-value="A1:G500">A1:G500</span>
+                        <button type="button" class="btn-small" data-abs="tableArrayV">$ מוחלט</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="colIndex">מספר העמודה להחזרה <span class="badge">col_index_num</span></label>
+                    <input type="number" id="colIndex" min="1" max="255" placeholder="לדוגמה: 2" value="2" aria-describedby="colIndexError">
+                    <div class="hint">1 = העמודה הראשונה בטווח, 2 = השנייה, וכן הלאה</div>
+                    <div class="field-error" id="colIndexError" role="alert"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>סוג התאמה <span class="badge">range_lookup</span></label>
+                    <div class="radio-group" id="rangeLookupVGroup">
+                        <label class="radio-option selected">
+                            <input type="radio" name="rangeLookupV" value="FALSE" checked>
+                            <span>מדויקת (FALSE)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="rangeLookupV" value="TRUE">
+                            <span>משוערת (TRUE)</span>
+                        </label>
+                    </div>
+                    <div class="hint">ברוב המקרים מומלץ להשתמש בהתאמה מדויקת</div>
+                    <div class="warning-box" id="approxWarningV">⚠️ התאמה משוערת דורשת שהעמודה הראשונה תהיה ממוינת בסדר עולה. אחרת עלולות להתקבל תוצאות שגויות.</div>
+                </div>
+            </div>
+
+            <!-- ========== HLOOKUP fields ========== -->
+            <div id="fields-HLOOKUP" class="field-group" role="tabpanel" aria-labelledby="tab-HLOOKUP">
+                <div class="form-group">
+                    <label for="tableArrayH">טווח הטבלה <span class="badge">table_array</span></label>
+                    <div class="range-row">
+                        <input type="text" id="tableArrayH" class="range-input" placeholder="לדוגמה: A1:Z5" autocomplete="off" aria-describedby="tableArrayHError">
+                        <input type="text" id="sheetNameH" class="sheet-input" placeholder="לשונית אם לא זהה" title="שם הלשונית בגיליון (אופציונלי)" autocomplete="off">
+                    </div>
+                    <div class="hint">הטווח שבו נמצאים הנתונים. השורה הראשונה חייבת להכיל את ערכי החיפוש</div>
+                    <div class="field-error" id="tableArrayHError" role="alert"></div>
+                    <div class="examples">
+                        <span class="example-chip" data-target="tableArrayH" data-value="A1:Z5">A1:Z5</span>
+                        <span class="example-chip" data-target="tableArrayH" data-value="A1:Z10">A1:Z10</span>
+                        <button type="button" class="btn-small" data-abs="tableArrayH">$ מוחלט</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="rowIndex">מספר השורה להחזרה <span class="badge">row_index_num</span></label>
+                    <input type="number" id="rowIndex" min="1" max="255" placeholder="לדוגמה: 2" value="2" aria-describedby="rowIndexError">
+                    <div class="hint">1 = השורה הראשונה בטווח, 2 = השנייה, וכן הלאה</div>
+                    <div class="field-error" id="rowIndexError" role="alert"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>סוג התאמה <span class="badge">range_lookup</span></label>
+                    <div class="radio-group" id="rangeLookupHGroup">
+                        <label class="radio-option selected">
+                            <input type="radio" name="rangeLookupH" value="FALSE" checked>
+                            <span>מדויקת (FALSE)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="rangeLookupH" value="TRUE">
+                            <span>משוערת (TRUE)</span>
+                        </label>
+                    </div>
+                    <div class="hint">ברוב המקרים מומלץ להשתמש בהתאמה מדויקת</div>
+                    <div class="warning-box" id="approxWarningH">⚠️ התאמה משוערת דורשת שהשורה הראשונה תהיה ממוינת בסדר עולה. אחרת עלולות להתקבל תוצאות שגויות.</div>
+                </div>
+            </div>
+
+            <!-- ========== INDEX + MATCH fields ========== -->
+            <div id="fields-INDEXMATCH" class="field-group" role="tabpanel" aria-labelledby="tab-INDEXMATCH">
+                <div class="form-group">
+                    <label for="returnRangeIM">טווח ההחזרה <span class="badge">INDEX range</span></label>
+                    <div class="range-row">
+                        <input type="text" id="returnRangeIM" class="range-input" placeholder="לדוגמה: B2:B100" autocomplete="off" aria-describedby="returnRangeIMError">
+                        <input type="text" id="sheetNameIM" class="sheet-input" placeholder="לשונית" title="שם הלשונית (אופציונלי)" autocomplete="off">
+                    </div>
+                    <div class="hint">העמודה/השורה שממנה יוחזר הערך</div>
+                    <div class="field-error" id="returnRangeIMError" role="alert"></div>
+                    <div class="examples">
+                        <span class="example-chip" data-target="returnRangeIM" data-value="B2:B100">B2:B100</span>
+                        <span class="example-chip" data-target="returnRangeIM" data-value="C:C">C:C</span>
+                        <button type="button" class="btn-small" data-abs="returnRangeIM">$ מוחלט</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="lookupRangeIM">טווח החיפוש <span class="badge">MATCH range</span></label>
+                    <div class="range-row">
+                        <input type="text" id="lookupRangeIM" class="range-input" placeholder="לדוגמה: A2:A100" autocomplete="off" aria-describedby="lookupRangeIMError">
+                        <input type="text" id="sheetNameIMLookup" class="sheet-input" placeholder="לשונית אחרת?" title="אם טווח החיפוש בלשונית שונה" autocomplete="off">
+                    </div>
+                    <div class="hint">העמודה/השורה שבה מחפשים את הערך</div>
+                    <div class="field-error" id="lookupRangeIMError" role="alert"></div>
+                    <div class="examples">
+                        <span class="example-chip" data-target="lookupRangeIM" data-value="A2:A100">A2:A100</span>
+                        <span class="example-chip" data-target="lookupRangeIM" data-value="A:A">A:A</span>
+                        <button type="button" class="btn-small" data-abs="lookupRangeIM">$ מוחלט</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>סוג התאמה <span class="badge">match_type</span></label>
+                    <div class="radio-group" id="matchTypeIMGroup">
+                        <label class="radio-option selected">
+                            <input type="radio" name="matchTypeIM" value="0" checked>
+                            <span>מדויקת (0)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="matchTypeIM" value="1">
+                            <span>הקטן הקרוב (1)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="matchTypeIM" value="-1">
+                            <span>הגדול הקרוב (-1)</span>
+                        </label>
+                    </div>
+                    <div class="hint">0 = מדויקת (הכי נפוץ). 1/-1 דורשים מיון</div>
+                </div>
+            </div>
+
+            <!-- Advanced (shared) -->
+            <div class="advanced">
+                <button type="button" class="toggle-advanced" id="toggleAdvancedBtn" aria-expanded="false">
+                    <span id="advArrow">▼</span> אפשרויות מתקדמות
+                </button>
+                <div class="advanced-content" id="advancedContent">
+                    <!-- XLOOKUP-only advanced fields -->
+                    <div id="advXLOOKUP" class="adv-func-fields">
+                        <div class="form-group">
+                            <label>סוג התאמה <span class="badge">match_mode</span></label>
+                            <div class="radio-group" id="matchModeGroup">
+                                <label class="radio-option selected">
+                                    <input type="radio" name="matchMode" value="0" checked>
+                                    <span>מדויקת (0)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="matchMode" value="-1">
+                                    <span>הקטן הקרוב (-1)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="matchMode" value="1">
+                                    <span>הגדול הקרוב (1)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="matchMode" value="2">
+                                    <span>תווים כלליים (2)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>כיוון חיפוש <span class="badge">search_mode</span></label>
+                            <div class="radio-group" id="searchModeGroup">
+                                <label class="radio-option selected">
+                                    <input type="radio" name="searchMode" value="1" checked>
+                                    <span>מההתחלה (1)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="searchMode" value="-1">
+                                    <span>מהסוף (-1)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="searchMode" value="2">
+                                    <span>בינארי עולה (2)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="searchMode" value="-2">
+                                    <span>בינארי יורד (-2)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="ifErrorGroup">
+                        <label>
+                            <input type="checkbox" id="useIfError" style="width:auto; margin-left:8px; accent-color: var(--primary);">
+                            עטוף ב-IFERROR (רלוונטי בעיקר ל-VLOOKUP / HLOOKUP / INDEX+MATCH)
+                        </label>
+                        <input type="text" id="ifErrorValue" placeholder='לדוגמה: "" או "לא נמצא"' value='""' style="margin-top:4px;" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="generateBtn" style="margin-top: 6px;">
+                ✨ צור נוסחה
+            </button>
+        </div>
+
+        <div class="card" id="resultCard" style="display: none;">
+            <h2>✅ הנוסחה המוכנה</h2>
+            <div class="result-box">
+                <button class="copy-btn" id="copyBtn" aria-label="העתק נוסחה">העתק</button>
+                <div class="formula" id="formulaOutput"></div>
+            </div>
+
+            <div class="explanation" id="explanation">
+                <h3>פירוט הפרמטרים:</h3>
+                <ul id="explanationList"></ul>
+            </div>
+
+            <div style="margin-top: 8px; display: flex; gap: 6px;">
+                <button class="btn btn-secondary" id="resetBtn" style="flex:1;">איפוס</button>
+            </div>
+        </div>
+    <footer class="site-footer">
+        <div class="copy">© 2026 כל הזכויות שמורות</div>
+        <img src="OG_Green_Logo.png" alt="לוגו" width="120" height="36" loading="lazy">
+
+    </footer>
+    </div>
+
+
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        let currentFunc = 'XLOOKUP';
+
+        // ========== Helpers ==========
+        function $(id) { return document.getElementById(id); }
+
+        function showToast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2200);
+        }
+
+        function prefixSheet(range, sheetName) {
+            // Always normalize spaces inside the range part
+            let r = range;
+            if (r && r.includes('!')) {
+                const idx = r.lastIndexOf('!');
+                r = r.slice(0, idx + 1) + normalizeRange(r.slice(idx + 1));
+            } else {
+                r = normalizeRange(r);
+            }
+            if (!sheetName || !r || r.includes('!')) return r;
+            const needsQuotes = /[^a-zA-Z0-9_\u0590-\u05FF.]/.test(sheetName) || /\s/.test(sheetName);
+            const safeSheet = needsQuotes ? `'${sheetName.replace(/'/g, "''")}'` : sheetName;
+            return `${safeSheet}!${r}`;
+        }
+
+        function makeAbsolute(range) {
+            if (!range) return range;
+            const cleaned = normalizeRange(range);
+            return cleaned.replace(/([A-Za-z]+)(\d+)/g, '$$$1$$$2')
+                         .replace(/([A-Za-z]+):/g, '$$$1:')
+                         .replace(/:([A-Za-z]+)$/g, ':$$$1');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function updateRadioUI(groupId) {
+            document.querySelectorAll('#' + groupId + ' .radio-option').forEach(opt => {
+                const input = opt.querySelector('input');
+                opt.classList.toggle('selected', input.checked);
+            });
+        }
+
+        function updatePrimaryColor(func) {
+            const root = document.documentElement;
+            const isDark = root.getAttribute('data-theme') === 'dark';
+            const map = {
+                XLOOKUP:    { c: '#703efa', d: '#5a2fd4', l: '#f0ebff', ld: '#2e1065' },
+                VLOOKUP:    { c: '#28a745', d: '#218838', l: '#e6f4ea', ld: '#14532d' },
+                HLOOKUP:    { c: '#fd7e14', d: '#e06b00', l: '#fff3e0', ld: '#7c2d12' },
+                INDEXMATCH: { c: '#0d6efd', d: '#0b5ed7', l: '#e7f1ff', ld: '#1e3a5f' }
+            };
+            const m = map[func] || map.XLOOKUP;
+            root.style.setProperty('--primary', m.c);
+            root.style.setProperty('--primary-dark', m.d);
+            root.style.setProperty('--primary-light', isDark ? m.ld : m.l);
+        }
+
+        // ========== Tab switching ==========
+        function selectFunc(func) {
+            currentFunc = func;
+
+            document.querySelectorAll('.func-tab').forEach(tab => {
+                const isActive = tab.dataset.func === func;
+                tab.classList.toggle('active', isActive);
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            document.querySelectorAll('.field-group').forEach(g => g.classList.remove('visible'));
+            const panel = $('fields-' + func);
+            if (panel) panel.classList.add('visible');
+
+            const titles = {
+                XLOOKUP: '📝 פרמטרים — XLOOKUP',
+                VLOOKUP: '📝 פרמטרים — VLOOKUP',
+                HLOOKUP: '📝 פרמטרים — HLOOKUP',
+                INDEXMATCH: '📝 פרמטרים — INDEX + MATCH'
+            };
+            $('paramsTitle').textContent = titles[func] || titles.XLOOKUP;
+            $('resultCard').style.display = 'none';
+            // Clear validation highlights when switching
+            document.querySelectorAll('input.invalid, input.valid').forEach(el => {
+                el.classList.remove('invalid', 'valid');
+            });
+            document.querySelectorAll('.field-error').forEach(el => {
+                el.textContent = '';
+                el.classList.remove('visible');
+            });
+            // Show XLOOKUP-only advanced fields only when XLOOKUP is selected
+            const advX = $('advXLOOKUP');
+            if (advX) advX.style.display = (func === 'XLOOKUP') ? 'block' : 'none';
+            updatePrimaryColor(func);
+            saveState();
+        }
+
+        // ========== Absolute references ==========
+        function applyAbsolute(targetId) {
+            const el = $(targetId);
+            if (!el || !el.value.trim()) return;
+            el.value = makeAbsolute(el.value.trim());
+            showToast('הוספו סימני $');
+        }
+
+        // ========== Generate ==========
+        function generateFormula() {
+            const lookupValue = $('lookupValue').value.trim();
+            const useIfError = $('useIfError').checked;
+            const ifErrorValue = $('ifErrorValue').value.trim() || '""';
+
+            // Full validation before generating
+            if (!validateCurrentForm(true)) {
+                showToast('יש שגיאות בטופס – תקן אותן');
+                // Focus first invalid field
+                const firstInvalid = document.querySelector('input.invalid');
+                if (firstInvalid) firstInvalid.focus();
+                return;
+            }
+
+            if (!lookupValue) {
+                setFieldError('lookupValue', 'lookupValueError', 'נא להזין את הערך לחיפוש');
+                $('lookupValue').focus();
+                return;
+            }
+
+            let formula = '';
+            let explanationItems = [];
+
+            if (currentFunc === 'XLOOKUP') {
+                let lookupArray = $('lookupArray').value.trim();
+                let returnArray = $('returnArray').value.trim();
+                const ifNotFound = $('ifNotFound').value.trim();
+                const matchMode = document.querySelector('input[name="matchMode"]:checked').value;
+                const searchMode = document.querySelector('input[name="searchMode"]:checked').value;
+                const sheetLookup = $('sheetNameX').value.trim();
+                const sheetReturn = $('sheetNameXReturn').value.trim() || sheetLookup;
+
+                if (!lookupArray) { alert('נא להזין את טווח החיפוש (lookup_array)'); return; }
+                if (!returnArray) { alert('נא להזין את טווח ההחזרה (return_array)'); return; }
+
+                lookupArray = prefixSheet(lookupArray, sheetLookup);
+                returnArray = prefixSheet(returnArray, sheetReturn);
+
+                let args = [lookupValue, lookupArray, returnArray];
+                const needsIfNotFound = ifNotFound !== '';
+                const needsMatchMode = matchMode !== '0';
+                const needsSearchMode = searchMode !== '1';
+
+                if (needsIfNotFound || needsMatchMode || needsSearchMode) {
+                    args.push(needsIfNotFound ? ifNotFound : '""');
+                }
+                if (needsMatchMode || needsSearchMode) args.push(matchMode);
+                if (needsSearchMode) args.push(searchMode);
+
+                formula = `XLOOKUP(${args.join(',')})`;
+
+                explanationItems = [
+                    `<li><strong>lookup_value:</strong> ${escapeHtml(lookupValue)}</li>`,
+                    `<li><strong>lookup_array:</strong> ${escapeHtml(lookupArray)}</li>`,
+                    `<li><strong>return_array:</strong> ${escapeHtml(returnArray)}</li>`
+                ];
+                if (needsIfNotFound || needsMatchMode || needsSearchMode) {
+                    explanationItems.push(`<li><strong>if_not_found:</strong> ${escapeHtml(needsIfNotFound ? ifNotFound : '""')}</li>`);
+                }
+                if (needsMatchMode || needsSearchMode) {
+                    const labels = {'0':'מדויקת','-1':'הקטן הקרוב','1':'הגדול הקרוב','2':'תווים כלליים'};
+                    explanationItems.push(`<li><strong>match_mode:</strong> ${matchMode} (${labels[matchMode]})</li>`);
+                }
+                if (needsSearchMode) {
+                    const labels = {'1':'מההתחלה','-1':'מהסוף','2':'בינארי עולה','-2':'בינארי יורד'};
+                    explanationItems.push(`<li><strong>search_mode:</strong> ${searchMode} (${labels[searchMode]})</li>`);
+                }
+
+            } else if (currentFunc === 'VLOOKUP') {
+                let tableArray = $('tableArrayV').value.trim();
+                const colIndex = $('colIndex').value.trim();
+                const rangeLookup = document.querySelector('input[name="rangeLookupV"]:checked').value;
+                const sheetName = $('sheetNameV').value.trim();
+
+                if (!tableArray) { alert('נא להזין את טווח הטבלה'); return; }
+                if (!colIndex || colIndex < 1) { alert('נא להזין מספר עמודה תקין (1 ומעלה)'); return; }
+
+                tableArray = prefixSheet(tableArray, sheetName);
+                formula = `VLOOKUP(${lookupValue},${tableArray},${colIndex},${rangeLookup})`;
+
+                explanationItems = [
+                    `<li><strong>lookup_value:</strong> ${escapeHtml(lookupValue)}</li>`,
+                    `<li><strong>table_array:</strong> ${escapeHtml(tableArray)}</li>`,
+                    `<li><strong>col_index_num:</strong> ${colIndex}</li>`,
+                    `<li><strong>range_lookup:</strong> ${rangeLookup} (${rangeLookup === 'FALSE' ? 'מדויקת' : 'משוערת'})</li>`
+                ];
+
+            } else if (currentFunc === 'HLOOKUP') {
+                let tableArray = $('tableArrayH').value.trim();
+                const rowIndex = $('rowIndex').value.trim();
+                const rangeLookup = document.querySelector('input[name="rangeLookupH"]:checked').value;
+                const sheetName = $('sheetNameH').value.trim();
+
+                if (!tableArray) { alert('נא להזין את טווח הטבלה'); return; }
+                if (!rowIndex || rowIndex < 1) { alert('נא להזין מספר שורה תקין (1 ומעלה)'); return; }
+
+                tableArray = prefixSheet(tableArray, sheetName);
+                formula = `HLOOKUP(${lookupValue},${tableArray},${rowIndex},${rangeLookup})`;
+
+                explanationItems = [
+                    `<li><strong>lookup_value:</strong> ${escapeHtml(lookupValue)}</li>`,
+                    `<li><strong>table_array:</strong> ${escapeHtml(tableArray)}</li>`,
+                    `<li><strong>row_index_num:</strong> ${rowIndex}</li>`,
+                    `<li><strong>range_lookup:</strong> ${rangeLookup} (${rangeLookup === 'FALSE' ? 'מדויקת' : 'משוערת'})</li>`
+                ];
+
+            } else if (currentFunc === 'INDEXMATCH') {
+                let returnRange = $('returnRangeIM').value.trim();
+                let lookupRange = $('lookupRangeIM').value.trim();
+                const matchType = document.querySelector('input[name="matchTypeIM"]:checked').value;
+                const sheetReturn = $('sheetNameIM').value.trim();
+                const sheetLookup = $('sheetNameIMLookup').value.trim() || sheetReturn;
+
+                if (!returnRange) { alert('נא להזין את טווח ההחזרה (INDEX)'); return; }
+                if (!lookupRange) { alert('נא להזין את טווח החיפוש (MATCH)'); return; }
+
+                returnRange = prefixSheet(returnRange, sheetReturn);
+                lookupRange = prefixSheet(lookupRange, sheetLookup);
+
+                formula = `INDEX(${returnRange},MATCH(${lookupValue},${lookupRange},${matchType}))`;
+
+                const matchLabels = {'0':'מדויקת','1':'הקטן הקרוב','-1':'הגדול הקרוב'};
+                explanationItems = [
+                    `<li><strong>INDEX range:</strong> ${escapeHtml(returnRange)}</li>`,
+                    `<li><strong>MATCH lookup_value:</strong> ${escapeHtml(lookupValue)}</li>`,
+                    `<li><strong>MATCH range:</strong> ${escapeHtml(lookupRange)}</li>`,
+                    `<li><strong>match_type:</strong> ${matchType} (${matchLabels[matchType]})</li>`
+                ];
+            }
+
+            if (useIfError) {
+                formula = `IFERROR(${formula},${ifErrorValue})`;
+                explanationItems.push(`<li><strong>IFERROR:</strong> במקרה של שגיאה יוצג ${escapeHtml(ifErrorValue)}</li>`);
+            }
+
+            formula = '=' + formula;
+
+            $('formulaOutput').textContent = formula;
+            $('resultCard').style.display = 'block';
+            $('explanationList').innerHTML = explanationItems.join('');
+            $('resultCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            saveState();
+        }
+
+        // ========== Copy ==========
+        function copyFormula() {
+            const formula = $('formulaOutput').textContent;
+            if (!formula) return;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(formula).then(() => {
+                    const btn = $('copyBtn');
+                    btn.textContent = 'הועתק! ✓';
+                    btn.classList.add('copied');
+                    showToast('הנוסחה הועתקה');
+                    setTimeout(() => {
+                        btn.textContent = 'העתק';
+                        btn.classList.remove('copied');
+                    }, 2000);
+                }).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
+
+            function fallbackCopy() {
+                const range = document.createRange();
+                range.selectNode($('formulaOutput'));
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                try {
+                    document.execCommand('copy');
+                    showToast('הנוסחה הועתקה');
+                } catch (e) {
+                    showToast('לא ניתן להעתיק – העתק ידנית');
+                }
+                window.getSelection().removeAllRanges();
+            }
+        }
+
+        // ========== Reset ==========
+        function resetForm() {
+            $('lookupValue').value = '';
+            // XLOOKUP
+            $('lookupArray').value = '';
+            $('returnArray').value = '';
+            $('ifNotFound').value = '';
+            $('sheetNameX').value = '';
+            $('sheetNameXReturn').value = '';
+            document.querySelector('input[name="matchMode"][value="0"]').checked = true;
+            document.querySelector('input[name="searchMode"][value="1"]').checked = true;
+            updateRadioUI('matchModeGroup');
+            updateRadioUI('searchModeGroup');
+            // VLOOKUP
+            $('tableArrayV').value = '';
+            $('colIndex').value = '2';
+            $('sheetNameV').value = '';
+            document.querySelector('input[name="rangeLookupV"][value="FALSE"]').checked = true;
+            updateRadioUI('rangeLookupVGroup');
+            $('approxWarningV').classList.remove('visible');
+            // HLOOKUP
+            $('tableArrayH').value = '';
+            $('rowIndex').value = '2';
+            $('sheetNameH').value = '';
+            document.querySelector('input[name="rangeLookupH"][value="FALSE"]').checked = true;
+            updateRadioUI('rangeLookupHGroup');
+            $('approxWarningH').classList.remove('visible');
+            // INDEXMATCH
+            $('returnRangeIM').value = '';
+            $('lookupRangeIM').value = '';
+            $('sheetNameIM').value = '';
+            $('sheetNameIMLookup').value = '';
+            document.querySelector('input[name="matchTypeIM"][value="0"]').checked = true;
+            updateRadioUI('matchTypeIMGroup');
+            // Advanced
+            $('useIfError').checked = false;
+            $('ifErrorValue').value = '""';
+            $('ifErrorValue').disabled = true;
+            $('resultCard').style.display = 'none';
+            $('advancedContent').classList.remove('open');
+            $('advArrow').textContent = '▼';
+            $('toggleAdvancedBtn').setAttribute('aria-expanded', 'false');
+            // Clear all validation states
+            document.querySelectorAll('input.invalid, input.valid').forEach(el => {
+                el.classList.remove('invalid', 'valid');
+            });
+            document.querySelectorAll('.field-error').forEach(el => {
+                el.textContent = '';
+                el.classList.remove('visible');
+            });
+            localStorage.removeItem('excelLookupGen');
+            showToast('הטופס אופס');
+        }
+
+        // ========== localStorage ==========
+        // No persistence: every page load starts clean (like reset)
+        function saveState() {
+            // intentionally empty – do not remember form values between sessions
+        }
+
+        function clearStoredState() {
+            try {
+                localStorage.removeItem('excelLookupGen');
+                // keep excelLookupTheme – theme preference is remembered
+            } catch (e) {}
+        }
+
+        // ========== Dark mode ==========
+        function getPreferredTheme() {
+            try {
+                const stored = localStorage.getItem('excelLookupTheme');
+                if (stored === 'dark' || stored === 'light') return stored;
+            } catch (e) {}
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            try {
+                localStorage.setItem('excelLookupTheme', theme);
+            } catch (e) {}
+            const btn = $('themeToggle');
+            if (btn) {
+                btn.setAttribute('aria-label', theme === 'dark' ? 'עבור למצב בהיר' : 'עבור למצב כהה');
+                btn.title = theme === 'dark' ? 'מצב בהיר' : 'מצב כהה';
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            applyTheme(isDark ? 'light' : 'dark');
+            updatePrimaryColor(currentFunc);
+            showToast(isDark ? 'מצב בהיר' : 'מצב כהה');
+        }
+
+        // ========== Live validation ==========
+        const COL_RE = /^\$?[A-Za-z]{1,3}$/;
+        const ROW_RE = /^\$?\d{1,7}$/;
+        const CELL_RE = /^\$?[A-Za-z]{1,3}\$?\d{1,7}$/;
+        const RANGE_RE = /^(\$?[A-Za-z]{1,3}\$?\d{0,7}|\$?\d{1,7})(:(\$?[A-Za-z]{1,3}\$?\d{0,7}|\$?\d{1,7}))?$/;
+
+        function setFieldError(inputId, errorId, message, suggestion) {
+            const input = $(inputId);
+            const err = $(errorId);
+            if (!input || !err) return;
+            if (message) {
+                input.classList.add('invalid');
+                input.classList.remove('valid');
+                if (suggestion) {
+                    // Build button safely so quotes and special chars work
+                    err.textContent = '';
+                    err.appendChild(document.createTextNode(message + ' '));
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'suggest-btn';
+                    btn.dataset.fixTarget = inputId;
+                    btn.dataset.fixValue = suggestion;
+                    btn.textContent = suggestion;
+                    err.appendChild(btn);
+                } else {
+                    err.textContent = message;
+                }
+                err.classList.add('visible');
+            } else {
+                input.classList.remove('invalid');
+                err.textContent = '';
+                err.innerHTML = '';
+                err.classList.remove('visible');
+                if (input.value.trim()) input.classList.add('valid');
+                else input.classList.remove('valid');
+            }
+        }
+
+        function clearFieldError(inputId, errorId) {
+            setFieldError(inputId, errorId, null);
+        }
+
+        /** Normalize range: remove spaces around : and $ */
+        function normalizeRange(str) {
+            if (!str) return str;
+            return str
+                .replace(/\s*:\s*/g, ':')   // spaces around colon
+                .replace(/\$\s+/g, '$')     // space after $
+                .replace(/\s+\$/g, '$')     // space before $
+                .replace(/\s+/g, '');       // any remaining spaces inside range
+        }
+
+        /** Detect common typos and suggest a corrected range */
+        function suggestRangeFix(raw) {
+            const s = normalizeRange(raw);
+            // A2A35 → A2:A35 (two cells stuck together)
+            let m = s.match(/^(\$?[A-Za-z]{1,3}\$?\d{1,7})(\$?[A-Za-z]{1,3}\$?\d{1,7})$/);
+            if (m) return m[1] + ':' + m[2];
+            // A2-A35 / A2–A35 / A2..A35
+            m = s.match(/^(\$?[A-Za-z]{1,3}\$?\d{0,7}|\$?\d{1,7})[-–.]{1,2}(\$?[A-Za-z]{1,3}\$?\d{0,7}|\$?\d{1,7})$/);
+            if (m) return m[1] + ':' + m[2];
+            // Trailing / leading / double colon
+            if (/:$/.test(s) && s.length > 1) return s.slice(0, -1);
+            if (/^:/.test(s)) return s.slice(1);
+            if (s.includes('::')) return s.replace(/::+/g, ':');
+            // Hebrew / fullwidth colon
+            if (/[׃：]/.test(s)) return s.replace(/[׃：]/g, ':');
+            return null;
+        }
+
+        /** Check for non-Latin letters used as column refs (Hebrew, Arabic, Cyrillic, etc.) */
+        function hasInvalidScriptInRange(str) {
+            // Allow only A-Z, a-z, digits, $, :, ! and sheet-name quotes/spaces outside
+            const clean = (str.includes('!') ? str.split('!').pop() : str);
+            // Any letter that is NOT Latin A-Z
+            return /[^\x00-\x7F$:\d\s.\-_]/.test(clean) && /[\u0590-\u05FF\u0600-\u06FF\u0400-\u04FF\u4E00-\u9FFF]/.test(clean);
+        }
+
+        function isNamedRange(str) {
+            // Named ranges can contain Hebrew, but pure cell-like patterns with non-Latin are invalid ranges
+            return /^[A-Za-z_\u0590-\u05FF][A-Za-z0-9_\u0590-\u05FF.]*$/.test(str)
+                && !CELL_RE.test(str)
+                && !/^\d/.test(str)
+                && !/[א-ת]\d/.test(str); // Hebrew letter + digit looks like mistaken cell ref
+        }
+
+        function isValidRange(str) {
+            if (!str) return false;
+            // Block non-Latin "cell" patterns like ג2ג25
+            if (hasInvalidScriptInRange(str)) return false;
+            if (isNamedRange(str)) return true;
+            const clean = normalizeRange(str.includes('!') ? str.split('!').pop() : str);
+            if (!RANGE_RE.test(clean)) return false;
+            const parts = clean.split(':');
+            if (parts.length === 1) {
+                return CELL_RE.test(parts[0]) || COL_RE.test(parts[0]) || ROW_RE.test(parts[0]);
+            }
+            if (parts.length === 2) {
+                const aOk = CELL_RE.test(parts[0]) || COL_RE.test(parts[0]) || ROW_RE.test(parts[0]);
+                const bOk = CELL_RE.test(parts[1]) || COL_RE.test(parts[1]) || ROW_RE.test(parts[1]);
+                return aOk && bOk;
+            }
+            return false;
+        }
+
+        function colToNum(col) {
+            const c = col.replace(/\$/g, '').toUpperCase();
+            let n = 0;
+            for (let i = 0; i < c.length; i++) n = n * 26 + (c.charCodeAt(i) - 64);
+            return n;
+        }
+
+        function estimateColumns(rangeStr) {
+            const clean = (rangeStr.includes('!') ? rangeStr.split('!').pop() : rangeStr).replace(/\s/g, '').replace(/\$/g, '');
+            const m = clean.match(/^([A-Za-z]{1,3})\d*:([A-Za-z]{1,3})\d*$/i)
+                   || clean.match(/^([A-Za-z]{1,3}):([A-Za-z]{1,3})$/i);
+            if (m) return Math.abs(colToNum(m[2]) - colToNum(m[1])) + 1;
+            if (/^[A-Za-z]{1,3}/i.test(clean)) return 1;
+            return null;
+        }
+
+        function estimateRows(rangeStr) {
+            const clean = (rangeStr.includes('!') ? rangeStr.split('!').pop() : rangeStr).replace(/\s/g, '').replace(/\$/g, '');
+            const m = clean.match(/^[A-Za-z]{0,3}(\d+):[A-Za-z]{0,3}(\d+)$/i);
+            if (!m) return null;
+            return Math.abs(parseInt(m[2], 10) - parseInt(m[1], 10)) + 1;
+        }
+
+        function isLegitimateCellRef(str) {
+            if (!str) return false;
+            const s = str.trim();
+            // Already quoted text is fine (English or Hebrew inside quotes)
+            if ((s.startsWith('"') && s.endsWith('"') && s.length >= 2) ||
+                (s.startsWith("'") && s.endsWith("'") && s.length >= 2)) return true;
+            // Pure number (lookup value can be numeric)
+            if (/^-?\d+(\.\d+)?$/.test(s)) return true;
+            // Formula-like starting with =
+            if (s.startsWith('=')) return true;
+            // Cell reference only: A1, $A$1, AA12, $B$5 (English letters only)
+            if (CELL_RE.test(s)) return true;
+            // Sheet!Cell or 'Sheet Name'!A1
+            if (/^('[^']+'|[A-Za-z0-9_]+)!\$?[A-Za-z]{1,3}\$?\d{1,7}$/.test(s)) return true;
+            return false;
+        }
+
+        function validateLookupValue() {
+            const v = $('lookupValue').value.trim();
+            if (!v) {
+                setFieldError('lookupValue', 'lookupValueError', null);
+                return true;
+            }
+            if (v.length > 200) {
+                setFieldError('lookupValue', 'lookupValueError', 'הערך ארוך מדי');
+                return false;
+            }
+            const q = (v.match(/"/g) || []).length;
+            if (q % 2 !== 0) {
+                setFieldError('lookupValue', 'lookupValueError', 'מרכאות לא מאוזנות');
+                return false;
+            }
+            // Legitimate cell / number / already quoted → OK
+            if (isLegitimateCellRef(v)) {
+                clearFieldError('lookupValue', 'lookupValueError');
+                return true;
+            }
+            // Not a legitimate cell, or contains non-English chars → offer clickable quote suggestion
+            const suggestion = '"' + v.replace(/"/g, '""') + '"';
+            setFieldError(
+                'lookupValue',
+                'lookupValueError',
+                'לא זוהה תא חוקי – יש להוסיף מרכאות. הצעה: ',
+                suggestion
+            );
+            return false;
+        }
+
+        function isValidIfNotFoundValue(str) {
+            if (!str) return true; // empty is allowed (optional field)
+            const s = str.trim();
+            // Empty string literal
+            if (s === '""' || s === "''") return true;
+            // Already quoted text
+            if ((s.startsWith('"') && s.endsWith('"') && s.length >= 2) ||
+                (s.startsWith("'") && s.endsWith("'") && s.length >= 2)) return true;
+            // Number
+            if (/^-?\d+(\.\d+)?$/.test(s)) return true;
+            // Cell reference
+            if (CELL_RE.test(s)) return true;
+            // Formula
+            if (s.startsWith('=')) return true;
+            return false;
+        }
+
+        function validateIfNotFound() {
+            const el = $('ifNotFound');
+            if (!el) return true;
+            const v = el.value.trim();
+            if (!v) {
+                setFieldError('ifNotFound', 'ifNotFoundError', null);
+                return true;
+            }
+            const q = (v.match(/"/g) || []).length;
+            if (q % 2 !== 0) {
+                setFieldError('ifNotFound', 'ifNotFoundError', 'מרכאות לא מאוזנות');
+                return false;
+            }
+            if (isValidIfNotFoundValue(v)) {
+                clearFieldError('ifNotFound', 'ifNotFoundError');
+                return true;
+            }
+            const suggestion = '"' + v.replace(/"/g, '""') + '"';
+            setFieldError(
+                'ifNotFound',
+                'ifNotFoundError',
+                'נראה כמו טקסט – יש להוסיף מרכאות. הצעה: ',
+                suggestion
+            );
+            return false;
+        }
+
+        function validateRange(inputId, errorId, required) {
+            const v = $(inputId).value.trim();
+            if (!v) {
+                if (required) {
+                    setFieldError(inputId, errorId, null);
+                    return false;
+                }
+                clearFieldError(inputId, errorId);
+                return true;
+            }
+
+            // Non-Latin letters used as columns (ג2, א1:ב10, etc.)
+            if (hasInvalidScriptInRange(v)) {
+                setFieldError(inputId, errorId,
+                    'אותיות עמודה חייבות להיות באנגלית בלבד (A–Z). לא ניתן להשתמש באותיות עבריות/אחרות');
+                return false;
+            }
+
+            // Suggest fix for common typos (A2A35, A2-A35, …) – clickable
+            const suggestion = suggestRangeFix(v);
+            const normalized = normalizeRange(v);
+            if (suggestion && suggestion !== normalized) {
+                setFieldError(inputId, errorId, 'נראה חסר ":" – האם התכוונת ל־', suggestion);
+                return false;
+            }
+
+            if (!isValidRange(v)) {
+                if ((v.includes('-') || /[־–—]/.test(v)) && !v.includes(':')) {
+                    const fix = suggestRangeFix(v);
+                    if (fix) {
+                        setFieldError(inputId, errorId, 'השתמש בנקודתיים (:) ולא במקף. הצעה: ', fix);
+                    } else {
+                        setFieldError(inputId, errorId, 'השתמש בנקודתיים (:) ולא במקף. לדוגמה: A2:A35');
+                    }
+                } else if (/[A-Za-z]+\d+[A-Za-z]+\d+/.test(normalized)) {
+                    const fix = suggestRangeFix(v);
+                    if (fix) {
+                        setFieldError(inputId, errorId, 'חסרים נקודתיים בין התאים. הצעה: ', fix);
+                    } else {
+                        setFieldError(inputId, errorId, 'חסרים נקודתיים בין התאים. לדוגמה: A2:A35');
+                    }
+                } else {
+                    setFieldError(inputId, errorId, 'טווח לא תקין (לדוגמה: A2:A100 או A:A)');
+                }
+                return false;
+            }
+            clearFieldError(inputId, errorId);
+            return true;
+        }
+
+        function validateColIndex() {
+            const el = $('colIndex');
+            const v = el.value.trim();
+            if (!v) {
+                setFieldError('colIndex', 'colIndexError', 'נא להזין מספר עמודה');
+                return false;
+            }
+            const n = parseInt(v, 10);
+            if (isNaN(n) || n < 1 || n > 255) {
+                setFieldError('colIndex', 'colIndexError', 'מספר בין 1 ל-255 בלבד');
+                return false;
+            }
+            const table = $('tableArrayV').value.trim();
+            if (table && isValidRange(table)) {
+                const cols = estimateColumns(table);
+                if (cols !== null && n > cols) {
+                    setFieldError('colIndex', 'colIndexError',
+                        'מספר העמודה (' + n + ') גדול ממספר העמודות בטווח (~' + cols + ')');
+                    return false;
+                }
+            }
+            clearFieldError('colIndex', 'colIndexError');
+            return true;
+        }
+
+        function validateRowIndex() {
+            const el = $('rowIndex');
+            const v = el.value.trim();
+            if (!v) {
+                setFieldError('rowIndex', 'rowIndexError', 'נא להזין מספר שורה');
+                return false;
+            }
+            const n = parseInt(v, 10);
+            if (isNaN(n) || n < 1 || n > 255) {
+                setFieldError('rowIndex', 'rowIndexError', 'מספר בין 1 ל-255 בלבד');
+                return false;
+            }
+            const table = $('tableArrayH').value.trim();
+            if (table && isValidRange(table)) {
+                const rows = estimateRows(table);
+                if (rows !== null && n > rows) {
+                    setFieldError('rowIndex', 'rowIndexError',
+                        'מספר השורה (' + n + ') גדול ממספר השורות בטווח (~' + rows + ')');
+                    return false;
+                }
+            }
+            clearFieldError('rowIndex', 'rowIndexError');
+            return true;
+        }
+
+        function validateCurrentForm(showRequired) {
+            let ok = validateLookupValue();
+            if (currentFunc === 'XLOOKUP') {
+                ok = validateRange('lookupArray', 'lookupArrayError', showRequired) && ok;
+                ok = validateRange('returnArray', 'returnArrayError', showRequired) && ok;
+                ok = validateIfNotFound() && ok;
+            } else if (currentFunc === 'VLOOKUP') {
+                ok = validateRange('tableArrayV', 'tableArrayVError', showRequired) && ok;
+                ok = validateColIndex() && ok;
+            } else if (currentFunc === 'HLOOKUP') {
+                ok = validateRange('tableArrayH', 'tableArrayHError', showRequired) && ok;
+                ok = validateRowIndex() && ok;
+            } else if (currentFunc === 'INDEXMATCH') {
+                ok = validateRange('returnRangeIM', 'returnRangeIMError', showRequired) && ok;
+                ok = validateRange('lookupRangeIM', 'lookupRangeIMError', showRequired) && ok;
+            }
+            return ok;
+        }
+
+        // Debounce helper
+        function debounce(fn, ms) {
+            let t;
+            return function (...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), ms);
+            };
+        }
+
+        const liveValidate = debounce(() => validateCurrentForm(false), 280);
+
+        // ========== Event listeners ==========
+        document.querySelectorAll('.func-tab').forEach(tab => {
+            tab.addEventListener('click', () => selectFunc(tab.dataset.func));
+        });
+
+        document.querySelectorAll('.example-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const target = chip.dataset.target;
+                const value = chip.dataset.value;
+                if (target && value !== undefined) {
+                    $(target).value = value;
+                    liveValidate();
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-abs]').forEach(btn => {
+            btn.addEventListener('click', () => applyAbsolute(btn.dataset.abs));
+        });
+
+        $('generateBtn').addEventListener('click', generateFormula);
+        $('copyBtn').addEventListener('click', copyFormula);
+        $('resetBtn').addEventListener('click', resetForm);
+
+        $('toggleAdvancedBtn').addEventListener('click', () => {
+            const content = $('advancedContent');
+            const isOpen = content.classList.toggle('open');
+            $('advArrow').textContent = isOpen ? '▲' : '▼';
+            $('toggleAdvancedBtn').setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        $('useIfError').addEventListener('change', function() {
+            $('ifErrorValue').disabled = !this.checked;
+        });
+
+        // Radio UI updates + approximate warnings
+        document.querySelectorAll('input[name="matchMode"]').forEach(r => {
+            r.addEventListener('change', () => updateRadioUI('matchModeGroup'));
+        });
+        document.querySelectorAll('input[name="searchMode"]').forEach(r => {
+            r.addEventListener('change', () => updateRadioUI('searchModeGroup'));
+        });
+        document.querySelectorAll('input[name="rangeLookupV"]').forEach(r => {
+            r.addEventListener('change', () => {
+                updateRadioUI('rangeLookupVGroup');
+                $('approxWarningV').classList.toggle('visible', r.value === 'TRUE' && r.checked);
+            });
+        });
+        document.querySelectorAll('input[name="rangeLookupH"]').forEach(r => {
+            r.addEventListener('change', () => {
+                updateRadioUI('rangeLookupHGroup');
+                $('approxWarningH').classList.toggle('visible', r.value === 'TRUE' && r.checked);
+            });
+        });
+        document.querySelectorAll('input[name="matchTypeIM"]').forEach(r => {
+            r.addEventListener('change', () => updateRadioUI('matchTypeIMGroup'));
+        });
+
+        // Apply suggestion on mousedown (before blur destroys the button)
+        const errorMap = {
+            lookupArray: 'lookupArrayError',
+            returnArray: 'returnArrayError',
+            tableArrayV: 'tableArrayVError',
+            tableArrayH: 'tableArrayHError',
+            returnRangeIM: 'returnRangeIMError',
+            lookupRangeIM: 'lookupRangeIMError',
+            lookupValue: 'lookupValueError',
+            ifNotFound: 'ifNotFoundError',
+            colIndex: 'colIndexError',
+            rowIndex: 'rowIndexError'
+        };
+
+        function applySuggestion(targetId, value) {
+            if (!targetId || value === undefined) return;
+            const el = $(targetId);
+            if (!el) return;
+            el.value = value;
+            const errId = errorMap[targetId] || (targetId + 'Error');
+            clearFieldError(targetId, errId);
+            el.classList.add('valid');
+            showToast('תוקן ל־' + value);
+            setTimeout(() => validateCurrentForm(false), 0);
+        }
+
+        document.addEventListener('mousedown', (e) => {
+            const btn = e.target.closest('.suggest-btn');
+            if (!btn) return;
+            e.preventDefault(); // prevent input blur from wiping the button before apply
+            applySuggestion(btn.dataset.fixTarget, btn.dataset.fixValue);
+        });
+
+        // Live validation on input
+        const validatedIds = [
+            'lookupValue', 'lookupArray', 'returnArray', 'ifNotFound',
+            'tableArrayV', 'colIndex',
+            'tableArrayH', 'rowIndex',
+            'returnRangeIM', 'lookupRangeIM'
+        ];
+        validatedIds.forEach(id => {
+            const el = $(id);
+            if (!el) return;
+            el.addEventListener('input', liveValidate);
+            el.addEventListener('blur', (e) => {
+                // Skip if focus is moving to a suggestion button
+                if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.suggest-btn')) return;
+                validateCurrentForm(true);
+            });
+        });
+
+        // Enter key
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', e => {
+                if (e.key === 'Enter') generateFormula();
+            });
+        });
+
+        // Theme toggle
+        $('themeToggle').addEventListener('click', toggleTheme);
+
+        // Init – always start with a clean form (no restored values)
+        clearStoredState();
+        applyTheme(getPreferredTheme());
+        updatePrimaryColor('XLOOKUP');
+    </script>
+</body>
+</html>
