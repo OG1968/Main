@@ -1009,74 +1009,82 @@
         font-weight: 700;
       }
 
-      /* ========== Compact mode ========== */
-      body.compact .container {
-        padding: 8px 8px 6px;
-        border-radius: 16px;
-      }
-      body.compact .card {
-        padding: 8px 8px;
-        margin-bottom: 6px;
-        border-radius: 12px;
-      }
-      body.compact header h1 {
-        font-size: 1.05rem;
-        margin-bottom: 0;
-      }
-      body.compact header p {
-        font-size: 0.72rem;
-        display: none;
-      }
-      body.compact .func-tab {
-        padding: 5px 4px;
-      }
-      body.compact .func-tab .func-desc {
-        display: none;
-      }
-      body.compact .form-group {
-        margin-bottom: 5px;
-      }
-      body.compact label {
-        font-size: 0.78rem;
-        margin-bottom: 2px;
-      }
-      body.compact .hint {
-        display: none;
-      }
-      body.compact input[type="text"],
-      body.compact input[type="number"],
-      body.compact select {
-        padding: 5px 10px;
-        font-size: 0.82rem;
-      }
-      body.compact .examples {
-        margin-top: 2px;
-      }
-      body.compact .example-chip {
-        font-size: 0.62rem;
-        padding: 1px 7px;
-      }
-      body.compact .btn {
-        padding: 6px 12px;
-        font-size: 0.82rem;
-      }
-      body.compact .result-box {
-        padding: 8px;
-        font-size: 0.82rem;
-      }
-      body.compact .explanation {
-        padding: 6px 10px;
-        font-size: 0.72rem;
-      }
-      body.compact .advanced {
-        margin-top: 2px;
-      }
-      body.compact .radio-option {
-        padding: 3px 7px;
-        font-size: 0.68rem;
-      }
-      body.compact .sheet-label-inline {
-        display: none;
+      /* ========== Auto-compact on small screens ========== */
+      @media (max-width: 640px) {
+        .container {
+          padding: 8px 8px 6px;
+          border-radius: 16px;
+        }
+        .card {
+          padding: 8px 8px;
+          margin-bottom: 6px;
+          border-radius: 12px;
+        }
+        header h1 {
+          font-size: 1.05rem;
+          margin-bottom: 0;
+        }
+        header p {
+          font-size: 0.72rem;
+        }
+        .func-tab {
+          padding: 5px 4px;
+        }
+        .func-tab .func-desc {
+          display: none;
+        }
+        .form-group {
+          margin-bottom: 5px;
+        }
+        label {
+          font-size: 0.78rem;
+          margin-bottom: 2px;
+        }
+        .hint {
+          font-size: 0.65rem;
+          padding: 2px 8px;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+          padding: 5px 10px;
+          font-size: 0.82rem;
+        }
+        .examples {
+          margin-top: 2px;
+        }
+        .example-chip {
+          font-size: 0.62rem;
+          padding: 1px 7px;
+        }
+        .btn {
+          padding: 6px 12px;
+          font-size: 0.82rem;
+        }
+        .result-box {
+          padding: 8px;
+          font-size: 0.82rem;
+        }
+        .explanation {
+          padding: 6px 10px;
+          font-size: 0.72rem;
+        }
+        .advanced {
+          margin-top: 2px;
+        }
+        .radio-option {
+          padding: 3px 7px;
+          font-size: 0.68rem;
+        }
+        .sheet-label-inline {
+          display: none;
+        }
+        .live-demo {
+          padding: 6px 8px;
+        }
+        .live-demo-table {
+          font-size: 0.68rem;
+        }
       }
 
       /* ========== Convert to XLOOKUP button ========== */
@@ -1205,201 +1213,35 @@
         color: var(--text-muted);
         margin-top: 4px;
       }
-      body.compact .live-demo {
-        padding: 6px 8px;
-      }
-      body.compact .live-demo-table {
-        font-size: 0.68rem;
-      }
-
-      /* ========== Toolbar (compact + theme extras) ========== */
-      .toolbar {
-        position: fixed;
-        top: 14px;
-        left: 14px;
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .toolbar-btn {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        border: 2px solid var(--border);
-        background: var(--card);
-        color: var(--text);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-        transition: background 0.2s, border-color 0.2s, transform 0.15s, color 0.2s;
-        font-size: 1.1rem;
-        font-family: inherit;
-        padding: 0;
-      }
-      .toolbar-btn:hover {
-        border-color: var(--primary);
-        transform: scale(1.08);
-      }
-      .toolbar-btn:active {
-        transform: scale(0.95);
-      }
-      .toolbar-btn:focus-visible {
-        outline: 2px solid var(--primary);
-        outline-offset: 2px;
-      }
-      .toolbar-btn.active {
-        border-color: var(--primary);
-        background: var(--primary);
-        color: #fff;
-      }
-      .toolbar-btn svg {
-        width: 20px;
-        height: 20px;
-      }
-      /* Keep theme toggle inside toolbar */
-      .toolbar .theme-toggle {
-        position: static;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-      }
-
-      /* Accent color themes */
-      [data-accent="purple"] {
-        --xlookup: #703efa;
-      }
-      [data-accent="teal"] {
-        --primary: #0d9488;
-        --primary-dark: #0f766e;
-        --primary-light: #ccfbf1;
-        --xlookup: #0d9488;
-        --focus-glow: 0 0 0 3px rgba(13, 148, 136, 0.25);
-      }
-      [data-theme="dark"][data-accent="teal"] {
-        --primary-light: #134e4a;
-      }
-      [data-accent="rose"] {
-        --primary: #e11d48;
-        --primary-dark: #be123c;
-        --primary-light: #ffe4e6;
-        --xlookup: #e11d48;
-        --focus-glow: 0 0 0 3px rgba(225, 29, 72, 0.25);
-      }
-      [data-theme="dark"][data-accent="rose"] {
-        --primary-light: #4c0519;
-      }
-      [data-accent="indigo"] {
-        --primary: #4f46e5;
-        --primary-dark: #4338ca;
-        --primary-light: #e0e7ff;
-        --xlookup: #4f46e5;
-        --focus-glow: 0 0 0 3px rgba(79, 70, 229, 0.25);
-      }
-      [data-theme="dark"][data-accent="indigo"] {
-        --primary-light: #1e1b4b;
-      }
-
-      .accent-picker {
-        display: none;
-        position: absolute;
-        top: 52px;
-        left: 0;
-        background: var(--card);
-        border: 2px solid var(--border);
-        border-radius: 16px;
-        padding: 8px;
-        box-shadow: var(--shadow);
-        gap: 6px;
-        flex-wrap: wrap;
-        width: 120px;
-        z-index: 10000;
-      }
-      .accent-picker.open {
-        display: flex;
-      }
-      .accent-swatch {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border: 2px solid transparent;
-        cursor: pointer;
-        transition: transform 0.15s, border-color 0.15s;
-      }
-      .accent-swatch:hover {
-        transform: scale(1.15);
-      }
-      .accent-swatch.active {
-        border-color: var(--text);
-        box-shadow: 0 0 0 2px var(--card);
-      }
-      .accent-swatch[data-accent="purple"] { background: #703efa; }
-      .accent-swatch[data-accent="teal"] { background: #0d9488; }
-      .accent-swatch[data-accent="rose"] { background: #e11d48; }
-      .accent-swatch[data-accent="indigo"] { background: #4f46e5; }
-    </style>
+      </style>
   </head>
   <body>
-    <div class="toolbar" id="toolbar">
-      <button
-        type="button"
-        class="theme-toggle toolbar-btn"
-        id="themeToggle"
-        aria-label="החלף מצב כהה/בהיר"
-        title="מצב כהה / בהיר"
+    <button
+      type="button"
+      class="theme-toggle"
+      id="themeToggle"
+      aria-label="החלף מצב כהה/בהיר"
+      title="מצב כהה / בהיר"
+    >
+      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+      <svg
+        class="icon-sun"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       >
-        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        </svg>
-        <svg
-          class="icon-sun"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="4" fill="currentColor" />
-          <path
-            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
-          />
-        </svg>
-      </button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        id="compactToggle"
-        aria-label="מצב קומפקטי"
-        title="מצב קומפקטי / מורחב"
-        aria-pressed="false"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <path d="M3 9h18M9 21V9" />
-        </svg>
-      </button>
-      <button
-        type="button"
-        class="toolbar-btn"
-        id="accentToggle"
-        aria-label="בחר צבע"
-        title="ערכת צבעים"
-        aria-expanded="false"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-        </svg>
-      </button>
-      <div class="accent-picker" id="accentPicker" role="listbox" aria-label="בחר צבע ראשי">
-        <button type="button" class="accent-swatch active" data-accent="purple" title="סגול" role="option" aria-selected="true"></button>
-        <button type="button" class="accent-swatch" data-accent="teal" title="טורקיז" role="option" aria-selected="false"></button>
-        <button type="button" class="accent-swatch" data-accent="rose" title="ורוד" role="option" aria-selected="false"></button>
-        <button type="button" class="accent-swatch" data-accent="indigo" title="אינדיגו" role="option" aria-selected="false"></button>
-      </div>
-    </div>
+        <circle cx="12" cy="12" r="4" fill="currentColor" />
+        <path
+          d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+        />
+      </svg>
+    </button>
     <div class="container">
       <header>
         <h1>
@@ -2438,35 +2280,13 @@
         function updatePrimaryColor(func) {
           const root = document.documentElement;
           const isDark = root.getAttribute("data-theme") === "dark";
-          const accent = root.getAttribute("data-accent") || "purple";
-          const accentMap = {
-            purple: {
+          const map = {
+            XLOOKUP: {
               c: "#703efa",
               d: "#5a2fd4",
               l: "#f0ebff",
               ld: "#2e1065",
             },
-            teal: {
-              c: "#0d9488",
-              d: "#0f766e",
-              l: "#ccfbf1",
-              ld: "#134e4a",
-            },
-            rose: {
-              c: "#e11d48",
-              d: "#be123c",
-              l: "#ffe4e6",
-              ld: "#4c0519",
-            },
-            indigo: {
-              c: "#4f46e5",
-              d: "#4338ca",
-              l: "#e0e7ff",
-              ld: "#1e1b4b",
-            },
-          };
-          const map = {
-            XLOOKUP: accentMap[accent] || accentMap.purple,
             VLOOKUP: {
               c: "#28a745",
               d: "#218838",
@@ -3877,59 +3697,6 @@
           showToast(isDark ? "☀️ מצב בהיר" : "🌙 מצב כהה");
         }
 
-        // ========== Compact mode ==========
-        function applyCompact(on) {
-          document.body.classList.toggle("compact", !!on);
-          const btn = $("compactToggle");
-          if (btn) {
-            btn.classList.toggle("active", !!on);
-            btn.setAttribute("aria-pressed", on ? "true" : "false");
-            btn.title = on ? "מצב מורחב" : "מצב קומפקטי";
-            btn.setAttribute(
-              "aria-label",
-              on ? "עבור למצב מורחב" : "עבור למצב קומפקטי",
-            );
-          }
-          try {
-            localStorage.setItem("excelLookupCompact", on ? "1" : "0");
-          } catch (e) {
-            /* ignore */
-          }
-        }
-
-        function toggleCompact() {
-          const isOn = document.body.classList.contains("compact");
-          applyCompact(!isOn);
-          showToast(isOn ? "📖 מצב מורחב" : "📱 מצב קומפקטי");
-        }
-
-        // ========== Accent colors ==========
-        function applyAccent(accent) {
-          const valid = ["purple", "teal", "rose", "indigo"];
-          if (!valid.includes(accent)) accent = "purple";
-          document.documentElement.setAttribute("data-accent", accent);
-          qsa(".accent-swatch").forEach((s) => {
-            const isActive = s.dataset.accent === accent;
-            s.classList.toggle("active", isActive);
-            s.setAttribute("aria-selected", isActive ? "true" : "false");
-          });
-          try {
-            localStorage.setItem("excelLookupAccent", accent);
-          } catch (e) {
-            /* ignore */
-          }
-          // Re-apply primary for current function (XLOOKUP uses accent)
-          updatePrimaryColor(currentFunc);
-        }
-
-        function toggleAccentPicker() {
-          const picker = $("accentPicker");
-          const btn = $("accentToggle");
-          if (!picker) return;
-          const open = picker.classList.toggle("open");
-          if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
-        }
-
         // ========== Debounce ==========
         function debounce(fn, ms) {
           let t;
@@ -4171,43 +3938,6 @@
           // Theme toggle
           $("themeToggle").addEventListener("click", toggleTheme);
 
-          // Compact mode
-          const compactBtn = $("compactToggle");
-          if (compactBtn) {
-            compactBtn.addEventListener("click", toggleCompact);
-          }
-
-          // Accent color picker
-          const accentBtn = $("accentToggle");
-          if (accentBtn) {
-            accentBtn.addEventListener("click", (e) => {
-              e.stopPropagation();
-              toggleAccentPicker();
-            });
-          }
-          qsa(".accent-swatch").forEach((sw) => {
-            sw.addEventListener("click", (e) => {
-              e.stopPropagation();
-              applyAccent(sw.dataset.accent);
-              $("accentPicker").classList.remove("open");
-              if (accentBtn) accentBtn.setAttribute("aria-expanded", "false");
-              showToast("🎨 צבע עודכן");
-            });
-          });
-          // Close accent picker on outside click
-          document.addEventListener("click", (e) => {
-            const picker = $("accentPicker");
-            if (
-              picker &&
-              picker.classList.contains("open") &&
-              !e.target.closest("#accentToggle") &&
-              !e.target.closest("#accentPicker")
-            ) {
-              picker.classList.remove("open");
-              if (accentBtn) accentBtn.setAttribute("aria-expanded", "false");
-            }
-          });
-
           // Convert to XLOOKUP
           const convertBtn = $("convertXLookupBtn");
           if (convertBtn) {
@@ -4218,16 +3948,8 @@
           loadState();
           updateAllFieldAlignments();
 
-          // Apply theme + compact + accent
+          // Apply theme
           applyTheme(getPreferredTheme());
-          try {
-            const compactPref = localStorage.getItem("excelLookupCompact");
-            if (compactPref === "1") applyCompact(true);
-            const accentPref = localStorage.getItem("excelLookupAccent");
-            if (accentPref) applyAccent(accentPref);
-          } catch (e) {
-            /* ignore */
-          }
           updatePrimaryColor("XLOOKUP");
 
           // Ensure convert button visibility matches current func
