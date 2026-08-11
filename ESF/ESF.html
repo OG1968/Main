@@ -1008,35 +1008,398 @@
       .site-footer .copy {
         font-weight: 700;
       }
+
+      /* ========== Compact mode ========== */
+      body.compact .container {
+        padding: 8px 8px 6px;
+        border-radius: 16px;
+      }
+      body.compact .card {
+        padding: 8px 8px;
+        margin-bottom: 6px;
+        border-radius: 12px;
+      }
+      body.compact header h1 {
+        font-size: 1.05rem;
+        margin-bottom: 0;
+      }
+      body.compact header p {
+        font-size: 0.72rem;
+        display: none;
+      }
+      body.compact .func-tab {
+        padding: 5px 4px;
+      }
+      body.compact .func-tab .func-desc {
+        display: none;
+      }
+      body.compact .form-group {
+        margin-bottom: 5px;
+      }
+      body.compact label {
+        font-size: 0.78rem;
+        margin-bottom: 2px;
+      }
+      body.compact .hint {
+        display: none;
+      }
+      body.compact input[type="text"],
+      body.compact input[type="number"],
+      body.compact select {
+        padding: 5px 10px;
+        font-size: 0.82rem;
+      }
+      body.compact .examples {
+        margin-top: 2px;
+      }
+      body.compact .example-chip {
+        font-size: 0.62rem;
+        padding: 1px 7px;
+      }
+      body.compact .btn {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+      }
+      body.compact .result-box {
+        padding: 8px;
+        font-size: 0.82rem;
+      }
+      body.compact .explanation {
+        padding: 6px 10px;
+        font-size: 0.72rem;
+      }
+      body.compact .advanced {
+        margin-top: 2px;
+      }
+      body.compact .radio-option {
+        padding: 3px 7px;
+        font-size: 0.68rem;
+      }
+      body.compact .sheet-label-inline {
+        display: none;
+      }
+
+      /* ========== Convert to XLOOKUP button ========== */
+      .convert-xlookup-wrap {
+        display: none;
+        margin-top: 6px;
+      }
+      .convert-xlookup-wrap.visible {
+        display: block;
+      }
+      .btn-convert {
+        width: 100%;
+        background: linear-gradient(135deg, #703efa 0%, #5a2fd4 100%);
+        color: #fff;
+        border: none;
+        padding: 7px 14px;
+        border-radius: 40px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(112, 62, 250, 0.3);
+      }
+      .btn-convert:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(112, 62, 250, 0.4);
+      }
+      .btn-convert:active {
+        transform: scale(0.97);
+      }
+      .btn-convert:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      /* ========== Live demo ========== */
+      .live-demo {
+        margin-top: 8px;
+        background: var(--panel);
+        border-radius: 14px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        display: none;
+      }
+      .live-demo.visible {
+        display: block;
+      }
+      .live-demo h3 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .live-demo-table-wrap {
+        overflow-x: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+      }
+      .live-demo-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.75rem;
+        direction: rtl;
+        background: var(--input-bg);
+      }
+      .live-demo-table th {
+        background: var(--primary);
+        color: #fff;
+        padding: 5px 8px;
+        font-weight: 600;
+        text-align: right;
+        white-space: nowrap;
+      }
+      .live-demo-table td {
+        padding: 4px 8px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        text-align: right;
+      }
+      .live-demo-table tr:last-child td {
+        border-bottom: none;
+      }
+      .live-demo-table tr.highlight-row {
+        background: color-mix(in srgb, var(--primary) 18%, transparent);
+      }
+      .live-demo-table td.highlight-cell {
+        background: color-mix(in srgb, var(--primary) 35%, transparent);
+        font-weight: 700;
+        color: var(--primary);
+      }
+      .live-demo-result {
+        margin-top: 8px;
+        padding: 6px 10px;
+        background: var(--primary-light);
+        border-radius: 10px;
+        font-size: 0.78rem;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .live-demo-result .result-value {
+        font-family: "IBM Plex Mono", monospace;
+        font-weight: 700;
+        color: var(--primary);
+        background: var(--input-bg);
+        padding: 2px 8px;
+        border-radius: 6px;
+        direction: ltr;
+        display: inline-block;
+      }
+      .live-demo-result .result-label {
+        font-weight: 600;
+      }
+      .live-demo-note {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+      body.compact .live-demo {
+        padding: 6px 8px;
+      }
+      body.compact .live-demo-table {
+        font-size: 0.68rem;
+      }
+
+      /* ========== Toolbar (compact + theme extras) ========== */
+      .toolbar {
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .toolbar-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        background: var(--card);
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        transition: background 0.2s, border-color 0.2s, transform 0.15s, color 0.2s;
+        font-size: 1.1rem;
+        font-family: inherit;
+        padding: 0;
+      }
+      .toolbar-btn:hover {
+        border-color: var(--primary);
+        transform: scale(1.08);
+      }
+      .toolbar-btn:active {
+        transform: scale(0.95);
+      }
+      .toolbar-btn:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+      .toolbar-btn.active {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: #fff;
+      }
+      .toolbar-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+      /* Keep theme toggle inside toolbar */
+      .toolbar .theme-toggle {
+        position: static;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      }
+
+      /* Accent color themes */
+      [data-accent="purple"] {
+        --xlookup: #703efa;
+      }
+      [data-accent="teal"] {
+        --primary: #0d9488;
+        --primary-dark: #0f766e;
+        --primary-light: #ccfbf1;
+        --xlookup: #0d9488;
+        --focus-glow: 0 0 0 3px rgba(13, 148, 136, 0.25);
+      }
+      [data-theme="dark"][data-accent="teal"] {
+        --primary-light: #134e4a;
+      }
+      [data-accent="rose"] {
+        --primary: #e11d48;
+        --primary-dark: #be123c;
+        --primary-light: #ffe4e6;
+        --xlookup: #e11d48;
+        --focus-glow: 0 0 0 3px rgba(225, 29, 72, 0.25);
+      }
+      [data-theme="dark"][data-accent="rose"] {
+        --primary-light: #4c0519;
+      }
+      [data-accent="indigo"] {
+        --primary: #4f46e5;
+        --primary-dark: #4338ca;
+        --primary-light: #e0e7ff;
+        --xlookup: #4f46e5;
+        --focus-glow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+      }
+      [data-theme="dark"][data-accent="indigo"] {
+        --primary-light: #1e1b4b;
+      }
+
+      .accent-picker {
+        display: none;
+        position: absolute;
+        top: 52px;
+        left: 0;
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 8px;
+        box-shadow: var(--shadow);
+        gap: 6px;
+        flex-wrap: wrap;
+        width: 120px;
+        z-index: 10000;
+      }
+      .accent-picker.open {
+        display: flex;
+      }
+      .accent-swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: transform 0.15s, border-color 0.15s;
+      }
+      .accent-swatch:hover {
+        transform: scale(1.15);
+      }
+      .accent-swatch.active {
+        border-color: var(--text);
+        box-shadow: 0 0 0 2px var(--card);
+      }
+      .accent-swatch[data-accent="purple"] { background: #703efa; }
+      .accent-swatch[data-accent="teal"] { background: #0d9488; }
+      .accent-swatch[data-accent="rose"] { background: #e11d48; }
+      .accent-swatch[data-accent="indigo"] { background: #4f46e5; }
     </style>
   </head>
   <body>
-    <button
-      type="button"
-      class="theme-toggle"
-      id="themeToggle"
-      aria-label="החלף מצב כהה/בהיר"
-      title="מצב כהה / בהיר"
-    >
-      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-      </svg>
-      <svg
-        class="icon-sun"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+    <div class="toolbar" id="toolbar">
+      <button
+        type="button"
+        class="theme-toggle toolbar-btn"
+        id="themeToggle"
+        aria-label="החלף מצב כהה/בהיר"
+        title="מצב כהה / בהיר"
       >
-        <circle cx="12" cy="12" r="4" fill="currentColor" />
-        <path
-          d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
-        />
-      </svg>
-    </button>
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <svg
+          class="icon-sun"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="4" fill="currentColor" />
+          <path
+            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+          />
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="toolbar-btn"
+        id="compactToggle"
+        aria-label="מצב קומפקטי"
+        title="מצב קומפקטי / מורחב"
+        aria-pressed="false"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <path d="M3 9h18M9 21V9" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="toolbar-btn"
+        id="accentToggle"
+        aria-label="בחר צבע"
+        title="ערכת צבעים"
+        aria-expanded="false"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </svg>
+      </button>
+      <div class="accent-picker" id="accentPicker" role="listbox" aria-label="בחר צבע ראשי">
+        <button type="button" class="accent-swatch active" data-accent="purple" title="סגול" role="option" aria-selected="true"></button>
+        <button type="button" class="accent-swatch" data-accent="teal" title="טורקיז" role="option" aria-selected="false"></button>
+        <button type="button" class="accent-swatch" data-accent="rose" title="ורוד" role="option" aria-selected="false"></button>
+        <button type="button" class="accent-swatch" data-accent="indigo" title="אינדיגו" role="option" aria-selected="false"></button>
+      </div>
+    </div>
     <div class="container">
       <header>
         <h1>
@@ -1737,6 +2100,12 @@
           </div>
         </div>
 
+        <div class="convert-xlookup-wrap" id="convertXLookupWrap">
+          <button type="button" class="btn-convert" id="convertXLookupBtn">
+            <span>⚡</span> המר ל-XLOOKUP
+          </button>
+        </div>
+
         <button
           class="btn btn-primary"
           id="generateBtn"
@@ -1758,6 +2127,47 @@
         <div class="explanation" id="explanation">
           <h3>פירוט הפרמטרים:</h3>
           <ul id="explanationList"></ul>
+        </div>
+
+        <!-- Live demo -->
+        <div class="live-demo" id="liveDemo">
+          <h3>🔍 דוגמה חיה — איך זה עובד</h3>
+          <div class="live-demo-table-wrap">
+            <table class="live-demo-table" id="liveDemoTable">
+              <thead>
+                <tr>
+                  <th>A (מזהה)</th>
+                  <th>B (שם)</th>
+                  <th>C (מחיר)</th>
+                  <th>D (קטגוריה)</th>
+                </tr>
+              </thead>
+              <tbody id="liveDemoBody">
+                <tr data-id="P001" data-name="עט כחול" data-price="12" data-cat="כתיבה">
+                  <td>P001</td><td>עט כחול</td><td>12</td><td>כתיבה</td>
+                </tr>
+                <tr data-id="P002" data-name="מחברת A4" data-price="25" data-cat="כתיבה">
+                  <td>P002</td><td>מחברת A4</td><td>25</td><td>כתיבה</td>
+                </tr>
+                <tr data-id="P003" data-name="תיק גב" data-price="180" data-cat="תיקים">
+                  <td>P003</td><td>תיק גב</td><td>180</td><td>תיקים</td>
+                </tr>
+                <tr data-id="P004" data-name="מחשבון" data-price="45" data-cat="אלקטרוניקה">
+                  <td>P004</td><td>מחשבון</td><td>45</td><td>אלקטרוניקה</td>
+                </tr>
+                <tr data-id="P005" data-name="עפרון HB" data-price="5" data-cat="כתיבה">
+                  <td>P005</td><td>עפרון HB</td><td>5</td><td>כתיבה</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="live-demo-result" id="liveDemoResult">
+            <span class="result-label">תוצאה לדוגמה:</span>
+            <span class="result-value" id="liveDemoValue">—</span>
+          </div>
+          <div class="live-demo-note">
+            הטבלה לדוגמה בלבד. הערך לחיפוש בדוגמה: <strong id="liveDemoLookupHint">P003</strong>
+          </div>
         </div>
 
         <div style="margin-top: 8px; display: flex; gap: 6px">
@@ -2028,13 +2438,35 @@
         function updatePrimaryColor(func) {
           const root = document.documentElement;
           const isDark = root.getAttribute("data-theme") === "dark";
-          const map = {
-            XLOOKUP: {
+          const accent = root.getAttribute("data-accent") || "purple";
+          const accentMap = {
+            purple: {
               c: "#703efa",
               d: "#5a2fd4",
               l: "#f0ebff",
               ld: "#2e1065",
             },
+            teal: {
+              c: "#0d9488",
+              d: "#0f766e",
+              l: "#ccfbf1",
+              ld: "#134e4a",
+            },
+            rose: {
+              c: "#e11d48",
+              d: "#be123c",
+              l: "#ffe4e6",
+              ld: "#4c0519",
+            },
+            indigo: {
+              c: "#4f46e5",
+              d: "#4338ca",
+              l: "#e0e7ff",
+              ld: "#1e1b4b",
+            },
+          };
+          const map = {
+            XLOOKUP: accentMap[accent] || accentMap.purple,
             VLOOKUP: {
               c: "#28a745",
               d: "#218838",
@@ -2595,8 +3027,319 @@
           const warn = $("sizeMismatchWarningX");
           if (warn) warn.classList.remove("visible");
 
+          // Show "Convert to XLOOKUP" for non-XLOOKUP functions
+          const convertWrap = $("convertXLookupWrap");
+          if (convertWrap) {
+            convertWrap.classList.toggle(
+              "visible",
+              func === "VLOOKUP" || func === "HLOOKUP" || func === "INDEXMATCH",
+            );
+          }
+
           updatePrimaryColor(func);
           saveState();
+        }
+
+        // ========== Convert to XLOOKUP ==========
+        /**
+         * Extract first column of a range like A1:D100 → A1:A100
+         * or A:D → A:A
+         */
+        function extractFirstColumn(rangeStr) {
+          const clean = normalizeRange(
+            rangeStr.includes("!") ? rangeStr.split("!").pop() : rangeStr,
+          );
+          // Full column range: A:D → A:A
+          let m = clean.match(/^(\$?[A-Za-z]{1,3}):(\$?[A-Za-z]{1,3})$/i);
+          if (m) return m[1] + ":" + m[1];
+          // Cell range: A1:D100 → A1:A100
+          m = clean.match(
+            /^(\$?[A-Za-z]{1,3})(\$?\d+):(\$?[A-Za-z]{1,3})(\$?\d+)$/i,
+          );
+          if (m) return m[1] + m[2] + ":" + m[1] + m[4];
+          // Single column already
+          if (/^\$?[A-Za-z]{1,3}(:\$?[A-Za-z]{1,3})?$/i.test(clean)) return clean;
+          return clean;
+        }
+
+        /**
+         * Extract N-th column (1-based) from a range.
+         * A1:D100, col 3 → C1:C100
+         */
+        function extractNthColumn(rangeStr, n) {
+          const clean = normalizeRange(
+            rangeStr.includes("!") ? rangeStr.split("!").pop() : rangeStr,
+          );
+          // Full columns: A:D
+          let m = clean.match(/^(\$?[A-Za-z]{1,3}):(\$?[A-Za-z]{1,3})$/i);
+          if (m) {
+            const start = colToNum(m[1]);
+            const target = start + n - 1;
+            if (target < 1 || target > EXCEL_MAX_COL) return null;
+            const letters = numToCol(target);
+            return letters + ":" + letters;
+          }
+          // Cell range: A1:D100
+          m = clean.match(
+            /^(\$?[A-Za-z]{1,3})(\$?\d+):(\$?[A-Za-z]{1,3})(\$?\d+)$/i,
+          );
+          if (m) {
+            const start = colToNum(m[1]);
+            const target = start + n - 1;
+            if (target < 1 || target > EXCEL_MAX_COL) return null;
+            const letters = numToCol(target);
+            return letters + m[2] + ":" + letters + m[4];
+          }
+          return null;
+        }
+
+        function numToCol(n) {
+          let s = "";
+          while (n > 0) {
+            const rem = (n - 1) % 26;
+            s = String.fromCharCode(65 + rem) + s;
+            n = Math.floor((n - 1) / 26);
+          }
+          return s;
+        }
+
+        /**
+         * Extract first row of a horizontal range like A1:Z5 → A1:Z1
+         */
+        function extractFirstRow(rangeStr) {
+          const clean = normalizeRange(
+            rangeStr.includes("!") ? rangeStr.split("!").pop() : rangeStr,
+          );
+          let m = clean.match(
+            /^(\$?[A-Za-z]{1,3})(\$?\d+):(\$?[A-Za-z]{1,3})(\$?\d+)$/i,
+          );
+          if (m) return m[1] + m[2] + ":" + m[3] + m[2];
+          // Full rows: 1:5 → 1:1
+          m = clean.match(/^(\$?\d+):(\$?\d+)$/);
+          if (m) return m[1] + ":" + m[1];
+          return clean;
+        }
+
+        /**
+         * Extract N-th row (1-based) from horizontal range.
+         */
+        function extractNthRow(rangeStr, n) {
+          const clean = normalizeRange(
+            rangeStr.includes("!") ? rangeStr.split("!").pop() : rangeStr,
+          );
+          let m = clean.match(
+            /^(\$?[A-Za-z]{1,3})(\$?\d+):(\$?[A-Za-z]{1,3})(\$?\d+)$/i,
+          );
+          if (m) {
+            const startRow = parseInt(m[2].replace(/\$/g, ""), 10);
+            const target = startRow + n - 1;
+            return m[1] + target + ":" + m[3] + target;
+          }
+          m = clean.match(/^(\$?\d+):(\$?\d+)$/);
+          if (m) {
+            const startRow = parseInt(m[1].replace(/\$/g, ""), 10);
+            const target = startRow + n - 1;
+            return target + ":" + target;
+          }
+          return null;
+        }
+
+        function convertToXLookup() {
+          if (currentFunc === "XLOOKUP") return;
+
+          const fromFunc = currentFunc;
+          const lookupValue = $("lookupValue").value.trim();
+          let lookupArray = "";
+          let returnArray = "";
+          let sheetLookup = "";
+          let sheetReturn = "";
+          let matchModeToSet = "0";
+
+          if (fromFunc === "VLOOKUP") {
+            const table = $("tableArrayV").value.trim();
+            const colIdx = parseInt($("colIndex").value, 10) || 2;
+            sheetLookup = $("sheetNameV").value.trim();
+            sheetReturn = sheetLookup;
+
+            if (!table) {
+              showToast("נא למלא את טווח הטבלה תחילה");
+              return;
+            }
+
+            lookupArray = extractFirstColumn(table);
+            returnArray = extractNthColumn(table, colIdx);
+            if (!returnArray) {
+              showToast("לא ניתן לחלץ את עמודת ההחזרה");
+              return;
+            }
+
+            const rangeLookup = document.querySelector(
+              'input[name="rangeLookupV"]:checked',
+            );
+            if (rangeLookup && rangeLookup.value === "TRUE") {
+              matchModeToSet = "-1"; // approximate → next smaller
+            }
+          } else if (fromFunc === "HLOOKUP") {
+            const table = $("tableArrayH").value.trim();
+            const rowIdx = parseInt($("rowIndex").value, 10) || 2;
+            sheetLookup = $("sheetNameH").value.trim();
+            sheetReturn = sheetLookup;
+
+            if (!table) {
+              showToast("נא למלא את טווח הטבלה תחילה");
+              return;
+            }
+
+            lookupArray = extractFirstRow(table);
+            returnArray = extractNthRow(table, rowIdx);
+            if (!returnArray) {
+              showToast("לא ניתן לחלץ את שורת ההחזרה");
+              return;
+            }
+
+            const rangeLookup = document.querySelector(
+              'input[name="rangeLookupH"]:checked',
+            );
+            if (rangeLookup && rangeLookup.value === "TRUE") {
+              matchModeToSet = "-1";
+            }
+          } else if (fromFunc === "INDEXMATCH") {
+            returnArray = $("returnRangeIM").value.trim();
+            lookupArray = $("lookupRangeIM").value.trim();
+            sheetReturn = $("sheetNameIM").value.trim();
+            sheetLookup =
+              $("sheetNameIMLookup").value.trim() || sheetReturn;
+
+            if (!returnArray || !lookupArray) {
+              showToast("נא למלא את טווחי INDEX ו-MATCH תחילה");
+              return;
+            }
+
+            const matchType = document.querySelector(
+              'input[name="matchTypeIM"]:checked',
+            );
+            if (matchType) {
+              // MATCH 1 (less or equal) ≈ XLOOKUP -1; MATCH -1 ≈ XLOOKUP 1
+              if (matchType.value === "1") matchModeToSet = "-1";
+              else if (matchType.value === "-1") matchModeToSet = "1";
+            }
+          }
+
+          // Switch to XLOOKUP and fill fields
+          selectFunc("XLOOKUP");
+
+          $("lookupValue").value = lookupValue;
+          $("lookupArray").value = lookupArray;
+          $("returnArray").value = returnArray;
+          $("sheetNameX").value = sheetLookup;
+          $("sheetNameXReturn").value = sheetReturn;
+
+          // Apply match mode
+          const matchModeRadio = document.querySelector(
+            `input[name="matchMode"][value="${matchModeToSet}"]`,
+          );
+          if (matchModeRadio) {
+            matchModeRadio.checked = true;
+            updateRadioUI("matchModeGroup");
+          }
+
+          // Open advanced if non-default match mode
+          if (matchModeToSet !== "0") {
+            $("advancedContent").classList.add("open");
+            $("advArrow").textContent = "▲";
+            $("toggleAdvancedBtn").setAttribute("aria-expanded", "true");
+          }
+
+          updateAllFieldAlignments();
+          validateCurrentForm(false);
+          showToast("✨ הומר ל-XLOOKUP — בדוק את הטווחים");
+          setTimeout(() => {
+            if (validateCurrentForm(false) && $("lookupValue").value.trim()) {
+              generateFormula();
+            }
+          }, 150);
+        }
+
+        // ========== Live demo ==========
+        const SAMPLE_DATA = [
+          { id: "P001", name: "עט כחול", price: "12", cat: "כתיבה" },
+          { id: "P002", name: "מחברת A4", price: "25", cat: "כתיבה" },
+          { id: "P003", name: "תיק גב", price: "180", cat: "תיקים" },
+          { id: "P004", name: "מחשבון", price: "45", cat: "אלקטרוניקה" },
+          { id: "P005", name: "עפרון HB", price: "5", cat: "כתיבה" },
+        ];
+
+        function updateLiveDemo() {
+          const demo = $("liveDemo");
+          if (!demo) return;
+
+          // Only show when we have a generated formula
+          const formula = $("formulaOutput").textContent;
+          if (!formula) {
+            demo.classList.remove("visible");
+            return;
+          }
+          demo.classList.add("visible");
+
+          // Determine which column is "lookup" and which is "return" conceptually
+          // For the demo we always use column A (id) as lookup key and pick return based on func
+          let returnField = "name"; // default B
+          let returnColIdx = 1; // 0-based in SAMPLE_DATA keys order: id,name,price,cat
+
+          if (currentFunc === "XLOOKUP") {
+            // Heuristic from return array letter
+            const ret = ($("returnArray").value || "").toUpperCase();
+            if (/\bB\b|:B|B\d/.test(ret) && !/[C-Z]/.test(ret.replace(/B/g, ""))) returnField = "name";
+            else if (/\bC\b|:C|C\d/.test(ret)) returnField = "price";
+            else if (/\bD\b|:D|D\d/.test(ret)) returnField = "cat";
+            else returnField = "name";
+          } else if (currentFunc === "VLOOKUP") {
+            const col = parseInt($("colIndex").value, 10) || 2;
+            if (col === 2) returnField = "name";
+            else if (col === 3) returnField = "price";
+            else if (col === 4) returnField = "cat";
+            else returnField = "name";
+          } else if (currentFunc === "INDEXMATCH") {
+            const ret = ($("returnRangeIM").value || "").toUpperCase();
+            if (/\bC\b|:C|C\d/.test(ret)) returnField = "price";
+            else if (/\bD\b|:D|D\d/.test(ret)) returnField = "cat";
+            else returnField = "name";
+          } else if (currentFunc === "HLOOKUP") {
+            const row = parseInt($("rowIndex").value, 10) || 2;
+            if (row === 2) returnField = "name";
+            else if (row === 3) returnField = "price";
+            else if (row === 4) returnField = "cat";
+            else returnField = "name";
+          }
+
+          // Sample lookup value: use user's lookup if it matches a sample id, else P003
+          let userLookup = $("lookupValue").value.trim().replace(/^["']|["']$/g, "");
+          // If it's a cell ref like A2, ignore and use sample
+          if (isCellRef(userLookup) || looksLikeRefValue(userLookup)) {
+            userLookup = "P003";
+          }
+          const matchRow =
+            SAMPLE_DATA.find((r) => r.id === userLookup) ||
+            SAMPLE_DATA.find((r) => r.id === "P003");
+
+          // Highlight rows
+          qsa("#liveDemoBody tr").forEach((tr) => {
+            tr.classList.remove("highlight-row");
+            qsa("td", tr).forEach((td) => td.classList.remove("highlight-cell"));
+            if (tr.dataset.id === matchRow.id) {
+              tr.classList.add("highlight-row");
+              // Highlight lookup cell (first) and return cell
+              const tds = tr.querySelectorAll("td");
+              if (tds[0]) tds[0].classList.add("highlight-cell");
+              const fieldMap = { id: 0, name: 1, price: 2, cat: 3 };
+              const idx = fieldMap[returnField] ?? 1;
+              if (tds[idx]) tds[idx].classList.add("highlight-cell");
+            }
+          });
+
+          const resultVal = matchRow[returnField];
+          $("liveDemoValue").textContent = resultVal;
+          $("liveDemoLookupHint").textContent = matchRow.id;
         }
 
         // ========== Generate ==========
@@ -2831,6 +3574,7 @@
             $("formulaOutput").textContent = formula;
             $("resultCard").style.display = "block";
             $("explanationList").innerHTML = explanationItems.join("");
+            updateLiveDemo();
             $("resultCard").scrollIntoView({
               behavior: "smooth",
               block: "nearest",
@@ -3133,6 +3877,59 @@
           showToast(isDark ? "☀️ מצב בהיר" : "🌙 מצב כהה");
         }
 
+        // ========== Compact mode ==========
+        function applyCompact(on) {
+          document.body.classList.toggle("compact", !!on);
+          const btn = $("compactToggle");
+          if (btn) {
+            btn.classList.toggle("active", !!on);
+            btn.setAttribute("aria-pressed", on ? "true" : "false");
+            btn.title = on ? "מצב מורחב" : "מצב קומפקטי";
+            btn.setAttribute(
+              "aria-label",
+              on ? "עבור למצב מורחב" : "עבור למצב קומפקטי",
+            );
+          }
+          try {
+            localStorage.setItem("excelLookupCompact", on ? "1" : "0");
+          } catch (e) {
+            /* ignore */
+          }
+        }
+
+        function toggleCompact() {
+          const isOn = document.body.classList.contains("compact");
+          applyCompact(!isOn);
+          showToast(isOn ? "📖 מצב מורחב" : "📱 מצב קומפקטי");
+        }
+
+        // ========== Accent colors ==========
+        function applyAccent(accent) {
+          const valid = ["purple", "teal", "rose", "indigo"];
+          if (!valid.includes(accent)) accent = "purple";
+          document.documentElement.setAttribute("data-accent", accent);
+          qsa(".accent-swatch").forEach((s) => {
+            const isActive = s.dataset.accent === accent;
+            s.classList.toggle("active", isActive);
+            s.setAttribute("aria-selected", isActive ? "true" : "false");
+          });
+          try {
+            localStorage.setItem("excelLookupAccent", accent);
+          } catch (e) {
+            /* ignore */
+          }
+          // Re-apply primary for current function (XLOOKUP uses accent)
+          updatePrimaryColor(currentFunc);
+        }
+
+        function toggleAccentPicker() {
+          const picker = $("accentPicker");
+          const btn = $("accentToggle");
+          if (!picker) return;
+          const open = picker.classList.toggle("open");
+          if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+        }
+
         // ========== Debounce ==========
         function debounce(fn, ms) {
           let t;
@@ -3374,13 +4171,75 @@
           // Theme toggle
           $("themeToggle").addEventListener("click", toggleTheme);
 
+          // Compact mode
+          const compactBtn = $("compactToggle");
+          if (compactBtn) {
+            compactBtn.addEventListener("click", toggleCompact);
+          }
+
+          // Accent color picker
+          const accentBtn = $("accentToggle");
+          if (accentBtn) {
+            accentBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              toggleAccentPicker();
+            });
+          }
+          qsa(".accent-swatch").forEach((sw) => {
+            sw.addEventListener("click", (e) => {
+              e.stopPropagation();
+              applyAccent(sw.dataset.accent);
+              $("accentPicker").classList.remove("open");
+              if (accentBtn) accentBtn.setAttribute("aria-expanded", "false");
+              showToast("🎨 צבע עודכן");
+            });
+          });
+          // Close accent picker on outside click
+          document.addEventListener("click", (e) => {
+            const picker = $("accentPicker");
+            if (
+              picker &&
+              picker.classList.contains("open") &&
+              !e.target.closest("#accentToggle") &&
+              !e.target.closest("#accentPicker")
+            ) {
+              picker.classList.remove("open");
+              if (accentBtn) accentBtn.setAttribute("aria-expanded", "false");
+            }
+          });
+
+          // Convert to XLOOKUP
+          const convertBtn = $("convertXLookupBtn");
+          if (convertBtn) {
+            convertBtn.addEventListener("click", convertToXLookup);
+          }
+
           // Load state
           loadState();
           updateAllFieldAlignments();
 
-          // Apply theme
+          // Apply theme + compact + accent
           applyTheme(getPreferredTheme());
+          try {
+            const compactPref = localStorage.getItem("excelLookupCompact");
+            if (compactPref === "1") applyCompact(true);
+            const accentPref = localStorage.getItem("excelLookupAccent");
+            if (accentPref) applyAccent(accentPref);
+          } catch (e) {
+            /* ignore */
+          }
           updatePrimaryColor("XLOOKUP");
+
+          // Ensure convert button visibility matches current func
+          const convertWrap = $("convertXLookupWrap");
+          if (convertWrap) {
+            convertWrap.classList.toggle(
+              "visible",
+              currentFunc === "VLOOKUP" ||
+                currentFunc === "HLOOKUP" ||
+                currentFunc === "INDEXMATCH",
+            );
+          }
         }
 
         // ========== Start ==========
