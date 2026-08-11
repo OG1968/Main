@@ -357,6 +357,20 @@
         color: var(--text);
       }
 
+      /* ברירת מחדל: RTL (placeholders בעברית מיושרים לימין).
+         כשמכניסים ערך מסוג תא/טווח/מספר — מוסיפים class="ltr-value" ב-JS */
+      input.ltr-value {
+        direction: ltr !important;
+        text-align: left !important;
+      }
+
+      /* ערכי טקסט קבועים — תמיד RTL */
+      #ifNotFound,
+      #ifErrorValue {
+        direction: rtl !important;
+        text-align: right !important;
+      }
+
       input:focus,
       select:focus {
         outline: none;
@@ -1098,7 +1112,7 @@
           <input
             type="text"
             id="lookupValue"
-            placeholder='לדוגמה: A2 או "מזהה123"'
+            placeholder='לדוגמה: A2  או  "ערך מזהה"'
             autocomplete="off"
             aria-describedby="lookupValueHint lookupValueError"
             aria-required="true"
@@ -1127,7 +1141,7 @@
             <span
               class="example-chip"
               data-target="lookupValue"
-              data-value='"תעודת זהות"'
+              data-value='"הכנס טקסט"'
               role="button"
               tabindex="0"
               >"טקסט"</span
@@ -1162,8 +1176,8 @@
                 type="text"
                 id="sheetNameX"
                 class="sheet-input"
-                placeholder="לשונית אם לא זהה"
-                title="שם הלשונית בגיליון (אופציונלי)"
+                placeholder="מלשונית אחרת ?"
+                title="אם טווח החיפוש בלשונית שונה (אופציונלי)"
                 autocomplete="off"
               />
             </div>
@@ -1216,8 +1230,8 @@
                 type="text"
                 id="sheetNameXReturn"
                 class="sheet-input"
-                placeholder="לשונית אחרת?"
-                title="אם טווח ההחזרה בלשונית שונה"
+                placeholder="מלשונית אחרת ?"
+                title="אם טווח ההחזרה בלשונית שונה (אופציונלי)"
                 autocomplete="off"
               />
             </div>
@@ -1311,7 +1325,7 @@
                 id="sheetNameV"
                 class="sheet-input"
                 placeholder="לשונית"
-                title="שם הלשונית בגיליון (אופציונלי)"
+                title="אם טווח החיפוש בלשונית שונה (אופציונלי)"
                 autocomplete="off"
               />
             </div>
@@ -1417,8 +1431,8 @@
                 type="text"
                 id="sheetNameH"
                 class="sheet-input"
-                placeholder="לשונית אם לא זהה"
-                title="שם הלשונית בגיליון (אופציונלי)"
+                placeholder="מלשונית אחרת ?"
+                title="אם טווח החיפוש בלשונית שונה (אופציונלי)"
                 autocomplete="off"
               />
             </div>
@@ -1573,8 +1587,8 @@
                 type="text"
                 id="sheetNameIMLookup"
                 class="sheet-input"
-                placeholder="לשונית אחרת?"
-                title="אם טווח החיפוש בלשונית שונה"
+                placeholder="מלשונית אחרת ?"
+                title="אם טווח החיפוש בלשונית שונה (אופציונלי)"
                 autocomplete="off"
               />
             </div>
@@ -1788,9 +1802,15 @@
         const qsa = (sel, ctx) => (ctx || document).querySelectorAll(sel);
 
         // ========== Utilities ==========
+        /** Uppercase only Latin letters (a-z → A-Z). Text values left unchanged. */
+        function upperLatin(str) {
+          if (!str) return str;
+          return str.replace(/[a-z]/g, (c) => c.toUpperCase());
+        }
+
         function normalizeRange(str) {
           if (!str) return str;
-          return str
+          return upperLatin(str)
             .replace(/\s*:\s*/g, ":")
             .replace(/\$\s+/g, "$")
             .replace(/\s+\$/g, "$")
@@ -1811,6 +1831,77 @@
 
         function makeAbsoluteRef(ref) {
           return ref.replace(/\b([A-Za-z]+)(\d+)\b/g, "$$$1$$$2");
+        }
+
+        /**
+         * True if the value looks like a cell/range/search ref (not free text).
+         * Quoted strings and plain text → false.
+         */
+        function looksLikeRefValue(str) {
+          if (!str) return false;
+          const s = str.trim();
+          if (
+            (s.startsWith('"') && s.endsWith('"')) ||
+            (s.startsWith("'") && s.endsWith("'"))
+          )
+            return false;
+          if (s.startsWith("=")) return true;
+          // Sheet!ref or pure range/cell
+          if (s.includes("!")) return true;
+          if (isCellLikeRef(s) || isCellRefPattern(s) || isColumnRef(s) || isRowRef(s))
+            return true;
+          if (/^[\$A-Za-z0-9:]+$/.test(s) && /[A-Za-z]/.test(s)) return true;
+          return false;
+        }
+
+        /**
+         * Set alignment according to content:
+         * - empty → RTL (Hebrew placeholder stays right-aligned)
+         * - looks like cell/range/number/ref → LTR left
+         * - free text → RTL right
+         */
+        function updateFieldAlignment(el) {
+          if (!el) return;
+          const v = el.value.trim();
+          const isNumberField =
+            el.type === "number" ||
+            el.id === "colIndex" ||
+            el.id === "rowIndex";
+          const shouldBeLtr =
+            v &&
+            (isNumberField ||
+              looksLikeRefValue(v) ||
+              /^[\$A-Za-z0-9:!'.\-]+$/.test(v));
+          if (shouldBeLtr) {
+            el.classList.add("ltr-value");
+            el.style.direction = "ltr";
+            el.style.textAlign = "left";
+          } else {
+            el.classList.remove("ltr-value");
+            el.style.direction = "rtl";
+            el.style.textAlign = "right";
+          }
+        }
+
+        /** Backward-compatible alias */
+        function updateLookupValueAlignment() {
+          updateFieldAlignment($("lookupValue"));
+        }
+
+        /** Apply dynamic alignment to all relevant fields */
+        function updateAllFieldAlignments() {
+          const ids = [
+            "lookupValue",
+            "lookupArray",
+            "returnArray",
+            "tableArrayV",
+            "tableArrayH",
+            "returnRangeIM",
+            "lookupRangeIM",
+            "colIndex",
+            "rowIndex",
+          ];
+          ids.forEach((id) => updateFieldAlignment($(id)));
         }
 
         // Excel limits: columns A–XFD (1–16384), rows 1–1048576
@@ -2020,7 +2111,24 @@
           if (!targetId || value === undefined) return;
           const el = $(targetId);
           if (!el) return;
+          // Uppercase Latin letters for range/search values; keep quoted text as-is
+          const isQuoted =
+            (String(value).startsWith('"') && String(value).endsWith('"')) ||
+            (String(value).startsWith("'") && String(value).endsWith("'"));
+          const rangeLike = [
+            "lookupArray",
+            "returnArray",
+            "tableArrayV",
+            "tableArrayH",
+            "returnRangeIM",
+            "lookupRangeIM",
+            "lookupValue",
+          ];
+          if (rangeLike.includes(targetId) && !isQuoted) {
+            value = upperLatin(value);
+          }
           el.value = value;
+          updateFieldAlignment(el);
           const errId = errorMap[targetId] || targetId + "Error";
           clearFieldError(targetId, errId);
           el.classList.add("valid");
@@ -2874,6 +2982,7 @@
           $("advArrow").textContent = "▼";
           $("toggleAdvancedBtn").setAttribute("aria-expanded", "false");
 
+          updateAllFieldAlignments();
           localStorage.removeItem(STORAGE_KEY);
           showToast("הטופס אופס");
         }
@@ -2963,8 +3072,11 @@
               $("toggleAdvancedBtn").setAttribute("aria-expanded", "true");
             }
 
-            // Trigger validation after restore
-            setTimeout(() => validateCurrentForm(false), 100);
+            // Trigger validation + alignment after restore
+            setTimeout(() => {
+              updateAllFieldAlignments();
+              validateCurrentForm(false);
+            }, 100);
           } catch (e) {
             /* ignore */
           }
@@ -3043,9 +3155,20 @@
           qsa(".example-chip").forEach((chip) => {
             chip.addEventListener("click", () => {
               const target = chip.dataset.target;
-              const value = chip.dataset.value;
+              let value = chip.dataset.value;
               if (target && value !== undefined) {
-                $(target).value = value;
+                // Uppercase Latin letters for range/search fields (not pure text)
+                const textOnlyIds = ["ifNotFound"];
+                if (!textOnlyIds.includes(target)) {
+                  // If value is quoted text, leave as-is; otherwise upper Latin
+                  const isQuoted =
+                    (value.startsWith('"') && value.endsWith('"')) ||
+                    (value.startsWith("'") && value.endsWith("'"));
+                  if (!isQuoted) value = upperLatin(value);
+                }
+                const el = $(target);
+                el.value = value;
+                updateFieldAlignment(el);
                 liveValidate();
               }
             });
@@ -3064,6 +3187,7 @@
               const el = $(target);
               if (el && el.value.trim()) {
                 el.value = makeAbsolute(el.value.trim());
+                updateFieldAlignment(el);
                 showToast("הוספו סימני $");
               }
             });
@@ -3142,6 +3266,16 @@
             });
           });
 
+          // Fields that are ranges / search refs → auto-uppercase Latin letters
+          const rangeLikeIds = [
+            "lookupArray",
+            "returnArray",
+            "tableArrayV",
+            "tableArrayH",
+            "returnRangeIM",
+            "lookupRangeIM",
+          ];
+
           // Live validation on input
           const validatedIds = [
             "lookupValue",
@@ -3158,7 +3292,42 @@
           validatedIds.forEach((id) => {
             const el = $(id);
             if (!el) return;
-            el.addEventListener("input", liveValidate);
+
+            el.addEventListener("input", () => {
+              // Auto-uppercase Latin letters for range/search values
+              if (rangeLikeIds.includes(id)) {
+                const start = el.selectionStart;
+                const end = el.selectionEnd;
+                const upper = upperLatin(el.value);
+                if (upper !== el.value) {
+                  el.value = upper;
+                  try {
+                    el.setSelectionRange(start, end);
+                  } catch (_) {}
+                }
+              } else if (id === "lookupValue") {
+                // Only upper if it looks like a cell/ref (not free text)
+                const v = el.value;
+                if (
+                  looksLikeRefValue(v) ||
+                  /^[\$A-Za-z0-9:!']*$/.test(v.trim())
+                ) {
+                  const start = el.selectionStart;
+                  const end = el.selectionEnd;
+                  const upper = upperLatin(v);
+                  if (upper !== v) {
+                    el.value = upper;
+                    try {
+                      el.setSelectionRange(start, end);
+                    } catch (_) {}
+                  }
+                }
+              }
+              // Dynamic alignment: empty/placeholder → RTL; ref/number → LTR
+              updateFieldAlignment(el);
+              liveValidate();
+            });
+
             el.addEventListener("blur", (e) => {
               if (
                 e.relatedTarget &&
@@ -3166,6 +3335,14 @@
                 e.relatedTarget.closest(".suggest-btn")
               )
                 return;
+              // Final normalize + upper for ranges
+              if (rangeLikeIds.includes(id) && el.value.trim()) {
+                el.value = upperLatin(el.value.trim());
+              }
+              if (id === "lookupValue" && looksLikeRefValue(el.value)) {
+                el.value = upperLatin(el.value.trim());
+              }
+              updateFieldAlignment(el);
               validateCurrentForm(true);
               saveState();
             });
@@ -3199,6 +3376,7 @@
 
           // Load state
           loadState();
+          updateAllFieldAlignments();
 
           // Apply theme
           applyTheme(getPreferredTheme());
