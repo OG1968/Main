@@ -1813,25 +1813,62 @@
           return ref.replace(/\b([A-Za-z]+)(\d+)\b/g, "$$$1$$$2");
         }
 
-        function isCellRef(str) {
-          return /^\$?[A-Za-z]{1,3}\$?\d{1,7}$/.test(str);
-        }
-
-        function isColumnRef(str) {
-          return /^\$?[A-Za-z]{1,3}$/.test(str);
-        }
-
-        function isRowRef(str) {
-          return /^\$?\d{1,7}$/.test(str);
-        }
+        // Excel limits: columns A–XFD (1–16384), rows 1–1048576
+        const EXCEL_MAX_COL = 16384; // XFD
+        const EXCEL_MAX_ROW = 1048576;
 
         function colToNum(col) {
           const c = col.replace(/\$/g, "").toUpperCase();
+          if (!/^[A-Z]{1,3}$/.test(c)) return 0;
           let n = 0;
           for (let i = 0; i < c.length; i++) {
             n = n * 26 + (c.charCodeAt(i) - 64);
           }
           return n;
+        }
+
+        function isValidColumnLetters(col) {
+          const n = colToNum(col);
+          return n >= 1 && n <= EXCEL_MAX_COL;
+        }
+
+        function isValidRowNumber(rowStr) {
+          const r = parseInt(String(rowStr).replace(/\$/g, ""), 10);
+          return !isNaN(r) && r >= 1 && r <= EXCEL_MAX_ROW;
+        }
+
+        /** Matches a cell-like pattern (1–3 letters + digits), regardless of bounds. */
+        function isCellRefPattern(str) {
+          return /^\$?[A-Za-z]{1,3}\$?\d{1,7}$/.test(str);
+        }
+
+        /** Matches anything that looks like a cell ref, including over-long columns/rows. */
+        function isCellLikeRef(str) {
+          return /^\$?[A-Za-z]{1,10}\$?\d{1,12}$/.test(str);
+        }
+
+        /** True only if the string is a legal Excel cell within A1:XFD1048576. */
+        function isCellRef(str) {
+          if (!isCellRefPattern(str)) return false;
+          const m = str.match(/^\$?([A-Za-z]{1,3})\$?(\d{1,7})$/);
+          if (!m) return false;
+          return isValidColumnLetters(m[1]) && isValidRowNumber(m[2]);
+        }
+
+        /** Looks like a cell ref but is outside Excel bounds (or over-long). */
+        function isOutOfBoundsCellRef(str) {
+          if (isCellRef(str)) return false;
+          return isCellLikeRef(str);
+        }
+
+        function isColumnRef(str) {
+          if (!/^\$?[A-Za-z]{1,3}$/.test(str)) return false;
+          return isValidColumnLetters(str);
+        }
+
+        function isRowRef(str) {
+          if (!/^\$?\d{1,7}$/.test(str)) return false;
+          return isValidRowNumber(str);
         }
 
         function estimateColumns(rangeStr) {
@@ -2021,6 +2058,8 @@
         function isNamedRange(str) {
           return (
             /^[A-Za-z_\u0590-\u05FF][A-Za-z0-9_\u0590-\u05FF.]*$/.test(str) &&
+            !isCellLikeRef(str) &&
+            !isCellRefPattern(str) &&
             !isCellRef(str) &&
             !/^\d/.test(str) &&
             !/[א-ת]\d/.test(str)
@@ -2063,8 +2102,11 @@
           if (/^-?\d+(\.\d+)?$/.test(s)) return true;
           if (s.startsWith("=")) return true;
           if (isCellRef(s)) return true;
-          if (/^('[^']+'|[A-Za-z0-9_]+)!\$?[A-Za-z]{1,3}\$?\d{1,7}$/.test(s))
-            return true;
+          // Sheet!Cell — validate the cell part against Excel bounds
+          const sheetCell = s.match(
+            /^('[^']+'|[A-Za-z0-9_\u0590-\u05FF]+)!(\$?[A-Za-z]{1,3}\$?\d{1,7})$/,
+          );
+          if (sheetCell) return isCellRef(sheetCell[2]);
           return false;
         }
 
@@ -2080,6 +2122,7 @@
           if (/^-?\d+(\.\d+)?$/.test(s)) return true;
           if (isCellRef(s)) return true;
           if (s.startsWith("=")) return true;
+          if (isOutOfBoundsCellRef(s)) return false;
           return false;
         }
 
@@ -2099,6 +2142,31 @@
               "lookupValue",
               "lookupValueError",
               "מרכאות לא מאוזנות",
+            );
+            return false;
+          }
+          // Out-of-bounds cell ref (e.g. XFE1 or A1048577) → invalid cell + suggest quotes
+          if (isOutOfBoundsCellRef(v)) {
+            const suggestion = '"' + v.replace(/"/g, '""') + '"';
+            setFieldError(
+              "lookupValue",
+              "lookupValueError",
+              "תא לא חוקי (מותר רק A1:XFD1048576). הצעה להוספת מרכאות: ",
+              suggestion,
+            );
+            return false;
+          }
+          // Sheet!out-of-bounds cell
+          const sheetCell = v.match(
+            /^('[^']+'|[A-Za-z0-9_\u0590-\u05FF]+)!(\$?[A-Za-z]{1,3}\$?\d{1,7})$/,
+          );
+          if (sheetCell && isOutOfBoundsCellRef(sheetCell[2])) {
+            const suggestion = '"' + v.replace(/"/g, '""') + '"';
+            setFieldError(
+              "lookupValue",
+              "lookupValueError",
+              "תא לא חוקי (מותר רק A1:XFD1048576). הצעה להוספת מרכאות: ",
+              suggestion,
             );
             return false;
           }
@@ -2149,7 +2217,26 @@
           }
 
           if (!isValidRange(v)) {
-            if ((v.includes("-") || /[־–—]/.test(v)) && !v.includes(":")) {
+            // Detect out-of-bounds cell / column / row refs (beyond A1:XFD1048576)
+            const refPart = (
+              v.includes("!") ? v.split("!").pop() : v
+            ).replace(/\s/g, "");
+            const parts = normalizeRange(refPart).split(":");
+            const hasOutOfBounds = parts.some((p) => {
+              if (isCellLikeRef(p) && !isCellRef(p)) return true;
+              if (/^\$?[A-Za-z]{1,10}$/.test(p) && !isColumnRef(p)) return true;
+              if (/^\$?\d{1,12}$/.test(p) && !isRowRef(p)) return true;
+              return false;
+            });
+            if (hasOutOfBounds) {
+              const suggestion = '"' + v.replace(/"/g, '""') + '"';
+              setFieldError(
+                inputId,
+                errorId,
+                "תא לא חוקי (מותר רק A1:XFD1048576). הצעה להוספת מרכאות: ",
+                suggestion,
+              );
+            } else if ((v.includes("-") || /[־–—]/.test(v)) && !v.includes(":")) {
               const fix = suggestRangeFix(v);
               if (fix) {
                 setFieldError(
@@ -2269,6 +2356,16 @@
           const q = (v.match(/"/g) || []).length;
           if (q % 2 !== 0) {
             setFieldError("ifNotFound", "ifNotFoundError", "מרכאות לא מאוזנות");
+            return false;
+          }
+          if (isOutOfBoundsCellRef(v)) {
+            const suggestion = '"' + v.replace(/"/g, '""') + '"';
+            setFieldError(
+              "ifNotFound",
+              "ifNotFoundError",
+              "תא לא חוקי (מותר רק A1:XFD1048576). הצעה להוספת מרכאות: ",
+              suggestion,
+            );
             return false;
           }
           if (isValidIfNotFoundValue(v)) {
