@@ -4,840 +4,1104 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>פריסת קרטון</title>
-    <!-- Favicon מקומי -->
     <link rel="icon" href="CL.ico" type="image/x-icon">
     <style>
         * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         @page {
-          size: A4 landscape;
-          margin: 0.5cm;
+            size: A4 landscape;
+            margin: 0.5cm;
         }
         
         body {
-          background: #b3d4f0;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          align-items: center;
-          min-height: 100vh;
-          font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-          gap: 8px;
-          padding: 6px 16px 16px 16px;
-          position: relative;
-          overflow-x: hidden;
+            background: #b3d4f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            gap: 8px;
+            padding: 6px 16px 16px 16px;
+            position: relative;
+            overflow-x: hidden;
         }
         
         .main-header {
-          text-align: center;
-          position: relative;
-          z-index: 1;
-          margin-bottom: 0px;
-          margin-top: 0px;
-          padding-top: 0px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0px;
+            margin-top: 0px;
+            padding-top: 0px;
         }
         
         .main-header h1 {
-          font-size: 2rem;
-          font-weight: 700;
-          color: #0c3861;
-          text-shadow: 0 2px 15px rgba(255,255,255,0.3);
-          letter-spacing: 1px;
-          background: transparent;
-          padding: 4px 24px;
-          border-radius: 0;
-          display: inline-block;
-          border: none;
-          box-shadow: none;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0c3861;
+            text-shadow: 0 2px 15px rgba(255,255,255,0.3);
+            letter-spacing: 1px;
+            background: transparent;
+            padding: 4px 24px;
+            border-radius: 0;
+            display: inline-block;
+            border: none;
+            box-shadow: none;
         }
         
         .main-header h1 .highlight {
-          color: #000E5E;
+            color: #000E5E;
         }
         
         .controls {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-wrap: wrap;
-          justify-content: center;
-          background: transparent;
-          padding: 8px 18px;
-          border-radius: 0;
-          box-shadow: none;
-          border: none;
-          position: relative;
-          z-index: 1;
-          transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: transparent;
+            padding: 8px 18px;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
         }
         
         .controls label {
-          font-weight: 600;
-          font-size: 0.85rem;
-          color: #1e2b3c;
-          letter-spacing: 0.3px;
-          display: flex;
-          align-items: center;
-          gap: 3px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e2b3c;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
         }
         
         .controls label::before {
-          content: "▍";
-          color: #4a7bb5;
-          font-weight: 300;
-          font-size: 0.9rem;
+            content: "▍";
+            color: #4a7bb5;
+            font-weight: 300;
+            font-size: 0.9rem;
         }
         
         .controls input {
-          width: 70px;
-          padding: 6px 8px;
-          font-size: 0.85rem;
-          font-weight: 500;
-          border: 2px solid rgba(255,255,255,0.8);
-          border-radius: 40px;
-          background: rgba(255, 255, 255, 0.7);
-          text-align: center;
-          color: #0b1a2b;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            width: 70px;
+            padding: 6px 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            color: #0b1a2b;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
         .controls input:focus {
-          border-color: #4a7bb5;
-          box-shadow: 0 0 0 4px rgba(74, 123, 181, 0.15);
-          outline: none;
-          transform: scale(1.02);
+            border-color: #4a7bb5;
+            box-shadow: 0 0 0 4px rgba(74, 123, 181, 0.15);
+            outline: none;
+            transform: scale(1.02);
         }
         
         .controls input:hover {
-          border-color: #6b9bcb;
+            border-color: #6b9bcb;
+        }
+        
+        .controls input.error {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
         }
         
         .controls .btn-update {
-          padding: 6px 22px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          background: linear-gradient(135deg, #1f6e43, #2d8a56);
-          color: white;
-          border: none;
-          border-radius: 40px;
-          cursor: pointer;
-          transition: all 0.25s ease;
-          box-shadow: 0 4px 15px rgba(31, 110, 67, 0.3);
-          letter-spacing: 0.4px;
-          margin-left: 2px;
-          position: relative;
-          overflow: hidden;
+            padding: 6px 22px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1f6e43, #2d8a56);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(31, 110, 67, 0.3);
+            letter-spacing: 0.4px;
+            margin-left: 2px;
+            position: relative;
+            overflow: hidden;
         }
         
         .controls .btn-update::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-          transition: left 0.5s ease;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
         
         .controls .btn-update:hover::before {
-          left: 100%;
+            left: 100%;
         }
         
         .controls .btn-update:hover {
-          background: linear-gradient(135deg, #135432, #1f6e43);
-          transform: scale(1.03) translateY(-2px);
-          box-shadow: 0 6px 20px rgba(31, 110, 67, 0.4);
+            background: linear-gradient(135deg, #135432, #1f6e43);
+            transform: scale(1.03) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(31, 110, 67, 0.4);
         }
         
         .controls .btn-update:active {
-          transform: scale(0.96);
+            transform: scale(0.96);
+        }
+        
+        .controls .btn-reset {
+            padding: 6px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+            color: white;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(127, 140, 141, 0.3);
+            letter-spacing: 0.4px;
+        }
+        
+        .controls .btn-reset:hover {
+            background: linear-gradient(135deg, #636e72, #7f8c8d);
+            transform: scale(1.03) translateY(-2px);
         }
         
         .actions {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
-          justify-content: center;
-          background: transparent;
-          padding: 8px 16px;
-          border-radius: 0;
-          border: none;
-          box-shadow: none;
-          position: relative;
-          z-index: 1;
-          transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: transparent;
+            padding: 8px 16px;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
         }
         
         .actions .checkbox-wrapper {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          cursor: pointer;
-          user-select: none;
-          font-weight: 500;
-          font-size: 0.85rem;
-          color: #1e2b3c;
-          transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1e2b3c;
+            transition: all 0.2s ease;
         }
         
         .actions .checkbox-wrapper:hover {
-          color: #1a4972;
+            color: #1a4972;
         }
         
         .actions .checkbox-wrapper input[type="checkbox"] {
-          width: 16px;
-          height: 16px;
-          cursor: pointer;
-          accent-color: #1a4972;
-          border-radius: 4px;
-          transition: all 0.2s ease;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #1a4972;
+            border-radius: 4px;
+            transition: all 0.2s ease;
         }
         
         .actions .checkbox-wrapper input[type="checkbox"]:hover {
-          transform: scale(1.1);
+            transform: scale(1.1);
         }
         
         .actions .checkbox-wrapper input[type="checkbox"]:checked {
-          accent-color: #1f6e43;
+            accent-color: #1f6e43;
         }
         
         .btn-pdf {
-          padding: 8px 28px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          background: linear-gradient(135deg, #1a4972, #2a6b9e);
-          color: white;
-          border: none;
-          border-radius: 60px;
-          cursor: pointer;
-          transition: all 0.25s ease;
-          box-shadow: 0 8px 25px rgba(26, 73, 114, 0.35);
-          letter-spacing: 0.5px;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          position: relative;
-          overflow: hidden;
+            padding: 8px 28px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1a4972, #2a6b9e);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 25px rgba(26, 73, 114, 0.35);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
         }
         
         .btn-pdf::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-          transition: left 0.5s ease;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
         
         .btn-pdf:hover::before {
-          left: 100%;
+            left: 100%;
         }
         
         .btn-pdf:hover {
-          background: linear-gradient(135deg, #0d3454, #1a4972);
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 12px 30px rgba(26, 73, 114, 0.45);
+            background: linear-gradient(135deg, #0d3454, #1a4972);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(26, 73, 114, 0.45);
         }
         
         .btn-pdf:active {
-          transform: scale(0.96);
+            transform: scale(0.96);
         }
         
         .btn-pdf::after {
-          content: "📄";
-          font-size: 1.1rem;
-          transition: transform 0.3s ease;
+            content: "📄";
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
         }
         
         .btn-pdf:hover::after {
-          transform: rotate(-10deg) scale(1.1);
+            transform: rotate(-10deg) scale(1.1);
+        }
+
+        .btn-svg {
+            padding: 8px 28px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 25px rgba(142, 68, 173, 0.35);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .note-wrapper {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          border-right: 2px solid rgba(0,0,0,0.08);
-          padding-right: 10px;
+        .btn-svg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
         
-        .note-wrapper label {
-          font-weight: 600;
-          font-size: 0.85rem;
-          color: #1e2b3c;
-          display: flex;
-          align-items: center;
-          gap: 3px;
-          white-space: nowrap;
+        .btn-svg:hover::before {
+            left: 100%;
         }
         
-        .note-wrapper label::before {
-          content: "✏️";
-          font-size: 0.9rem;
+        .btn-svg:hover {
+            background: linear-gradient(135deg, #6c3483, #8e44ad);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(142, 68, 173, 0.45);
         }
         
-        .note-wrapper input {
-          padding: 5px 12px;
-          font-size: 0.85rem;
-          border: 2px solid rgba(255,255,255,0.8);
-          border-radius: 30px;
-          background: rgba(255, 255, 255, 0.7);
-          color: #0b1a2b;
-          transition: all 0.2s ease;
-          min-width: 160px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-          text-align: right;
-          direction: rtl;
+        .btn-svg:active {
+            transform: scale(0.96);
         }
         
-        .note-wrapper input:focus {
-          border-color: #4a7bb5;
-          box-shadow: 0 0 0 4px rgba(74, 123, 181, 0.15);
-          outline: none;
+        .btn-svg::after {
+            content: "🎨";
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
         }
         
-        .note-wrapper input:hover {
-          border-color: #6b9bcb;
+        .btn-svg:hover::after {
+            transform: rotate(-10deg) scale(1.1);
         }
         
-        .note-wrapper input::placeholder {
-          color: #9aaec2;
-          font-weight: 400;
+        /* כפתורי פורמטים חדשים */
+        .btn-eps {
+            padding: 8px 28px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #6c3483, #8e44ad);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 25px rgba(108, 52, 131, 0.35);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-eps::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-eps:hover::before {
+            left: 100%;
+        }
+        .btn-eps:hover {
+            background: linear-gradient(135deg, #4a235a, #6c3483);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(108, 52, 131, 0.45);
+        }
+        .btn-eps:active {
+            transform: scale(0.96);
+        }
+        .btn-eps::after {
+            content: "✨";
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+        .btn-eps:hover::after {
+            transform: rotate(-10deg) scale(1.1);
+        }
+
+        .btn-ai {
+            padding: 8px 28px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.35);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-ai::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-ai:hover::before {
+            left: 100%;
+        }
+        .btn-ai:hover {
+            background: linear-gradient(135deg, #d35400, #f39c12);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(243, 156, 18, 0.45);
+        }
+        .btn-ai:active {
+            transform: scale(0.96);
+        }
+        .btn-ai::after {
+            content: "⭐";
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+        .btn-ai:hover::after {
+            transform: rotate(-10deg) scale(1.1);
+        }
+
+        .btn-dxf {
+            padding: 8px 28px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1a5276, #2e86c1);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 25px rgba(26, 82, 118, 0.35);
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-dxf::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-dxf:hover::before {
+            left: 100%;
+        }
+        .btn-dxf:hover {
+            background: linear-gradient(135deg, #0e3d5e, #1a5276);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(26, 82, 118, 0.45);
+        }
+        .btn-dxf:active {
+            transform: scale(0.96);
+        }
+        .btn-dxf::after {
+            content: "📐";
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+        .btn-dxf:hover::after {
+            transform: rotate(-10deg) scale(1.1);
         }
         
-        .info-bar {
-          font-size: 0.85rem;
-          color: #1f3347;
-          background: transparent;
-          padding: 6px 18px;
-          border-radius: 0;
-          border: none;
-          box-shadow: none;
-          font-weight: 500;
-          position: relative;
-          z-index: 1;
-          transition: all 0.3s ease;
-          text-align: center;
+        .note-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 4px;
+            direction: ltr;
         }
         
-        /* ===== מיכל הפריסה ===== */
+        .note-row label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1e2b3c;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+            order: 2;
+        }
+        
+        .note-row input {
+            flex: 1;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            color: #0b1a2b;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: right;
+            direction: rtl;
+            order: 1;
+        }
+        
+        .note-row input:focus {
+            border-color: #4a7bb5;
+            box-shadow: 0 0 0 4px rgba(74, 123, 181, 0.15);
+            outline: none;
+        }
+        
+        .note-row input:hover {
+            border-color: #6b9bcb;
+        }
+        
+        .note-row input::placeholder {
+            color: #9aaec2;
+            font-weight: 400;
+        }
+        
         .net-wrapper {
-          position: relative;
-          width: 100%;
-          overflow: auto;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          padding: 10px 0;
-          min-height: 300px;
+            position: relative;
+            width: 100%;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 10px 0;
+            min-height: 300px;
         }
         
         .net {
-          position: relative;
-          background: transparent;
-          border: none;
-          border-radius: 0;
-          box-shadow: none;
-          padding: 0;
-          transform-origin: top center;
-          flex-shrink: 0;
+            position: relative;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+            transform-origin: top center;
+            flex-shrink: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .net.fade {
+            opacity: 0.5;
         }
         
         .panel {
-          position: absolute;
-          border: 2px solid #1f2f3f;
-          border-radius: 8px;
-          background: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 13px;
-          font-weight: 600;
-          text-align: center;
-          flex-direction: column;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-          color: #111e2c;
-          padding: 2px;
-          cursor: default;
+            position: absolute;
+            border: 2px solid #1f2f3f;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            flex-direction: column;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            color: #111e2c;
+            padding: 2px;
+            cursor: default;
         }
         
         .panel:hover {
-          transform: scale(1.02);
-          z-index: 10;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            transform: scale(1.02);
+            z-index: 10;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         }
         
         .dim-label {
-          font-size: 14px;
-          font-weight: 700;
-          line-height: 1.3;
-          color: #0f1e2f;
-          text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.3;
+            color: #0f1e2f;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
         }
         
         .dim-sub {
-          font-size: 11px;
-          font-weight: 500;
-          color: #2c4058;
-          background: rgba(255,255,255,0.4);
-          padding: 2px 8px;
-          border-radius: 20px;
-          margin-top: 2px;
-          backdrop-filter: blur(4px);
+            font-size: 11px;
+            font-weight: 500;
+            color: #2c4058;
+            background: rgba(255,255,255,0.4);
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 2px;
+            backdrop-filter: blur(4px);
         }
         
-        /* ===== תפריט המרה לנייד ===== */
         .mobile-menu-toggle {
-          display: none;
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          z-index: 1000;
-          background: #1a4972;
-          color: white;
-          border: none;
-          border-radius: 60px;
-          padding: 14px 20px;
-          font-size: 1.2rem;
-          font-weight: 600;
-          box-shadow: 0 8px 30px rgba(26, 73, 114, 0.5);
-          cursor: pointer;
-          transition: all 0.3s ease;
-          gap: 8px;
-          align-items: center;
-          border: 2px solid rgba(255,255,255,0.3);
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #1a4972;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 14px 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 8px 30px rgba(26, 73, 114, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            gap: 8px;
+            align-items: center;
+            border: 2px solid rgba(255,255,255,0.3);
         }
         
         .mobile-menu-toggle:hover {
-          transform: scale(1.05);
-          background: #0d3454;
-          box-shadow: 0 12px 40px rgba(26, 73, 114, 0.6);
+            transform: scale(1.05);
+            background: #0d3454;
+            box-shadow: 0 12px 40px rgba(26, 73, 114, 0.6);
         }
         
         .mobile-menu-toggle:active {
-          transform: scale(0.95);
+            transform: scale(0.95);
         }
         
         .mobile-menu-toggle .badge {
-          background: #ff6b6b;
-          color: white;
-          border-radius: 50%;
-          width: 24px;
-          height: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.7rem;
-          font-weight: 700;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
         }
         
         .mobile-menu-panel {
-          display: none;
-          position: fixed;
-          bottom: 80px;
-          right: 20px;
-          left: 20px;
-          z-index: 999;
-          background: rgba(255,255,255,0.95);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-radius: 24px;
-          padding: 20px;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-          border: 1px solid rgba(255,255,255,0.2);
-          animation: slideUp 0.3s ease;
-          max-height: 70vh;
-          overflow-y: auto;
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            left: 20px;
+            z-index: 999;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: slideUp 0.3s ease;
+            max-height: 70vh;
+            overflow-y: auto;
         }
         
         .mobile-menu-panel.open {
-          display: block;
+            display: block;
         }
         
         @keyframes slideUp {
-          from { opacity: 0; transform: translateY(30px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
         
         .mobile-menu-panel .panel-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-          padding-bottom: 12px;
-          border-bottom: 2px solid rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(0,0,0,0.06);
         }
         
         .mobile-menu-panel .panel-header h3 {
-          font-size: 1.1rem;
-          color: #0c3861;
-          display: flex;
-          align-items: center;
-          gap: 8px;
+            font-size: 1.1rem;
+            color: #0c3861;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .mobile-menu-panel .panel-close {
-          background: none;
-          border: none;
-          font-size: 1.5rem;
-          cursor: pointer;
-          color: #666;
-          padding: 0 8px;
-          transition: transform 0.2s;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0 8px;
+            transition: transform 0.2s;
         }
         
         .mobile-menu-panel .panel-close:hover {
-          transform: rotate(90deg);
+            transform: rotate(90deg);
         }
         
         .mobile-menu-panel .control-group {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         
         .mobile-menu-panel .control-row {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
         .mobile-menu-panel .control-row label {
-          font-weight: 600;
-          font-size: 0.9rem;
-          color: #1e2b3c;
-          min-width: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e2b3c;
+            min-width: 30px;
         }
         
         .mobile-menu-panel .control-row input[type="number"] {
-          flex: 1;
-          min-width: 60px;
-          padding: 8px 12px;
-          font-size: 0.9rem;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 12px;
-          background: rgba(255,255,255,0.8);
-          text-align: center;
-          transition: border-color 0.2s;
+            flex: 1;
+            min-width: 60px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.8);
+            text-align: center;
+            transition: border-color 0.2s;
         }
         
         .mobile-menu-panel .control-row input[type="number"]:focus {
-          border-color: #4a7bb5;
-          outline: none;
+            border-color: #4a7bb5;
+            outline: none;
+        }
+        
+        .mobile-menu-panel .control-row input.error {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
         }
         
         .mobile-menu-panel .action-buttons {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
         }
         
         .mobile-menu-panel .action-buttons button {
-          padding: 12px;
-          border: none;
-          border-radius: 14px;
-          font-size: 0.95rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
+            padding: 12px;
+            border: none;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .mobile-menu-panel .action-buttons .btn-update-mobile {
-          background: linear-gradient(135deg, #1f6e43, #2d8a56);
-          color: white;
+            background: linear-gradient(135deg, #1f6e43, #2d8a56);
+            color: white;
         }
         
         .mobile-menu-panel .action-buttons .btn-update-mobile:active {
-          transform: scale(0.97);
+            transform: scale(0.97);
         }
         
         .mobile-menu-panel .action-buttons .btn-pdf-mobile {
-          background: linear-gradient(135deg, #1a4972, #2a6b9e);
-          color: white;
+            background: linear-gradient(135deg, #1a4972, #2a6b9e);
+            color: white;
         }
         
         .mobile-menu-panel .action-buttons .btn-pdf-mobile:active {
-          transform: scale(0.97);
+            transform: scale(0.97);
+        }
+
+        .mobile-menu-panel .action-buttons .btn-svg-mobile {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            color: white;
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-svg-mobile:active {
+            transform: scale(0.97);
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-eps-mobile {
+            background: linear-gradient(135deg, #6c3483, #8e44ad);
+            color: white;
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-eps-mobile:active {
+            transform: scale(0.97);
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-ai-mobile {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-ai-mobile:active {
+            transform: scale(0.97);
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-dxf-mobile {
+            background: linear-gradient(135deg, #1a5276, #2e86c1);
+            color: white;
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-dxf-mobile:active {
+            transform: scale(0.97);
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-reset-mobile {
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+            color: white;
+        }
+        
+        .mobile-menu-panel .action-buttons .btn-reset-mobile:active {
+            transform: scale(0.97);
         }
         
         .mobile-menu-panel .toggle-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 4px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 0;
         }
         
         .mobile-menu-panel .toggle-row label {
-          font-weight: 500;
-          color: #1e2b3c;
+            font-weight: 500;
+            color: #1e2b3c;
         }
         
         .mobile-menu-panel .toggle-row input[type="checkbox"] {
-          width: 20px;
-          height: 20px;
-          accent-color: #1a4972;
-          cursor: pointer;
+            width: 20px;
+            height: 20px;
+            accent-color: #1a4972;
+            cursor: pointer;
         }
         
         .mobile-menu-panel .note-row {
-          margin-top: 8px;
+            margin-top: 8px;
         }
         
         .mobile-menu-panel .note-row input {
-          width: 100%;
-          padding: 10px 14px;
-          border: 2px solid rgba(0,0,0,0.1);
-          border-radius: 12px;
-          font-size: 0.9rem;
-          background: rgba(255,255,255,0.8);
-          text-align: right;
-          direction: rtl;
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.8);
+            text-align: right;
+            direction: ltr;
         }
         
         .mobile-menu-panel .note-row input:focus {
-          border-color: #4a7bb5;
-          outline: none;
+            border-color: #4a7bb5;
+            outline: none;
         }
         
-        /* Overlay */
         .mobile-overlay {
-          display: none;
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.3);
-          z-index: 998;
-          backdrop-filter: blur(4px);
-          animation: fadeIn 0.3s ease;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 998;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
         }
         
         .mobile-overlay.open {
-          display: block;
+            display: block;
         }
         
         @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         @media print {
-          body { background: white; padding: 0; gap: 4px; }
-          .main-header { display: none; }
-          .controls { display: none; }
-          .actions { display: none; }
-          .info-bar { display: none; }
-          .net-wrapper { overflow: visible; }
-          .net { transform: none !important; }
-          .panel { border: 2px solid black; border-radius: 0; }
-          .panel:hover { transform: none; box-shadow: none; }
-          .mobile-menu-toggle { display: none !important; }
-          .mobile-menu-panel { display: none !important; }
-          .mobile-overlay { display: none !important; }
-          .footer { display: none !important; }
+            body { background: white; padding: 0; gap: 4px; }
+            .main-header { display: none; }
+            .controls { display: none; }
+            .actions { display: none; }
+            .note-row { display: none; }
+            .net-wrapper { overflow: visible; }
+            .net { transform: none !important; }
+            .panel { border: 2px solid black; border-radius: 0; }
+            .panel:hover { transform: none; box-shadow: none; }
+            .mobile-menu-toggle { display: none !important; }
+            .mobile-menu-panel { display: none !important; }
+            .mobile-overlay { display: none !important; }
+            .footer { display: none !important; }
         }
         
-        /* ===== תצוגה לנייד ===== */
         @media (max-width: 768px) {
-          body { padding: 4px 10px 80px 10px; gap: 6px; }
-          .main-header h1 {
-            font-size: 1.2rem;
-            padding: 4px 16px;
-          }
-          .controls { display: none; }
-          .actions { display: none; }
-          
-          .info-bar {
-            font-size: 0.7rem;
-            padding: 4px 8px;
-          }
-          
-          .mobile-menu-toggle {
-            display: flex;
-          }
-          
-          .net-wrapper {
-            overflow-x: auto;
-            overflow-y: visible;
-            padding: 5px 0;
-            min-height: 250px;
-            justify-content: center;
-            align-items: center;
-          }
-          
-          .net {
-            transform-origin: top center;
-          }
-          
-          .panel {
-            border-radius: 5px;
-            border-width: 1.5px;
-          }
-          
-          .dim-label {
-            font-size: 10px;
-          }
-          .dim-sub {
-            font-size: 8px;
-            padding: 1px 5px;
-          }
+            body { padding: 4px 10px 80px 10px; gap: 6px; }
+            .main-header h1 {
+                font-size: 1.2rem;
+                padding: 4px 16px;
+            }
+            .controls { display: none; }
+            .actions { display: none; }
+            .note-row { display: none; }
+            
+            .mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .net-wrapper {
+                overflow-x: auto;
+                overflow-y: visible;
+                padding: 5px 0;
+                min-height: 250px;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            .net {
+                transform-origin: top center;
+            }
+            
+            .panel {
+                border-radius: 5px;
+                border-width: 1.5px;
+            }
+            
+            .dim-label {
+                font-size: 10px;
+            }
+            .dim-sub {
+                font-size: 8px;
+                padding: 1px 5px;
+            }
         }
         
         @media (max-width: 480px) {
-          .mobile-menu-panel {
-            bottom: 70px;
-            right: 10px;
-            left: 10px;
-            padding: 16px;
-            border-radius: 20px;
-            max-height: 70vh;
-          }
-          
-          .mobile-menu-panel .control-row input[type="number"] {
-            min-width: 50px;
-            padding: 6px 8px;
-            font-size: 0.85rem;
-          }
-          
-          .mobile-menu-toggle {
-            padding: 12px 16px;
-            font-size: 1rem;
-            bottom: 15px;
-            right: 15px;
-          }
-          
-          .net-wrapper {
-            min-height: 200px;
-          }
+            .mobile-menu-panel {
+                bottom: 70px;
+                right: 10px;
+                left: 10px;
+                padding: 16px;
+                border-radius: 20px;
+                max-height: 70vh;
+            }
+            
+            .mobile-menu-panel .control-row input[type="number"] {
+                min-width: 50px;
+                padding: 6px 8px;
+                font-size: 0.85rem;
+            }
+            
+            .mobile-menu-toggle {
+                padding: 12px 16px;
+                font-size: 1rem;
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .net-wrapper {
+                min-height: 200px;
+            }
         }
         
         .loading-indicator {
-          display: none;
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          width: 40px;
-          height: 40px;
-          border: 3px solid #e2e8f0;
-          border-top: 3px solid #4a7bb5;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          z-index: 1000;
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4a7bb5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1000;
         }
         
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
-          opacity: 0.5;
+            opacity: 0.5;
         }
         
         input[type="number"]:hover::-webkit-inner-spin-button,
         input[type="number"]:hover::-webkit-outer-spin-button {
-          opacity: 1;
+            opacity: 1;
         }
         
         .toast {
-          position: fixed;
-          bottom: 30px;
-          right: 30px;
-          background: rgba(26, 73, 114, 0.9);
-          backdrop-filter: blur(10px);
-          color: white;
-          padding: 12px 24px;
-          border-radius: 12px;
-          font-size: 0.9rem;
-          font-weight: 500;
-          box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-          transform: translateY(100px);
-          opacity: 0;
-          transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-          z-index: 999;
-          border: 1px solid rgba(255,255,255,0.1);
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(26, 73, 114, 0.9);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 999;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .toast.show {
-          transform: translateY(0);
-          opacity: 1;
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.error {
+            background: rgba(192, 57, 43, 0.95);
+        }
+        
+        .toast.success {
+            background: rgba(46, 125, 50, 0.95);
+        }
+        
+        .toast.info {
+            background: rgba(26, 73, 114, 0.95);
         }
 
         @media (max-width: 768px) {
-          .toast {
-            bottom: 80px;
-            right: 20px;
-            left: 20px;
-            text-align: center;
-            padding: 10px 16px;
-            font-size: 0.8rem;
-          }
+            .toast {
+                bottom: 80px;
+                right: 20px;
+                left: 20px;
+                text-align: center;
+                padding: 10px 16px;
+                font-size: 0.8rem;
+            }
         }
 
-        /* ===== תחתית עם לוגו וזכויות - ממורכז ===== */
         .footer {
-          width: 100%;
-          max-width: 1200px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 16px;
-          padding: 12px 24px 8px 24px;
-          margin-top: 12px;
-          border-top: 1px solid rgba(0,0,0,0.08);
-          direction: rtl;
-          flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px 8px 24px;
+            margin-top: 12px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            direction: rtl;
+            flex-wrap: wrap;
         }
 
         .footer .copyright {
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: #1f3347;
-          letter-spacing: 0.3px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1f3347;
+            letter-spacing: 0.3px;
         }
 
         .footer .logo {
-          height: 32px;
-          width: auto;
-          object-fit: contain;
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
         @media (max-width: 768px) {
-          .footer {
-            padding: 10px 12px 6px 12px;
-            gap: 10px;
-          }
-          .footer .copyright {
-            font-size: 0.75rem;
-          }
-          .footer .logo {
-            height: 26px;
-          }
+            .footer {
+                padding: 10px 12px 6px 12px;
+                gap: 10px;
+            }
+            .footer .copyright {
+                font-size: 0.75rem;
+            }
+            .footer .logo {
+                height: 26px;
+            }
         }
         
         @media print {
-          .footer {
-            display: none !important;
-          }
+            .footer {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -846,35 +1110,37 @@
     <div class="loading-indicator" id="loadingIndicator"></div>
     <div class="toast" id="toast">✅ הפריסה עודכנה!</div>
 
-    <!-- Overlay -->
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
-    <!-- כפתור תפריט נייד -->
     <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="פתח תפריט שליטה">
         📐 תפריט
         <span class="badge" id="mobileBadge">⚡</span>
     </button>
 
-    <!-- תפריט נייד -->
-    <div class="mobile-menu-panel" id="mobileMenuPanel">
+    <div class="mobile-menu-panel" id="mobileMenuPanel" role="dialog" aria-label="תפריט שליטה בפריסה">
         <div class="panel-header">
             <h3>📦 שליטה בפריסה</h3>
-            <button class="panel-close" id="mobileMenuClose">✕</button>
+            <button class="panel-close" id="mobileMenuClose" aria-label="סגור תפריט">✕</button>
         </div>
         
         <div class="control-group">
             <div class="control-row">
-                <label>L</label>
-                <input type="number" id="mobileInputL" value="62" step="0.1" min="1">
-                <label>W</label>
-                <input type="number" id="mobileInputW" value="46" step="0.1" min="1">
-                <label>H</label>
-                <input type="number" id="mobileInputH" value="88.5" step="0.1" min="1">
+                <label for="mobileInputL">L</label>
+                <input type="number" id="mobileInputL" value="62" step="0.1" min="0.1" max="999" aria-label="אורך">
+                <label for="mobileInputW">W</label>
+                <input type="number" id="mobileInputW" value="46" step="0.1" min="0.1" max="999" aria-label="רוחב">
+                <label for="mobileInputH">H</label>
+                <input type="number" id="mobileInputH" value="88.5" step="0.1" min="0.1" max="999" aria-label="גובה">
             </div>
             
             <div class="action-buttons">
                 <button class="btn-update-mobile" id="mobileUpdateBtn">🔄 עדכן פריסה</button>
-                <button class="btn-pdf-mobile" id="mobilePdfBtn">📄 הורד PDF</button>
+                <button class="btn-pdf-mobile" id="mobilePdfBtn">📄 PDF</button>
+                <button class="btn-svg-mobile" id="mobileSvgBtn">🎨 SVG</button>
+                <button class="btn-eps-mobile" id="mobileEpsBtn">✨ EPS</button>
+                <button class="btn-ai-mobile" id="mobileAiBtn">⭐ AI</button>
+                <button class="btn-dxf-mobile" id="mobileDxfBtn">📐 DXF</button>
+                <button class="btn-reset-mobile" id="mobileResetBtn">↺ איפוס</button>
             </div>
             
             <div class="toggle-row">
@@ -883,7 +1149,7 @@
             </div>
             
             <div class="note-row">
-                <input type="text" id="mobileNoteInput" placeholder="✏️ הוסף הערה..." maxlength="100">
+                <input type="text" id="mobileNoteInput" placeholder="✏️ הוסף הערה..." maxlength="100" aria-label="הערה">
             </div>
         </div>
     </div>
@@ -893,12 +1159,13 @@
     </div>
 
     <div class="controls">
-        <label>L (אורך)</label>
-        <input type="number" id="inputL" value="62" step="0.1" min="1">
-        <label>W (רוחב)</label>
-        <input type="number" id="inputW" value="46" step="0.1" min="1">
-        <label>H (גובה)</label>
-        <input type="number" id="inputH" value="88.5" step="0.1" min="1">
+        <label for="inputL">L (אורך)</label>
+        <input type="number" id="inputL" value="62" step="0.1" min="0.1" max="999" aria-label="אורך">
+        <label for="inputW">W (רוחב)</label>
+        <input type="number" id="inputW" value="46" step="0.1" min="0.1" max="999" aria-label="רוחב">
+        <label for="inputH">H (גובה)</label>
+        <input type="number" id="inputH" value="88.5" step="0.1" min="0.1" max="999" aria-label="גובה">
+        <button class="btn-reset" onclick="resetDimensions()">↺ איפוס</button>
         <button class="btn-update" onclick="updateNet()">🔄 עדכן פריסה</button>
     </div>
 
@@ -907,20 +1174,22 @@
             <input type="checkbox" id="hideLabels">
             <label for="hideLabels">הסתר כותרות חלקים</label>
         </div>
-        <button class="btn-pdf" onclick="downloadPDF()">הורד PDF</button>
-        <div class="note-wrapper">
-            <label for="noteInput">הערה</label>
-            <input type="text" id="noteInput" placeholder="הוסף הערה לפריסה..." maxlength="100">
-        </div>
+        <button class="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
+        <button class="btn-svg" onclick="downloadSVG()">🎨 SVG</button>
+        <button class="btn-eps" onclick="downloadEPS()">✨ EPS</button>
+        <button class="btn-ai" onclick="downloadAI()">⭐ AI</button>
+        <button class="btn-dxf" onclick="downloadDXF()">📐 DXF</button>
     </div>
 
-    <div class="info-bar" id="infoBar"></div>
+    <div class="note-row"> 
+        <label for="noteInput">✏️ הערה</label>
+        <input type="text" id="noteInput" placeholder="הוסף הערה לפריסה..." maxlength="100" aria-label="הערה">
+    </div>
     
     <div class="net-wrapper" id="netWrapper">
         <div id="netContainer"></div>
     </div>
 
-    <!-- תחתית: זכויות + לוגו - ממורכזים -->
     <div class="footer">
         <span class="copyright">© 2026 כל הזכויות שמורות</span>
         <img src="OG_Blue_Logo2.png" alt="לוגו" class="logo">
@@ -928,40 +1197,77 @@
 
     <script>
         (function() {
-            let L = 62;
-            let W = 46;
-            let H = 88.5;
+            // ===== קבועים =====
             const BASE_SCALE = 3.78;
+            const DEFAULT_L = 62;
+            const DEFAULT_W = 46;
+            const DEFAULT_H = 88.5;
+            const STORAGE_KEY = 'netState';
 
-            const topColor = '#ffe6f0';
-            const wallColor = '#f9f9f9';
-            const bottomColor = '#e6f2ff';
-
+            // ===== מצב =====
             let currentScale = 1;
             let isMobile = window.innerWidth <= 768;
+            let animationFrameId = null;
+            let currentL = DEFAULT_L;
+            let currentW = DEFAULT_W;
+            let currentH = DEFAULT_H;
 
-            function showToast(message) {
+            // ===== פונקציות עזר =====
+            function showToast(message, type = 'info') {
                 const toast = document.getElementById('toast');
-                toast.textContent = message || '✅ הפריסה עודכנה!';
+                toast.textContent = message;
+                toast.className = 'toast ' + type;
                 toast.classList.add('show');
                 clearTimeout(toast._timeout);
                 toast._timeout = setTimeout(() => {
                     toast.classList.remove('show');
-                }, 2500);
+                }, 3000);
             }
 
-            function getDimensions() {
-                L = parseFloat(document.getElementById('inputL').value) || 62;
-                W = parseFloat(document.getElementById('inputW').value) || 46;
-                H = parseFloat(document.getElementById('inputH').value) || 88.5;
+            function validateDimensions(L, W, H) {
+                const errors = [];
+                if (isNaN(L) || L <= 0) errors.push('L חייב להיות מספר חיובי');
+                if (isNaN(W) || W <= 0) errors.push('W חייב להיות מספר חיובי');
+                if (isNaN(H) || H <= 0) errors.push('H חייב להיות מספר חיובי');
+                if (L > 999) errors.push('L לא יכול לעלות על 999');
+                if (W > 999) errors.push('W לא יכול לעלות על 999');
+                if (H > 999) errors.push('H לא יכול לעלות על 999');
+                return errors;
+            }
+
+            function setInputError(input, hasError) {
+                if (hasError) {
+                    input.classList.add('error');
+                    input.setAttribute('aria-invalid', 'true');
+                } else {
+                    input.classList.remove('error');
+                    input.removeAttribute('aria-invalid');
+                }
+            }
+
+            function validateAndHighlight(inputs) {
+                let hasError = false;
+                inputs.forEach(input => {
+                    const val = parseFloat(input.value);
+                    const isValid = !isNaN(val) && val > 0 && val <= 999;
+                    setInputError(input, !isValid);
+                    if (!isValid) hasError = true;
+                });
+                return !hasError;
+            }
+
+            function getDimensionsFromInputs() {
+                const L = parseFloat(document.getElementById('inputL').value);
+                const W = parseFloat(document.getElementById('inputW').value);
+                const H = parseFloat(document.getElementById('inputH').value);
                 return { L, W, H };
             }
 
-            function getMobileDimensions() {
-                const l = parseFloat(document.getElementById('mobileInputL').value) || 62;
-                const w = parseFloat(document.getElementById('mobileInputW').value) || 46;
-                const h = parseFloat(document.getElementById('mobileInputH').value) || 88.5;
-                return { L: l, W: w, H: h };
+            function getDimensionsFromMobile() {
+                const L = parseFloat(document.getElementById('mobileInputL').value);
+                const W = parseFloat(document.getElementById('mobileInputW').value);
+                const H = parseFloat(document.getElementById('mobileInputH').value);
+                return { L, W, H };
             }
 
             function getNote() {
@@ -980,12 +1286,91 @@
                 return document.getElementById('mobileHideLabels').checked;
             }
 
+            function getCombinedNote() {
+                const desktopNote = getNote();
+                const mobileNote = getMobileNote();
+                return desktopNote || mobileNote;
+            }
+
+            function getCombinedHideLabels() {
+                return getHideLabels() || getMobileHideLabels();
+            }
+
+            function syncDesktopToMobile() {
+                const dims = getDimensionsFromInputs();
+                document.getElementById('mobileInputL').value = dims.L || DEFAULT_L;
+                document.getElementById('mobileInputW').value = dims.W || DEFAULT_W;
+                document.getElementById('mobileInputH').value = dims.H || DEFAULT_H;
+                document.getElementById('mobileHideLabels').checked = getHideLabels();
+                document.getElementById('mobileNoteInput').value = getNote();
+            }
+
+            function syncMobileToDesktop() {
+                const dims = getDimensionsFromMobile();
+                document.getElementById('inputL').value = dims.L || DEFAULT_L;
+                document.getElementById('inputW').value = dims.W || DEFAULT_W;
+                document.getElementById('inputH').value = dims.H || DEFAULT_H;
+                document.getElementById('hideLabels').checked = getMobileHideLabels();
+                document.getElementById('noteInput').value = getMobileNote();
+            }
+
+            function saveState(L, W, H, note, hideLabels) {
+                try {
+                    const state = { L, W, H, note, hideLabels, timestamp: Date.now() };
+                    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                } catch (e) {
+                    // ignore
+                }
+            }
+
+            function loadState() {
+                try {
+                    const data = sessionStorage.getItem(STORAGE_KEY);
+                    if (data) {
+                        const state = JSON.parse(data);
+                        if (state.timestamp && (Date.now() - state.timestamp) < 3600000) {
+                            return state;
+                        }
+                    }
+                } catch (e) {
+                    // ignore
+                }
+                return null;
+            }
+
+            function resetDimensions() {
+                document.getElementById('inputL').value = DEFAULT_L;
+                document.getElementById('inputW').value = DEFAULT_W;
+                document.getElementById('inputH').value = DEFAULT_H;
+                document.getElementById('mobileInputL').value = DEFAULT_L;
+                document.getElementById('mobileInputW').value = DEFAULT_W;
+                document.getElementById('mobileInputH').value = DEFAULT_H;
+                document.getElementById('noteInput').value = '';
+                document.getElementById('mobileNoteInput').value = '';
+                document.getElementById('hideLabels').checked = false;
+                document.getElementById('mobileHideLabels').checked = false;
+                
+                document.querySelectorAll('.controls input, .mobile-menu-panel input[type="number"]').forEach(el => {
+                    el.classList.remove('error');
+                    el.removeAttribute('aria-invalid');
+                });
+                
+                buildNet(DEFAULT_L, DEFAULT_W, DEFAULT_H);
+                showToast('↺ אופס לערכי ברירת מחדל', 'info');
+            }
+
+            // ===== פונקציות לבניית הפריסה =====
             function calculateAutoScale() {
                 isMobile = window.innerWidth <= 768;
                 if (!isMobile) {
                     currentScale = 1;
                     return;
                 }
+
+                const dims = getDimensionsFromInputs();
+                const L = dims.L || DEFAULT_L;
+                const W = dims.W || DEFAULT_W;
+                const H = dims.H || DEFAULT_H;
 
                 const totalWidth = W + L + W + L;
                 const maxWidth = window.innerWidth - 40;
@@ -1002,8 +1387,12 @@
                 currentScale = autoScale;
             }
 
-            // פונקציה לבניית הפריסה עם קנה מידה ספציפי
             function buildNetWithScale(L, W, H, scaleFactor) {
+                if (!L || !W || !H || L <= 0 || W <= 0 || H <= 0) {
+                    showToast('⚠️ מידות לא תקינות', 'error');
+                    return;
+                }
+
                 const totalWidth = W + L + W + L;
                 const maxTopHeight = Math.max(L/2, W/2);
                 const totalHeight = maxTopHeight + H + maxTopHeight;
@@ -1019,7 +1408,7 @@
                 container.className = 'net';
                 container.innerHTML = '';
 
-                const hideLabels = getHideLabels() || getMobileHideLabels();
+                const hideLabels = getCombinedHideLabels();
 
                 function createPanel(name, left, top, w, h, color, sub) {
                     const div = document.createElement('div');
@@ -1029,6 +1418,8 @@
                     div.style.width = (w * effectiveScale) + 'px';
                     div.style.height = (h * effectiveScale) + 'px';
                     div.style.background = color;
+                    div.setAttribute('role', 'img');
+                    div.setAttribute('aria-label', `${name}: ${sub} ס"מ`);
                     
                     const fontSize = Math.max(7, Math.min(16, 14 * scaleFactor));
                     const subFontSize = Math.max(6, Math.min(12, 11 * scaleFactor));
@@ -1046,6 +1437,10 @@
                     div.title = `${name}: ${sub} ס"מ`;
                     container.appendChild(div);
                 }
+
+                const topColor = '#ffe6f0';
+                const wallColor = '#f9f9f9';
+                const bottomColor = '#e6f2ff';
 
                 const topData = [
                     { name: 'מכסה עליון', w: W, h: L/2, sub: W + '×' + (L/2).toFixed(1) },
@@ -1087,84 +1482,619 @@
                     x += p.w;
                 });
 
-                window._currentL = L;
-                window._currentW = W;
-                window._currentH = H;
-                window._totalWidth = totalWidth;
-                window._totalHeight = totalHeight;
-                window._totalW = totalW;
-                window._totalH = totalH;
+                // שמירת מצב
+                const note = getCombinedNote();
+                const hideLabelsState = getCombinedHideLabels();
+                saveState(L, W, H, note, hideLabelsState);
+
+                currentL = L;
+                currentW = W;
+                currentH = H;
             }
 
             function buildNet(L, W, H) {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+
+                const errors = validateDimensions(L, W, H);
+                if (errors.length > 0) {
+                    showToast('⚠️ ' + errors.join('; '), 'error');
+                    const desktopInputs = [
+                        document.getElementById('inputL'),
+                        document.getElementById('inputW'),
+                        document.getElementById('inputH')
+                    ];
+                    const mobileInputs = [
+                        document.getElementById('mobileInputL'),
+                        document.getElementById('mobileInputW'),
+                        document.getElementById('mobileInputH')
+                    ];
+                    const allInputs = [...desktopInputs, ...mobileInputs];
+                    allInputs.forEach(input => {
+                        const val = parseFloat(input.value);
+                        const isValid = !isNaN(val) && val > 0 && val <= 999;
+                        setInputError(input, !isValid);
+                    });
+                    return;
+                }
+
+                document.querySelectorAll('.controls input, .mobile-menu-panel input[type="number"]').forEach(el => {
+                    el.classList.remove('error');
+                    el.removeAttribute('aria-invalid');
+                });
+
                 const indicator = document.getElementById('loadingIndicator');
                 indicator.style.display = 'block';
 
+                const container = document.getElementById('netContainer');
+                container.classList.add('fade');
+
                 calculateAutoScale();
 
-                setTimeout(() => {
+                animationFrameId = requestAnimationFrame(() => {
                     buildNetWithScale(L, W, H, currentScale);
-
-                    const totalWidth = W + L + W + L;
-                    const totalHeight = Math.max(L/2, W/2) + H + Math.max(L/2, W/2);
-                    const scalePercent = Math.round(currentScale * 100);
-                    
-                    document.getElementById('infoBar').innerHTML =
-                        '📐 L=' + L + ' ס"מ &nbsp;|&nbsp; W=' + W + ' ס"מ &nbsp;|&nbsp; H=' + H + ' ס"מ &nbsp;|&nbsp; ' +
-                        'פריסה: ' + totalWidth + '×' + totalHeight.toFixed(1) + ' ס"מ &nbsp;|&nbsp; ' +
-                        '🔲 12 חלקים' +
-                        (isMobile ? ' &nbsp;|&nbsp; 📱 מותאם לנייד' : '');
-
+                    setTimeout(() => {
+                        container.classList.remove('fade');
+                    }, 50);
                     indicator.style.display = 'none';
-                    showToast('✅ פריסה עודכנה!');
-                }, 300);
+                    showToast('✅ פריסה עודכנה!', 'success');
+                    animationFrameId = null;
+                });
             }
 
-            function syncFieldsToMobile() {
-                const dims = getDimensions();
-                document.getElementById('mobileInputL').value = dims.L;
-                document.getElementById('mobileInputW').value = dims.W;
-                document.getElementById('mobileInputH').value = dims.H;
-                document.getElementById('mobileHideLabels').checked = getHideLabels();
-                document.getElementById('mobileNoteInput').value = getNote();
-            }
-
-            function syncFieldsToDesktop() {
-                const dims = getMobileDimensions();
-                document.getElementById('inputL').value = dims.L;
-                document.getElementById('inputW').value = dims.W;
-                document.getElementById('inputH').value = dims.H;
-                document.getElementById('hideLabels').checked = getMobileHideLabels();
-                document.getElementById('noteInput').value = getMobileNote();
-            }
-
+            // ===== פונקציות עדכון =====
             window.updateNet = function() {
-                const dims = getDimensions();
-                syncFieldsToMobile();
-                buildNet(dims.L, dims.W, dims.H);
+                const dims = getDimensionsFromInputs();
+                const L = dims.L || DEFAULT_L;
+                const W = dims.W || DEFAULT_W;
+                const H = dims.H || DEFAULT_H;
+                syncDesktopToMobile();
+                buildNet(L, W, H);
             };
 
             window.updateNetMobile = function() {
-                const dims = getMobileDimensions();
-                syncFieldsToDesktop();
-                buildNet(dims.L, dims.W, dims.H);
+                const dims = getDimensionsFromMobile();
+                const L = dims.L || DEFAULT_L;
+                const W = dims.W || DEFAULT_W;
+                const H = dims.H || DEFAULT_H;
+                syncMobileToDesktop();
+                buildNet(L, W, H);
                 closeMobileMenu();
             };
 
-            window.downloadPDF = function() {
-                const dims = getDimensions();
-                const L = dims.L;
-                const W = dims.W;
-                const H = dims.H;
-                const note = getNote() || getMobileNote();
-                const hideLabels = getHideLabels() || getMobileHideLabels();
+            window.resetDimensions = resetDimensions;
+
+            // ===== יצוא SVG (משופר עם שכבות) =====
+            window.downloadSVG = function() {
+                const dims = getDimensionsFromInputs();
+                const L = dims.L || DEFAULT_L;
+                const W = dims.W || DEFAULT_W;
+                const H = dims.H || DEFAULT_H;
+
+                const errors = validateDimensions(L, W, H);
+                if (errors.length > 0) {
+                    showToast('⚠️ ' + errors.join('; '), 'error');
+                    return;
+                }
+
+                const totalWidth = W + L + W + L;
+                const maxTopHeight = Math.max(L/2, W/2);
+                const totalHeight = maxTopHeight + H + maxTopHeight;
+
+                const scale = BASE_SCALE;
+                const svgWidth = totalWidth * scale;
+                const svgHeight = totalHeight * scale;
+
+                const hideLabels = getCombinedHideLabels();
+                const note = getCombinedNote();
+
+                let svgContent = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+                svgContent += `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" `;
+                svgContent += `width="${svgWidth}" height="${svgHeight + 80}" viewBox="0 0 ${svgWidth} ${svgHeight + 80}" `;
+                svgContent += `xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" `;
+                svgContent += `ai:version="27.0" style="background:white;">\n`;
                 
-                // בניית הפריסה מחדש עם קנה מידה מלא (1) ל-PDF
-                // נשמור את הקנה מידה הנוכחי ונחזיר אחר כך
+                // מטא-דאטה
+                svgContent += `<metadata>\n`;
+                svgContent += `  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n`;
+                svgContent += `    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">\n`;
+                svgContent += `      <dc:title>פריסת קרטון ${L}x${W}x${H}</dc:title>\n`;
+                svgContent += `    </rdf:Description>\n`;
+                svgContent += `  </rdf:RDF>\n`;
+                svgContent += `</metadata>\n\n`;
+
+                // CSS
+                svgContent += `<style>\n`;
+                svgContent += `  .panel { stroke: #1f2f3f; stroke-width: 2; rx: 4; }\n`;
+                svgContent += `  .top { fill: #ffe6f0; }\n`;
+                svgContent += `  .wall { fill: #f9f9f9; }\n`;
+                svgContent += `  .bottom { fill: #e6f2ff; }\n`;
+                svgContent += `  .label { font-family: 'Arial', 'Helvetica', sans-serif; font-weight: bold; text-anchor: middle; fill: #111e2c; }\n`;
+                svgContent += `  .sub { font-family: 'Arial', 'Helvetica', sans-serif; text-anchor: middle; fill: #2c4058; }\n`;
+                svgContent += `</style>\n\n`;
+
+                // Layer 1 - שרטוט
+                svgContent += `<g id="Layer_1" ai:layer="true" ai:name="שרטוט">\n`;
+
+                function addPanel(x, y, w, h, cls, label, sub) {
+                    const rx = x * scale;
+                    const ry = y * scale;
+                    const rw = w * scale;
+                    const rh = h * scale;
+                    svgContent += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" class="panel ${cls}" />\n`;
+                    
+                    const fontSize = Math.min(14, rw/10);
+                    const subFontSize = Math.min(11, rw/15);
+                    if (hideLabels) {
+                        svgContent += `<text x="${rx + rw/2}" y="${ry + rh/2 + 5}" class="label" font-size="${fontSize}">${sub}</text>\n`;
+                    } else {
+                        svgContent += `<text x="${rx + rw/2}" y="${ry + rh/2 - 6}" class="label" font-size="${fontSize}">${label}</text>\n`;
+                        svgContent += `<text x="${rx + rw/2}" y="${ry + rh/2 + 14}" class="sub" font-size="${subFontSize}">${sub}</text>\n`;
+                    }
+                }
+
+                let xPos = 0;
+                const topParts = [
+                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` },
+                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` }
+                ];
+                topParts.forEach(p => {
+                    const yPos = maxTopHeight - p.h;
+                    addPanel(xPos, yPos, p.w, p.h, 'top', p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                xPos = 0;
+                const wallParts = [
+                    { w: W, h: H, label: 'דופן 1', sub: `${W}×${H}` },
+                    { w: L, h: H, label: 'דופן 2', sub: `${L}×${H}` },
+                    { w: W, h: H, label: 'דופן 3', sub: `${W}×${H}` },
+                    { w: L, h: H, label: 'דופן 4', sub: `${L}×${H}` }
+                ];
+                wallParts.forEach(p => {
+                    addPanel(xPos, maxTopHeight, p.w, p.h, 'wall', p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                xPos = 0;
+                const bottomParts = [
+                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` },
+                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` }
+                ];
+                bottomParts.forEach(p => {
+                    addPanel(xPos, maxTopHeight + H, p.w, p.h, 'bottom', p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                svgContent += `</g>\n`;
+
+                // Layer 2 - קווי עזר
+                svgContent += `<g id="Layer_2" ai:layer="true" ai:name="קווי עזר" style="display:none;">\n`;
+                svgContent += `  <line x1="0" y1="${maxTopHeight * scale}" x2="${totalWidth * scale}" y2="${maxTopHeight * scale}" stroke="#999" stroke-width="0.5" stroke-dasharray="4,4" />\n`;
+                svgContent += `  <line x1="0" y1="${(maxTopHeight + H) * scale}" x2="${totalWidth * scale}" y2="${(maxTopHeight + H) * scale}" stroke="#999" stroke-width="0.5" stroke-dasharray="4,4" />\n`;
+                svgContent += `</g>\n`;
+
+                // Layer 3 - מידע
+                svgContent += `<g id="Layer_3" ai:layer="true" ai:name="מידע">\n`;
+                svgContent += `<text x="${svgWidth/2}" y="${svgHeight + 30}" class="label" font-size="11" fill="#555">L=${L}cm | W=${W}cm | H=${H}cm</text>\n`;
+                if (note) {
+                    svgContent += `<text x="${svgWidth/2}" y="${svgHeight + 50}" class="label" font-size="11" fill="#1a4972">📝 ${note}</text>\n`;
+                }
+                svgContent += `</g>\n`;
+
+                svgContent += `</svg>`;
+
+                try {
+                    const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `net-${L}x${W}x${H}.svg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('🎨 SVG עם שכבות נוצר בהצלחה!', 'success');
+                } catch (e) {
+                    showToast('❌ שגיאה ביצירת SVG: ' + e.message, 'error');
+                }
+            };
+
+            // ===== 1. EPS - Encapsulated PostScript =====
+            window.downloadEPS = function() {
+                const dims = getDimensionsFromInputs();
+                const L = dims.L || DEFAULT_L;
+                const W = dims.W || DEFAULT_W;
+                const H = dims.H || DEFAULT_H;
+
+                const errors = validateDimensions(L, W, H);
+                if (errors.length > 0) {
+                    showToast('⚠️ ' + errors.join('; '), 'error');
+                    return;
+                }
+
+                const totalWidth = W + L + W + L;
+                const maxTopHeight = Math.max(L/2, W/2);
+                const totalHeight = maxTopHeight + H + maxTopHeight;
+                const scale = BASE_SCALE;
+                const svgW = totalWidth * scale;
+                const svgH = totalHeight * scale;
+                const note = getCombinedNote();
+                const hideLabels = getCombinedHideLabels();
+
+                let eps = `%!PS-Adobe-3.0 EPSF-3.0\n`;
+                eps += `%%BoundingBox: 0 0 ${Math.round(svgW)} ${Math.round(svgH + 80)}\n`;
+                eps += `%%Title: Carton Net ${L}x${W}x${H}\n`;
+                eps += `%%Creator: Carton Layout Generator\n`;
+                eps += `%%CreationDate: ${new Date().toISOString()}\n`;
+                eps += `%%LanguageLevel: 2\n`;
+                eps += `%%EndComments\n\n`;
+                
+                eps += `/cm { 1 index 1 index 3 -1 roll 4 2 roll 5 3 roll } def\n`;
+                eps += `/rect { 4 2 roll moveto 1 index 0 rlineto 0 exch rlineto neg 0 rlineto closepath } def\n`;
+                eps += `/color { setrgbcolor } def\n`;
+                eps += `/setgray { dup dup setrgbcolor } def\n`;
+                eps += `0.8 setgray 1 setlinewidth\n\n`;
+
+                const colors = {
+                    top: [1, 0.9, 0.94],
+                    wall: [0.976, 0.976, 0.976],
+                    bottom: [0.902, 0.949, 1]
+                };
+
+                function addPanel(x, y, w, h, color, label, sub) {
+                    const rx = x * scale;
+                    const ry = (totalHeight - y - h) * scale;
+                    const rw = w * scale;
+                    const rh = h * scale;
+                    
+                    eps += `gsave\n`;
+                    eps += `${color[0]} ${color[1]} ${color[2]} color\n`;
+                    eps += `${rx} ${ry} ${rw} ${rh} rect fill\n`;
+                    eps += `0 setgray 1.5 setlinewidth\n`;
+                    eps += `${rx} ${ry} ${rw} ${rh} rect stroke\n`;
+                    
+                    const fontSize = Math.min(12, rw/12);
+                    const subFontSize = Math.min(10, rw/16);
+                    const centerX = rx + rw/2;
+                    const centerY = ry + rh/2;
+                    
+                    if (!hideLabels) {
+                        eps += `/Helvetica findfont ${fontSize} scalefont setfont\n`;
+                        eps += `${centerX} ${centerY + 4} moveto\n`;
+                        eps += `(${label}) dup stringwidth pop -1 mul 0 rmoveto show\n`;
+                        eps += `/Helvetica findfont ${subFontSize} scalefont setfont\n`;
+                        eps += `${centerX} ${centerY - 12} moveto\n`;
+                        eps += `(${sub}) dup stringwidth pop -1 mul 0 rmoveto show\n`;
+                    } else {
+                        eps += `/Helvetica-Bold findfont ${fontSize + 2} scalefont setfont\n`;
+                        eps += `${centerX} ${centerY + 5} moveto\n`;
+                        eps += `(${sub}) dup stringwidth pop -1 mul 0 rmoveto show\n`;
+                    }
+                    eps += `grestore\n\n`;
+                }
+
+                // Top parts
+                let xPos = 0;
+                const topParts = [
+                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` },
+                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` }
+                ];
+                topParts.forEach(p => {
+                    const yPos = maxTopHeight - p.h;
+                    addPanel(xPos, yPos, p.w, p.h, colors.top, p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                // Wall parts
+                xPos = 0;
+                const wallParts = [
+                    { w: W, h: H, label: 'דופן 1', sub: `${W}×${H}` },
+                    { w: L, h: H, label: 'דופן 2', sub: `${L}×${H}` },
+                    { w: W, h: H, label: 'דופן 3', sub: `${W}×${H}` },
+                    { w: L, h: H, label: 'דופן 4', sub: `${L}×${H}` }
+                ];
+                wallParts.forEach(p => {
+                    addPanel(xPos, 0, p.w, p.h, colors.wall, p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                // Bottom parts
+                xPos = 0;
+                const bottomParts = [
+                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` },
+                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` }
+                ];
+                bottomParts.forEach(p => {
+                    const yPos = -(H + maxTopHeight);
+                    addPanel(xPos, yPos, p.w, p.h, colors.bottom, p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                // Footer
+                eps += `0 setgray /Helvetica findfont 10 scalefont setfont\n`;
+                eps += `${svgW/2} ${svgH + 30} moveto (L=${L}cm | W=${W}cm | H=${H}cm) dup stringwidth pop -1 mul 0 rmoveto show\n`;
+                if (note) {
+                    eps += `${svgW/2} ${svgH + 50} moveto (${note}) dup stringwidth pop -1 mul 0 rmoveto show\n`;
+                }
+                eps += `showpage\n`;
+
+                try {
+                    const blob = new Blob([eps], { type: 'application/postscript;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `net-${L}x${W}x${H}.eps`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('✨ EPS נוצר בהצלחה! (נפתח באילוסטרייטור)', 'success');
+                } catch (e) {
+                    showToast('❌ שגיאה ביצירת EPS: ' + e.message, 'error');
+                }
+            };
+
+            // ===== 2. AI - Adobe Illustrator =====
+            window.downloadAI = function() {
+                const dims = getDimensionsFromInputs();
+                const L = dims.L || DEFAULT_L;
+                const W = dims.W || DEFAULT_W;
+                const H = dims.H || DEFAULT_H;
+
+                const errors = validateDimensions(L, W, H);
+                if (errors.length > 0) {
+                    showToast('⚠️ ' + errors.join('; '), 'error');
+                    return;
+                }
+
+                const totalWidth = W + L + W + L;
+                const maxTopHeight = Math.max(L/2, W/2);
+                const totalHeight = maxTopHeight + H + maxTopHeight;
+                const scale = BASE_SCALE;
+                const svgW = totalWidth * scale;
+                const svgH = totalHeight * scale;
+                const note = getCombinedNote();
+                const hideLabels = getCombinedHideLabels();
+
+                let svg = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+                svg += `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n`;
+                svg += `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" `;
+                svg += `width="${svgW}" height="${svgH + 80}" viewBox="0 0 ${svgW} ${svgH + 80}" `;
+                svg += `xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" `;
+                svg += `ai:version="27.0" style="background:white;">\n`;
+                
+                svg += `<metadata>\n`;
+                svg += `  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n`;
+                svg += `    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">\n`;
+                svg += `      <dc:title>פריסת קרטון ${L}x${W}x${H}</dc:title>\n`;
+                svg += `      <dc:creator>Carton Layout Generator</dc:creator>\n`;
+                svg += `    </rdf:Description>\n`;
+                svg += `  </rdf:RDF>\n`;
+                svg += `</metadata>\n\n`;
+
+                svg += `<style>\n`;
+                svg += `  .panel { stroke: #1f2f3f; stroke-width: 2; rx: 4; }\n`;
+                svg += `  .top { fill: #ffe6f0; }\n`;
+                svg += `  .wall { fill: #f9f9f9; }\n`;
+                svg += `  .bottom { fill: #e6f2ff; }\n`;
+                svg += `  .label { font-family: 'Arial', 'Helvetica', sans-serif; font-weight: bold; text-anchor: middle; fill: #111e2c; }\n`;
+                svg += `  .sub { font-family: 'Arial', 'Helvetica', sans-serif; text-anchor: middle; fill: #2c4058; }\n`;
+                svg += `</style>\n\n`;
+
+                // Layer 1 - Main Drawing
+                svg += `<g id="Layer_1" ai:layer="true" ai:name="שרטוט">\n`;
+
+                function addPanel(x, y, w, h, cls, label, sub) {
+                    const rx = x * scale;
+                    const ry = y * scale;
+                    const rw = w * scale;
+                    const rh = h * scale;
+                    svg += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" class="panel ${cls}" />\n`;
+                    
+                    const fontSize = Math.min(14, rw/10);
+                    const subFontSize = Math.min(11, rw/15);
+                    if (hideLabels) {
+                        svg += `<text x="${rx + rw/2}" y="${ry + rh/2 + 5}" class="label" font-size="${fontSize}">${sub}</text>\n`;
+                    } else {
+                        svg += `<text x="${rx + rw/2}" y="${ry + rh/2 - 6}" class="label" font-size="${fontSize}">${label}</text>\n`;
+                        svg += `<text x="${rx + rw/2}" y="${ry + rh/2 + 14}" class="sub" font-size="${subFontSize}">${sub}</text>\n`;
+                    }
+                }
+
+                let xPos = 0;
+                const topParts = [
+                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` },
+                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` }
+                ];
+                topParts.forEach(p => {
+                    const yPos = maxTopHeight - p.h;
+                    addPanel(xPos, yPos, p.w, p.h, 'top', p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                xPos = 0;
+                const wallParts = [
+                    { w: W, h: H, label: 'דופן 1', sub: `${W}×${H}` },
+                    { w: L, h: H, label: 'דופן 2', sub: `${L}×${H}` },
+                    { w: W, h: H, label: 'דופן 3', sub: `${W}×${H}` },
+                    { w: L, h: H, label: 'דופן 4', sub: `${L}×${H}` }
+                ];
+                wallParts.forEach(p => {
+                    addPanel(xPos, maxTopHeight, p.w, p.h, 'wall', p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                xPos = 0;
+                const bottomParts = [
+                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` },
+                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
+                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` }
+                ];
+                bottomParts.forEach(p => {
+                    addPanel(xPos, maxTopHeight + H, p.w, p.h, 'bottom', p.label, p.sub);
+                    xPos += p.w;
+                });
+
+                svg += `</g>\n`;
+
+                // Layer 2 - Guides
+                svg += `<g id="Layer_2" ai:layer="true" ai:name="קווי עזר" style="display:none;">\n`;
+                svg += `  <line x1="0" y1="${maxTopHeight * scale}" x2="${totalWidth * scale}" y2="${maxTopHeight * scale}" stroke="#999" stroke-width="0.5" stroke-dasharray="4,4" />\n`;
+                svg += `  <line x1="0" y1="${(maxTopHeight + H) * scale}" x2="${totalWidth * scale}" y2="${(maxTopHeight + H) * scale}" stroke="#999" stroke-width="0.5" stroke-dasharray="4,4" />\n`;
+                svg += `</g>\n`;
+
+                // Layer 3 - Info
+                svg += `<g id="Layer_3" ai:layer="true" ai:name="מידע">\n`;
+                svg += `<text x="${svgW/2}" y="${svgH + 30}" class="label" font-size="11" fill="#555">L=${L}cm | W=${W}cm | H=${H}cm</text>\n`;
+                if (note) {
+                    svg += `<text x="${svgW/2}" y="${svgH + 50}" class="label" font-size="11" fill="#1a4972">📝 ${note}</text>\n`;
+                }
+                svg += `</g>\n`;
+
+                svg += `</svg>`;
+
+                try {
+                    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `net-${L}x${W}x${H}.ai`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('⭐ AI נוצר בהצלחה! (נפתח באילוסטרייטור)', 'success');
+                } catch (e) {
+                    showToast('❌ שגיאה ביצירת AI: ' + e.message, 'error');
+                }
+            };
+
+            // ===== 3. DXF - AutoCAD Drawing Exchange =====
+            window.downloadDXF = function() {
+                const dims = getDimensionsFromInputs();
+                const L = dims.L || DEFAULT_L;
+                const W = dims.W || DEFAULT_W;
+                const H = dims.H || DEFAULT_H;
+
+                const errors = validateDimensions(L, W, H);
+                if (errors.length > 0) {
+                    showToast('⚠️ ' + errors.join('; '), 'error');
+                    return;
+                }
+
+                const totalWidth = W + L + W + L;
+                const maxTopHeight = Math.max(L/2, W/2);
+                const totalHeight = maxTopHeight + H + maxTopHeight;
+                const scale = BASE_SCALE;
+
+                let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
+                dxf += `0\nSECTION\n2\nENTITIES\n`;
+
+                function addDXFRect(x, y, w, h) {
+                    const rx = x * scale;
+                    const ry = y * scale;
+                    const rw = w * scale;
+                    const rh = h * scale;
+                    
+                    dxf += `0\nLWPOLYLINE\n8\n0\n90\n4\n70\n0\n43\n0.0\n`;
+                    dxf += `10\n${rx}\n20\n${ry}\n`;
+                    dxf += `10\n${rx + rw}\n20\n${ry}\n`;
+                    dxf += `10\n${rx + rw}\n20\n${ry + rh}\n`;
+                    dxf += `10\n${rx}\n20\n${ry + rh}\n`;
+                    dxf += `0\nSEQEND\n`;
+                }
+
+                // Top parts
+                let xPos = 0;
+                const topParts = [
+                    { w: W, h: L/2 },
+                    { w: L, h: W/2 },
+                    { w: W, h: L/2 },
+                    { w: L, h: W/2 }
+                ];
+                topParts.forEach(p => {
+                    const yPos = maxTopHeight - p.h;
+                    addDXFRect(xPos, yPos, p.w, p.h);
+                    xPos += p.w;
+                });
+
+                // Wall parts
+                xPos = 0;
+                const wallParts = [
+                    { w: W, h: H },
+                    { w: L, h: H },
+                    { w: W, h: H },
+                    { w: L, h: H }
+                ];
+                wallParts.forEach(p => {
+                    addDXFRect(xPos, maxTopHeight, p.w, p.h);
+                    xPos += p.w;
+                });
+
+                // Bottom parts
+                xPos = 0;
+                const bottomParts = [
+                    { w: W, h: L/2 },
+                    { w: L, h: W/2 },
+                    { w: W, h: L/2 },
+                    { w: L, h: W/2 }
+                ];
+                bottomParts.forEach(p => {
+                    addDXFRect(xPos, maxTopHeight + H, p.w, p.h);
+                    xPos += p.w;
+                });
+
+                dxf += `0\nENDSEC\n0\nEOF\n`;
+
+                try {
+                    const blob = new Blob([dxf], { type: 'application/dxf;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `net-${L}x${W}x${H}.dxf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast('📐 DXF נוצר בהצלחה! (נפתח באילוסטרייטור/AutoCAD)', 'success');
+                } catch (e) {
+                    showToast('❌ שגיאה ביצירת DXF: ' + e.message, 'error');
+                }
+            };
+
+            // ===== PDF =====
+            window.downloadPDF = function() {
+                const dims = getDimensionsFromInputs();
+                const L = dims.L || DEFAULT_L;
+                const W = dims.W || DEFAULT_W;
+                const H = dims.H || DEFAULT_H;
+
+                const errors = validateDimensions(L, W, H);
+                if (errors.length > 0) {
+                    showToast('⚠️ ' + errors.join('; '), 'error');
+                    return;
+                }
+
+                const note = getCombinedNote();
+                const hideLabels = getCombinedHideLabels();
+                
                 const originalScale = currentScale;
                 currentScale = 1;
                 
-                // בונים את הפריסה עם קנה מידה 100%
                 buildNetWithScale(L, W, H, 1);
                 
                 const totalWidth = W + L + W + L;
@@ -1175,135 +2105,142 @@
                 const container = document.getElementById('netContainer');
                 const originalHTML = container.innerHTML;
 
-                // מחזירים את הקנה מידה המקורי
                 currentScale = originalScale;
                 
-                // בונים מחדש את הפריסה עם הקנה מידה המקורי
                 setTimeout(() => {
                     buildNetWithScale(L, W, H, originalScale);
                 }, 100);
 
-                showToast('📄 מוריד PDF...');
+                showToast('📄 מוריד PDF...', 'info');
 
-                const printWindow = window.open('', '_blank', 'width=1200,height=800');
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                      <meta charset="UTF-8">
-                      <title>פריסת קרטון - ${L}×${W}×${H}</title>
-                      <style>
-                        * { margin: 0; padding: 0; box-sizing: border-box; }
-                        @page { size: A4 landscape; margin: 0.5cm; }
-                        body {
-                          background: white;
-                          display: flex;
-                          flex-direction: column;
-                          justify-content: center;
-                          align-items: center;
-                          min-height: 100vh;
-                          font-family: 'Segoe UI', Arial, sans-serif;
-                          padding: 10px;
-                        }
-                        .net {
-                          position: relative;
-                          width: ${totalW}px;
-                          height: ${totalH}px;
-                          border: none;
-                          background: white;
-                        }
-                        .panel {
-                          position: absolute;
-                          border: 2px solid black;
-                          background: white;
-                          display: flex;
-                          justify-content: center;
-                          align-items: center;
-                          font-size: 13px;
-                          font-weight: bold;
-                          text-align: center;
-                          flex-direction: column;
-                        }
-                        .dim-label {
-                          font-size: 14px;
-                          font-weight: bold;
-                        }
-                        .dim-sub {
-                          font-size: 11px;
-                          font-weight: normal;
-                          color: #333;
-                        }
-                        .footer {
-                          position: fixed;
-                          bottom: 15px;
-                          left: 0;
-                          right: 0;
-                          text-align: center;
-                          font-size: 13px;
-                          color: #555;
-                          font-family: 'Segoe UI', Arial, sans-serif;
-                          padding: 8px 20px;
-                          background: rgba(255,255,255,0.9);
-                          border-top: 1px solid #ddd;
-                          direction: rtl;
-                          display: flex;
-                          flex-direction: column;
-                          align-items: flex-end;
-                        }
-                        .footer .dimensions {
-                          direction: rtl;
-                          text-align: right;
-                          padding-left: 20px;
-                          width: 100%;
-                        }
-                        .footer .note {
-                          color: #1a4972;
-                          font-weight: 600;
-                          margin-top: 3px;
-                          font-size: 12px;
-                          text-align: right;
-                          direction: rtl;
-                          width: 100%;
-                        }
-                        @media print {
-                          .net { border: none; }
-                          .panel { border: 2px solid black; }
-                          .footer { 
-                            border-top: 1px solid #999;
-                            background: white;
-                          }
-                          .footer .note { color: #1a4972; }
-                        }
-                      </style>
-                    </head>
-                    <body>
-                      <div class="net">
-                        ${originalHTML}
-                      </div>
-                      <div class="footer">
-                        <div class="dimensions">מידות: L=${L} ס"מ | W=${W} ס"מ | H=${H} ס"מ &nbsp;·&nbsp; ${totalWidth}×${totalHeight.toFixed(1)} ס"מ</div>
-                        ${note ? `<div class="note">📝 ${note}</div>` : ''}
-                      </div>
-                      <script>
-                        window.onload = function() {
-                          window.print();
-                        };
-                      <\/script>
-                    </body>
-                    </html>
-                `);
-                printWindow.document.close();
-                
-                setTimeout(() => {
-                    showToast('✅ PDF נוצר בהצלחה!');
-                }, 1000);
+                try {
+                    const printWindow = window.open('', '_blank', 'width=1200,height=800');
+                    if (!printWindow) {
+                        showToast('❌ נא לאפשר חלונות קופצים', 'error');
+                        return;
+                    }
+                    
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                          <meta charset="UTF-8">
+                          <title>פריסת קרטון - ${L}×${W}×${H}</title>
+                          <style>
+                            * { margin: 0; padding: 0; box-sizing: border-box; }
+                            @page { size: A4 landscape; margin: 0.5cm; }
+                            body {
+                              background: white;
+                              display: flex;
+                              flex-direction: column;
+                              justify-content: center;
+                              align-items: center;
+                              min-height: 100vh;
+                              font-family: 'Segoe UI', Arial, sans-serif;
+                              padding: 10px;
+                            }
+                            .net {
+                              position: relative;
+                              width: ${totalW}px;
+                              height: ${totalH}px;
+                              border: none;
+                              background: white;
+                            }
+                            .panel {
+                              position: absolute;
+                              border: 2px solid black;
+                              background: white;
+                              display: flex;
+                              justify-content: center;
+                              align-items: center;
+                              font-size: 13px;
+                              font-weight: bold;
+                              text-align: center;
+                              flex-direction: column;
+                            }
+                            .dim-label {
+                              font-size: 14px;
+                              font-weight: bold;
+                            }
+                            .dim-sub {
+                              font-size: 11px;
+                              font-weight: normal;
+                              color: #333;
+                            }
+                            .footer {
+                              position: fixed;
+                              bottom: 15px;
+                              left: 0;
+                              right: 0;
+                              text-align: center;
+                              font-size: 13px;
+                              color: #555;
+                              font-family: 'Segoe UI', Arial, sans-serif;
+                              padding: 8px 20px;
+                              background: rgba(255,255,255,0.9);
+                              border-top: 1px solid #ddd;
+                              direction: rtl;
+                              display: flex;
+                              flex-direction: column;
+                              align-items: flex-end;
+                            }
+                            .footer .dimensions {
+                              direction: rtl;
+                              text-align: right;
+                              padding-left: 20px;
+                              width: 100%;
+                            }
+                            .footer .note {
+                              color: #1a4972;
+                              font-weight: 600;
+                              margin-top: 3px;
+                              font-size: 12px;
+                              text-align: right;
+                              direction: rtl;
+                              width: 100%;
+                            }
+                            @media print {
+                              .net { border: none; }
+                              .panel { border: 2px solid black; }
+                              .footer { 
+                                border-top: 1px solid #999;
+                                background: white;
+                              }
+                              .footer .note { color: #1a4972; }
+                            }
+                          </style>
+                        </head>
+                        <body>
+                          <div class="net">
+                            ${originalHTML}
+                          </div>
+                          <div class="footer">
+                            <div class="dimensions">L=${L} ס"מ | W=${W} ס"מ | H=${H} ס"מ</div>
+                            ${note ? `<div class="note">📝 ${note}</div>` : ''}
+                          </div>
+                          <script>
+                            window.onload = function() {
+                              window.print();
+                            };
+                          <\/script>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    
+                    setTimeout(() => {
+                        showToast('✅ PDF נוצר בהצלחה!', 'success');
+                    }, 1000);
+                } catch (e) {
+                    showToast('❌ שגיאה ביצירת PDF: ' + e.message, 'error');
+                }
             };
 
             // ===== תפריט נייד =====
             function openMobileMenu() {
                 document.getElementById('mobileMenuPanel').classList.add('open');
                 document.getElementById('mobileOverlay').classList.add('open');
-                syncFieldsToMobile();
+                syncDesktopToMobile();
             }
 
             function closeMobileMenu() {
@@ -1311,98 +2248,193 @@
                 document.getElementById('mobileOverlay').classList.remove('open');
             }
 
-            function toggleMobileMenu() {
+            window.toggleMobileMenu = function() {
                 if (document.getElementById('mobileMenuPanel').classList.contains('open')) {
                     closeMobileMenu();
                 } else {
                     openMobileMenu();
                 }
-            }
+            };
 
             // ===== אירועים =====
-            document.getElementById('mobileMenuToggle').addEventListener('click', toggleMobileMenu);
+            document.getElementById('mobileMenuToggle').addEventListener('click', window.toggleMobileMenu);
             document.getElementById('mobileMenuClose').addEventListener('click', closeMobileMenu);
             document.getElementById('mobileOverlay').addEventListener('click', closeMobileMenu);
 
-            document.getElementById('mobileUpdateBtn').addEventListener('click', window.updateNetMobile);
-            document.getElementById('mobilePdfBtn').addEventListener('click', function() {
-                closeMobileMenu();
-                const dims = getMobileDimensions();
-                document.getElementById('inputL').value = dims.L;
-                document.getElementById('inputW').value = dims.W;
-                document.getElementById('inputH').value = dims.H;
-                document.getElementById('hideLabels').checked = getMobileHideLabels();
-                document.getElementById('noteInput').value = getMobileNote();
-                buildNet(dims.L, dims.W, dims.H);
-                setTimeout(window.downloadPDF, 400);
+            document.querySelectorAll('.controls input[type="number"]').forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const dims = getDimensionsFromInputs();
+                        if (validateAndHighlight([
+                            document.getElementById('inputL'),
+                            document.getElementById('inputW'),
+                            document.getElementById('inputH')
+                        ])) {
+                            updateNet();
+                        }
+                    }
+                });
             });
 
-            // סנכרון שדות
-            document.getElementById('inputL').addEventListener('change', syncFieldsToMobile);
-            document.getElementById('inputW').addEventListener('change', syncFieldsToMobile);
-            document.getElementById('inputH').addEventListener('change', syncFieldsToMobile);
+            document.querySelectorAll('#mobileInputL, #mobileInputW, #mobileInputH, #mobileNoteInput').forEach(input => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const dims = getDimensionsFromMobile();
+                        if (validateAndHighlight([
+                            document.getElementById('mobileInputL'),
+                            document.getElementById('mobileInputW'),
+                            document.getElementById('mobileInputH')
+                        ])) {
+                            window.updateNetMobile();
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('inputL').addEventListener('change', syncDesktopToMobile);
+            document.getElementById('inputW').addEventListener('change', syncDesktopToMobile);
+            document.getElementById('inputH').addEventListener('change', syncDesktopToMobile);
+
             document.getElementById('hideLabels').addEventListener('change', function() {
                 document.getElementById('mobileHideLabels').checked = this.checked;
-                const dims = getDimensions();
-                buildNet(dims.L, dims.W, dims.H);
+                const dims = getDimensionsFromInputs();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
             });
+
             document.getElementById('noteInput').addEventListener('input', function() {
                 document.getElementById('mobileNoteInput').value = this.value;
+                const dims = getDimensionsFromInputs();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
             });
 
             document.getElementById('mobileHideLabels').addEventListener('change', function() {
                 document.getElementById('hideLabels').checked = this.checked;
-                const dims = getMobileDimensions();
-                buildNet(dims.L, dims.W, dims.H);
+                const dims = getDimensionsFromMobile();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
             });
+
             document.getElementById('mobileNoteInput').addEventListener('input', function() {
                 document.getElementById('noteInput').value = this.value;
+                const dims = getDimensionsFromMobile();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
             });
 
-            // Enter
-            document.querySelectorAll('#mobileInputL, #mobileInputW, #mobileInputH, #mobileNoteInput').forEach(input => {
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        window.updateNetMobile();
-                    }
+            document.getElementById('mobileUpdateBtn').addEventListener('click', window.updateNetMobile);
+            
+            document.getElementById('mobilePdfBtn').addEventListener('click', function() {
+                closeMobileMenu();
+                const dims = getDimensionsFromMobile();
+                document.getElementById('inputL').value = dims.L || DEFAULT_L;
+                document.getElementById('inputW').value = dims.W || DEFAULT_W;
+                document.getElementById('inputH').value = dims.H || DEFAULT_H;
+                document.getElementById('hideLabels').checked = getMobileHideLabels();
+                document.getElementById('noteInput').value = getMobileNote();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
+                setTimeout(window.downloadPDF, 400);
+            });
+
+            document.getElementById('mobileSvgBtn').addEventListener('click', function() {
+                closeMobileMenu();
+                const dims = getDimensionsFromMobile();
+                document.getElementById('inputL').value = dims.L || DEFAULT_L;
+                document.getElementById('inputW').value = dims.W || DEFAULT_W;
+                document.getElementById('inputH').value = dims.H || DEFAULT_H;
+                document.getElementById('hideLabels').checked = getMobileHideLabels();
+                document.getElementById('noteInput').value = getMobileNote();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
+                setTimeout(window.downloadSVG, 400);
+            });
+
+            document.getElementById('mobileEpsBtn').addEventListener('click', function() {
+                closeMobileMenu();
+                const dims = getDimensionsFromMobile();
+                document.getElementById('inputL').value = dims.L || DEFAULT_L;
+                document.getElementById('inputW').value = dims.W || DEFAULT_W;
+                document.getElementById('inputH').value = dims.H || DEFAULT_H;
+                document.getElementById('hideLabels').checked = getMobileHideLabels();
+                document.getElementById('noteInput').value = getMobileNote();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
+                setTimeout(window.downloadEPS, 400);
+            });
+
+            document.getElementById('mobileAiBtn').addEventListener('click', function() {
+                closeMobileMenu();
+                const dims = getDimensionsFromMobile();
+                document.getElementById('inputL').value = dims.L || DEFAULT_L;
+                document.getElementById('inputW').value = dims.W || DEFAULT_W;
+                document.getElementById('inputH').value = dims.H || DEFAULT_H;
+                document.getElementById('hideLabels').checked = getMobileHideLabels();
+                document.getElementById('noteInput').value = getMobileNote();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
+                setTimeout(window.downloadAI, 400);
+            });
+
+            document.getElementById('mobileDxfBtn').addEventListener('click', function() {
+                closeMobileMenu();
+                const dims = getDimensionsFromMobile();
+                document.getElementById('inputL').value = dims.L || DEFAULT_L;
+                document.getElementById('inputW').value = dims.W || DEFAULT_W;
+                document.getElementById('inputH').value = dims.H || DEFAULT_H;
+                document.getElementById('hideLabels').checked = getMobileHideLabels();
+                document.getElementById('noteInput').value = getMobileNote();
+                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
+                setTimeout(window.downloadDXF, 400);
+            });
+
+            document.getElementById('mobileResetBtn').addEventListener('click', function() {
+                closeMobileMenu();
+                resetDimensions();
+            });
+
+            document.querySelectorAll('.controls input[type="number"], #mobileInputL, #mobileInputW, #mobileInputH').forEach(input => {
+                input.addEventListener('input', function() {
+                    const val = parseFloat(this.value);
+                    const isValid = !isNaN(val) && val > 0 && val <= 999;
+                    setInputError(this, !isValid);
                 });
             });
 
-            document.querySelectorAll('.controls input').forEach(input => {
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        updateNet();
-                    }
-                });
-            });
-
-            document.getElementById('noteInput').addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    updateNet();
-                }
-            });
-
-            // התאמה לשינוי גודל חלון
             let resizeTimeout;
             window.addEventListener('resize', function() {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
-                    const dims = getDimensions();
-                    buildNet(dims.L, dims.W, dims.H);
+                    const dims = getDimensionsFromInputs();
+                    buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
                 }, 400);
             });
 
             // ===== אתחול =====
-            document.getElementById('inputL').value = L;
-            document.getElementById('inputW').value = W;
-            document.getElementById('inputH').value = H;
-            document.getElementById('mobileInputL').value = L;
-            document.getElementById('mobileInputW').value = W;
-            document.getElementById('mobileInputH').value = H;
+            const savedState = loadState();
+            if (savedState) {
+                document.getElementById('inputL').value = savedState.L;
+                document.getElementById('inputW').value = savedState.W;
+                document.getElementById('inputH').value = savedState.H;
+                document.getElementById('mobileInputL').value = savedState.L;
+                document.getElementById('mobileInputW').value = savedState.W;
+                document.getElementById('mobileInputH').value = savedState.H;
+                if (savedState.note) {
+                    document.getElementById('noteInput').value = savedState.note;
+                    document.getElementById('mobileNoteInput').value = savedState.note;
+                }
+                if (savedState.hideLabels) {
+                    document.getElementById('hideLabels').checked = true;
+                    document.getElementById('mobileHideLabels').checked = true;
+                }
+                buildNet(savedState.L, savedState.W, savedState.H);
+            } else {
+                document.getElementById('inputL').value = DEFAULT_L;
+                document.getElementById('inputW').value = DEFAULT_W;
+                document.getElementById('inputH').value = DEFAULT_H;
+                document.getElementById('mobileInputL').value = DEFAULT_L;
+                document.getElementById('mobileInputW').value = DEFAULT_W;
+                document.getElementById('mobileInputH').value = DEFAULT_H;
+                buildNet(DEFAULT_L, DEFAULT_W, DEFAULT_H);
+            }
 
-            buildNet(L, W, H);
-
-            console.log('✅ מוכן! קנה מידה מותאם אוטומטית לנייד, PDF בקנה מידה מלא.');
+            console.log('✅ מוכן! פורמטים נתמכים: PDF, SVG (עם שכבות), EPS, AI, DXF');
+            console.log('📐 כל הפורמטים נפתחים ב-Adobe Illustrator');
         })();
     </script>
 
