@@ -28,7 +28,7 @@
             border-radius: 28px;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
             padding: 20px 15px 20px;
-            overflow: hidden;
+            overflow: visible;
         }
         h1 {
             font-size: 1.5rem;
@@ -48,6 +48,9 @@
             gap: 12px;
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 15px;
+            overflow: visible;
+            position: relative;
+            z-index: 20;
         }
         .filter-area {
             display: flex;
@@ -105,6 +108,9 @@
             flex-wrap: nowrap;
             justify-content: center;
             align-items: center;
+            overflow: visible;
+            position: relative;
+            z-index: 30;
         }
         .btn {
             padding: 5px 10px;
@@ -190,6 +196,90 @@
             background: #155e75;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
+
+        /* טיפ ריחוף מעוצב */
+        .btn[data-tip] {
+            position: relative;
+        }
+        .btn[data-tip]::after {
+            content: attr(data-tip);
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+            background: #4c1d95;
+            color: #ffffff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            line-height: 1.35;
+            padding: 8px 14px;
+            border-radius: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+            z-index: 100;
+            box-shadow: 0 6px 18px rgba(76, 29, 149, 0.35);
+        }
+        .btn[data-tip]::before {
+            content: '';
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+            border: 6px solid transparent;
+            border-bottom-color: #4c1d95;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+            z-index: 100;
+        }
+        .btn[data-tip]:hover::after,
+        .btn[data-tip]:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        /* כפתורים בקצוות – יישור טיפ כדי שלא ייחתך */
+        .action-buttons .btn:last-child[data-tip]::after {
+            left: auto;
+            right: 0;
+            transform: translateX(0) translateY(-4px);
+        }
+        .action-buttons .btn:last-child[data-tip]::before {
+            left: auto;
+            right: 16px;
+            transform: translateX(0) translateY(-4px);
+        }
+        .action-buttons .btn:last-child[data-tip]:hover::after,
+        .action-buttons .btn:last-child[data-tip]:hover::before {
+            transform: translateX(0) translateY(0);
+        }
+        .action-buttons .btn:first-child[data-tip]::after {
+            left: 0;
+            transform: translateX(0) translateY(-4px);
+        }
+        .action-buttons .btn:first-child[data-tip]::before {
+            left: 16px;
+            transform: translateX(0) translateY(-4px);
+        }
+        .action-buttons .btn:first-child[data-tip]:hover::after,
+        .action-buttons .btn:first-child[data-tip]:hover::before {
+            transform: translateX(0) translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .btn[data-tip]::after {
+                font-size: 0.72rem;
+                padding: 6px 10px;
+                white-space: normal;
+                max-width: 160px;
+                text-align: center;
+            }
+        }
+
         .stats-bar {
             display: flex;
             gap: 12px;
@@ -827,13 +917,13 @@
                 <span class="save-indicator" id="saveIndicator" title="💾 נשמר אוטומטית"></span>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-success" id="addRowBtn">➕ הוסף</button>
-                <button class="btn btn-danger" id="deleteSelectedBtn">🗑️ מחק</button>
-                <button class="btn btn-selected" id="showSelectedBtn">👁️ מסומנים</button>
-                <button class="btn btn-archive" id="archiveBtn">📁 ארכיב</button>
-                <button class="btn btn-sort" id="sortBtn">🔽 מיון</button>
-                <button class="btn btn-excel" id="exportExcelBtn">📊 יצא</button>
-                <button class="btn btn-load" id="loadExcelBtn">📂 יבא</button>
+                <button class="btn btn-success" id="addRowBtn" data-tip="הוסף שורה חדשה">➕ הוסף</button>
+                <button class="btn btn-danger" id="deleteSelectedBtn" data-tip="מחק שורה/ות מסומנות">🗑️ מחק</button>
+                <button class="btn btn-selected" id="showSelectedBtn" data-tip="הצג שורות מסומנות בלבד">👁️ מסומנים</button>
+                <button class="btn btn-archive" id="archiveBtn" data-tip="העבר שורות לטאב הארכיב">📁 ארכיב</button>
+                <button class="btn btn-sort" id="sortBtn" data-tip="מיון לפי סטטוס">🔽 מיון</button>
+                <button class="btn btn-excel" id="exportExcelBtn" data-tip="יצא סטטוסים לקובץ אקסל">📊 יצא</button>
+                <button class="btn btn-load" id="loadExcelBtn" data-tip="יבא סטטוסים מקובץ אקסל">📂 יבא</button>
             </div>
         </div>
 
@@ -855,7 +945,6 @@
             <span>❌ חוסר: <strong class="stat-missing" id="missingCount">0</strong></span>
             <span>🚫 בוטל: <strong class="stat-cancelled" id="cancelledCount">0</strong></span>
             <span>⏳ בהמתנה: <strong id="pendingCount">0</strong></span>
-            <span>📁 ארכיב: <strong id="archiveCount">0</strong></span>
         </div>
 
         <div class="table-wrap">
@@ -1219,7 +1308,7 @@
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
                 const selBtn = document.getElementById('showSelectedBtn');
-                if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
+                if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
 
                 document.getElementById('tabMain').classList.toggle('active', view === 'main');
                 document.getElementById('tabArchive').classList.toggle('active', view === 'archive');
@@ -1229,10 +1318,10 @@
                 if (archBtn) {
                     if (view === 'archive') {
                         archBtn.textContent = '↩️ שחזר';
-                        archBtn.title = 'החזר שורות נבחרות למשלוחים';
+                        archBtn.setAttribute('data-tip', 'החזר שורות נבחרות למשלוחים');
                     } else {
                         archBtn.textContent = '📁 ארכיב';
-                        archBtn.title = 'העבר שורות נבחרות לארכיב';
+                        archBtn.setAttribute('data-tip', 'העבר שורות לטאב הארכיב');
                     }
                 }
 
@@ -1501,8 +1590,6 @@
                 document.getElementById('missingCount').textContent = missing;
                 document.getElementById('cancelledCount').textContent = cancelled;
                 document.getElementById('pendingCount').textContent = pending;
-                const archEl = document.getElementById('archiveCount');
-                if (archEl) archEl.textContent = archiveData.length;
                 const tabMainCount = document.getElementById('tabMainCount');
                 const tabArchiveCount = document.getElementById('tabArchiveCount');
                 if (tabMainCount) tabMainCount.textContent = currentData.length;
@@ -1561,7 +1648,7 @@
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
                 const selBtn = document.getElementById('showSelectedBtn');
-                if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
+                if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
                 renderTable(filterSelect.value);
                 updateStats(getActiveData());
             }
@@ -1572,7 +1659,7 @@
                 if (showSelectedOnly) {
                     showSelectedOnly = false;
                     selectedIdsSnapshot = [];
-                    if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
+                    if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
                     renderTable(filterSelect.value);
                     return;
                 }
@@ -1586,7 +1673,7 @@
                     if (tr && tr.dataset.rowId) selectedIdsSnapshot.push(tr.dataset.rowId);
                 });
                 showSelectedOnly = true;
-                if (selBtn) { selBtn.classList.add('active'); selBtn.textContent = '👁️ הצג הכל'; }
+                if (selBtn) { selBtn.classList.add('active'); selBtn.textContent = '👁️ הצג הכל'; selBtn.setAttribute('data-tip', 'חזור לתצוגה מלאה'); }
                 renderTable(filterSelect.value);
             }
 
@@ -1626,7 +1713,7 @@
                     showSelectedOnly = false;
                     selectedIdsSnapshot = [];
                     const selBtn = document.getElementById('showSelectedBtn');
-                    if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
+                    if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
                     renderTable(filterSelect.value);
                     updateStats(getActiveData());
                     alert('↩️ שוחזרו ' + toRestore.length + ' שורות למשלוחים');
@@ -1660,7 +1747,7 @@
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
                 const selBtn = document.getElementById('showSelectedBtn');
-                if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
+                if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
                 renderTable(filterSelect.value);
                 updateStats(getActiveData());
                 alert('📁 הועברו ' + toArchive.length + ' שורות לארכיב (סה"כ בארכיב: ' + archiveData.length + ')');
@@ -1831,7 +1918,7 @@
                         showSelectedOnly = false;
                         selectedIdsSnapshot = [];
                         const selBtn = document.getElementById('showSelectedBtn');
-                        if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
+                        if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
                         renderTable(filterSelect.value);
                         saveAndUpdate();
                         setTimeout(() => {
