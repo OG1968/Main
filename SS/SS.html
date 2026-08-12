@@ -17,7 +17,8 @@
             margin: 0;
             padding: 10px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
         }
         .container {
@@ -26,7 +27,8 @@
             background: white;
             border-radius: 28px;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-            padding: 20px 15px 25px;
+            padding: 20px 15px 20px;
+            overflow: hidden;
         }
         h1 {
             font-size: 1.5rem;
@@ -229,6 +231,57 @@
             color: #2563eb;
             font-weight: 700;
         }
+        .view-tabs {
+            display: flex;
+            gap: 0;
+            margin: 0 0 12px 0;
+            border-bottom: 2px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        .view-tab {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: 0.2s;
+            border-radius: 8px 8px 0 0;
+            font-family: inherit;
+        }
+        .view-tab:hover {
+            color: #0b1e33;
+            background: #f1f5f9;
+        }
+        .view-tab.active {
+            color: #1e3a5f;
+            border-bottom-color: #1e3a5f;
+            background: #f8fafc;
+        }
+        .view-tab .tab-count {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 0.75rem;
+            padding: 1px 8px;
+            border-radius: 20px;
+            margin-right: 6px;
+            font-weight: 700;
+        }
+        .view-tab.active .tab-count {
+            background: #1e3a5f;
+            color: white;
+        }
+        .view-tab.archive-tab.active {
+            color: #475569;
+            border-bottom-color: #475569;
+        }
+        .view-tab.archive-tab.active .tab-count {
+            background: #475569;
+        }
         .table-wrap {
             overflow-x: auto;
             border-radius: 16px;
@@ -358,24 +411,35 @@
             color: #1e293b;
         }
         .footer-bottom {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #e2e8f0;
+            margin-top: 18px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-top: none;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 16px;
+            background: transparent;
+            width: 100%;
+            max-width: 1550px;
         }
         .footer-bottom .copyright {
-            font-size: 1.2rem;
-            color: #475569;
-            font-weight: 500;
+            font-size: 1rem;
+            color: #0b1e33;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .footer-bottom .logo {
+            display: flex;
+            align-items: center;
         }
         .footer-bottom .logo img {
-            height: 35px;
+            height: 36px;
             width: auto;
+            max-width: 180px;
             display: block;
+            object-fit: contain;
         }
         .counter {
             background: #002555;
@@ -651,9 +715,14 @@
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
+                padding: 10px 6px 6px;
+                gap: 8px;
+            }
+            .footer-bottom .copyright {
+                font-size: 0.85rem;
             }
             .footer-bottom .logo img {
-                height: 20px;
+                height: 24px;
             }
         }
         @media (max-width: 480px) {
@@ -703,7 +772,10 @@
                 font-size: 0.7rem;
             }
             .footer-bottom .logo img {
-                height: 25px;
+                height: 22px;
+            }
+            .footer-bottom .copyright {
+                font-size: 0.75rem;
             }
         }
         @media (pointer: coarse) {
@@ -765,6 +837,15 @@
             </div>
         </div>
 
+        <div class="view-tabs" id="viewTabs">
+            <button type="button" class="view-tab active" id="tabMain" data-view="main">
+                📦 משלוחים <span class="tab-count" id="tabMainCount">0</span>
+            </button>
+            <button type="button" class="view-tab archive-tab" id="tabArchive" data-view="archive">
+                📁 ארכיב <span class="tab-count" id="tabArchiveCount">0</span>
+            </button>
+        </div>
+
         <div class="stats-bar" id="statsBar">
             <span>📊 סה"כ: <strong id="totalCount">0</strong></span>
             <span>✅ הגיע: <strong id="arrivedCount">0</strong></span>
@@ -812,13 +893,13 @@
         <div class="footer-info">
             <span class="counter" id="rowCounter">0 שורות</span>
         </div>
+    </div>
 
-        <!-- תחתית עם זכויות יוצרים ולוגו -->
-        <div class="footer-bottom">
-            <div class="copyright">© 2026 כל הזכויות שמורות</div>
-            <div class="logo">
-                <img src="OG_Blue_Logo2.png" alt="OG Blue Logo">
-            </div>
+    <!-- תחתית עם זכויות יוצרים ולוגו – מחוץ לכרטיס, על הרקע הכחול -->
+    <div class="footer-bottom">
+        <div class="copyright">© 2026 כל הזכויות שמורות</div>
+        <div class="logo">
+            <img src="OG_Blue_Logo2.png" alt="OG Blue Logo">
         </div>
     </div>
 
@@ -1046,6 +1127,8 @@
             let nextId = currentData.length + archiveData.length + 1000;
             let showSelectedOnly = false;
             let selectedIdsSnapshot = [];
+            let currentView = 'main'; // 'main' | 'archive'
+
 
             const tbody = document.getElementById('tableBody');
             const filterSelect = document.getElementById('statusFilter');
@@ -1078,38 +1161,101 @@
             }
 
             function saveAndUpdate() {
-                saveData(currentData);
+                saveActive();
                 updateCounter(document.querySelectorAll('#tableBody tr').length);
             }
 
             function sortData() {
-                currentData.sort((a, b) => {
+                const data = getActiveData();
+                data.sort((a, b) => {
                     const orderA = sortOrder[a.status] || 8;
                     const orderB = sortOrder[b.status] || 8;
                     return orderA - orderB;
                 });
+                if (currentView === 'archive') saveArchive(archiveData);
+                else saveData(currentData);
                 renderTable(filterSelect.value);
-                saveAndUpdate();
+                updateStats(getActiveData());
             }
 
             function moveRow(rowId, direction) {
-                const index = currentData.findIndex(r => (r._id || `row-${currentData.indexOf(r)}`) === rowId);
+                const data = getActiveData();
+                const index = data.findIndex(r => (r._id || ('row-' + data.indexOf(r))) === rowId);
                 if (index === -1) return;
                 const newIndex = direction === 'up' ? index - 1 : index + 1;
-                if (newIndex < 0 || newIndex >= currentData.length) return;
-                const temp = currentData[index];
-                currentData[index] = currentData[newIndex];
-                currentData[newIndex] = temp;
+                if (newIndex < 0 || newIndex >= data.length) return;
+                const temp = data[index];
+                data[index] = data[newIndex];
+                data[newIndex] = temp;
+                if (currentView === 'archive') saveArchive(archiveData);
+                else saveData(currentData);
                 renderTable(filterSelect.value);
-                saveAndUpdate();
+                updateStats(getActiveData());
+            }
+
+            function getActiveData() {
+                return currentView === 'archive' ? archiveData : currentData;
+            }
+
+            function setActiveData(data) {
+                if (currentView === 'archive') {
+                    archiveData = data;
+                    saveArchive(archiveData);
+                } else {
+                    currentData = data;
+                    saveData(currentData);
+                }
+            }
+
+            function findActiveRow(rowId) {
+                const data = getActiveData();
+                return data.find(r => (r._id || ('row-' + data.indexOf(r))) === rowId);
+            }
+
+            function saveActive() {
+                if (currentView === 'archive') {
+                    saveArchive(archiveData);
+                } else {
+                    saveData(currentData);
+                }
+                updateStats(getActiveData());
+            }
+
+            function switchView(view) {
+                currentView = view;
+                showSelectedOnly = false;
+                selectedIdsSnapshot = [];
+                const selBtn = document.getElementById('showSelectedBtn');
+                if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
+
+                document.getElementById('tabMain').classList.toggle('active', view === 'main');
+                document.getElementById('tabArchive').classList.toggle('active', view === 'archive');
+
+                // כפתור ארכיב / שחזור לפי תצוגה
+                const archBtn = document.getElementById('archiveBtn');
+                if (archBtn) {
+                    if (view === 'archive') {
+                        archBtn.textContent = '↩️ שחזר';
+                        archBtn.title = 'החזר שורות נבחרות למשלוחים';
+                    } else {
+                        archBtn.textContent = '📁 ארכיב';
+                        archBtn.title = 'העבר שורות נבחרות לארכיב';
+                    }
+                }
+
+                filterSelect.value = 'all';
+                searchInput.value = '';
+                renderTable('all');
+                updateStats(getActiveData());
             }
 
             function renderTable(filter = 'all') {
                 const searchTerm = searchInput.value.toLowerCase();
+                const sourceData = getActiveData();
 
-                const filtered = currentData.filter((row, idx) => {
+                const filtered = sourceData.filter((row, idx) => {
                     if (showSelectedOnly) {
-                        const id = row._id || ('row-' + currentData.indexOf(row));
+                        const id = row._id || ('row-' + sourceData.indexOf(row));
                         if (!selectedIdsSnapshot.includes(id)) return false;
                     }
 
@@ -1165,8 +1311,7 @@
                     });
                     typeSelect.addEventListener('change', function() {
                         const newVal = this.value;
-                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            tr.dataset.rowId);
+                        const rowData = findActiveRow(tr.dataset.rowId);
                         if (rowData) {
                             rowData.type = newVal;
                             saveAndUpdate();
@@ -1194,8 +1339,7 @@
 
                         td.addEventListener('blur', function(e) {
                             const newVal = this.textContent.trim();
-                            const rowData = currentData.find(r => (r._id ||
-                                `row-${currentData.indexOf(r)}`) === tr.dataset.rowId);
+                            const rowData = findActiveRow(tr.dataset.rowId);
                             if (rowData) {
                                 if (field === 'date') {
                                     const parts = newVal.split('/');
@@ -1254,8 +1398,7 @@
                     });
                     statusSelect.addEventListener('change', function() {
                         const newStatus = this.value;
-                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            tr.dataset.rowId);
+                        const rowData = findActiveRow(tr.dataset.rowId);
                         if (rowData) {
                             rowData.status = newStatus === 'empty' ? '' : newStatus;
                             tr.className = getStatusClass(newStatus);
@@ -1276,8 +1419,7 @@
                     tdNote.setAttribute('data-field', 'note');
                     tdNote.addEventListener('blur', function(e) {
                         const newVal = this.textContent.trim();
-                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            tr.dataset.rowId);
+                        const rowData = findActiveRow(tr.dataset.rowId);
                         if (rowData) {
                             rowData.note = newVal;
                             saveAndUpdate();
@@ -1318,12 +1460,12 @@
                     delBtn.className = 'delete-btn';
                     delBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        const rowData = currentData.find(r => (r._id || `row-${currentData.indexOf(r)}`) ===
-                            tr.dataset.rowId);
+                        const rowData = findActiveRow(tr.dataset.rowId);
                         if (rowData) {
                             if (confirm('למחוק שורה זו?')) {
-                                const index = currentData.indexOf(rowData);
-                                currentData.splice(index, 1);
+                                const data = getActiveData();
+                                const index = data.indexOf(rowData);
+                                if (index !== -1) data.splice(index, 1);
                                 renderTable(filterSelect.value);
                                 saveAndUpdate();
                             }
@@ -1343,7 +1485,9 @@
             }
 
             function updateCounter(count) {
-                rowCounter.textContent = `שורות סה"כ ${currentData.length}`;
+                const n = getActiveData().length;
+                const label = currentView === 'archive' ? 'ארכיב' : 'משלוחים';
+                rowCounter.textContent = label + ': ' + n + ' שורות';
             }
 
             function updateStats(data) {
@@ -1366,9 +1510,17 @@
                 document.getElementById('pendingCount').textContent = pending;
                 const archEl = document.getElementById('archiveCount');
                 if (archEl) archEl.textContent = archiveData.length;
+                const tabMainCount = document.getElementById('tabMainCount');
+                const tabArchiveCount = document.getElementById('tabArchiveCount');
+                if (tabMainCount) tabMainCount.textContent = currentData.length;
+                if (tabArchiveCount) tabArchiveCount.textContent = archiveData.length;
             }
 
             function addNewRow() {
+                if (currentView === 'archive') {
+                    alert('לא ניתן להוסיף שורה בארכיב. עבור לטאב משלוחים.');
+                    return;
+                }
                 const newRow = {
                     _id: `row-${nextId++}`,
                     type: '',
@@ -1395,22 +1547,30 @@
                     alert('לא נבחרו שורות למחיקה');
                     return;
                 }
-                if (!confirm(`למחוק ${checkboxes.length} שורות?`)) return;
+                if (!confirm('למחוק ' + checkboxes.length + ' שורות?')) return;
                 const idsToRemove = [];
                 checkboxes.forEach(cb => {
                     const tr = cb.closest('tr');
                     if (tr) idsToRemove.push(tr.dataset.rowId);
                 });
-                currentData = currentData.filter(r => {
-                    const id = r._id || `row-${currentData.indexOf(r)}`;
+                const data = getActiveData();
+                const filtered = data.filter(r => {
+                    const id = r._id || ('row-' + data.indexOf(r));
                     return !idsToRemove.includes(id);
                 });
+                if (currentView === 'archive') {
+                    archiveData = filtered;
+                    saveArchive(archiveData);
+                } else {
+                    currentData = filtered;
+                    saveData(currentData);
+                }
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
                 const selBtn = document.getElementById('showSelectedBtn');
                 if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
                 renderTable(filterSelect.value);
-                saveAndUpdate();
+                updateStats(getActiveData());
             }
 
             function toggleShowSelected() {
@@ -1440,10 +1600,48 @@
             function moveToArchive() {
                 const checkboxes = document.querySelectorAll('.row-checkbox:checked');
                 if (checkboxes.length === 0) {
-                    alert('לא נבחרו שורות להעברה לארכיב');
+                    alert(currentView === 'archive' ? 'לא נבחרו שורות לשחזור' : 'לא נבחרו שורות להעברה לארכיב');
                     return;
                 }
-                if (!confirm('להעביר ' + checkboxes.length + ' שורות לארכיב?\nהן לא יוצגו כאן, אך יופיעו בטאב "ארכיב" ביצוא לאקסל.')) return;
+
+                if (currentView === 'archive') {
+                    // שחזור מארכיב למשלוחים
+                    if (!confirm('לשחזר ' + checkboxes.length + ' שורות למשלוחים?')) return;
+                    const idsToRestore = [];
+                    checkboxes.forEach(cb => {
+                        const tr = cb.closest('tr');
+                        if (tr) idsToRestore.push(tr.dataset.rowId);
+                    });
+                    const toRestore = [];
+                    archiveData = archiveData.filter(r => {
+                        const id = r._id || ('row-' + archiveData.indexOf(r));
+                        if (idsToRestore.includes(id)) { toRestore.push(r); return false; }
+                        return true;
+                    });
+                    // מניעת כפילות בהזמנות במשלוחים
+                    const existingOrders = new Set(
+                        currentData.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
+                    );
+                    toRestore.forEach(r => {
+                        const k = String(r.order || '').trim();
+                        if (k && k !== 'חדש' && k !== 'x' && existingOrders.has(k)) return;
+                        currentData.push(r);
+                        if (k) existingOrders.add(k);
+                    });
+                    saveArchive(archiveData);
+                    saveData(currentData);
+                    showSelectedOnly = false;
+                    selectedIdsSnapshot = [];
+                    const selBtn = document.getElementById('showSelectedBtn');
+                    if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
+                    renderTable(filterSelect.value);
+                    updateStats(getActiveData());
+                    alert('↩️ שוחזרו ' + toRestore.length + ' שורות למשלוחים');
+                    return;
+                }
+
+                // העברה ממשלוחים לארכיב
+                if (!confirm('להעביר ' + checkboxes.length + ' שורות לארכיב?\nהן לא יוצגו כאן, אך יופיעו בטאב "ארכיב".')) return;
                 const idsToArchive = [];
                 checkboxes.forEach(cb => {
                     const tr = cb.closest('tr');
@@ -1451,11 +1649,10 @@
                 });
                 const toArchive = [];
                 currentData = currentData.filter(r => {
-                    const id = r._id || `row-${currentData.indexOf(r)}`;
+                    const id = r._id || ('row-' + currentData.indexOf(r));
                     if (idsToArchive.includes(id)) { toArchive.push(r); return false; }
                     return true;
                 });
-                // מוסיפים לארכיב רק שורות שעדיין לא שם (לפי מספר הזמנה)
                 const existingOrders = new Set(
                     archiveData.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
                 );
@@ -1466,12 +1663,13 @@
                     if (k) existingOrders.add(k);
                 });
                 saveArchive(archiveData);
+                saveData(currentData);
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
                 const selBtn = document.getElementById('showSelectedBtn');
                 if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; }
                 renderTable(filterSelect.value);
-                saveAndUpdate();
+                updateStats(getActiveData());
                 alert('📁 הועברו ' + toArchive.length + ' שורות לארכיב (סה"כ בארכיב: ' + archiveData.length + ')');
             }
 
@@ -1864,6 +2062,8 @@
             document.getElementById('archiveBtn').addEventListener('click', moveToArchive);
             document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
             document.getElementById('sortBtn').addEventListener('click', sortData);
+            document.getElementById('tabMain').addEventListener('click', function() { switchView('main'); });
+            document.getElementById('tabArchive').addEventListener('click', function() { switchView('archive'); });
             selectAllCheck.addEventListener('change', function() {
                 const checkboxes = document.querySelectorAll('.row-checkbox');
                 checkboxes.forEach(cb => cb.checked = this.checked);
