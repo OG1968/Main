@@ -114,21 +114,16 @@
         box-shadow: var(--shadow);
         animation: dealCard 0.3s ease;
         background: white;
+        position: relative;
+        overflow: hidden;
       }
 
       .card img {
         width: 100%;
+        height: 100%;
         object-fit: contain;
         border-radius: 8px;
-      }
-
-      .total {
-        font-size: clamp(0.9rem, 3.5vw, 1.2rem);
-        margin-top: 0.5rem;
-        padding: 0.3rem 0.8rem;
-        border-radius: 50px;
-        display: inline-block;
-        flex-shrink: 0;
+        display: block;
       }
 
       .bet-controls {
@@ -153,7 +148,7 @@
         padding: 0.6rem 1rem;
         border: none;
         border-radius: 50px;
-        font-size: clamp(0.8rem, 3vw, 1rem);
+        font-size: clamp(0.75rem, 2.8vw, 0.95rem);
         font-weight: bold;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -161,7 +156,7 @@
         letter-spacing: 0.5px;
         box-shadow: var(--shadow);
         flex: 1;
-        max-width: 150px;
+        max-width: 140px;
       }
 
       .bet-btn {
@@ -195,6 +190,11 @@
       .game-btn.disabled {
         background-color: #cccccc;
         cursor: not-allowed;
+      }
+
+      .new-game-btn {
+        background-color: #9b59b6;
+        color: white;
       }
 
       .hit-btn {
@@ -247,13 +247,8 @@
         :root {
           --card-width: 12vw;
         }
-
         .area-title {
           margin-bottom: 0.2rem;
-        }
-
-        .total {
-          margin-top: 0.2rem;
         }
       }
 
@@ -261,9 +256,13 @@
         :root {
           --card-width: 18vw;
         }
-
         .container {
           padding: 0.5rem;
+        }
+        button {
+          max-width: 120px;
+          font-size: 0.7rem;
+          padding: 0.5rem 0.6rem;
         }
       }
     </style>
@@ -278,7 +277,7 @@
       <div class="game-area">
         <div class="dealer-area">
           <div class="area-title">
-            דילר סה"כ: <span id="dealer-total">0</span>
+            דילר סה"כ: <span id="dealer-total">?</span>
           </div>
           <div class="cards-container" id="dealer-cards"></div>
         </div>
@@ -291,25 +290,16 @@
         </div>
 
         <div class="bet-controls" id="bet-controls">
-          <div class="bet-btn" style="background: #e74c3c" data-bet="10">
-            10$
-          </div>
-          <div class="bet-btn" style="background: #3498db" data-bet="25">
-            25$
-          </div>
-          <div class="bet-btn" style="background: #2ecc71" data-bet="50">
-            50$
-          </div>
-          <div class="bet-btn" style="background: #f39c12" data-bet="100">
-            100$
-          </div>
-          <div class="bet-btn" style="background: #9b59b6" data-bet="500">
-            500$
-          </div>
+          <div class="bet-btn" style="background: #e74c3c" data-bet="10">10$</div>
+          <div class="bet-btn" style="background: #3498db" data-bet="25">25$</div>
+          <div class="bet-btn" style="background: #2ecc71" data-bet="50">50$</div>
+          <div class="bet-btn" style="background: #f39c12" data-bet="100">100$</div>
+          <div class="bet-btn" style="background: #9b59b6" data-bet="500">500$</div>
         </div>
 
         <div class="controls">
-          <button class="game-btn" id="game-btn">התחל משחק</button>
+          <button class="new-game-btn" id="new-game-btn">משחק חדש</button>
+          <button class="game-btn" id="game-btn">התחל משחקון</button>
           <button class="hit-btn" id="hit-btn" disabled>קלף</button>
           <button class="stand-btn" id="stand-btn" disabled>עצור</button>
         </div>
@@ -317,16 +307,18 @@
         <div class="message" id="message"></div>
       </div>
     </div>
+
     <script>
       fetch("footer.html")
         .then((response) => response.text())
         .then((data) => {
           document.body.insertAdjacentHTML("beforeend", data);
-        });
+        })
+        .catch(() => {});
     </script>
+
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // אלמנטים במשחק
         const dealerCardsEl = document.getElementById("dealer-cards");
         const playerCardsEl = document.getElementById("player-cards");
         const dealerTotalEl = document.getElementById("dealer-total");
@@ -334,62 +326,41 @@
         const hitBtn = document.getElementById("hit-btn");
         const standBtn = document.getElementById("stand-btn");
         const gameBtn = document.getElementById("game-btn");
+        const newGameBtn = document.getElementById("new-game-btn");
         const messageEl = document.getElementById("message");
         const scoreEl = document.getElementById("score");
         const betControls = document.getElementById("bet-controls");
 
-        // משתני המשחק
         let deck = [];
         let dealerCards = [];
         let playerCards = [];
         let gameOver = true;
         let score = 1000;
         let currentBet = 0;
+        let lastBet = 0; // שומר את ההימור האחרון למשחקון הבא
         let isBetActive = false;
-
-        // פונקציות המשחק
+        let dealerRevealed = false;
+        let holeCardImg = null;
 
         function getCardValue(card) {
-          if (["jack", "queen", "king"].includes(card.value)) {
-            return 10;
-          } else if (card.value === "ace") {
-            return 11;
-          }
+          if (["jack", "queen", "king"].includes(card.value)) return 10;
+          if (card.value === "ace") return 11;
           return parseInt(card.value);
         }
 
         function initDeck() {
           deck = [];
           const suits = ["hearts", "diamonds", "clubs", "spades"];
-          const values = [
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "9",
-            "10",
-            "jack",
-            "queen",
-            "king",
-            "ace",
-          ];
-
+          const values = ["2","3","4","5","6","7","8","9","10","jack","queen","king","ace"];
           for (let suit of suits) {
             for (let value of values) {
               deck.push({
-                suit: suit,
-                value: value,
-                image: `${value}_of_${suit}.png`,
+                suit,
+                value,
+                image: `${value}_of_${suit}.png`
               });
             }
           }
-          shuffleDeck();
-        }
-
-        function shuffleDeck() {
           for (let i = deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -399,7 +370,6 @@
         function calculateHandValue(hand) {
           let value = 0;
           let aces = 0;
-
           for (let card of hand) {
             if (card.value === "ace") {
               aces++;
@@ -410,16 +380,21 @@
               value += parseInt(card.value);
             }
           }
-
           while (value > 21 && aces > 0) {
             value -= 10;
             aces--;
           }
-
           return value;
         }
 
-        function addCardToHand(hand, element, isDealer = false) {
+        function getVisibleDealerValue() {
+          if (dealerRevealed || dealerCards.length === 0) {
+            return calculateHandValue(dealerCards);
+          }
+          return getCardValue(dealerCards[0]);
+        }
+
+        function addCardToHand(hand, element, isHidden = false) {
           const card = deck.pop();
           hand.push(card);
 
@@ -427,11 +402,25 @@
           cardSlot.className = "card-slot";
 
           const cardEl = document.createElement("div");
-          cardEl.className = "card new-card";
+          cardEl.className = "card";
 
           const cardImg = document.createElement("img");
-          cardImg.src = `images/${card.image}`;
-          cardImg.alt = `${card.value} of ${card.suit}`;
+
+          if (isHidden) {
+            cardImg.src = "images/card_back.png";
+            cardImg.alt = "Hidden card";
+            cardImg.dataset.realSrc = `images/${card.image}`;
+            holeCardImg = cardImg;
+          } else {
+            cardImg.src = `images/${card.image}`;
+            cardImg.alt = `${card.value} of ${card.suit}`;
+          }
+
+          cardImg.onerror = function () {
+            this.style.display = "none";
+            cardEl.style.background = "#fff";
+            cardEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:0.85rem;color:#333;font-weight:bold;text-align:center;padding:4px;">${isHidden ? "🂠" : card.value + "<br>" + card.suit[0].toUpperCase()}</div>`;
+          };
 
           cardEl.appendChild(cardImg);
           cardSlot.appendChild(cardEl);
@@ -440,21 +429,124 @@
           return card;
         }
 
-        function updateDisplay() {
-          const dealerValue = calculateHandValue(dealerCards);
-          const playerValue = calculateHandValue(playerCards);
+        function revealHoleCard() {
+          if (holeCardImg && holeCardImg.dataset.realSrc) {
+            holeCardImg.src = holeCardImg.dataset.realSrc;
+            holeCardImg.alt = "Revealed card";
+            delete holeCardImg.dataset.realSrc;
+          }
+          dealerRevealed = true;
+          dealerTotalEl.textContent = calculateHandValue(dealerCards);
+        }
 
+        function updateDisplay() {
+          const playerValue = calculateHandValue(playerCards);
           playerTotalEl.textContent = playerValue;
-          dealerTotalEl.textContent = dealerValue; // תמיד מציג את הערך המלא של הדילר
+          dealerTotalEl.textContent = dealerRevealed
+            ? calculateHandValue(dealerCards)
+            : getVisibleDealerValue();
 
           if (playerValue > 21) {
             endGame("הפסדת! עברת את 21", "lose");
           }
         }
 
+        function updateScore() {
+          scoreEl.textContent = score;
+        }
+
+        function showMessage(msg, type) {
+          messageEl.innerHTML = `<div>${msg}</div><div>ניקוד נוכחי: ${score}</div>`;
+          messageEl.className = `message ${type}`;
+          messageEl.style.display = "block";
+        }
+
+        function hideMessage() {
+          messageEl.style.display = "none";
+        }
+
+        function endGame(msg, type) {
+          if (!isBetActive) return;
+
+          gameOver = true;
+          isBetActive = false;
+
+          revealHoleCard();
+
+          const dealerValue = calculateHandValue(dealerCards);
+          const playerValue = calculateHandValue(playerCards);
+
+          if (!type) {
+            if (playerValue > 21) {
+              type = "lose";
+              msg = "הפסדת! עברת את 21";
+            } else if (dealerValue > 21) {
+              type = "win";
+              msg = "ניצחת! הדילר עבר את 21";
+            } else if (playerValue > dealerValue) {
+              type = "win";
+              msg = "ניצחת! היד שלך טובה יותר";
+            } else if (playerValue < dealerValue) {
+              type = "lose";
+              msg = "הפסדת! היד של הדילר טובה יותר";
+            } else {
+              type = "draw";
+              msg = "תיקו! שתי הידיים שוות";
+            }
+          }
+
+          // עדכון ניקוד
+          if (type === "win") {
+            score += currentBet;
+          } else if (type === "lose") {
+            score -= currentBet;
+          } else if (type === "blackjack") {
+            score += Math.floor(currentBet * 1.5);
+          }
+
+          // שמירת ההימור האחרון למשחקון הבא
+          lastBet = currentBet;
+
+          updateScore();
+
+          messageEl.innerHTML = `
+            <div>${msg}</div>
+            <div>ניקוד נוכחי: ${score}</div>
+          `;
+          messageEl.className = `message ${type}`;
+          messageEl.style.display = "block";
+
+          gameBtn.textContent = "משחקון חדש";
+          gameBtn.classList.remove("disabled");
+          gameBtn.disabled = false;
+          hitBtn.disabled = true;
+          standBtn.disabled = true;
+          betControls.style.display = "flex";
+          newGameBtn.disabled = false;
+        }
+
         function startGame() {
-          if (currentBet <= 0 || currentBet > score) {
-            showMessage("בחר סכום להמרה תקין", "error");
+          // אם אין הימור נוכחי – משתמשים בהימור האחרון (אם קיים)
+          if (currentBet <= 0 && lastBet > 0) {
+            currentBet = lastBet;
+            // מסמנים את כפתור ההימור המתאים
+            document.querySelectorAll(".bet-btn").forEach((b) => {
+              if (parseInt(b.dataset.bet) === currentBet) {
+                b.style.transform = "scale(1.15)";
+                b.style.boxShadow = "0 0 18px rgba(255,255,255,0.8)";
+              } else {
+                b.style.transform = "scale(1)";
+                b.style.boxShadow = "none";
+              }
+            });
+          }
+
+          if (currentBet <= 0) {
+            showMessage("בחר סכום להמרה", "error");
+            return;
+          }
+          if (currentBet > score) {
+            showMessage("אין מספיק כסף בקופה", "error");
             return;
           }
 
@@ -464,182 +556,65 @@
           playerCards = [];
           gameOver = false;
           isBetActive = true;
+          dealerRevealed = false;
+          holeCardImg = null;
           hideMessage();
 
           initDeck();
 
-          // דילר מקבל 2 קלפים
-          const firstCard = addCardToHand(dealerCards, dealerCardsEl, true);
-          const secondCard = addCardToHand(dealerCards, dealerCardsEl, true);
+          // דילר: גלוי + סמוי (card_back.png)
+          addCardToHand(dealerCards, dealerCardsEl, false);
+          addCardToHand(dealerCards, dealerCardsEl, true);
 
-          // שחקן מקבל 2 קלפים
-          addCardToHand(playerCards, playerCardsEl);
-          addCardToHand(playerCards, playerCardsEl);
+          // שחקן
+          addCardToHand(playerCards, playerCardsEl, false);
+          addCardToHand(playerCards, playerCardsEl, false);
 
-          // חישוב ערכים
           const playerValue = calculateHandValue(playerCards);
           const dealerFullValue = calculateHandValue(dealerCards);
 
-          // תצוגה מעודכנת - הדילר מציג את הערך המלא של שני הקלפים
           playerTotalEl.textContent = playerValue;
-          dealerTotalEl.textContent = dealerFullValue;
+          dealerTotalEl.textContent = getVisibleDealerValue();
 
-          // בדיקת בלאק ג'ק
           if (playerValue === 21 && dealerFullValue === 21) {
             endGame("תיקו! לשניכם בלאק ג'ק", "draw");
             return;
-          } else if (playerValue === 21) {
-            const winnings = Math.floor(currentBet * 1.5);
-            score += winnings;
-            updateScore();
-            endGame(`בלאק ג'ק! ניצחת! (+${winnings} נקודות)`, "blackjack");
+          }
+          if (playerValue === 21) {
+            endGame(`בלאק ג'ק! ניצחת! (+${Math.floor(currentBet * 1.5)})`, "blackjack");
             return;
-          } else if (dealerFullValue === 21) {
-            score -= currentBet;
-            updateScore();
+          }
+          if (dealerFullValue === 21) {
             endGame("הדילר קיבל בלאק ג'ק! הפסדת", "lose");
             return;
           }
 
-          updateDisplay();
-          gameBtn.textContent = "משחק בתהליך";
+          gameBtn.textContent = "משחקון בתהליך";
           gameBtn.classList.add("disabled");
           gameBtn.disabled = true;
           hitBtn.disabled = false;
           standBtn.disabled = false;
           betControls.style.display = "none";
+          newGameBtn.disabled = true;
         }
 
-        function endGame(msg, type) {
-          if (!isBetActive) return;
-
-          gameOver = true;
-          isBetActive = false;
-
-          const dealerValue = calculateHandValue(dealerCards);
-          const playerValue = calculateHandValue(playerCards);
-
-          dealerTotalEl.textContent = dealerValue;
-
-          if (!type) {
-            if (playerValue > 21) {
-              type = "lose";
-              score -= currentBet;
-              msg = "הפסדת! עברת את 21";
-            } else if (dealerValue > 21) {
-              type = "win";
-              score += currentBet;
-              msg = "ניצחת! הדילר עבר את 21";
-            } else if (playerValue > dealerValue) {
-              type = "win";
-              score += currentBet;
-              msg = "ניצחת! היד שלך טובה יותר";
-            } else if (playerValue < dealerValue) {
-              type = "lose";
-              score -= currentBet;
-              msg = "הפסדת! היד של הדילר טובה יותר";
-            } else {
-              type = "draw";
-              msg = "תיקו! שתי הידיים שוות";
-            }
-            updateScore();
-          }
-
-          messageEl.innerHTML = `
-                    <div>${msg}</div>
-                    <div>ניקוד נוכחי: ${score}</div>
-                `;
-          messageEl.className = `message ${type}`;
-          messageEl.style.display = "block";
-
-          gameBtn.textContent = "משחק חדש";
-          gameBtn.classList.remove("disabled");
-          gameBtn.disabled = false;
-          hitBtn.disabled = true;
-          standBtn.disabled = true;
-          betControls.style.display = "flex";
-        }
-
-        function showMessage(msg, type) {
-          messageEl.textContent = msg;
-          messageEl.className = `message ${type}`;
-          messageEl.style.display = "block";
-        }
-
-        function hideMessage() {
-          messageEl.style.display = "none";
-        }
-
-        function updateScore() {
-          scoreEl.textContent = score;
-        }
-
-        // אירועי כפתורים
-        gameBtn.addEventListener("click", () => {
-          if (gameOver) {
-            if (isBetActive) {
-              resetGame();
-            } else {
-              startGame();
-            }
-          }
-        });
-
-        hitBtn.addEventListener("click", () => {
-          if (gameOver) return;
-          addCardToHand(playerCards, playerCardsEl);
-          updateDisplay();
-        });
-
-        standBtn.addEventListener("click", () => {
-          if (gameOver) return;
-
-          dealerTotalEl.textContent = calculateHandValue(dealerCards);
-
-          const drawDealerCard = () => {
-            const dealerValue = calculateHandValue(dealerCards);
-
-            if (dealerValue < 17) {
-              addCardToHand(dealerCards, dealerCardsEl, true);
-              dealerTotalEl.textContent = calculateHandValue(dealerCards);
-
-              if (calculateHandValue(dealerCards) > 21) {
-                endGame("הדילר עבר את 21! ניצחת!", "win");
-              } else {
-                setTimeout(drawDealerCard, 1000);
-              }
-            } else {
-              endGame();
-            }
-          };
-
-          drawDealerCard();
-        });
-
-        // אירועי הכפתורים להמרה
-        document.querySelectorAll(".bet-btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            currentBet = parseInt(btn.dataset.bet);
-
-            document.querySelectorAll(".bet-btn").forEach((b) => {
-              b.style.transform = b === btn ? "scale(1.1)" : "scale(1)";
-              b.style.boxShadow =
-                b === btn ? "0 0 15px rgba(255,255,255,0.7)" : "none";
-            });
-          });
-        });
-
-        function resetGame() {
+        // איפוס מלא של המשחק (כולל ניקוד)
+        function fullReset() {
           dealerCardsEl.innerHTML = "";
           playerCardsEl.innerHTML = "";
           dealerCards = [];
           playerCards = [];
           currentBet = 0;
+          lastBet = 0;
+          score = 1000;
           gameOver = true;
           isBetActive = false;
+          dealerRevealed = false;
+          holeCardImg = null;
 
-          dealerTotalEl.textContent = "0";
+          dealerTotalEl.textContent = "?";
           playerTotalEl.textContent = "0";
+          updateScore();
           hideMessage();
 
           document.querySelectorAll(".bet-btn").forEach((b) => {
@@ -647,16 +622,114 @@
             b.style.boxShadow = "none";
           });
 
-          gameBtn.textContent = "התחל משחק";
+          gameBtn.textContent = "התחל משחקון";
           gameBtn.classList.remove("disabled");
           gameBtn.disabled = false;
           hitBtn.disabled = true;
           standBtn.disabled = true;
           betControls.style.display = "flex";
+          newGameBtn.disabled = false;
         }
 
-        // אתחול ראשוני
-        resetGame();
+        // איפוס רק של הידיים (למשחקון חדש באותו הימור)
+        function resetRound() {
+          dealerCardsEl.innerHTML = "";
+          playerCardsEl.innerHTML = "";
+          dealerCards = [];
+          playerCards = [];
+          gameOver = true;
+          isBetActive = false;
+          dealerRevealed = false;
+          holeCardImg = null;
+
+          dealerTotalEl.textContent = "?";
+          playerTotalEl.textContent = "0";
+          hideMessage();
+
+          // שומרים את ההימור הנוכחי / האחרון
+          if (lastBet > 0 && currentBet <= 0) {
+            currentBet = lastBet;
+          }
+
+          gameBtn.textContent = "התחל משחקון";
+          gameBtn.classList.remove("disabled");
+          gameBtn.disabled = false;
+          hitBtn.disabled = true;
+          standBtn.disabled = true;
+          betControls.style.display = "flex";
+          newGameBtn.disabled = false;
+        }
+
+        // ===== אירועים =====
+        gameBtn.addEventListener("click", () => {
+          if (!gameOver) return;
+
+          // אם הכפתור אומר "משחקון חדש" – מתחילים מיד עם אותו הימור
+          if (gameBtn.textContent === "משחקון חדש") {
+            // אם המשתמש בחר הימור אחר בינתיים – משתמשים בו, אחרת ב-lastBet
+            if (currentBet <= 0) {
+              currentBet = lastBet;
+            }
+            startGame();
+          } else {
+            // "התחל משחקון"
+            startGame();
+          }
+        });
+
+        newGameBtn.addEventListener("click", () => {
+          if (!gameOver && isBetActive) return; // לא מאפשרים באמצע משחק
+          fullReset();
+          showMessage("המשחק אופס. ניקוד התחלתי: 1000", "draw");
+        });
+
+        hitBtn.addEventListener("click", () => {
+          if (gameOver || !isBetActive) return;
+          addCardToHand(playerCards, playerCardsEl, false);
+          updateDisplay();
+        });
+
+        standBtn.addEventListener("click", () => {
+          if (gameOver || !isBetActive) return;
+
+          revealHoleCard();
+          hitBtn.disabled = true;
+          standBtn.disabled = true;
+
+          const drawDealer = () => {
+            const val = calculateHandValue(dealerCards);
+            if (val < 17) {
+              addCardToHand(dealerCards, dealerCardsEl, false);
+              dealerTotalEl.textContent = calculateHandValue(dealerCards);
+
+              if (calculateHandValue(dealerCards) > 21) {
+                endGame("הדילר עבר את 21! ניצחת!", "win");
+              } else {
+                setTimeout(drawDealer, 700);
+              }
+            } else {
+              endGame();
+            }
+          };
+
+          setTimeout(drawDealer, 400);
+        });
+
+        document.querySelectorAll(".bet-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (!gameOver) return;
+            currentBet = parseInt(btn.dataset.bet);
+            lastBet = currentBet; // מעדכנים גם את האחרון
+
+            document.querySelectorAll(".bet-btn").forEach((b) => {
+              b.style.transform = b === btn ? "scale(1.15)" : "scale(1)";
+              b.style.boxShadow = b === btn ? "0 0 18px rgba(255,255,255,0.8)" : "none";
+            });
+          });
+        });
+
+        // אתחול
+        fullReset();
       });
     </script>
   </body>
