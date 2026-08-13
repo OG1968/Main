@@ -24,7 +24,7 @@
         --card: #ffe699;
         --panel: #f1f3f5;
         --text: #1a1a1a;
-        --text-muted: #333;
+        --text-muted: #555;
         --border: #d0d0d0;
         --success: #28a745;
         --blue: #0d6efd;
@@ -34,7 +34,7 @@
         --hlookup: #fd7e14;
         --indexmatch: #0d6efd;
         --input-bg: #fff;
-        --hint-bg: #d5c6ff;
+        --hint-bg: #e8ecf0;
         --result-bg: #1a1a1a;
         --result-text: #e2e8f0;
         --result-formula: #ce9178;
@@ -61,12 +61,12 @@
         --card: #1e293b;
         --panel: #334155;
         --text: #f1f5f9;
-        --text-muted: #dfe4eb;
+        --text-muted: #cbd5e1;
         --border: #475569;
         --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
         --primary-light: #2e1065;
         --input-bg: #1e293b;
-        --hint-bg: #004099;
+        --hint-bg: #475569;
         --result-bg: #0f172a;
         --result-text: #e2e8f0;
         --result-formula: #fbbf24;
@@ -141,7 +141,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 30px rgba(120, 96, 255, 0.9);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.9);
         transition:
           background 0.2s,
           border-color 0.2s,
@@ -326,15 +326,80 @@
         line-height: 1;
       }
 
-      .hint {
+      /* Shared tooltip style (field hints + sheet inputs) */
+      .hint,
+      .sheet-tooltip {
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        right: 0;
+        left: auto;
+        max-width: min(340px, 92vw);
+        width: max-content;
         font-size: 0.72rem;
-        color: var(--text-muted);
-        margin-top: 4px;
-        font-weight: 400;
-        background: var(--hint-bg);
-        padding: 3px 10px;
-        border-radius: 20px;
-        display: inline-block;
+        color: var(--text);
+        font-weight: 500;
+        background: var(--card);
+        padding: 6px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+        line-height: 1.4;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-6px);
+        transition:
+          opacity 0.15s ease,
+          visibility 0.15s ease,
+          transform 0.15s ease;
+        white-space: normal;
+        text-align: right;
+        direction: rtl;
+        margin: 0;
+      }
+
+      .hint::after,
+      .sheet-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        right: 16px;
+        border: 6px solid transparent;
+        border-top-color: var(--card);
+        filter: drop-shadow(0 1px 0 var(--border));
+      }
+
+      .form-group:hover > .hint,
+      .form-group:focus-within > .hint {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(-100%);
+      }
+
+      /* בריחוף/פוקוס על שדה הלשונית — רק הטיפ שלו, לא של השורה */
+      .form-group:has(.sheet-wrap:hover) > .hint,
+      .form-group:has(.sheet-wrap:focus-within) > .hint {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-6px);
+      }
+
+      .sheet-wrap:hover > .sheet-tooltip,
+      .sheet-wrap:focus-within > .sheet-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(-100%);
+      }
+
+      .sheet-wrap {
+        position: relative;
+        flex-shrink: 0;
+        width: 145px;
+      }
+
+      .sheet-wrap .sheet-input {
+        width: 100%;
       }
 
       input[type="text"],
@@ -682,8 +747,6 @@
       }
 
       .range-row .sheet-input {
-        width: 145px;
-        flex-shrink: 0;
         font-size: 0.82rem;
         padding: 7px 10px;
       }
@@ -924,9 +987,11 @@
         label {
           font-size: 0.78rem;
         }
-        .hint {
+        .hint,
+        .sheet-tooltip {
           font-size: 0.65rem;
-          padding: 2px 8px;
+          padding: 5px 10px;
+          max-width: min(280px, 90vw);
         }
         input[type="text"],
         input[type="number"],
@@ -957,8 +1022,10 @@
           font-size: 0.65rem;
           padding: 1px 8px;
         }
-        .range-row .sheet-input {
+        .sheet-wrap {
           width: 110px;
+        }
+        .range-row .sheet-input {
           padding: 6px 8px;
           font-size: 0.75rem;
         }
@@ -978,7 +1045,7 @@
         .func-tab .func-desc {
           display: none;
         }
-        .range-row .sheet-input {
+        .sheet-wrap {
           width: 95px;
         }
       }
@@ -1040,9 +1107,11 @@
           font-size: 0.78rem;
           margin-bottom: 2px;
         }
-        .hint {
+        .hint,
+        .sheet-tooltip {
           font-size: 0.65rem;
-          padding: 2px 8px;
+          padding: 5px 10px;
+          max-width: min(280px, 90vw);
         }
         input[type="text"],
         input[type="number"],
@@ -1213,7 +1282,7 @@
         color: var(--text-muted);
         margin-top: 4px;
       }
-    </style>
+      </style>
   </head>
   <body>
     <button
@@ -1377,14 +1446,18 @@
                 aria-describedby="lookupArrayError"
                 aria-required="true"
               />
-              <input
-                type="text"
-                id="sheetNameX"
-                class="sheet-input"
-                placeholder="מלשונית אחרת ?"
-                title="אם טווח החיפוש בלשונית שונה (אופציונלי)"
-                autocomplete="off"
-              />
+              <span class="sheet-wrap">
+                <input
+                  type="text"
+                  id="sheetNameX"
+                  class="sheet-input"
+                  placeholder="מלשונית אחרת ?"
+                  autocomplete="off"
+                />
+                <span class="sheet-tooltip"
+                  >אם טווח החיפוש בלשונית שונה (אופציונלי)</span
+                >
+              </span>
             </div>
             <div class="hint">
               העמודה/השורה שבה מחפשים את הערך ·
@@ -1431,14 +1504,18 @@
                 aria-describedby="returnArrayError"
                 aria-required="true"
               />
-              <input
-                type="text"
-                id="sheetNameXReturn"
-                class="sheet-input"
-                placeholder="מלשונית אחרת ?"
-                title="אם טווח ההחזרה בלשונית שונה (אופציונלי)"
-                autocomplete="off"
-              />
+              <span class="sheet-wrap">
+                <input
+                  type="text"
+                  id="sheetNameXReturn"
+                  class="sheet-input"
+                  placeholder="מלשונית אחרת ?"
+                  autocomplete="off"
+                />
+                <span class="sheet-tooltip"
+                  >אם טווח ההחזרה בלשונית שונה (אופציונלי)</span
+                >
+              </span>
             </div>
             <div class="hint">
               העמודה/השורה שממנה יוחזר הערך (יכול להיות מרובה עמודות)
@@ -1525,14 +1602,18 @@
                 aria-describedby="tableArrayVError"
                 aria-required="true"
               />
-              <input
-                type="text"
-                id="sheetNameV"
-                class="sheet-input"
-                placeholder="לשונית"
-                title="אם טווח החיפוש בלשונית שונה (אופציונלי)"
-                autocomplete="off"
-              />
+              <span class="sheet-wrap">
+                <input
+                  type="text"
+                  id="sheetNameV"
+                  class="sheet-input"
+                  placeholder="מלשונית אחרת ?"
+                  autocomplete="off"
+                />
+                <span class="sheet-tooltip"
+                  >אם טווח החיפוש בלשונית שונה (אופציונלי)</span
+                >
+              </span>
             </div>
             <div class="hint">
               הטווח שבו נמצאים הנתונים. העמודה הראשונה חייבת להכיל את ערכי
@@ -1632,14 +1713,18 @@
                 aria-describedby="tableArrayHError"
                 aria-required="true"
               />
-              <input
-                type="text"
-                id="sheetNameH"
-                class="sheet-input"
-                placeholder="מלשונית אחרת ?"
-                title="אם טווח החיפוש בלשונית שונה (אופציונלי)"
-                autocomplete="off"
-              />
+              <span class="sheet-wrap">
+                <input
+                  type="text"
+                  id="sheetNameH"
+                  class="sheet-input"
+                  placeholder="מלשונית אחרת ?"
+                  autocomplete="off"
+                />
+                <span class="sheet-tooltip"
+                  >אם טווח החיפוש בלשונית שונה (אופציונלי)</span
+                >
+              </span>
             </div>
             <div class="hint">
               הטווח שבו נמצאים הנתונים. השורה הראשונה חייבת להכיל את ערכי החיפוש
@@ -1738,14 +1823,18 @@
                 aria-describedby="returnRangeIMError"
                 aria-required="true"
               />
-              <input
-                type="text"
-                id="sheetNameIM"
-                class="sheet-input"
-                placeholder="לשונית"
-                title="שם הלשונית (אופציונלי)"
-                autocomplete="off"
-              />
+              <span class="sheet-wrap">
+                <input
+                  type="text"
+                  id="sheetNameIM"
+                  class="sheet-input"
+                  placeholder="מלשונית אחרת ?"
+                  autocomplete="off"
+                />
+                <span class="sheet-tooltip"
+                  >אם טווח ההחזרה בלשונית שונה (אופציונלי)</span
+                >
+              </span>
             </div>
             <div class="hint">העמודה/השורה שממנה יוחזר הערך</div>
             <div class="field-error" id="returnRangeIMError" role="alert"></div>
@@ -1788,14 +1877,18 @@
                 aria-describedby="lookupRangeIMError"
                 aria-required="true"
               />
-              <input
-                type="text"
-                id="sheetNameIMLookup"
-                class="sheet-input"
-                placeholder="מלשונית אחרת ?"
-                title="אם טווח החיפוש בלשונית שונה (אופציונלי)"
-                autocomplete="off"
-              />
+              <span class="sheet-wrap">
+                <input
+                  type="text"
+                  id="sheetNameIMLookup"
+                  class="sheet-input"
+                  placeholder="מלשונית אחרת ?"
+                  autocomplete="off"
+                />
+                <span class="sheet-tooltip"
+                  >אם טווח החיפוש בלשונית שונה (אופציונלי)</span
+                >
+              </span>
             </div>
             <div class="hint">העמודה/השורה שבה מחפשים את הערך</div>
             <div class="field-error" id="lookupRangeIMError" role="alert"></div>
@@ -1971,6 +2064,47 @@
           <ul id="explanationList"></ul>
         </div>
 
+        <!-- Live demo -->
+        <div class="live-demo" id="liveDemo">
+          <h3>🔍 דוגמה חיה — איך זה עובד</h3>
+          <div class="live-demo-table-wrap">
+            <table class="live-demo-table" id="liveDemoTable">
+              <thead>
+                <tr>
+                  <th>A (מזהה)</th>
+                  <th>B (שם)</th>
+                  <th>C (מחיר)</th>
+                  <th>D (קטגוריה)</th>
+                </tr>
+              </thead>
+              <tbody id="liveDemoBody">
+                <tr data-id="P001" data-name="עט כחול" data-price="12" data-cat="כתיבה">
+                  <td>P001</td><td>עט כחול</td><td>12</td><td>כתיבה</td>
+                </tr>
+                <tr data-id="P002" data-name="מחברת A4" data-price="25" data-cat="כתיבה">
+                  <td>P002</td><td>מחברת A4</td><td>25</td><td>כתיבה</td>
+                </tr>
+                <tr data-id="P003" data-name="תיק גב" data-price="180" data-cat="תיקים">
+                  <td>P003</td><td>תיק גב</td><td>180</td><td>תיקים</td>
+                </tr>
+                <tr data-id="P004" data-name="מחשבון" data-price="45" data-cat="אלקטרוניקה">
+                  <td>P004</td><td>מחשבון</td><td>45</td><td>אלקטרוניקה</td>
+                </tr>
+                <tr data-id="P005" data-name="עפרון HB" data-price="5" data-cat="כתיבה">
+                  <td>P005</td><td>עפרון HB</td><td>5</td><td>כתיבה</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="live-demo-result" id="liveDemoResult">
+            <span class="result-label">תוצאה לדוגמה:</span>
+            <span class="result-value" id="liveDemoValue">—</span>
+          </div>
+          <div class="live-demo-note">
+            הטבלה לדוגמה בלבד. הערך לחיפוש בדוגמה: <strong id="liveDemoLookupHint">P003</strong>
+          </div>
+        </div>
+
         <div style="margin-top: 8px; display: flex; gap: 6px">
           <button class="btn btn-secondary" id="resetBtn" style="flex: 1">
             איפוס
@@ -2059,12 +2193,7 @@
           if (s.startsWith("=")) return true;
           // Sheet!ref or pure range/cell
           if (s.includes("!")) return true;
-          if (
-            isCellLikeRef(s) ||
-            isCellRefPattern(s) ||
-            isColumnRef(s) ||
-            isRowRef(s)
-          )
+          if (isCellLikeRef(s) || isCellRefPattern(s) || isColumnRef(s) || isRowRef(s))
             return true;
           if (/^[\$A-Za-z0-9:]+$/.test(s) && /[A-Za-z]/.test(s)) return true;
           return false;
@@ -2542,10 +2671,9 @@
 
           if (!isValidRange(v)) {
             // Detect out-of-bounds cell / column / row refs (beyond A1:XFD1048576)
-            const refPart = (v.includes("!") ? v.split("!").pop() : v).replace(
-              /\s/g,
-              "",
-            );
+            const refPart = (
+              v.includes("!") ? v.split("!").pop() : v
+            ).replace(/\s/g, "");
             const parts = normalizeRange(refPart).split(":");
             const hasOutOfBounds = parts.some((p) => {
               if (isCellLikeRef(p) && !isCellRef(p)) return true;
@@ -2561,10 +2689,7 @@
                 "תא לא חוקי (מותר רק A1:XFD1048576). הצעה להוספת מרכאות: ",
                 suggestion,
               );
-            } else if (
-              (v.includes("-") || /[־–—]/.test(v)) &&
-              !v.includes(":")
-            ) {
+            } else if ((v.includes("-") || /[־–—]/.test(v)) && !v.includes(":")) {
               const fix = suggestRangeFix(v);
               if (fix) {
                 setFieldError(
@@ -2846,8 +2971,7 @@
           );
           if (m) return m[1] + m[2] + ":" + m[1] + m[4];
           // Single column already
-          if (/^\$?[A-Za-z]{1,3}(:\$?[A-Za-z]{1,3})?$/i.test(clean))
-            return clean;
+          if (/^\$?[A-Za-z]{1,3}(:\$?[A-Za-z]{1,3})?$/i.test(clean)) return clean;
           return clean;
         }
 
@@ -2996,7 +3120,8 @@
             returnArray = $("returnRangeIM").value.trim();
             lookupArray = $("lookupRangeIM").value.trim();
             sheetReturn = $("sheetNameIM").value.trim();
-            sheetLookup = $("sheetNameIMLookup").value.trim() || sheetReturn;
+            sheetLookup =
+              $("sheetNameIMLookup").value.trim() || sheetReturn;
 
             if (!returnArray || !lookupArray) {
               showToast("נא למלא את טווחי INDEX ו-MATCH תחילה");
@@ -3077,11 +3202,7 @@
           if (currentFunc === "XLOOKUP") {
             // Heuristic from return array letter
             const ret = ($("returnArray").value || "").toUpperCase();
-            if (
-              /\bB\b|:B|B\d/.test(ret) &&
-              !/[C-Z]/.test(ret.replace(/B/g, ""))
-            )
-              returnField = "name";
+            if (/\bB\b|:B|B\d/.test(ret) && !/[C-Z]/.test(ret.replace(/B/g, ""))) returnField = "name";
             else if (/\bC\b|:C|C\d/.test(ret)) returnField = "price";
             else if (/\bD\b|:D|D\d/.test(ret)) returnField = "cat";
             else returnField = "name";
@@ -3105,9 +3226,7 @@
           }
 
           // Sample lookup value: use user's lookup if it matches a sample id, else P003
-          let userLookup = $("lookupValue")
-            .value.trim()
-            .replace(/^["']|["']$/g, "");
+          let userLookup = $("lookupValue").value.trim().replace(/^["']|["']$/g, "");
           // If it's a cell ref like A2, ignore and use sample
           if (isCellRef(userLookup) || looksLikeRefValue(userLookup)) {
             userLookup = "P003";
@@ -3119,9 +3238,7 @@
           // Highlight rows
           qsa("#liveDemoBody tr").forEach((tr) => {
             tr.classList.remove("highlight-row");
-            qsa("td", tr).forEach((td) =>
-              td.classList.remove("highlight-cell"),
-            );
+            qsa("td", tr).forEach((td) => td.classList.remove("highlight-cell"));
             if (tr.dataset.id === matchRow.id) {
               tr.classList.add("highlight-row");
               // Highlight lookup cell (first) and return cell
