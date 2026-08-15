@@ -254,8 +254,7 @@
     }
 
     .ship-on-board img {
-      width: 100%;
-      height: 100%;
+      /* נמתח רק לאורך האונייה – הרוחב נשמר לפי יחס תמונה (בלי טשטוש) */
       object-fit: contain;
       object-position: center;
       filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
@@ -1024,11 +1023,18 @@
         img.draggable = false;
 
         if (isHorizontal) {
-          img.style.transform = "rotate(90deg)";
-          img.style.width = height + "px";
+          // אחרי סיבוב 90° – הגובה הופך לאורך האונייה; הרוחב נשמר לפי יחס התמונה
           img.style.height = width + "px";
-          img.style.maxWidth = "none";
+          img.style.width = "auto";
+          img.style.maxWidth = height + "px"; // לא רחב יותר מתא בודד
           img.style.maxHeight = "none";
+          img.style.transform = "rotate(90deg)";
+          img.style.transformOrigin = "center center";
+        } else {
+          // אנכי: ממלא את כל האורך, רוחב לפי יחס תמונה (ללא מתיחה)
+          img.style.height = "100%";
+          img.style.width = "auto";
+          img.style.maxWidth = "100%";
         }
 
         overlay.appendChild(img);
@@ -1096,6 +1102,10 @@
             state.shipsRotated[idx] = !state.shipsRotated[idx];
             const wrap = card.querySelector(".ship-img-wrap");
             if (wrap) wrap.classList.toggle("rotated", state.shipsRotated[idx]);
+            // סיבוב כלי שאינו הנבחר הופך אותו לנבחר
+            state.selectedShipIndex = idx;
+            updatePaletteSelection();
+            updateHint();
           });
 
           const imgWrap = document.createElement("div");
@@ -1243,7 +1253,10 @@
         };
         state.playerShips.push(shipObj);
         state.shipsPlaced[idx] = true;
-        state.selectedShipIndex = null;
+
+        // בחירה אוטומטית של הכלי הבא שטרם הוצב (אלא אם המשתמש יבחר אחר)
+        const nextIdx = state.shipsPlaced.findIndex(placed => !placed);
+        state.selectedShipIndex = nextIdx === -1 ? null : nextIdx;
 
         // render the full ship image on the board
         renderShipOnBoard(shipObj, playerBoard, playerBoardWrap);
@@ -1259,8 +1272,14 @@
         startBtn.disabled = !all;
         if (all) {
           shipPalette.classList.add("hidden");
-          placementHint.textContent = "כל הכלים במקום – התחל משחק!";
-          showToast("כל כלי השיט הוצבו בהצלחה");
+          placementHint.textContent = "מתחיל משחק...";
+          showToast("כל כלי השיט הוצבו – מתחילים!");
+          // התחלה אוטומטית ללא לחיצה על «התחל משחק»
+          setTimeout(() => {
+            if (state.phase === "setup" && state.shipsPlaced.every(Boolean)) {
+              startBtn.click();
+            }
+          }, 600);
         }
       }
 
