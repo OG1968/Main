@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="משחק אבן נייר ומספריים – גרסה משופרת עם מצב כהה, סטטיסטיקות ואנימציות"
+    />
+    <meta name="theme-color" content="#1b4f72" />
+    <title>אבן נייר ומספריים</title>
+
+    <!-- Google Font – Heebo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" type="image/x-icon" href="images/RPS.ico" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header + Theme Toggle -->
+      <div class="header-row">
+        <button
+          id="theme-btn"
+          class="theme-btn"
+          aria-label="החלף מצב תצוגה"
+          title="מצב כהה / בהיר"
+        >
+          🌙
+        </button>
+        <h1 class="header">אבן נייר ומספריים</h1>
+        <div style="width: 42px"></div>
+        <!-- spacer for centering -->
+      </div>
+
+      <p class="subtitle">בחר את המהלך שלך (או לחץ 1 / 2 / 3)</p>
+
+      <!-- Score -->
+      <div class="score-display" id="score" aria-live="polite">
+        אתה: <strong>0</strong> &nbsp;|&nbsp; מחשב: <strong>0</strong>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="stats-bar" aria-live="polite">
+        <span class="stat" id="streak-stat">רצף: 0</span>
+        <span class="stat" id="rate-stat">ניצחונות: 0%</span>
+        <span class="stat" id="draws-stat">תיקו: 0</span>
+      </div>
+
+      <!-- Game Area -->
+      <div class="game-area">
+        <div class="vs-text" id="vs-area" aria-live="polite"></div>
+
+        <div class="result-image-container" id="result-container">
+          <img class="result-image" id="result-image" alt="" />
+        </div>
+      </div>
+
+      <!-- Result Message -->
+      <div class="result-display" id="result-text" aria-live="assertive"></div>
+
+      <!-- Choice Buttons -->
+      <div class="choices" role="group" aria-label="בחר מהלך">
+        <button class="choice-btn" data-choice="rock" aria-label="אבן">
+          <img src="images/rock.png" alt="אבן" width="92" height="92" />
+        </button>
+        <button class="choice-btn" data-choice="paper" aria-label="נייר">
+          <img src="images/paper.png" alt="נייר" width="92" height="92" />
+        </button>
+        <button class="choice-btn" data-choice="scissors" aria-label="מספריים">
+          <img src="images/scissors.png" alt="מספריים" width="92" height="92" />
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          class="action-btn secondary"
+          id="reset-btn"
+          aria-label="איפוס ניקוד"
+        >
+          <img src="images/reset.png" alt="" width="28" height="28" />
+          איפוס
+        </button>
+        <button class="action-btn" id="rules-btn" aria-label="חוקי המשחק">
+          <img src="images/rules.png" alt="" width="28" height="28" />
+          חוקים
+        </button>
+        <button
+          class="action-btn secondary"
+          id="stats-btn"
+          aria-label="סטטיסטיקות"
+        >
+          📊 סטטיסטיקות
+        </button>
+        <button
+          class="action-btn secondary"
+          id="sound-btn"
+          aria-label="הפעל/כבה צליל"
+        >
+          🔊 צליל
+        </button>
+      </div>
+    </div>
+
+    <!-- Rules Popup -->
+    <div
+      id="rules-popup"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rules-title"
+    >
+      <h2 id="rules-title" style="margin-bottom: 12px; font-size: 1.3rem">
+        חוקי המשחק
+      </h2>
+      <img
+        src="images/rps.png"
+        alt="תרשים חוקי המשחק: אבן שוברת מספריים, מספריים גוזרים נייר, נייר עוטף אבן"
+      />
+      <p>אבן שוברת מספריים, מספריים גוזרים נייר, ונייר עוטף אבן.</p>
+      <button class="close-btn" id="close-rules">סגור</button>
+    </div>
+
+    <!-- Stats Popup -->
+    <div
+      id="stats-popup"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stats-title"
+    >
+      <h2 id="stats-title">📊 סטטיסטיקות</h2>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">ניצחונות</div>
+          <div class="value" id="stat-wins" style="color: var(--win)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">הפסדים</div>
+          <div class="value" id="stat-losses" style="color: var(--lose)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">תיקו</div>
+          <div class="value" id="stat-draws">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">אחוז ניצחון</div>
+          <div class="value" id="stat-rate">0%</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">רצף שיא</div>
+          <div class="value" id="stat-streak" style="color: var(--win)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">סה״כ משחקים</div>
+          <div class="value" id="stat-total">0</div>
+        </div>
+      </div>
+
+      <p style="font-size: 0.95rem; margin-bottom: 8px; font-weight: 600">
+        הבחירות שלך:
+      </p>
+      <div class="stats-grid" style="margin-bottom: 14px">
+        <div class="stat-card">
+          <div class="label">🪨 אבן</div>
+          <div class="value" id="stat-rock">0%</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">📄 נייר</div>
+          <div class="value" id="stat-paper">0%</div>
+        </div>
+        <div class="stat-card" style="grid-column: span 2">
+          <div class="label">✂️ מספריים</div>
+          <div class="value" id="stat-scissors">0%</div>
+        </div>
+      </div>
+
+      <p style="font-size: 0.95rem; margin-bottom: 6px; font-weight: 600">
+        היסטוריה אחרונה:
+      </p>
+      <div class="history-list" id="history-list"></div>
+
+      <button class="close-btn" id="close-stats">סגור</button>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <footer class="site-footer">
+      <p class="copyright">2026 כל הזכויות שמורות</p>
+      <img
+        src="images/logo_Blue.png"
+        alt="לוגו"
+        class="footer-logo"
+        width="220"
+        height="60"
+      />
+    </footer>
+
+    <script src="js/game.js"></script>
+  </body>
+</html>
