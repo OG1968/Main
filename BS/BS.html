@@ -501,6 +501,13 @@
       flex-wrap: wrap;
       width: 100%;
       flex-shrink: 0;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 699px) {
+      .difficulty-bar {
+        margin-bottom: 12px; /* ריווח מול «לוח המחשב» */
+      }
     }
 
     .difficulty-bar button {
@@ -1701,7 +1708,10 @@
         clearHighlights();
       }
 
-      resetBtn.addEventListener("click", resetGame);
+      // רענון מלא – מונע חפיפת כפתורים/שדות אחרי סיום משחק
+      resetBtn.addEventListener("click", () => {
+        window.location.reload();
+      });
 
       helpBtn.addEventListener("click", () => modal.classList.add("show"));
       closeModal.addEventListener("click", () => modal.classList.remove("show"));
