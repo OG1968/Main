@@ -134,7 +134,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 6px;
       flex-shrink: 0;
     }
 
@@ -144,7 +144,15 @@
       color: var(--text-muted);
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 4px;
+      flex-shrink: 0;
+      line-height: 1.35;
+      min-height: 1.35em;
+      margin: 0;
+      padding: 0 4px;
+      position: relative;
+      z-index: 2;
     }
 
     /* Board with relative positioning for ship overlays */
@@ -441,6 +449,7 @@
       top: 8px;
       left: 8px;
       display: flex;
+      flex-direction: row;
       gap: 6px;
       z-index: 100;
     }
@@ -460,11 +469,29 @@
       align-items: center;
       justify-content: center;
       padding: 0;
+      flex-shrink: 0;
     }
 
     .top-bar button:hover {
       background: var(--accent);
       color: #222;
+    }
+
+    @media (max-width: 699px) {
+      .top-bar {
+        flex-direction: column;
+        top: 6px;
+        left: 6px;
+        gap: 4px;
+      }
+      .top-bar button {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+      }
+      h1 {
+        padding-inline-start: 40px; /* מקום לעמודת הכפתורים משמאל */
+      }
     }
 
     .difficulty-bar {
@@ -728,11 +755,20 @@
         padding: 2px;
       }
       .board-title {
-        font-size: 0.7rem;
-        gap: 2px;
+        font-size: 0.75rem;
+        gap: 3px;
+        line-height: 1.4;
+        min-height: 20px;
+        padding: 3px 4px 4px;
+        margin-bottom: 2px;
+        flex-shrink: 0;
+      }
+      .board-section {
+        flex-shrink: 0;
+        gap: 6px;
       }
       .boards-wrapper {
-        gap: 4px;
+        gap: 12px;
       }
       .ship-palette {
         max-height: 90px;
@@ -749,8 +785,14 @@
         max-width: 130px;
       }
       .placement-hint {
-        font-size: 0.7rem;
-        min-height: 14px;
+        font-size: 0.75rem;
+        min-height: 22px;
+        line-height: 1.4;
+        padding: 4px 6px;
+        margin: 2px 0;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 2;
       }
     }
 
@@ -767,8 +809,13 @@
     }
 
     @media (max-width: 699px) {
-      body.playing-mode .boards-wrapper { gap: 4px; }
-      body.playing-mode .board-title { font-size: 0.65rem; }
+      body.playing-mode .boards-wrapper { gap: 12px; }
+      body.playing-mode .board-title {
+        font-size: 0.75rem;
+        min-height: 20px;
+        padding: 3px 4px 4px;
+      }
+      body.playing-mode .board-section { gap: 6px; }
     }
   </style>
 </head>
@@ -1155,7 +1202,7 @@
           placementHint.textContent = "בחר כלי שיט ולחץ על הלוח כדי להציב";
         } else {
           const name = SHIP_DATA[state.selectedShipIndex].name;
-          placementHint.textContent = `מציב: ${name} – לחץ על משבצת התחלה`;
+          placementHint.textContent = `מציב: ${name}`;
         }
       }
 
@@ -1702,19 +1749,20 @@
           const vh = window.innerHeight;
           const vw = window.innerWidth;
           const isPlaying = document.body.classList.contains("playing-mode");
-          const reserved = isPlaying ? 110 : 200;
-          const availableH = Math.max(160, vh - reserved);
-          const boardChrome = 20;
-          const gapBetween = 6;
+          // שמירת מקום לכותרת, סטטוס, כפתורים, רמז הצבה, פלטה, קושי
+          const reserved = isPlaying ? 130 : 230;
+          const availableH = Math.max(140, vh - reserved);
+          // כותרת לוח (~24px) + מרווח לכל לוח
+          const boardChrome = 28;
+          const gapBetween = 12;
           const totalChrome = boardChrome * 2 + gapBetween;
           const cellByHeight = Math.floor((availableH - totalChrome) / 20);
-          const cellByWidth = Math.floor((vw - 24) / 10.5);
-          let cell = Math.min(cellByHeight, cellByWidth, 32);
-          cell = Math.max(cell, 16);
+          const cellByWidth = Math.floor((vw - 28) / 10.5);
+          let cell = Math.min(cellByHeight, cellByWidth, 30);
+          cell = Math.max(cell, 14);
           document.documentElement.style.setProperty("--cell-size", cell + "px");
         }
 
-        // תמיד לצייר מחדש את האוניות אחרי שינוי גודל תאים
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             rerenderAllShips();
