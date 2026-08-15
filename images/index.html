@@ -1,0 +1,1359 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="images/logo_white.png" />
+    <meta
+      name="description"
+      content="כלים מקוונים חינמיים אונליין, חוברת מתכונים, המרת מטבעות , הצפנת קבצים, מחשבון קלורי,ממיר מידות ביגוד והנעלה, יוצר גלריות עורך תמונות , שינוי שמות קבצים בבאלק, משחקי אונליין."
+    />
+    <title>אפליקציות ווב</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@800&family=Varela+Round&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-color: #3b44dd;
+        --secondary-color: #418056;
+        --light-color: #ffd876;
+        --dark-color: #24282c;
+        --accent-color: #ff6b6b;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: #ffeb92;
+        color: var(--dark-color);
+        line-height: 1.2;
+        padding-bottom: 2rem;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.05;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      header {
+        text-align: center;
+        animation: fadeIn 1s ease-in-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      header::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        transform: skewY(-2deg);
+        transform-origin: top left;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+        margin-top: 50px;
+        font-family: "Heebo", sans-serif;
+        text-shadow:
+          2px 2px 0px rgba(0, 0, 0, 0.1),
+          4px 4px 0px rgba(78, 84, 200, 0.2),
+          6px 6px 0px rgba(78, 84, 200, 0.1);
+        margin-bottom: 1.5rem;
+        position: relative;
+        display: inline-block;
+        letter-spacing: -1px;
+        line-height: 1.1;
+        text-transform: uppercase;
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        padding: 0 10px;
+        background-size: 200% auto;
+      }
+
+      h1::after {
+        content: "";
+        position: absolute;
+        width: 80%;
+        height: 6px;
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--accent-color),
+          var(--secondary-color)
+        );
+        bottom: -15px;
+        left: 10%;
+        border-radius: 5px;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        transform: skewX(-15deg);
+        animation: pulse 2s ease infinite;
+      }
+
+      p.subtitle {
+        font-size: 1.1rem;
+        color: #333;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 0.01em;
+      }
+
+      .filters {
+        margin: 1.5rem 0;
+        text-align: center;
+      }
+
+      .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.2rem;
+        margin-top: 1rem;
+      }
+
+      .filter-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        background: #eee;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .filter-btn::after {
+        content: "";
+        position: absolute;
+        top: var(--y);
+        left: var(--x);
+        width: 0;
+        height: 0;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition:
+          width 0.3s ease,
+          height 0.3s ease;
+        z-index: -1;
+      }
+
+      .filter-btn:hover::after {
+        width: 200px;
+        height: 200px;
+      }
+
+      .filter-btn.active {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .filter-btn:hover {
+        background: #ff7575;
+      }
+
+      .apps-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-top: 1rem;
+      }
+
+      .app-card {
+        cursor: pointer;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      .app-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .app-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+      }
+
+      .app-icon {
+        width: 100%;
+        height: 160px;
+        background: linear-gradient(
+          to bottom right,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .app-icon::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0.3) 0%,
+          rgba(255, 255, 255, 0) 50%
+        );
+        transform: rotate(30deg);
+        transition: all 0.5s ease;
+      }
+
+      .app-card:hover .app-icon::after {
+        left: 100%;
+      }
+
+      .app-info {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-info h3 {
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+      }
+
+      .app-info p {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        flex-grow: 1;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.6rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .btn::after {
+        content: "";
+        position: absolute;
+        top: var(--y);
+        left: var(--x);
+        width: 0;
+        height: 0;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition:
+          width 0.3s ease,
+          height 0.3s ease;
+        z-index: -1;
+      }
+
+      .btn:hover::after {
+        width: 200px;
+        height: 200px;
+      }
+
+      .btn:hover {
+        background: var(--accent-color);
+        transform: translateY(-2px);
+      }
+
+      .btn i {
+        margin-left: 5px;
+      }
+
+      footer {
+        width: 100%;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        margin-top: 1rem;
+        text-align: center;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: var(--shadow);
+      }
+
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+
+      footer a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        transition: var(--transition);
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .about-card {
+        margin-top: 2rem;
+      }
+
+      /* הוסף מרווח תחתון נוסף */
+      .about-card .app-info {
+        padding-bottom: 2rem;
+      }
+
+      .about-card .app-icon {
+        height: 120px;
+      }
+
+      .about-card .btn {
+        padding: 0.8rem 1.5rem;
+      }
+
+      .app-preview {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .preview-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+        transform: scale(0.9);
+        animation: scaleIn 0.3s ease forwards;
+      }
+
+      .close-preview {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary-color);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes scaleIn {
+        to {
+          transform: scale(1);
+        }
+      }
+
+      /* Responsive - 2 cards always */
+      @media (max-width: 600px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .apps-grid {
+          gap: 1rem;
+        }
+
+        .app-icon {
+          height: 120px;
+          font-size: 2.5rem;
+        }
+
+        .app-info {
+          padding: 1rem;
+        }
+
+        .btn {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
+        }
+
+        footer {
+          padding: 0.8rem;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .apps-grid {
+          gap: 0.5rem;
+        }
+
+        .app-icon {
+          height: 100px;
+        }
+
+        .app-info h3 {
+          font-size: 1rem;
+        }
+
+        .app-info p {
+          font-size: 0.8rem;
+        }
+      }
+
+      /* סטייל למודל היציאה */
+      #exit-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #exit-modal-content {
+        background-color: white;
+        color: var(--text);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 80%;
+        border: 1px solid var(--primary-color);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      #exit-modal h3 {
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+
+      #exit-modal button {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #confirm-exit {
+        background-color: #ff4444;
+        color: white;
+      }
+
+      #cancel-exit {
+        background-color: var(--primary-color);
+        color: white;
+      }
+    </style>
+  </head>
+
+  <!-- Google tag (gtag.js) -->
+  <script
+    async
+    src="https://www.googletagmanager.com/gtag/js?id=G-WLGJD4BXBT"
+  ></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+
+    gtag("config", "G-WLGJD4BXBT");
+  </script>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>מרכז ה WebApp שלנו</h1>
+        <p class="subtitle">
+          גלה את הכלים המקוונים שלנו הזמינים ישירות מהדפדפן חינם וללא צורך
+          בהורדה !
+        </p>
+      </header>
+
+      <div class="filters">
+        <div class="category-filters">
+          <button class="filter-btn active" data-category="all">הצג הכל</button>
+          <button class="filter-btn" data-category="Lifestyle">
+            לייף סטייל
+          </button>
+          <button class="filter-btn" data-category="finance">פיננסי</button>
+          <button class="filter-btn" data-category="health">בריאות</button>
+          <button class="filter-btn" data-category="Productive">
+            פרודוקטיביות
+          </button>
+          <button class="filter-btn" data-category="free_time">פנאי</button>
+          <button class="filter-btn" data-category="private">פרטי</button>
+          <button class="filter-btn" data-category="about">אודותנו</button>
+        </div>
+      </div>
+
+      <div class="apps-grid">
+        <!-- אפליקציה 1 -->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fas fa-book"></i>
+          </div>
+          <div class="app-info">
+            <h3>חוברת מתכונים</h3>
+            <p>ארגן את המתכונים האהובים עליך בצורה יעילה ושתף אותם עם חברים.</p>
+            <a href="CB.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 2 -->
+        <div class="app-card" data-category="finance">
+          <div class="app-icon">
+            <i class="fa-solid fa-calculator"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון המרות</h3>
+            <p>
+              המרת מטבעות בשער עדכני, מידות מרחקים, משקלים, טמפרטורה, נפח, שטח,
+              מהירות.
+            </p>
+            <a href="UC.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 3 -->
+        <div class="app-card" data-category="health">
+          <div class="app-icon">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון קלורי</h3>
+            <p>
+              עקוב אחר הערך הקלורי, הויטמינים, מינרלים ערך גלוקימי ומדד השובע של
+              כל מה שבחרת לאכול לבחירות נבונות יותר.
+            </p>
+            <a href="CC.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 4 -->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fas fa-shirt"></i>
+          </div>
+          <div class="app-info">
+            <h3>ממיר המידות לביגוד והנעלה</h3>
+            <p>
+              ראית דיל מעולה ברשת, אבל המידה אמריקאית, בריטית אסייאתית ואתה לא
+              בטוח? הממיר הזה עבורך.
+            </p>
+            <a href="OC.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 5 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="app-info">
+            <h3>הצ'קליסט האולטימטיבי</h3>
+            <p>
+              יוצאים לחו"ל או קמפינג בארץ, או סתם חוששים לשכוח לעשות משהו?
+              הצ'קליסט הזה יעשה לכם סדר בראש.
+            </p>
+            <a href="TC.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 6 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-pencil"></i>
+          </div>
+          <div class="app-info">
+            <h3>עורך טקסטים מתקדם</h3>
+            <p>
+              אז העתקת והדבקת טקסט , אבל הוא מבולבל אותיות הפוכות ומילים בסדר
+              הפוך , בקיצור לא קריא? אל דאגה אנחנו כאן לעזור...
+            </p>
+            <a href="TE.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- 7 אפליקציה-->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fa-regular fa-images"></i>
+          </div>
+          <div class="app-info">
+            <h3>יוצר גלריית שקופיות</h3>
+            <p>
+              צור גלריית שיקופיות עם מיטב התמונות מוכנות לשליחה כקובץ דפדפן
+              עצמאי רק לפתוח ולהנות...
+            </p>
+            <a href="SG.html" class="btn"
+              >לכניסה <i class="fa-regular fa-images"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- 8 אפליקציה-->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <div class="app-info">
+            <h3>יוצר גלריית קרוסלה</h3>
+            <p>צור קרוסלה מקסימה של 8 מתמונותיך, המשפחה תאהב את זה.</p>
+            <a href="CG.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- 9 אפליקציה-->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fa-solid fa-image"></i>
+          </div>
+          <div class="app-info">
+            <h3>יוצר גלריית אקורדיון</h3>
+            <p>
+              יש לך תמונות של ארוע שאתה רוצה לשלוח באופן מרשים לחברים או משפחה
+              נסה את הכלי הזה.
+            </p>
+            <a href="GC.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- 10 אפליקציה-->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fa-solid fa-camera-retro"></i>
+          </div>
+          <div class="app-info">
+            <h3>יוצר גלריית תיאור</h3>
+            <p>
+              אם יש לך תמונות שדורשות תיאור/הסבר/סיפור בגלריה זו תוכל להוסיף
+              זאת.
+            </p>
+            <a href="PS.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- 11 אפליקציה-->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <div class="app-info">
+            <h3>מצפין קבצים</h3>
+            <p>
+              יש לך כמה מסמכים שממש לא בא לך שיחשפו בפני מישהו שחיטט לך במחשב?
+              הצפן קבצים בתוך תמונה של יקירך , רק אתה תדע שהקבצים שם וכיצד
+              לחלצם.
+            </p>
+            <a href="CF.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- 12 אפליקציה-->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-eye-slash"></i>
+          </div>
+          <div class="app-info">
+            <h3>מצפין טקסטים</h3>
+            <p>
+              כותב שירה בסתר ? סתם בא לך להצפין טקסטים שאף עין בלתי מורשית לא
+              תראה? הישום הזה יעשה זאת בשבילך.
+            </p>
+            <a href="CT.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 13 -->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </div>
+          <div class="app-info">
+            <h3>מה קרוב אלי</h3>
+            <p>
+              אז אתה בטיול בחו"ל ויש לא מעט מקומות שאתה רוצה לראות, מסעדות לבקר
+              וכ"ו, ולא מתחשק לך ללכת במסלולים מעגליים או בזיג זג, הפתרון פה.
+            </p>
+            <a href="TP.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 14 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-images"></i>
+          </div>
+          <div class="app-info">
+            <h3>עיבוד תמונות</h3>
+            <p>
+              התמונה כבדה מדי בגודל ? לא בפרספקטיבה הרצויה או בזוית הלא נכונה,
+              הכלי הזה יעשה את התיקונים עבורך.
+            </p>
+            <a href="IE.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 15 -->
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon">
+            <i class="fa-solid fa-film"></i>
+          </div>
+          <div class="app-info">
+            <h3>יוצר מצגות</h3>
+            <p>
+              אתה רוצה להכין מצגת של תמונות ארועי אבל לא בטוח שלנמענים יש את
+              פאוורפוינט של מיקרוסופט הכלי הזה בשבילך.
+            </p>
+            <a href="SS.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 16 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-file-pen"></i>
+          </div>
+          <div class="app-info">
+            <h3>שינוי שמות קבצים</h3>
+            <p>
+              יש לכם תיקיה מלאה בקבצים ודרוש לכם שינוי שם קבצים עם מאפיין מספרי
+              רץ או תאריך ואפילו גם וגם, הכלי הזה עודה את העבודה .
+            </p>
+            <a href="FR.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 17 -->
+        <div class="app-card" data-category="health">
+          <div class="app-icon">
+            <i class="fa-solid fa-person-walking"></i>
+          </div>
+          <div class="app-info">
+            <h3>ספידומטר GPS</h3>
+            <p>
+              צא להליכה , ריצה או אופניים ועקוב אחר הנתונים , מרחק , מהירות
+              ממוצעת ומהירות מירבית
+            </p>
+            <a href="GP.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 18 -->
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="50"
+              height="50"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-cut"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M7 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+              <path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+              <path d="M9.15 14.85l8.85 -10.85" />
+              <path d="M6 4l8.85 10.85" />
+            </svg>
+          </div>
+          <div class="app-info">
+            <h3>אבן נייר ומספריים</h3>
+            <p>משחק הילדות אבן נייר ומספריים במשחק מול המחשב.</p>
+            <a href="RPS/RPS.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 19 -->
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="140"
+              height="140"
+              viewBox="8 -7 15 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-tic-tac"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M12 2m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+              <path d="M16 4l4 4" />
+              <path d="M16 8l4 -4" />
+            </svg>
+          </div>
+          <div class="app-info">
+            <h3>איקס עיגול</h3>
+            <p>משחק הילדות איקס עיגול בגירסת אונליין המשחק מול המחשב.</p>
+            <a href="TTT.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 20 -->
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="80"
+              height="80"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-spade"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M12 3l4.919 4.5c.61 .587 1.177 1.177 1.703 1.771a5.527 5.527 0 0 1 .264 6.979c-1.18 1.56 -3.338 1.92 -4.886 .75v1l1 3h-6l1 -3v-1c-1.54 1.07 -3.735 .772 -4.886 -.75a5.527 5.527 0 0 1 .264 -6.979a30.883 30.883 0 0 1 1.703 -1.771a1541.72 1541.72 0 0 1 4.919 -4.5z"
+              />
+            </svg>
+          </div>
+          <div class="app-info">
+            <h3>בלאק ג'ק</h3>
+            <p>משחק בלאק ג'ק אונליין (Beta)</p>
+            <a href="BJ/BJ.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 21 -->
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon">
+            <i class="fa-solid fa-ship"></i>
+          </div>
+          <div class="app-info">
+            <h3>צוללות</h3>
+            <p>שחק את משחק הצוללות אונליין מול המחשב.</p>
+            <a href="BS/BS.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 22 -->
+        <div class="app-card" data-category="finance">
+          <div class="app-icon">
+            <i class="fa-solid fa-square-root-variable"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון פיננסי</h3>
+            <p>
+              חישוב ריביות עתידיות וריבית דהריבית בהלוואות בחסכונות והשקעות.
+            </p>
+            <a href="FC.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 23 -->
+        <div class="app-card" data-category="finance">
+          <div class="app-icon">
+            <i class="fa-solid fa-car"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחשבון אחזקת רכב</h3>
+            <p>חישוב הוצאות אחזקת רכב כתלות במספר השנים וסוג ההינע.</p>
+            <a href="CE\Car_Expenses.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 24 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-file-signature"></i>
+          </div>
+          <div class="app-info">
+            <h3>החתמת מסמך PDF</h3>
+            <p>
+              קיבלתם מסמך PDF ויש צורך בהוספת חתימה סרוקה ושליחה חזרה , הכלי הזה
+              יקצר את התהליך .
+            </p>
+            <a href="SP/PDFS.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 25 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-crop-simple"></i>
+          </div>
+          <div class="app-info">
+            <h3>עורך תמונות</h3>
+            <p>
+              צריכים את האפשרות להקטין להגדיל לשנות פורמט או להגדיר רוחב ואורך
+              של תמונות? זה הכלי עבורכם.
+            </p>
+            <a href="IR/IR.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 26 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-solid fa-box-open"></i>
+          </div>
+          <div class="app-info">
+            <h3>יוצר פריסת קרטון</h3>
+            <p>
+              כלי יצירת פריסת קרטון (LAYOUT) על פי מידות מוכנסות של אורך רוחב
+              וגובה ויצואם למסמך PDF
+            </p>
+            <a href="CL/CL.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 27 -->
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon">
+            <i class="fa-regular fa-file-excel"></i>
+          </div>
+          <div class="app-info">
+            <h3>מחולל נוסחאות חיפוש באקסל</h3>
+            <p>
+              טבלה עצומה באקסל ונתונים שאתה מחפש , אפשר ליצר נוסחאות למצוא בדיוק
+              מה שאתה מחפש עם מחולל הנוסחאות לחיפוש באקסל
+            </p>
+            <a href="ESF/ESF.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+
+        <!-- אפליקציה 28 -->
+        <div class="app-card" data-category="private">
+          <div class="app-icon">
+            <i class="fa-solid fa-hand"></i>
+          </div>
+          <div class="app-info">
+            <h3>תיקיה פרטית</h3>
+            <p>כניסה למורשים בלבד</p>
+            <a href="Pass.html" class="btn"
+              >לכניסה <i class="fas fa-external-link-alt"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- אודותנו -->
+      <div class="app-card about-card" data-category="about">
+        <div class="app-icon">
+          <img
+            src="data:image/png;base64,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"
+            alt="לוגו"
+            style="width: 80px; height: 80px"
+          />
+        </div>
+        <div class="app-info">
+          <h3>אודותנו</h3>
+          <p>פרטים ליצירת קשר.</p>
+          <a href="AM.html" class="btn"
+            >לכניסה <i class="fas fa-external-link-alt"></i
+          ></a>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-content">
+          <p><strong>2025 כל הזכויות שמורות G©.</strong></p>
+        </div>
+      </footer>
+
+      <!-- הודעת טוסט -->
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <!-- תצוגה מקדימה של אפליקציות -->
+    <div class="app-preview" id="appPreview"></div>
+
+    <!-- Exit Confirmation Modal -->
+    <div id="exit-modal">
+      <div id="exit-modal-content">
+        <h3>האם לצאת?</h3>
+        <button id="confirm-exit">יציאה</button>
+        <button id="cancel-exit">ביטול</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // פונקציונליות סינון
+        const filterBtns = document.querySelectorAll(".filter-btn");
+        const appCards = document.querySelectorAll(".app-card");
+
+        function filterApps() {
+          const activeCategory =
+            document.querySelector(".filter-btn.active").dataset.category;
+
+          appCards.forEach((card) => {
+            const category = card.dataset.category;
+            const matchesCategory =
+              activeCategory === "all" || category === activeCategory;
+
+            if (matchesCategory) {
+              card.style.display = "flex";
+            } else {
+              card.style.display = "none";
+            }
+          });
+        }
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            filterBtns.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            filterApps();
+          });
+        });
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            filterBtns.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            filterApps();
+          });
+        });
+
+        // פונקציה להצגת הודעות טוסט
+        function showToast(message) {
+          const toast = document.getElementById("toast");
+          toast.textContent = message;
+          toast.classList.add("show");
+
+          setTimeout(() => {
+            toast.classList.remove("show");
+          }, 3000);
+        }
+
+        // אנימציה לגלילה חלקה
+        document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+          anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+              behavior: "smooth",
+            });
+          });
+        });
+
+        // אנימציה להדגשת כרטיסים בעת מעבר עם העכבר
+        const cards = document.querySelectorAll(".app-card");
+        cards.forEach((card) => {
+          card.addEventListener("mousemove", (e) => {
+            const x = e.pageX - card.offsetLeft;
+            const y = e.pageY - card.offsetTop;
+
+            card.style.setProperty("--mouse-x", x);
+            card.style.setProperty("--mouse-y", y);
+            card.style.transform = `perspective(1000px) rotateX(${
+              (y - card.offsetHeight / 2) / 20
+            }deg) rotateY(${-(x - card.offsetWidth / 2) / 20}deg)`;
+          });
+
+          card.addEventListener("mouseleave", () => {
+            card.style.transform = "perspective(1000px) rotateX(0) rotateY(0)";
+          });
+        });
+
+        // אפקט ריחוף לכפתורים
+        document.querySelectorAll(".btn, .filter-btn").forEach((btn) => {
+          btn.addEventListener("mousemove", (e) => {
+            const x = e.pageX - btn.offsetLeft;
+            const y = e.pageY - btn.offsetTop;
+
+            btn.style.setProperty("--x", `${x}px`);
+            btn.style.setProperty("--y", `${y}px`);
+          });
+        });
+
+        // טעינה פרוגרסיבית עם אנימציה
+        function animateOnScroll() {
+          const elements = document.querySelectorAll(
+            ".app-card, header, .filters",
+          );
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.style.animation = `fadeInUp 0.2s ${
+                    entry.target.dataset.delay || "0s"
+                  } ease-out forwards`;
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.01 },
+          );
+
+          elements.forEach((el, i) => {
+            el.style.opacity = "0";
+            el.style.transform = "translateY(10px)";
+            el.dataset.delay = `${i * 0.03}s`;
+            observer.observe(el);
+          });
+        }
+
+        animateOnScroll();
+
+        // תצוגה מקדימה של אפליקציות
+        document.querySelectorAll(".app-card").forEach((card) => {
+          const preview = document.createElement("div");
+          preview.className = "app-preview";
+          preview.innerHTML = `
+      <div class="preview-content">
+        <span class="close-preview">&times;</span>
+        <h3>${card.querySelector("h3").textContent}</h3>
+        <p>${card.querySelector("p").textContent}</p>
+        <a href="${card.querySelector("a").getAttribute("href")}" class="btn">
+          לכניסה <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+    `;
+          document.body.appendChild(preview);
+
+          card.addEventListener("click", (e) => {
+            if (!e.target.closest("a")) {
+              preview.style.display = "flex";
+              document.body.style.overflow = "hidden";
+            }
+          });
+
+          preview
+            .querySelector(".close-preview")
+            .addEventListener("click", () => {
+              preview.style.display = "none";
+              document.body.style.overflow = "auto";
+            });
+        });
+      });
+
+      // פונקציות לניהול יציאה
+      function exitApplication() {
+        window.location.href = "https://www.google.com";
+      }
+
+      function showExitDialog() {
+        const exitModal = document.getElementById("exit-modal");
+        if (exitModal) exitModal.style.display = "flex";
+      }
+
+      function hideExitDialog() {
+        const exitModal = document.getElementById("exit-modal");
+        if (exitModal) exitModal.style.display = "none";
+      }
+
+      // אתחול מערכת היציאה
+      function initExitSystem() {
+        history.pushState(null, null, window.location.pathname);
+        window.addEventListener("popstate", function (event) {
+          showExitDialog();
+          history.pushState(null, null, window.location.pathname);
+        });
+        document
+          .getElementById("confirm-exit")
+          ?.addEventListener("click", exitApplication);
+        document
+          .getElementById("cancel-exit")
+          ?.addEventListener("click", hideExitDialog);
+      }
+
+      // הוספת הקריאה לאתחול בפונקציה הראשית
+      document.addEventListener("DOMContentLoaded", function () {
+        // הקוד הקיים שלך...
+        initExitSystem(); // הוסף שורה זו בסוף
+      });
+    </script>
+  </body>
+</html>
