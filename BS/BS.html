@@ -454,6 +454,42 @@
       z-index: 100;
     }
 
+    .footer-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      flex-shrink: 0;
+      padding: 8px 4px 6px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-muted);
+      opacity: 0.95;
+      position: relative;
+      z-index: 2;
+    }
+
+    .footer-bar img {
+      height: 40px;
+      width: auto;
+      display: block;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 699px) {
+      .footer-bar {
+        font-size: 0.9rem;
+        gap: 5px;
+        padding: 5px 4px 3px;
+      }
+      .footer-bar img {
+        height: 30px;
+      }
+    }
+
     .top-bar button {
       width: 34px;
       height: 34px;
@@ -870,6 +906,11 @@
       <button class="action start-btn" id="startBtn" disabled>התחל משחק</button>
       <button class="action reset-btn" id="resetBtn">משחק חדש</button>
     </div>
+
+    <footer class="footer-bar">
+      <span>© 2026 כל הזכויות שמורות</span>
+      <img src="images/logo_Yellow.png" alt="לוגו" />
+    </footer>
   </div>
 
   <div class="modal-overlay" id="modal">
@@ -1759,8 +1800,8 @@
           const vh = window.innerHeight;
           const vw = window.innerWidth;
           const isPlaying = document.body.classList.contains("playing-mode");
-          // שמירת מקום לכותרת, סטטוס, כפתורים, רמז הצבה, פלטה, קושי
-          const reserved = isPlaying ? 130 : 230;
+          // שמירת מקום לכותרת, סטטוס, כפתורים, רמז הצבה, פלטה, קושי, פוטר
+          const reserved = (isPlaying ? 130 : 230) + 55;
           const availableH = Math.max(140, vh - reserved);
           // כותרת לוח (~24px) + מרווח לכל לוח
           const boardChrome = 28;
