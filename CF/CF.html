@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>4 בשורה</title>
+  <link rel="icon" type="image/png" href="images/4_row.png" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>4 בשורה</h1>
+      <div class="controls">
+        <select id="difficulty" title="רמת קושי">
+          <option value="easy">קל</option>
+          <option value="medium" selected>בינוני</option>
+          <option value="hard">קשה</option>
+        </select>
+        <button class="theme-btn" id="themeBtn" title="מצב כהה/בהיר">🌙</button>
+        <button class="btn-primary" id="restartBtn">חדש</button>
+      </div>
+    </header>
+
+    <div class="status" id="status">תורך <span class="dot" style="background:var(--player)"></span></div>
+
+    <div class="board-area">
+      <div class="board-wrapper" id="boardWrapper">
+        <div class="board" id="board"></div>
+      </div>
+    </div>
+
+    <div class="powers" id="powers">
+      <button class="power-btn btn-special" id="powerBomb" title="מסיר דיסקית של היריב">💣 פצצה <span class="badge" id="bombCount">1</span></button>
+      <button class="power-btn" id="powerUndo" title="בטל מהלך">↩️ בטל</button>
+      <button class="power-btn" id="powerHint" title="רמז">💡 רמז</button>
+    </div>
+
+    <div class="score-bar">
+      <div class="score-item"><span>אתה</span><span id="scoreHuman">0</span></div>
+      <div class="score-item"><span>תיקו</span><span id="scoreDraw">0</span></div>
+      <div class="score-item"><span>מחשב</span><span id="scoreAI">0</span></div>
+      <div class="score-item"><span>סה״כ</span><span id="scoreTotal">0</span></div>
+    </div>
+
+    <div class="settings">
+      <label>
+        לוח
+        <select id="boardSize">
+          <option value="6x7" selected>6×7</option>
+          <option value="7x8">7×8</option>
+          <option value="8x9">8×9</option>
+        </select>
+      </label>
+      <label>
+        צבע שלך
+        <input type="color" id="colorPlayer" value="#ef4444" />
+      </label>
+      <label>
+        צבע מחשב
+        <input type="color" id="colorAI" value="#eab308" />
+      </label>
+      <label>
+        כאוס
+        <select id="chaosMode">
+          <option value="off" selected>כבוי</option>
+          <option value="mild">קל</option>
+          <option value="wild">פראי</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="footer">
+      <div class="footer-tips">💣 פצצה • ↩️ בטל • 💡 רמז • מקלדת: 1-9 / B / U / H</div>
+      <div class="copyright">© 2026 כל הזכויות שמורות</div>
+      <img src="images/logo_Red.png" alt="לוגו" class="footer-logo" />
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h2 id="modalTitle">ניצחת!</h2>
+      <p id="modalText">כל הכבוד</p>
+      <div class="modal-buttons">
+        <button class="btn-primary" id="playAgainBtn">שחק שוב</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/game.js"></script>
+</body>
+</html>
