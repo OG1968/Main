@@ -2,10 +2,68 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>4 בשורה</title>
   <link rel="icon" type="image/png" href="images/4_row.png" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* תיקון תצוגה במסכים קטנים – מניעת הסתרה מתחת לתפריט הדפדפן */
+    html {
+      height: auto;
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
+      height: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-bottom: max(24px, env(safe-area-inset-bottom, 0px) + 16px);
+      box-sizing: border-box;
+    }
+    .container {
+      min-height: auto !important;
+      height: auto !important;
+      padding-bottom: max(28px, env(safe-area-inset-bottom, 0px) + 20px) !important;
+      box-sizing: border-box;
+      overflow: visible !important;
+    }
+    .board-area {
+      flex-shrink: 1;
+      min-height: 0;
+    }
+    .settings,
+    .footer {
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+    .footer {
+      margin-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+      padding-bottom: 8px;
+    }
+    /* במסכים נמוכים – הקטנת מרווחים כדי שיותר תוכן ייכנס */
+    @media (max-height: 700px) {
+      .settings {
+        font-size: 0.85rem;
+      }
+      .footer-tips {
+        font-size: 0.75rem;
+      }
+      .footer-logo {
+        max-height: 36px !important;
+      }
+    }
+    @media (max-height: 600px) {
+      body {
+        padding-bottom: max(32px, env(safe-area-inset-bottom, 0px) + 24px);
+      }
+      .container {
+        padding-bottom: max(36px, env(safe-area-inset-bottom, 0px) + 28px) !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
