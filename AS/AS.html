@@ -1,577 +1,2717 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>אליס</title>
-  <link rel="icon" type="image/png" href="images/as.png">
-  <link rel="apple-touch-icon" href="images/as.png">
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg1:#0f0c29; --bg2:#302b63; --primary:#7c5cfc; --primary-glow:rgba(124,92,252,0.4);
-      --team1:#00d2ff; --team2:#ff6b9d; --success:#00e676; --danger:#ff5252; --warning:#ffd740;
-    }
-    [data-theme="ocean"]{--bg1:#0a1628;--bg2:#0d3b4c;--primary:#00bcd4;--primary-glow:rgba(0,188,212,0.4);--team1:#4fc3f7;--team2:#26a69a;}
-    [data-theme="sunset"]{--bg1:#1a0a0a;--bg2:#4a1c1c;--primary:#ff7043;--primary-glow:rgba(255,112,67,0.4);--team1:#ffca28;--team2:#ef5350;}
-    [data-theme="forest"]{--bg1:#0a1a0f;--bg2:#1b3a2a;--primary:#66bb6a;--primary-glow:rgba(102,187,106,0.4);--team1:#aed581;--team2:#26a69a;}
-        [data-theme="classic"]{--bg1:#1a120b;--bg2:#3e2723;--primary:#ff8f00;--primary-glow:rgba(255,143,0,0.4);--team1:#ffcc80;--team2:#ef9a9a;}
-
-    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
-    html,body{height:100%;height:100dvh;overflow:hidden;font-family:'Heebo',sans-serif;background:linear-gradient(160deg,var(--bg1),var(--bg2) 60%,#1a1a3e);color:#fff;touch-action:manipulation;transition:background .4s;}
-    .screen{display:none;height:100%;height:100dvh;width:100%;flex-direction:column;align-items:center;padding:4px 10px 52px;overflow:hidden;}
-    .screen.active{display:flex;animation:fadeIn .35s ease;}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-
-    .float-btns{position:fixed;top:6px;left:6px;z-index:40;display:flex;gap:6px;}
-    .float-btn{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:transform .15s,background .2s;}
-    .float-btn:active{transform:scale(0.9);}
-    .float-btn:hover{background:rgba(255,255,255,0.2);}
-
-    .settings-panel{position:fixed;top:46px;left:6px;z-index:41;background:rgba(20,15,40,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:14px;width:200px;box-shadow:0 10px 30px rgba(0,0,0,0.5);display:none;flex-direction:column;gap:10px;animation:fadeIn .25s ease;}
-    .settings-panel.open{display:flex;}
-    .settings-panel h4{font-size:0.85rem;opacity:0.7;margin-bottom:2px;}
-    .theme-row{display:flex;flex-wrap:wrap;gap:6px;}
-    .theme-btn{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,0.25);cursor:pointer;transition:transform .2s;}
-    .theme-btn.active,.theme-btn:active{transform:scale(1.2);border-color:#fff;}
-    .mute-row{display:flex;align-items:center;justify-content:space-between;font-size:0.9rem;font-weight:600;}
-    .toggle{width:44px;height:24px;background:rgba(255,255,255,0.2);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;}
-    .toggle.on{background:var(--primary);}
-    .toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;}
-    .toggle.on::after{transform:translateX(20px);}
-
-    .rules-banner{position:fixed;inset:0;z-index:50;background:rgba(10,8,25,0.92);display:none;align-items:center;justify-content:center;padding:20px;animation:fadeIn .3s ease;}
-    .rules-banner.open{display:flex;}
-    .rules-box{background:rgba(30,25,55,0.98);border:1px solid rgba(255,255,255,0.15);border-radius:16px;padding:14px 16px;max-width:340px;width:100%;max-height:90dvh;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);}
-    .rules-box h3{font-size:1.1rem;margin-bottom:8px;text-align:center;}
-    .rules-box ul{list-style:none;padding:0;font-size:0.78rem;line-height:1.35;opacity:0.9;}
-    .rules-box li{margin-bottom:4px;padding-right:2px;}
-    .rules-box li::before{content:"• ";color:var(--primary);font-weight:700;}
-    .rules-close{display:block;width:100%;margin-top:10px;padding:10px;border:none;border-radius:50px;background:linear-gradient(135deg,var(--primary),#a78bfa);color:#fff;font-family:inherit;font-size:0.95rem;font-weight:700;cursor:pointer;}
-
-    .bonus-banner{position:fixed;top:20%;left:50%;transform:translateX(-50%) scale(0.8);z-index:45;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1a1a2e;padding:16px 28px;border-radius:16px;font-size:1.15rem;font-weight:800;box-shadow:0 12px 40px rgba(251,191,36,0.5);opacity:0;pointer-events:none;transition:all .3s cubic-bezier(0.34,1.56,0.64,1);text-align:center;white-space:nowrap;}
-    .bonus-banner.show{opacity:1;transform:translateX(-50%) scale(1);}
-
-    .confirm-overlay{position:fixed;inset:0;z-index:55;background:rgba(10,8,25,0.85);display:none;align-items:center;justify-content:center;padding:20px;animation:fadeIn .25s ease;}
-    .confirm-overlay.show{display:flex;}
-    .confirm-box{
-      background:linear-gradient(160deg,rgba(40,30,70,0.98),rgba(25,18,50,0.98));
-      border:1px solid rgba(255,255,255,0.18);border-radius:20px;padding:22px 20px;max-width:300px;width:100%;
-      box-shadow:0 20px 50px rgba(0,0,0,0.55),0 0 40px rgba(124,92,252,0.2);text-align:center;
-      transform:scale(0.9);opacity:0;transition:all .3s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .confirm-overlay.show .confirm-box{transform:scale(1);opacity:1;}
-    .confirm-box h3{font-size:1.15rem;font-weight:800;margin-bottom:8px;
-      background:linear-gradient(120deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-    .confirm-box p{font-size:0.85rem;opacity:0.8;margin-bottom:18px;line-height:1.4;}
-    .confirm-actions{display:flex;gap:10px;justify-content:center;}
-    .confirm-actions .btn{flex:1;padding:11px 14px;font-size:0.9rem;}
-
-
-    .setup-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;max-width:360px;gap:8px;}
-    .logo{font-size:clamp(1.8rem,8vw,2.8rem);font-weight:900;background:linear-gradient(120deg,#a78bfa,#f472b6,#22d3ee);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:grad 5s ease infinite;}
-    @keyframes grad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-    .tagline{font-size:0.85rem;opacity:0.65;}
-    .card{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px;width:100%;}
-    .input-group{margin-bottom:10px;}
-    .input-group label{display:block;font-size:0.78rem;font-weight:600;margin-bottom:4px;opacity:0.8;}
-    .input-group input{width:100%;padding:10px 12px;border-radius:10px;border:2px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#fff;font-size:0.95rem;font-family:inherit;font-weight:600;}
-    .input-group input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);}
-    .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:middle;}
-    .dot.t1{background:var(--team1);box-shadow:0 0 5px var(--team1);}
-    .dot.t2{background:var(--team2);box-shadow:0 0 5px var(--team2);}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border:none;border-radius:50px;font-family:inherit;font-size:0.95rem;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s,opacity .2s;}
-    .btn:active{transform:scale(0.94);}
-    .btn:disabled{opacity:0.4;pointer-events:none;}
-    .btn-primary{background:linear-gradient(135deg,var(--primary),#a78bfa);color:#fff;box-shadow:0 5px 16px var(--primary-glow);width:100%;}
-    .btn-success{background:linear-gradient(135deg,#00e676,#00c853);color:#003d1f;box-shadow:0 4px 12px rgba(0,230,118,0.3);}
-    .btn-danger{background:linear-gradient(135deg,#ff5252,#ff1744);color:#fff;box-shadow:0 4px 12px rgba(255,82,82,0.3);}
-    .btn-ghost{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);font-size:0.75rem;padding:6px 12px;}
-    .btn-sm{padding:8px 10px;font-size:0.85rem;}
-    .dice-duel{display:flex;gap:24px;justify-content:center;margin:16px 0;}
-    .duel-side{text-align:center;}
-    .duel-dice{width:70px;height:70px;background:linear-gradient(145deg,#fff,#ddd);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;color:#1a1a2e;margin:0 auto 8px;box-shadow:0 6px 16px rgba(0,0,0,0.3);}
-    .duel-dice.rolling{animation:diceAnim .5s ease;}
-    .game-top{width:100%;max-width:400px;flex-shrink:0;}
-    .teams-row{display:flex;gap:6px;margin-bottom:4px;}
-    .team-pill{flex:1;padding:5px 8px;border-radius:10px;background:rgba(0,0,0,0.25);border:2px solid transparent;text-align:center;transition:all .3s;}
-    .team-pill.active{transform:scale(1.03);box-shadow:0 0 14px rgba(255,255,255,0.12);}
-    .team-pill.t1.active{border-color:var(--team1);background:rgba(0,210,255,0.15);}
-    .team-pill.t2.active{border-color:var(--team2);background:rgba(255,107,157,0.15);}
-    .team-name{font-size:0.7rem;font-weight:700;opacity:0.9;}
-    .team-score{font-size:1.15rem;font-weight:900;line-height:1.05;}
-    .tracks{display:flex;flex-direction:column;gap:3px;margin-bottom:3px;}
-    .track-row{display:flex;align-items:center;gap:7px;}
-    .track-label{font-size:0.68rem;font-weight:700;width:16px;text-align:center;opacity:0.8;}
-    .track-bar{flex:1;height:7px;background:rgba(255,255,255,0.1);border-radius:8px;overflow:hidden;}
-    .track-fill{height:100%;border-radius:8px;transition:width .7s cubic-bezier(0.34,1.56,0.64,1);}
-    .track-fill.t1{background:linear-gradient(90deg,var(--team1),#0084ff);box-shadow:0 0 7px rgba(0,210,255,0.45);}
-    .track-fill.t2{background:linear-gradient(90deg,var(--team2),#c44569);box-shadow:0 0 7px rgba(255,107,157,0.45);}
-    .track-num{font-size:0.72rem;font-weight:700;min-width:40px;text-align:left;opacity:0.85;}
-    .turn-line{text-align:center;font-size:0.75rem;font-weight:600;opacity:0.8;margin-bottom:2px;}
-    .mid-row{display:flex;align-items:center;justify-content:center;gap:14px;margin:2px 0 4px;flex-shrink:0;}
-    .dice{width:50px;height:50px;background:linear-gradient(145deg,#fff,#e0e0e0);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;color:#1a1a2e;box-shadow:0 5px 14px rgba(0,0,0,0.35);cursor:pointer;flex-shrink:0;line-height:1.1;}
-    .dice .dice-label-sm{font-size:0.45rem;font-weight:700;opacity:0.7;margin-bottom:0;}
-    .dice .dice-num{font-size:1.25rem;}
-    .dice.rolling{animation:diceAnim .55s ease;}
-    @keyframes diceAnim{0%{transform:rotate(0) scale(1)}25%{transform:rotate(90deg) scale(1.1)}50%{transform:rotate(180deg) scale(0.92)}75%{transform:rotate(270deg) scale(1.08)}100%{transform:rotate(360deg) scale(1)}}
-    .timer-ring{width:56px;height:56px;border-radius:50%;background:conic-gradient(var(--primary) var(--progress,100%),rgba(255,255,255,0.12) 0%);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;}
-    .timer-ring::before{content:'';position:absolute;inset:5px;background:linear-gradient(160deg,var(--bg1),var(--bg2));border-radius:50%;}
-    .timer-value{position:relative;font-size:1.15rem;font-weight:900;z-index:1;}
-    .timer-ring.warning{background:conic-gradient(var(--warning) var(--progress),rgba(255,255,255,0.12) 0%);}
-    .timer-ring.danger{background:conic-gradient(var(--danger) var(--progress),rgba(255,255,255,0.12) 0%);animation:pulse .5s infinite;}
-    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-    .correct-line{text-align:center;font-size:0.78rem;font-weight:700;color:var(--success);margin-bottom:3px;flex-shrink:0;}
-    .word-area{width:100%;max-width:380px;flex:1;min-height:48px;max-height:80px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px;margin-bottom:4px;flex-shrink:1;}
-    .word-display{font-size:clamp(1.4rem,6vw,2rem);font-weight:800;text-align:center;line-height:1.15;opacity:0;transform:scale(0.9);transition:all .2s cubic-bezier(0.34,1.56,0.64,1);word-break:break-word;max-width:100%;}
-    .word-display.visible{opacity:1;transform:scale(1);}
-    .hold-hint{font-size:0.7rem;opacity:0.5;margin-top:3px;}
-    .hold-btn{width:100%;max-width:380px;padding:10px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--primary),#a78bfa);color:#fff;font-family:inherit;font-size:0.95rem;font-weight:800;box-shadow:0 5px 16px var(--primary-glow);margin-bottom:4px;flex-shrink:0;touch-action:none;transition:transform .15s,box-shadow .15s,opacity .2s;}
-    .hold-btn:active,.hold-btn.holding{transform:scale(0.97);box-shadow:0 3px 10px var(--primary-glow);}
-    .hold-btn:disabled{opacity:0.45;pointer-events:none;}
-    .actions{display:flex;gap:6px;width:100%;max-width:380px;margin-bottom:3px;flex-shrink:0;}
-    .actions .btn{flex:1;}
-    .bottom-row{display:flex;gap:6px;width:100%;max-width:380px;justify-content:center;flex-shrink:0;padding-bottom:2px;}
-    @media(min-width:500px){
-      .screen{padding:14px 18px}.game-top{max-width:420px}.teams-row{gap:10px;margin-bottom:10px}.team-pill{padding:10px 12px}
-      .team-name{font-size:0.85rem}.team-score{font-size:1.4rem}.tracks{gap:8px;margin-bottom:8px}.track-bar{height:11px}
-      .mid-row{gap:24px;margin:8px 0 12px}.dice{width:70px;height:70px}.dice .dice-num{font-size:1.8rem}.dice .dice-label-sm{font-size:0.6rem}
-      .timer-ring{width:78px;height:78px}.timer-value{font-size:1.55rem}
-      .word-area{max-width:420px;min-height:80px;max-height:130px;padding:12px;margin-bottom:10px}
-      .hold-btn{max-width:420px;padding:14px;font-size:1.1rem;margin-bottom:10px}.actions{max-width:420px;gap:10px;margin-bottom:8px}.bottom-row{max-width:420px}
-    }
-    @media(min-width:700px){
-      .screen{padding:20px 28px}.game-top{max-width:460px}.mid-row{gap:32px;margin:12px 0 16px}
-      .dice{width:82px;height:82px}.dice .dice-num{font-size:2.1rem}.timer-ring{width:90px;height:90px}.timer-value{font-size:1.75rem}
-      .word-area{max-width:460px;min-height:100px;max-height:150px}.hold-btn{max-width:460px;padding:16px;font-size:1.15rem}
-      .actions,.bottom-row{max-width:460px}
-    }
-    .overlay{position:fixed;inset:0;background:rgba(15,12,41,0.94);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:50;padding:20px;text-align:center;}
-    .overlay.show{display:flex;animation:fadeIn .4s ease;}
-    .win-title{font-size:2.1rem;font-weight:900;margin-bottom:6px;background:linear-gradient(120deg,#fbbf24,#f472b6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-    .win-team{font-size:1.25rem;font-weight:700;margin-bottom:20px;}
-    .confetti{position:fixed;width:8px;height:8px;top:-15px;z-index:51;animation:fall 2.8s linear forwards;}
-    @keyframes fall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(720deg);opacity:0}}
-    
-    .target-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:4px;}
-    .target-btn{min-width:52px;padding:8px 10px;border-radius:12px;border:2px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.25);color:#fff;font-family:inherit;font-size:0.95rem;font-weight:800;cursor:pointer;transition:all .2s;}
-    .target-btn.active{border-color:var(--primary);background:rgba(124,92,252,0.25);box-shadow:0 0 12px var(--primary-glow);}
-
-    
-    .game-title{font-size:1.55rem;font-weight:900;text-align:center;margin-bottom:4px;letter-spacing:0.3px;
-      background:linear-gradient(120deg,#a78bfa,#f472b6,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex-shrink:0;}
-    .page-footer{position:fixed;bottom:2px;left:0;right:0;z-index:30;display:flex;flex-direction:column;align-items:center;pointer-events:none;font-size:1.1rem;opacity:0.65;line-height:1.2;gap:2px;}
-    .page-footer img{height:28px;width:auto;margin-top:2px;opacity:0.9;}
-    @media(min-width:500px){.game-title{font-size:1.85rem;margin-bottom:6px;}.page-footer{font-size:1.35rem;bottom:6px;}.page-footer img{height:40px;}}
-
-    
-    @media(max-height:640px){
-      .game-title{font-size:1.25rem;margin-bottom:2px;}
-      .team-pill{padding:4px 6px;}
-      .team-score{font-size:1.05rem;}
-      .tracks{gap:2px;margin-bottom:2px;}
-      .track-bar{height:6px;}
-      .mid-row{margin:1px 0 2px;gap:10px;}
-      .dice{width:44px;height:44px;}
-      .dice .dice-num{font-size:1.1rem;}
-      .timer-ring{width:48px;height:48px;}
-      .timer-value{font-size:1rem;}
-      .word-area{min-height:40px;max-height:64px;padding:4px;margin-bottom:3px;}
-      .word-display{font-size:clamp(1.2rem,5.5vw,1.7rem);}
-      .hold-btn{padding:8px;font-size:0.88rem;margin-bottom:3px;}
-      .btn-sm{padding:7px 8px;font-size:0.8rem;}
-      .btn-ghost{padding:5px 10px;font-size:0.7rem;}
-      .correct-line{font-size:0.72rem;margin-bottom:2px;}
-      .turn-line{font-size:0.7rem;}
-      .page-footer{font-size:0.95rem;}
-      .page-footer img{height:24px;}
-      .screen{padding:3px 8px 48px;}
-    }
-
-    .hidden{display:none!important;}
-  </style>
-</head>
-<body>
-  <div class="float-btns">
-    <button class="float-btn" id="settingsBtn" title="הגדרות">⚙️</button>
-    <button class="float-btn" id="rulesBtn" title="כללי המשחק">❓</button>
-  </div>
-
-  <div class="settings-panel" id="settingsPanel">
-    <h4>ערכת צבעים</h4>
-    <div class="theme-row">
-      <div class="theme-btn active" data-theme="default" style="background:linear-gradient(135deg,#7c5cfc,#a78bfa)"></div>
-      <div class="theme-btn" data-theme="ocean" style="background:linear-gradient(135deg,#00bcd4,#26a69a)"></div>
-      <div class="theme-btn" data-theme="sunset" style="background:linear-gradient(135deg,#ff7043,#ef5350)"></div>
-      <div class="theme-btn" data-theme="forest" style="background:linear-gradient(135deg,#66bb6a,#26a69a)"></div>
-      <div class="theme-btn" data-theme="classic" style="background:linear-gradient(135deg,#ff8f00,#ef9a9a)"></div>
-    </div>
-    <h4>צלילים</h4>
-    <div class="mute-row">
-      <span id="muteLabel">מופעל</span>
-      <div class="toggle on" id="muteToggle"></div>
-    </div>
-  </div>
-
-  <div class="rules-banner" id="rulesBanner">
-    <div class="rules-box">
-      <h3>כללי המשחק</h3>
-      <ul>
-        <li>משחק לשתי קבוצות. הראשונה שמגיעה ליעד הניקוד (40/60/80/100) מנצחת.</li>
-        <li>לפני המשחק: נזרקת קובייה – הגבוהה קובעת את זהות הקבוצה המתחילה (תיקו: שוב).</li>
-        <li>בתחילת תור: מפעילים את קוביית הבונוס + הטיימר רץ 60 שניות, זה הזמן לענות.</li>
-        <li>החזק את הכפתור כדי לראות את המילה (רק המסביר).</li>
-        <li>הקובייה: <strong>−1, 0, 1, 2, 3, 4</strong> – בונוס/קנס לניקוד התור <strong>רק אם נענו יותר מ-5 תשובות נכונות נכונות</strong>.</li>
-        <li>כשזכאים לבונוס – הבאנר יודיע על כך בסוף התור.</li>
-        <li>חובה לראות את המילה לפני לחיצה על "נכון" או "דילוג".</li>
-        <li>מסבירים בלי לומר את המילה או חלקים ממנה.</li>
-        <li>נכון = נקודה · דילוג = ללא נקודה.</li>
-        <li>התקדמות = תשובות נכונות <br>(+/− בונוס אם גדול יותר מ-5 תשובות נכונות).</li>
-        <li>הגעה ליעד = ניצחון מיידי גם באמצע התור.</li>
-        בהצלחה !
-      </ul>
-      <button class="rules-close" id="rulesClose">סגור</button>
-    </div>
-  </div>
-
-  <div class="bonus-banner" id="bonusBanner">תור זכאי לבונוס!</div>
-
-  <!-- SETUP -->
-  <div class="screen active" id="setupScreen">
-    <div class="setup-wrap">
-      <div class="logo">אליס</div>
-      <div class="tagline">משחק המילים</div>
-      <div class="card">
-        <div class="input-group"><label><span class="dot t1"></span> קבוצה 1</label><input type="text" id="team1Name" value="הכחולים" maxlength="12"></div>
-        <div class="input-group"><label><span class="dot t2"></span> קבוצה 2</label><input type="text" id="team2Name" value="הוורודים" maxlength="12"></div>
-        <div style="font-size:0.75rem;opacity:0.7;margin:8px 0 4px;text-align:center;">נקודות לניצחון</div>
-        <div class="target-row" id="targetRow">
-          <button type="button" class="target-btn" data-target="40">40</button>
-          <button type="button" class="target-btn active" data-target="60">60</button>
-          <button type="button" class="target-btn" data-target="80">80</button>
-          <button type="button" class="target-btn" data-target="100">100</button>
-        </div>
-        <button class="btn btn-primary" id="startBtn" style="margin-top:12px">המשך לזריקת קובייה</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- DUEL -->
-  <div class="screen" id="duelScreen">
-    <div class="setup-wrap">
-      <div style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">מי מתחיל?</div>
-      <div style="font-size:0.85rem;opacity:0.7;margin-bottom:8px;">כל קבוצה זורקת – הגבוהה מתחילה</div>
-      <div class="dice-duel">
-        <div class="duel-side"><div class="duel-dice" id="duelDice1">?</div><div id="duelName1" style="font-weight:700;font-size:0.9rem;">קבוצה 1</div></div>
-        <div class="duel-side"><div class="duel-dice" id="duelDice2">?</div><div id="duelName2" style="font-weight:700;font-size:0.9rem;">קבוצה 2</div></div>
-      </div>
-      <div id="duelResult" style="font-size:1rem;font-weight:700;min-height:28px;margin:8px 0;"></div>
-      <button class="btn btn-primary" id="duelRollBtn" style="width:auto;padding:12px 28px;">זרוק קוביות</button>
-      <button class="btn btn-primary hidden" id="duelStartBtn" style="width:auto;padding:12px 28px;margin-top:8px;">התחל משחק</button>
-    </div>
-  </div>
-
-  <!-- GAME -->
-  <div class="screen" id="gameScreen">
-    <div class="game-title">אליס</div>
-    <div class="game-top">
-      <div class="teams-row">
-        <div class="team-pill t1" id="pill1"><div class="team-name" id="name1">הכחולים</div><div class="team-score" id="score1">0</div></div>
-        <div class="team-pill t2" id="pill2"><div class="team-name" id="name2">הוורודים</div><div class="team-score" id="score2">0</div></div>
-      </div>
-      <div class="tracks">
-        <div class="track-row"><div class="track-label" style="color:var(--team1)">1</div><div class="track-bar"><div class="track-fill t1" id="fill1" style="width:0%"></div></div><div class="track-num" id="pos1">0/60</div></div>
-        <div class="track-row"><div class="track-label" style="color:var(--team2)">2</div><div class="track-bar"><div class="track-fill t2" id="fill2" style="width:0%"></div></div><div class="track-num" id="pos2">0/60</div></div>
-      </div>
-      <div class="turn-line" id="turnInfo">תור של הכחולים</div>
-    </div>
-    <div class="mid-row">
-      <div class="dice" id="dice" onclick="rollDice()"><span class="dice-label-sm">בונוס</span><span class="dice-num">?</span></div>
-      <div class="timer-ring" id="timerRing" style="--progress:100%"><div class="timer-value" id="timerValue">60</div></div>
-    </div>
-    <div class="correct-line" id="correctCount">מילים נכונות: 0</div>
-    <div class="word-area"><div class="word-display" id="wordDisplay">••••</div><div class="hold-hint" id="holdHint">זרוק קובייה</div></div>
-    <button class="hold-btn" id="holdBtn" disabled>החזק כדי לראות מילה</button>
-    <div class="actions">
-      <button class="btn btn-success btn-sm" id="correctBtn" disabled>✓ נכון</button>
-      <button class="btn btn-danger btn-sm" id="skipBtn" disabled>✗ דילוג</button>
-    </div>
-    <div class="bottom-row">
-      <button class="btn btn-ghost" id="endTurnBtn" disabled>סיום תור</button>
-      <button class="btn btn-ghost" id="endGameBtn">סיים משחק</button>
-    </div>
-  </div>
-
-  
-  <div class="confirm-overlay" id="confirmOverlay">
-    <div class="confirm-box">
-      <h3>לסיים את המשחק?</h3>
-      <p>אישור יחזיר למסך הפתיחה.<br>ביטול ימשיך את המשחק.</p>
-      <div class="confirm-actions">
-        <button class="btn btn-ghost" id="confirmCancel">ביטול</button>
-        <button class="btn btn-danger btn-sm" id="confirmOk">סיים</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="overlay" id="winOverlay">
-    <div class="win-title">ניצחון!</div>
-    <div class="win-team" id="winTeamName"></div>
-    <button class="btn btn-primary" style="width:auto;padding:12px 28px" onclick="location.reload()">משחק חדש</button>
-  </div>
-
-  <script>
-    const WORDS=["מטוס","פיצה","פיל","שמש","ים","ספר","כיסא","טלפון","כלב","חתול","לחם","גשם","מכונית","בית","עץ","פרח","כוכב","ירח","כדורגל","מוזיקה","קפה","שוקולד","מחשב","מפתח","דלת","חלון","שולחן","מיטה","נעל","כובע","משקפיים","שעון","תיק","עט","מצלמה","טלוויזיה","מקרר","תנור","סכין","כף","צלחת","כוס","בקבוק","מים","אש","קרח","שלג","רוח","ענן","הר","נהר","יער","מדבר","אי","גשר","מגדל","טירה","מלך","מלכה","נסיך","דרקון","אביר","חרב","מגן","סוס","אריה","נמר","דולפין","כריש","ציפור","דג","פרפר","דבורה","נחש","צב","רופא","מורה","שוטר","כבאי","טייס","שף","זמר","שחקן","צייר","אושר","עצב","כעס","פחד","אהבה","חלום","סוד","תקווה","אומץ","כדורסל","טניס","שחייה","ריצה","פסנתר","גיטרה","תופים","תפוח","בננה","תפוז","ענבים","אבטיח","תות","עגבנייה","גזר","בצל","חורף","קיץ","אביב","סתיו","בוקר","לילה","יום הולדת","חתונה","מסיבה","מתנה","עוגה","עיר","כפר","פארק","מוזיאון","ספרייה","בית ספר","בית חולים","רכבת","שוק","מסעדה","מלון","חוף","בריכה","גן חיות","קרקס","תיאטרון","קולנוע","ארנב","עכבר","פרה","כבשה","תרנגולת","ברווז","אווז","חמור","גמל","זברה","ג'ירפה","היפופוטם","קרנף","קוף","גורילה","פינגווין","ינשוף","עורב","יונה","תוכי","ברבור","טווס","נשר","עיט","עטלף","צב ים","תנין","לטאה","קרפדה","צפרדע","תולעת","נמלה","זבוב","יתוש","חיפושית","עכביש","עקרב","סרטן","מדוזה","כוכב ים","גלידה","עוגייה","בייגלה","המבורגר","נקניקייה","שווארמה","פלאפל","חומוס","טחינה","סלט","מרק","אורז","פסטה","לזניה","סושי","צ'יפס","פופקורן","ביצה","חלב","גבינה","יוגורט","חמאה","דבש","ריבה","סוכר","מלח","פלפל","חרדל","קטשופ","מיונז","מיץ","תה","קקאו","בירה","יין","סודה","שייק","מים מינרליים","קרטיב","סופגנייה","בורקס","ג'חנון","שקשוקה","חביתה","טוסט","סנדוויץ","פיתה","בגט","קרואסון","מאפין","ראש","עין","אוזן","אף","פה","שן","לשון","צוואר","כתף","יד","אצבע","ציפורן","רגל","ברך","עקב","גב","בטן","לב","ריאות","מוח","חולצה","מכנס","שמלה","חצאית","מעיל","סוודר","ג'קט","גרביים","תחתונים","חזייה","חגורה","עניבה","צעיף","כפפות","מגבעת","קסדה","תיק גב","ארנק","שרשרת","טבעת","ספה","כורסה","ארון","מגירה","מראה","מנורה","נורה","מתג","שקע","סוללה","מזגן","מאוורר","תנור חימום","שואב אבק","מכונת כביסה","מייבש","מגהץ","מטאטא","יעה","סמרטוט","סבון","שמפו","משחת שיניים","מברשת","מגבת","שירותים","מקלחת","אמבטיה","כיור","ברז","סיר","מחבת","קומקום","מיקסר","בלנדר","טוסטר","מיקרוגל","תנור אפייה","פותחן","פומפייה","אגם","מפל","מערה","צוק","עמק","מישור","סוואנה","ג'ונגל","קוטב","הר געש","רעידת אדמה","צונאמי","ברק","רעם","קשת בענן","שקיעה","זריחה","צל","ערפל","רחוב","שדרה","כיכר","צומת","כביש","מנהרה","מעלית","מדרגות","מרפסת","גג","חניה","תחנה","נמל תעופה","נמל","מסילה","אוטובוס","מונית","אופניים","קטנוע","משאית","מהנדס","עורך דין","רואה חשבון","אדריכל","מעצב","מתכנת","נהג","דייג","חקלאי","נגר","חשמלאי","אינסטלטור","קוסמטיקאית","אחות","רוקח","מדען","חוקר","עיתונאי","צלם","רקדן","קוסם","ליצן","ספורטאי","שופט","מאמן","שוער","חלוץ","מגיש","די ג'יי","יוגה","פילאטיס","כושר","הליכה","טיפוס","גלישה","סקי","סנובורד","צלילה","רכיבה","חברות","משפחה","שכנות","כבוד","אמת","שקר","צדק","חירות","שלום","מלחמה","ניצחון","הפסד","הצלחה","כישלון","הפתעה","בדיחה","צחוק","בכי","דמעה","חיוך","זיכרון","שכחה","רעיון","דמיון","מציאות","עתיד","עבר","הווה","זמן","שעון חול","מזל","סיכוי","סכנה","ביטחון","פחד גבהים","קלסטרופוביה","סקרנות","שעמום","התרגשות","רוגע","אינטרנט","אתר","אפליקציה","סיסמה","אימייל","הודעה","צ'אט","רשת חברתית","לייק","סטטוס","וידאו","פודקאסט","רדיו","עיתון","מגזין","בלוג","פוד","אוזניות","רמקול","מיקרופון","מדפסת","סורק","דיסק","ענן מחשוב","וירוס מחשב","חומת אש","רשת","נתב","כבל","סמארטפון","טאבלט","מחשב נייד","מקלדת","עכבר מחשב","מסך","מצלמת רשת","אוזניית בלוטות'","מטען","כבל USB","כרטיס זיכרון","שער","כדור","מחבט","שופט קו","עבירת חוקים","הארכה","פנדל","קרן","בעיטה","זריקה","מסירה","חסימה","קפיצה","ספרינט","מרתון","אולימפיאדה","מדליה","גביע","אליפות","שחמט","דמקה","קלפים","קובייה","פאזל","לגו","בובות","רחפן","יו יו","סביבון","בדיחות","חידון","חידה","תשבץ","סודוקו","מונופול","טאקי","אונו","פוקר","ברידג'","ירושלים","תל אביב","חיפה","אילת","כנרת","ים המלח","מצדה","כותל","שוק הכרמל","נווה צדק","חומוס עם ביצה","שקשוקה חריפה","גלידה ארטיק","במבה","ביסלי","שוקולד פרה","ארטיק קרח","סולת","קוסקוס","חמין","חנוכה","פורים","פסח","סוכות","ראש השנה","יום כיפור","לג בעומר","יום העצמאות","יום הזיכרון","שבת","משלוח מנות","מצה","לולב","אתרוג","שופר","תפילין","כיפה","טלית","מדרכה","רמזור","שלט","פרסומת","כרזה","דגל","המנון","מפה","מצפן","GPS","מזוודה","דרכון","כרטיס טיסה","ביקורת דרכונים","מכס","מלון בוטיק","צימר","קמפינג","אוהל","שק שינה","פנס","מצית","גפרור","נר","מנורת שמן","פחם","מנגל","על האש","Barbecue","שיפוד","מספריים","דבק","נייר דבק","סיכה","מהדק","חורר","מחדד","מחק","סרגל","מחוגה","יומן","מחברת","קלסר","תיקייה","מעטפה","בול","גלויה","מכתב","חתימה","חותמת","כסף","מטבע","שטר","ארנק דיגיטלי","כרטיס אשראי","כספומט","בנק","הלוואה","חיסכון","ריבית","חשבונית","קבלה","מחיר","הנחה","מבצע","קופון","עגלה","סל קניות","קופה","קופאי","מדף","מחסן","מכולת","סופרמרקט","קניון","חנות","דוכן","יריד","שוק פשפשים","חנות יד שנייה","ריח","טעם","מגע","קול","ראייה","חם","קר","לח","יבש","חלק","מחוספס","רך","קשה","כבד","קל","גדול","קטן","ארוך","קצר","רחב","צר","עגול","מרובע","משולש","חד","קהה","בריא","חולה","עייף","ערני","רעב","צמא","שבע","שיכור","מבושם","נקי","מלוכלך","מסודר","מבולגן","שקט","רועש","מהיר","איטי","חזק","חלש","חכם","טיפש","יפה","מכוער","מצחיק","בישול","אפייה","כביסה","ניקיון","תיקון","בנייה","ציור","פיסול","כתיבה","קריאה","לימוד","הוראה","נסיעה","טיול","חופשה","עבודה","ישיבה","עמידה","שכיבה","שינה","יקיצה","מקלחת בוקר","צחצוח שיניים","גילוח","איפור","סירוק","תספורת","צביעת שיער","מניקור","פדיקור","ספינה","יאכטה","סירה","קיאק","מפרשית","צוללת","רחפת","כדור פורח","מצנח","דאון","טרקטור","קומביין","מחרשה","חממה","אורווה","לול","רפת","דיר","שדה","מטע","כרם","זית","תמר","רימון","תאנה","שקד","אגוז","בוטן","גרעין","זרע","פנס רחוב","ספסל","פח אשפה","ברז כיבוי","מדרגות נעות","דלת מסתובבת","חלון ראווה","שלט ניאון","כביסה על חבל","עציץ","דשא","דשא סינתטי","גדר","שער כניסה","מפתן","מזוזה","פעמון דלת","אינטרקום","מצלמת אבטחה","אזעקה","מטף","גלגל הצלה","חגורת הצלה","אפוד מגן","קסדת אופניים","מרפק","פלסטר","תחבושת","אספירין","ויטמין","חיסון","מזרק","טבלית","סירופ","מדחום","לחץ דם","דופק","בדיקת דם","רנטגן","אולטרסאונד","ניתוח","הרדמה","תפרים","גבס","קביים","כיסא גלגלים","משקפי שמש","עדשות מגע","מכשיר שמיעה","פאה","שיניים תותבות","קעקוע","פירסינג","איפור קבוע","בוטוקס","ניתוח פלסטי","דיאטה","צום","ספורט אתגרי","צניחה חופשית","בנג'י","טיפוס הרים","טרקים","קמפינג לילי","מדורה","זמרה סביב המדורה","גיטרה אקוסטית","מארשמלאו","שוקולד חם","סיפור לפני השינה","אגדה","מיתוס","אגדת ילדים","ספר מתח","רומן","שירה","הייקו","בלוג אישי","יומן מסע","מפה עתיקה","מצפן עתיק","אוצר","מפת אוצר","פיראט","ספינת פיראטים","אי בודד","בקבוק עם פתק","מגדלור","סלע","קונכייה","חול","טירה בחול","דלי","את חול","משחק כדור בחוף","מטקות","גלשן","גל","קצף ים","שחף","סרטן נזיר","מדוזה צורבת","קרם הגנה","כובע קש","כפכפים","מגבת חוף","כיסא מתקפל","שמשייה","צידנית"];
-    let BOARD=60;
-    const BONUS_FACES=[-1,0,1,2,3,4];
-
-    let state={teams:[{name:"הכחולים",score:0,pos:0},{name:"הוורודים",score:0,pos:0}],current:0,timer:60,interval:null,running:false,correct:0,word:"",used:new Set(),canReveal:false,hasSeenWord:false,muted:false,bonus:0};
-
-    const AudioCtx=window.AudioContext||window.webkitAudioContext;let actx=null;
-    function ensureAudio(){if(!actx)actx=new AudioCtx();if(actx.state==='suspended')actx.resume();}
-    function playTone(freq,dur,type='sine',vol=0.3){if(state.muted)return;ensureAudio();const o=actx.createOscillator(),g=actx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.01,actx.currentTime+dur);o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+dur);}
-    function sndCorrect(){playTone(523,0.12,'sine',0.25);setTimeout(()=>playTone(659,0.12,'sine',0.25),100);setTimeout(()=>playTone(784,0.18,'sine',0.3),200);}
-    function sndSkip(){playTone(200,0.15,'sawtooth',0.2);setTimeout(()=>playTone(150,0.2,'sawtooth',0.15),80);}
-    function sndWin(){if(state.muted)return;[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.25,'sine',0.3),i*180));setTimeout(()=>playTone(784,0.4,'triangle',0.25),800);}
-    function sndDice(){playTone(300+Math.random()*200,0.08,'square',0.15);}
-    function sndBonus(){playTone(440,0.1,'sine',0.25);setTimeout(()=>playTone(554,0.1,'sine',0.25),100);setTimeout(()=>playTone(659,0.2,'sine',0.3),200);}
-
-    const $=id=>document.getElementById(id);
-    const setupScreen=$('setupScreen'),duelScreen=$('duelScreen'),gameScreen=$('gameScreen'),winOverlay=$('winOverlay');
-    const diceEl=$('dice'),timerRing=$('timerRing'),timerValue=$('timerValue'),wordDisplay=$('wordDisplay');
-    const holdBtn=$('holdBtn'),correctBtn=$('correctBtn'),skipBtn=$('skipBtn'),endTurnBtn=$('endTurnBtn');
-    const correctCount=$('correctCount'),turnInfo=$('turnInfo'),holdHint=$('holdHint'),bonusBanner=$('bonusBanner');
-    const settingsPanel=$('settingsPanel'),rulesBanner=$('rulesBanner');
-
-    function setDiceDisplay(val){
-      if(val===null||val===undefined||val==='?'){
-        diceEl.innerHTML='<span class="dice-label-sm">בונוס</span><span class="dice-num">?</span>';
-      } else {
-        const txt=val>0?'+'+val:String(val);
-        diceEl.innerHTML='<span class="dice-label-sm">בונוס</span><span class="dice-num">'+txt+'</span>';
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>אליס</title>
+    <link rel="icon" type="image/png" href="images/as.png" />
+    <link rel="apple-touch-icon" href="images/as.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@500;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg1: #0f0c29;
+        --bg2: #302b63;
+        --primary: #7c5cfc;
+        --primary-glow: rgba(124, 92, 252, 0.4);
+        --team1: #00d2ff;
+        --team2: #ff6b9d;
+        --success: #00e676;
+        --danger: #ff5252;
+        --warning: #ffd740;
       }
-    }
+      [data-theme="ocean"] {
+        --bg1: #0a1628;
+        --bg2: #0d3b4c;
+        --primary: #00bcd4;
+        --primary-glow: rgba(0, 188, 212, 0.4);
+        --team1: #4fc3f7;
+        --team2: #26a69a;
+      }
+      [data-theme="sunset"] {
+        --bg1: #1a0a0a;
+        --bg2: #4a1c1c;
+        --primary: #ff7043;
+        --primary-glow: rgba(255, 112, 67, 0.4);
+        --team1: #ffca28;
+        --team2: #ef5350;
+      }
+      [data-theme="forest"] {
+        --bg1: #0a1a0f;
+        --bg2: #1b3a2a;
+        --primary: #66bb6a;
+        --primary-glow: rgba(102, 187, 106, 0.4);
+        --team1: #aed581;
+        --team2: #26a69a;
+      }
+      [data-theme="classic"] {
+        --bg1: #1a120b;
+        --bg2: #3e2723;
+        --primary: #ff8f00;
+        --primary-glow: rgba(255, 143, 0, 0.4);
+        --team1: #ffcc80;
+        --team2: #ef9a9a;
+      }
 
-    $('settingsBtn').onclick=e=>{e.stopPropagation();settingsPanel.classList.toggle('open');rulesBanner.classList.remove('open');};
-    document.addEventListener('click',e=>{if(!settingsPanel.contains(e.target)&&e.target!==$('settingsBtn'))settingsPanel.classList.remove('open');});
-
-    document.querySelectorAll('.target-btn').forEach(btn=>{
-      btn.onclick=()=>{
-        document.querySelectorAll('.target-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        state.target=parseInt(btn.dataset.target,10);
-        BOARD=state.target;
-        // update labels if already visible
-        if($('pos1')){$('pos1').textContent='0/'+BOARD;$('pos2').textContent='0/'+BOARD;}
-      };
-    });
-    document.querySelectorAll('.theme-btn').forEach(btn=>{
-      btn.onclick=()=>{document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-        const t=btn.dataset.theme;if(t==='default')document.body.removeAttribute('data-theme');else document.body.setAttribute('data-theme',t);};
-    });
-
-    $('muteToggle').onclick=()=>{
-      state.muted=!state.muted;
-      $('muteToggle').classList.toggle('on',!state.muted);
-      $('muteLabel').textContent=state.muted?'מושתק':'מופעל';
-    };
-
-    $('rulesBtn').onclick=()=>{rulesBanner.classList.add('open');settingsPanel.classList.remove('open');};
-    $('rulesClose').onclick=()=>rulesBanner.classList.remove('open');
-    rulesBanner.onclick=e=>{if(e.target===rulesBanner)rulesBanner.classList.remove('open');};
-
-    $('startBtn').onclick=()=>{ensureAudio();
-      BOARD=state.target||60;
-      state.teams[0].name=$('team1Name').value.trim()||"הכחולים";state.teams[1].name=$('team2Name').value.trim()||"הוורודים";
-      $('name1').textContent=state.teams[0].name;$('name2').textContent=state.teams[1].name;
-      $('duelName1').textContent=state.teams[0].name;$('duelName2').textContent=state.teams[1].name;
-      setupScreen.classList.remove('active');duelScreen.classList.add('active');
-    };
-
-    let duelRolling=false;
-    $('duelRollBtn').onclick=()=>{if(duelRolling)return;duelRolling=true;$('duelResult').textContent='';$('duelStartBtn').classList.add('hidden');
-      const d1=$('duelDice1'),d2=$('duelDice2');d1.classList.add('rolling');d2.classList.add('rolling');
-      let n=0;const iv=setInterval(()=>{d1.textContent=Math.ceil(Math.random()*6);d2.textContent=Math.ceil(Math.random()*6);sndDice();
-        if(++n>10){clearInterval(iv);const v1=Math.ceil(Math.random()*6),v2=Math.ceil(Math.random()*6);
-          d1.textContent=v1;d2.textContent=v2;d1.classList.remove('rolling');d2.classList.remove('rolling');duelRolling=false;
-          if(v1>v2){state.current=0;$('duelResult').textContent=state.teams[0].name+' מתחילים!';$('duelRollBtn').classList.add('hidden');}
-          else if(v2>v1){state.current=1;$('duelResult').textContent=state.teams[1].name+' מתחילים!';$('duelRollBtn').classList.add('hidden');}
-          else{$('duelResult').textContent='תיקו! זרקו שוב';return;}
-          $('duelStartBtn').classList.remove('hidden');
-        }},60);
-    };
-    $('duelStartBtn').onclick=()=>{duelScreen.classList.remove('active');gameScreen.classList.add('active');prepareTurn();};
-    $('endGameBtn').onclick=()=>{$('confirmOverlay').classList.add('show');};
-    $('confirmCancel').onclick=()=>$('confirmOverlay').classList.remove('show');
-    $('confirmOk').onclick=()=>location.reload();
-    $('confirmOverlay').onclick=e=>{if(e.target===$('confirmOverlay'))$('confirmOverlay').classList.remove('show');};
-
-    function rollDice(){
-      if(state.running)return;
-      ensureAudio();
-      diceEl.classList.add('rolling');
-      let n=0;
-      const iv=setInterval(()=>{
-        const face=BONUS_FACES[Math.floor(Math.random()*6)];
-        setDiceDisplay(face);
-        sndDice();
-        if(++n>9){
-          clearInterval(iv);
-          const final=BONUS_FACES[Math.floor(Math.random()*6)];
-          state.bonus=final;
-          setDiceDisplay(final);
-          diceEl.classList.remove('rolling');
-          startTurn();
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+      }
+      html,
+      body {
+        height: 100%;
+        height: 100dvh;
+        overflow: hidden;
+        font-family: "Heebo", sans-serif;
+        background: linear-gradient(
+          160deg,
+          var(--bg1),
+          var(--bg2) 60%,
+          #1a1a3e
+        );
+        color: #fff;
+        touch-action: manipulation;
+        transition: background 0.4s;
+      }
+      .screen {
+        display: none;
+        height: 100%;
+        height: 100dvh;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        padding: 4px 10px 52px;
+        overflow: hidden;
+      }
+      .screen.active {
+        display: flex;
+        animation: fadeIn 0.35s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
         }
-      },55);
-    }
-
-    function prepareTurn(){
-      state.correct=0;state.running=false;state.canReveal=false;state.hasSeenWord=false;state.bonus=0;
-      setDiceDisplay('?');
-      wordDisplay.classList.remove('visible');wordDisplay.textContent='••••';
-      holdHint.textContent='זרוק קוביית בונוס';
-      holdBtn.disabled=true;correctBtn.disabled=true;skipBtn.disabled=true;endTurnBtn.disabled=true;
-      timerValue.textContent='60';timerRing.style.setProperty('--progress','100%');timerRing.classList.remove('warning','danger');
-      correctCount.textContent='מילים נכונות: 0';
-      updateUI();
-    }
-
-    function startTurn(){
-      state.running=true;state.canReveal=true;state.hasSeenWord=false;state.timer=60;
-      holdBtn.disabled=false;correctBtn.disabled=true;skipBtn.disabled=true;endTurnBtn.disabled=false;
-      holdHint.textContent='החזק כדי לראות';
-      nextWord();
-      clearInterval(state.interval);
-      state.interval=setInterval(()=>{
-        state.timer--;timerValue.textContent=state.timer;
-        timerRing.style.setProperty('--progress',(state.timer/60*100)+'%');
-        if(state.timer<=12){timerRing.classList.add('danger');timerRing.classList.remove('warning');}
-        else if(state.timer<=25)timerRing.classList.add('warning');
-        if(state.timer<=0){clearInterval(state.interval);finishTurn();}
-      },1000);
-    }
-
-    function nextWord(){
-      let w,tries=0;
-      do{w=WORDS[Math.floor(Math.random()*WORDS.length)];tries++;}while(state.used.has(w)&&tries<40);
-      state.used.add(w);if(state.used.size>WORDS.length*0.75)state.used.clear();
-      state.word=w;state.hasSeenWord=false;correctBtn.disabled=true;skipBtn.disabled=true;
-      wordDisplay.classList.remove('visible');wordDisplay.textContent='••••';
-    }
-
-    function show(){
-      if(!state.canReveal||!state.running)return;
-      wordDisplay.textContent=state.word;wordDisplay.classList.add('visible');holdHint.textContent='שחרר להסתרה';
-      if(!state.hasSeenWord){state.hasSeenWord=true;correctBtn.disabled=false;skipBtn.disabled=false;}
-    }
-    function hide(){
-      wordDisplay.classList.remove('visible');wordDisplay.textContent='••••';
-      if(state.running)holdHint.textContent='החזק כדי לראות';
-    }
-
-    holdBtn.addEventListener('touchstart',e=>{e.preventDefault();show();holdBtn.classList.add('holding');});
-    holdBtn.addEventListener('touchend',()=>{hide();holdBtn.classList.remove('holding');});
-    holdBtn.addEventListener('touchcancel',()=>{hide();holdBtn.classList.remove('holding');});
-    holdBtn.addEventListener('mousedown',()=>{show();holdBtn.classList.add('holding');});
-    holdBtn.addEventListener('mouseup',()=>{hide();holdBtn.classList.remove('holding');});
-    holdBtn.addEventListener('mouseleave',()=>{hide();holdBtn.classList.remove('holding');});
-
-    correctBtn.onclick=()=>{
-      if(!state.running||!state.hasSeenWord)return;
-      state.correct++;
-      correctCount.textContent='מילים נכונות: '+state.correct;
-      sndCorrect();
-      // ניצחון מיידי באמצע תור אם הגענו ליעד
-      const projected = state.teams[state.current].pos + state.correct + (state.correct>=5 ? state.bonus : 0);
-      if(projected >= BOARD){
-        clearInterval(state.interval);
-        state.running=false; state.canReveal=false; state.hasSeenWord=false;
-        holdBtn.disabled=true; correctBtn.disabled=true; skipBtn.disabled=true; endTurnBtn.disabled=true;
-        hide();
-        let move = state.correct;
-        if(state.correct>=5){ move = state.correct + state.bonus; showBonusBanner(); }
-        const t = state.teams[state.current];
-        t.pos = Math.min(BOARD, Math.max(0, t.pos + move));
-        t.score = t.pos;
-        updateUI();
-        setTimeout(()=>showWin(t.name), state.correct>=5 ? 1600 : 300);
-        return;
-      }
-      nextWord();
-    };
-    skipBtn.onclick=()=>{if(!state.running||!state.hasSeenWord)return;sndSkip();nextWord();};
-    endTurnBtn.onclick=()=>finishTurn();
-
-    function showBonusBanner(){
-      bonusBanner.classList.add('show');
-      sndBonus();
-      setTimeout(()=>bonusBanner.classList.remove('show'),1500);
-    }
-
-    function finishTurn(){
-      clearInterval(state.interval);
-      state.running=false;state.canReveal=false;state.hasSeenWord=false;
-      hide();
-
-      let move=state.correct;
-      // בונוס רק אם לפחות 5 נכונות
-      if(state.correct>=5){
-        move=state.correct+state.bonus;
-        showBonusBanner();
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
-      const t=state.teams[state.current];
-      // אל תאפשר ירידה מתחת ל-0
-      t.pos=Math.max(0, Math.min(BOARD, t.pos+move));
-      t.score+=Math.max(0, move); // או לשמור את המהלך בפועל - נשמור ניקוד מצטבר של מילים+בונוס כפי שחושב
-
-      // עדכון מדויק יותר של ניקוד: ניקוד = מיקום
-      t.score=t.pos;
-
-      updateUI();
-
-      if(t.pos>=BOARD){
-        setTimeout(()=>showWin(t.name),1600); // אחרי הבאנר
-        return;
+      .float-btns {
+        position: fixed;
+        top: 6px;
+        left: 6px;
+        z-index: 40;
+        display: flex;
+        gap: 6px;
+      }
+      .float-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        transition:
+          transform 0.15s,
+          background 0.2s;
+      }
+      .float-btn:active {
+        transform: scale(0.9);
+      }
+      .float-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
       }
 
-      // אם היה באנר, לחכות קצת לפני מעבר תור
-      const delay=state.correct>=5?1600:0;
-      setTimeout(()=>{
-        state.current=1-state.current;
+      .settings-panel {
+        position: fixed;
+        top: 46px;
+        left: 6px;
+        z-index: 41;
+        background: rgba(20, 15, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 14px;
+        width: 200px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+        animation: fadeIn 0.25s ease;
+      }
+      .settings-panel.open {
+        display: flex;
+      }
+      .settings-panel h4 {
+        font-size: 0.85rem;
+        opacity: 0.7;
+        margin-bottom: 2px;
+      }
+      .theme-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .theme-btn {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .theme-btn.active,
+      .theme-btn:active {
+        transform: scale(1.2);
+        border-color: #fff;
+      }
+      .mute-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+      .toggle {
+        width: 44px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .toggle.on {
+        background: var(--primary);
+      }
+      .toggle::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        border-radius: 50%;
+        top: 3px;
+        left: 3px;
+        transition: transform 0.2s;
+      }
+      .toggle.on::after {
+        transform: translateX(20px);
+      }
+
+      .rules-banner {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background: rgba(10, 8, 25, 0.92);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: fadeIn 0.3s ease;
+      }
+      .rules-banner.open {
+        display: flex;
+      }
+      .rules-box {
+        background: rgba(30, 25, 55, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 14px 16px;
+        max-width: 340px;
+        width: 100%;
+        max-height: 90dvh;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      }
+      .rules-box h3 {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .rules-box ul {
+        list-style: none;
+        padding: 0;
+        font-size: 0.78rem;
+        line-height: 1.35;
+        opacity: 0.9;
+      }
+      .rules-box li {
+        margin-bottom: 4px;
+        padding-right: 2px;
+      }
+      .rules-box li::before {
+        content: "• ";
+        color: var(--primary);
+        font-weight: 700;
+      }
+      .rules-close {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px;
+        border: none;
+        border-radius: 50px;
+        background: linear-gradient(135deg, var(--primary), #a78bfa);
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .bonus-banner {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%) scale(0.8);
+        z-index: 45;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #1a1a2e;
+        padding: 16px 28px;
+        border-radius: 16px;
+        font-size: 1.15rem;
+        font-weight: 800;
+        box-shadow: 0 12px 40px rgba(251, 191, 36, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        text-align: center;
+        white-space: nowrap;
+      }
+      .bonus-banner.show {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+      }
+
+      .confirm-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 55;
+        background: rgba(10, 8, 25, 0.85);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: fadeIn 0.25s ease;
+      }
+      .confirm-overlay.show {
+        display: flex;
+      }
+      .confirm-box {
+        background: linear-gradient(
+          160deg,
+          rgba(40, 30, 70, 0.98),
+          rgba(25, 18, 50, 0.98)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 20px;
+        padding: 22px 20px;
+        max-width: 300px;
+        width: 100%;
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.55),
+          0 0 40px rgba(124, 92, 252, 0.2);
+        text-align: center;
+        transform: scale(0.9);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .confirm-overlay.show .confirm-box {
+        transform: scale(1);
+        opacity: 1;
+      }
+      .confirm-box h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(120deg, #a78bfa, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .confirm-box p {
+        font-size: 0.85rem;
+        opacity: 0.8;
+        margin-bottom: 18px;
+        line-height: 1.4;
+      }
+      .confirm-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      .confirm-actions .btn {
+        flex: 1;
+        padding: 11px 14px;
+        font-size: 0.9rem;
+      }
+
+      .setup-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        max-width: 360px;
+        gap: 8px;
+      }
+      .logo {
+        font-size: clamp(1.8rem, 8vw, 2.8rem);
+        font-weight: 900;
+        background: linear-gradient(120deg, #a78bfa, #f472b6, #22d3ee);
+        background-size: 200% 200%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: grad 5s ease infinite;
+      }
+      @keyframes grad {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+      .tagline {
+        font-size: 0.85rem;
+        opacity: 0.65;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        padding: 12px;
+        width: 100%;
+      }
+      .input-group {
+        margin-bottom: 10px;
+      }
+      .input-group label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        opacity: 0.8;
+      }
+      .input-group input {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        background: rgba(0, 0, 0, 0.3);
+        color: #fff;
+        font-size: 0.95rem;
+        font-family: inherit;
+        font-weight: 600;
+      }
+      .input-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-glow);
+      }
+      .dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 4px;
+        vertical-align: middle;
+      }
+      .dot.t1 {
+        background: var(--team1);
+        box-shadow: 0 0 5px var(--team1);
+      }
+      .dot.t2 {
+        background: var(--team2);
+        box-shadow: 0 0 5px var(--team2);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 11px 18px;
+        border: none;
+        border-radius: 50px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s,
+          opacity 0.2s;
+      }
+      .btn:active {
+        transform: scale(0.94);
+      }
+      .btn:disabled {
+        opacity: 0.4;
+        pointer-events: none;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), #a78bfa);
+        color: #fff;
+        box-shadow: 0 5px 16px var(--primary-glow);
+        width: 100%;
+      }
+      .btn-success {
+        background: linear-gradient(135deg, #00e676, #00c853);
+        color: #003d1f;
+        box-shadow: 0 4px 12px rgba(0, 230, 118, 0.3);
+      }
+      .btn-danger {
+        background: linear-gradient(135deg, #ff5252, #ff1744);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+      }
+      .btn-ghost {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        font-size: 0.75rem;
+        padding: 6px 12px;
+      }
+      .btn-sm {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+      }
+      .dice-duel {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+        margin: 16px 0;
+      }
+      .duel-side {
+        text-align: center;
+      }
+      .duel-dice {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(145deg, #fff, #ddd);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 900;
+        color: #1a1a2e;
+        margin: 0 auto 8px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+      }
+      .duel-dice.rolling {
+        animation: diceAnim 0.5s ease;
+      }
+      .game-top {
+        width: 100%;
+        max-width: 400px;
+        flex-shrink: 0;
+      }
+      .teams-row {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 4px;
+      }
+      .team-pill {
+        flex: 1;
+        padding: 5px 8px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.25);
+        border: 2px solid transparent;
+        text-align: center;
+        transition: all 0.3s;
+      }
+      .team-pill.active {
+        transform: scale(1.03);
+        box-shadow: 0 0 14px rgba(255, 255, 255, 0.12);
+      }
+      .team-pill.t1.active {
+        border-color: var(--team1);
+        background: rgba(0, 210, 255, 0.15);
+      }
+      .team-pill.t2.active {
+        border-color: var(--team2);
+        background: rgba(255, 107, 157, 0.15);
+      }
+      .team-name {
+        font-size: 0.7rem;
+        font-weight: 700;
+        opacity: 0.9;
+      }
+      .team-score {
+        font-size: 1.15rem;
+        font-weight: 900;
+        line-height: 1.05;
+      }
+      .tracks {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 3px;
+      }
+      .track-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .track-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        width: 16px;
+        text-align: center;
+        opacity: 0.8;
+      }
+      .track-bar {
+        flex: 1;
+        height: 7px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .track-fill {
+        height: 100%;
+        border-radius: 8px;
+        transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .track-fill.t1 {
+        background: linear-gradient(90deg, var(--team1), #0084ff);
+        box-shadow: 0 0 7px rgba(0, 210, 255, 0.45);
+      }
+      .track-fill.t2 {
+        background: linear-gradient(90deg, var(--team2), #c44569);
+        box-shadow: 0 0 7px rgba(255, 107, 157, 0.45);
+      }
+      .track-num {
+        font-size: 0.72rem;
+        font-weight: 700;
+        min-width: 40px;
+        text-align: left;
+        opacity: 0.85;
+      }
+      .turn-line {
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        opacity: 0.8;
+        margin-bottom: 2px;
+      }
+      .mid-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        margin: 2px 0 4px;
+        flex-shrink: 0;
+      }
+      .dice {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(145deg, #fff, #e0e0e0);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: #1a1a2e;
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.35);
+        cursor: pointer;
+        flex-shrink: 0;
+        line-height: 1.1;
+      }
+      .dice .dice-label-sm {
+        font-size: 0.45rem;
+        font-weight: 700;
+        opacity: 0.7;
+        margin-bottom: 0;
+      }
+      .dice .dice-num {
+        font-size: 1.25rem;
+      }
+      .dice.rolling {
+        animation: diceAnim 0.55s ease;
+      }
+      @keyframes diceAnim {
+        0% {
+          transform: rotate(0) scale(1);
+        }
+        25% {
+          transform: rotate(90deg) scale(1.1);
+        }
+        50% {
+          transform: rotate(180deg) scale(0.92);
+        }
+        75% {
+          transform: rotate(270deg) scale(1.08);
+        }
+        100% {
+          transform: rotate(360deg) scale(1);
+        }
+      }
+      .timer-ring {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: conic-gradient(
+          var(--primary) var(--progress, 100%),
+          rgba(255, 255, 255, 0.12) 0%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        flex-shrink: 0;
+      }
+      .timer-ring::before {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        background: linear-gradient(160deg, var(--bg1), var(--bg2));
+        border-radius: 50%;
+      }
+      .timer-value {
+        position: relative;
+        font-size: 1.15rem;
+        font-weight: 900;
+        z-index: 1;
+      }
+      .timer-ring.warning {
+        background: conic-gradient(
+          var(--warning) var(--progress),
+          rgba(255, 255, 255, 0.12) 0%
+        );
+      }
+      .timer-ring.danger {
+        background: conic-gradient(
+          var(--danger) var(--progress),
+          rgba(255, 255, 255, 0.12) 0%
+        );
+        animation: pulse 0.5s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.04);
+        }
+      }
+      .correct-line {
+        text-align: center;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--success);
+        margin-bottom: 3px;
+        flex-shrink: 0;
+      }
+      .word-area {
+        width: 100%;
+        max-width: 380px;
+        flex: 1;
+        min-height: 48px;
+        max-height: 80px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+        margin-bottom: 4px;
+        flex-shrink: 1;
+      }
+      .word-display {
+        font-size: clamp(1.4rem, 6vw, 2rem);
+        font-weight: 800;
+        text-align: center;
+        line-height: 1.15;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        word-break: break-word;
+        max-width: 100%;
+      }
+      .word-display.visible {
+        opacity: 1;
+        transform: scale(1);
+      }
+      .hold-hint {
+        font-size: 0.7rem;
+        opacity: 0.5;
+        margin-top: 3px;
+      }
+      .hold-btn {
+        width: 100%;
+        max-width: 380px;
+        padding: 10px;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, var(--primary), #a78bfa);
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 800;
+        box-shadow: 0 5px 16px var(--primary-glow);
+        margin-bottom: 4px;
+        flex-shrink: 0;
+        touch-action: none;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s,
+          opacity 0.2s;
+      }
+      .hold-btn:active,
+      .hold-btn.holding {
+        transform: scale(0.97);
+        box-shadow: 0 3px 10px var(--primary-glow);
+      }
+      .hold-btn:disabled {
+        opacity: 0.45;
+        pointer-events: none;
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+        width: 100%;
+        max-width: 380px;
+        margin-bottom: 3px;
+        flex-shrink: 0;
+      }
+      .actions .btn {
+        flex: 1;
+      }
+      .bottom-row {
+        display: flex;
+        gap: 6px;
+        width: 100%;
+        max-width: 380px;
+        justify-content: center;
+        flex-shrink: 0;
+        padding-bottom: 2px;
+      }
+      @media (min-width: 500px) {
+        .screen {
+          padding: 14px 18px;
+        }
+        .game-top {
+          max-width: 420px;
+        }
+        .teams-row {
+          gap: 10px;
+          margin-bottom: 10px;
+        }
+        .team-pill {
+          padding: 10px 12px;
+        }
+        .team-name {
+          font-size: 0.85rem;
+        }
+        .team-score {
+          font-size: 1.4rem;
+        }
+        .tracks {
+          gap: 8px;
+          margin-bottom: 8px;
+        }
+        .track-bar {
+          height: 11px;
+        }
+        .mid-row {
+          gap: 24px;
+          margin: 8px 0 12px;
+        }
+        .dice {
+          width: 70px;
+          height: 70px;
+        }
+        .dice .dice-num {
+          font-size: 1.8rem;
+        }
+        .dice .dice-label-sm {
+          font-size: 0.6rem;
+        }
+        .timer-ring {
+          width: 78px;
+          height: 78px;
+        }
+        .timer-value {
+          font-size: 1.55rem;
+        }
+        .word-area {
+          max-width: 420px;
+          min-height: 80px;
+          max-height: 130px;
+          padding: 12px;
+          margin-bottom: 10px;
+        }
+        .hold-btn {
+          max-width: 420px;
+          padding: 14px;
+          font-size: 1.1rem;
+          margin-bottom: 10px;
+        }
+        .actions {
+          max-width: 420px;
+          gap: 10px;
+          margin-bottom: 8px;
+        }
+        .bottom-row {
+          max-width: 420px;
+        }
+      }
+      @media (min-width: 700px) {
+        .screen {
+          padding: 20px 28px;
+        }
+        .game-top {
+          max-width: 460px;
+        }
+        .mid-row {
+          gap: 32px;
+          margin: 12px 0 16px;
+        }
+        .dice {
+          width: 82px;
+          height: 82px;
+        }
+        .dice .dice-num {
+          font-size: 2.1rem;
+        }
+        .timer-ring {
+          width: 90px;
+          height: 90px;
+        }
+        .timer-value {
+          font-size: 1.75rem;
+        }
+        .word-area {
+          max-width: 460px;
+          min-height: 100px;
+          max-height: 150px;
+        }
+        .hold-btn {
+          max-width: 460px;
+          padding: 16px;
+          font-size: 1.15rem;
+        }
+        .actions,
+        .bottom-row {
+          max-width: 460px;
+        }
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 12, 41, 0.94);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        padding: 20px;
+        text-align: center;
+      }
+      .overlay.show {
+        display: flex;
+        animation: fadeIn 0.4s ease;
+      }
+      .win-title {
+        font-size: 2.1rem;
+        font-weight: 900;
+        margin-bottom: 6px;
+        background: linear-gradient(120deg, #fbbf24, #f472b6, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .win-team {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+      .confetti {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        top: -15px;
+        z-index: 51;
+        animation: fall 2.8s linear forwards;
+      }
+      @keyframes fall {
+        0% {
+          transform: translateY(0) rotate(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(105vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      .target-row {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+      .target-btn {
+        min-width: 52px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.18);
+        background: rgba(0, 0, 0, 0.25);
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .target-btn.active {
+        border-color: var(--primary);
+        background: rgba(124, 92, 252, 0.25);
+        box-shadow: 0 0 12px var(--primary-glow);
+      }
+
+      .game-title {
+        font-size: 1.55rem;
+        font-weight: 900;
+        text-align: center;
+        margin-bottom: 4px;
+        letter-spacing: 0.3px;
+        background: linear-gradient(120deg, #a78bfa, #f472b6, #22d3ee);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        flex-shrink: 0;
+      }
+      .page-footer {
+        position: fixed;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        pointer-events: none;
+        font-size: 1.1rem;
+        opacity: 0.65;
+        line-height: 1.2;
+        gap: 2px;
+      }
+      .page-footer img {
+        height: 28px;
+        width: auto;
+        margin-top: 2px;
+        opacity: 0.9;
+      }
+      @media (min-width: 500px) {
+        .game-title {
+          font-size: 3rem;
+          margin-bottom: 6px;
+        }
+        .page-footer {
+          font-size: 1.35rem;
+          bottom: 6px;
+        }
+        .page-footer img {
+          height: 60px;
+        }
+      }
+
+      @media (max-height: 640px) {
+        .game-title {
+          font-size: 1.25rem;
+          margin-bottom: 2px;
+        }
+        .team-pill {
+          padding: 4px 6px;
+        }
+        .team-score {
+          font-size: 1.05rem;
+        }
+        .tracks {
+          gap: 2px;
+          margin-bottom: 2px;
+        }
+        .track-bar {
+          height: 6px;
+        }
+        .mid-row {
+          margin: 1px 0 2px;
+          gap: 10px;
+        }
+        .dice {
+          width: 44px;
+          height: 44px;
+        }
+        .dice .dice-num {
+          font-size: 1.1rem;
+        }
+        .timer-ring {
+          width: 48px;
+          height: 48px;
+        }
+        .timer-value {
+          font-size: 1rem;
+        }
+        .word-area {
+          min-height: 40px;
+          max-height: 64px;
+          padding: 4px;
+          margin-bottom: 3px;
+        }
+        .word-display {
+          font-size: clamp(1.2rem, 5.5vw, 1.7rem);
+        }
+        .hold-btn {
+          padding: 8px;
+          font-size: 0.88rem;
+          margin-bottom: 3px;
+        }
+        .btn-sm {
+          padding: 7px 8px;
+          font-size: 0.8rem;
+        }
+        .btn-ghost {
+          padding: 5px 10px;
+          font-size: 0.7rem;
+        }
+        .correct-line {
+          font-size: 0.72rem;
+          margin-bottom: 2px;
+        }
+        .turn-line {
+          font-size: 0.7rem;
+        }
+        .page-footer {
+          font-size: 0.95rem;
+        }
+        .page-footer img {
+          height: 24px;
+        }
+        .screen {
+          padding: 3px 8px 48px;
+        }
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="float-btns">
+      <button class="float-btn" id="settingsBtn" title="הגדרות">⚙️</button>
+      <button class="float-btn" id="rulesBtn" title="כללי המשחק">❓</button>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+      <h4>ערכת צבעים</h4>
+      <div class="theme-row">
+        <div
+          class="theme-btn active"
+          data-theme="default"
+          style="background: linear-gradient(135deg, #7c5cfc, #a78bfa)"
+        ></div>
+        <div
+          class="theme-btn"
+          data-theme="ocean"
+          style="background: linear-gradient(135deg, #00bcd4, #26a69a)"
+        ></div>
+        <div
+          class="theme-btn"
+          data-theme="sunset"
+          style="background: linear-gradient(135deg, #ff7043, #ef5350)"
+        ></div>
+        <div
+          class="theme-btn"
+          data-theme="forest"
+          style="background: linear-gradient(135deg, #66bb6a, #26a69a)"
+        ></div>
+        <div
+          class="theme-btn"
+          data-theme="classic"
+          style="background: linear-gradient(135deg, #ff8f00, #ef9a9a)"
+        ></div>
+      </div>
+      <h4>צלילים</h4>
+      <div class="mute-row">
+        <span id="muteLabel">מופעל</span>
+        <div class="toggle on" id="muteToggle"></div>
+      </div>
+    </div>
+
+    <div class="rules-banner" id="rulesBanner">
+      <div class="rules-box">
+        <h3>כללי המשחק</h3>
+        <ul>
+          <li>
+            משחק לשתי קבוצות. הראשונה שמגיעה ליעד הניקוד (40/60/80/100) מנצחת.
+          </li>
+          <li>
+            לפני המשחק: נזרקת קובייה – הגבוהה קובעת את זהות הקבוצה המתחילה
+            (תיקו: שוב).
+          </li>
+          <li>
+            בתחילת תור: מפעילים את קוביית הבונוס + הטיימר רץ 60 שניות, זה הזמן
+            לענות.
+          </li>
+          <li>החזק את הכפתור כדי לראות את המילה (רק המסביר).</li>
+          <li>
+            הקובייה: <strong>−1, 0, 1, 2, 3, 4</strong> – בונוס/קנס לניקוד התור
+            <strong>רק אם נענו יותר מ-5 תשובות נכונות נכונות</strong>.
+          </li>
+          <li>כשזכאים לבונוס – הבאנר יודיע על כך בסוף התור.</li>
+          <li>חובה לראות את המילה לפני לחיצה על "נכון" או "דילוג".</li>
+          <li>מסבירים בלי לומר את המילה או חלקים ממנה.</li>
+          <li>נכון = נקודה · דילוג = ללא נקודה.</li>
+          <li>
+            התקדמות = תשובות נכונות <br />(+/− בונוס אם גדול יותר מ-5 תשובות
+            נכונות).
+          </li>
+          <li>הגעה ליעד = ניצחון מיידי גם באמצע התור.</li>
+          בהצלחה !
+        </ul>
+        <button class="rules-close" id="rulesClose">סגור</button>
+      </div>
+    </div>
+
+    <div class="bonus-banner" id="bonusBanner">תור זכאי לבונוס!</div>
+
+    <!-- SETUP -->
+    <div class="screen active" id="setupScreen">
+      <div class="setup-wrap">
+        <div class="logo">אליס</div>
+        <div class="tagline">משחק המילים</div>
+        <div class="card">
+          <div class="input-group">
+            <label><span class="dot t1"></span> קבוצה 1</label
+            ><input type="text" id="team1Name" value="הכחולים" maxlength="12" />
+          </div>
+          <div class="input-group">
+            <label><span class="dot t2"></span> קבוצה 2</label
+            ><input
+              type="text"
+              id="team2Name"
+              value="הוורודים"
+              maxlength="12"
+            />
+          </div>
+          <div
+            style="
+              font-size: 0.75rem;
+              opacity: 0.7;
+              margin: 8px 0 4px;
+              text-align: center;
+            "
+          >
+            נקודות לניצחון
+          </div>
+          <div class="target-row" id="targetRow">
+            <button type="button" class="target-btn" data-target="40">
+              40
+            </button>
+            <button type="button" class="target-btn active" data-target="60">
+              60
+            </button>
+            <button type="button" class="target-btn" data-target="80">
+              80
+            </button>
+            <button type="button" class="target-btn" data-target="100">
+              100
+            </button>
+          </div>
+          <button
+            class="btn btn-primary"
+            id="startBtn"
+            style="margin-top: 12px"
+          >
+            המשך לזריקת קובייה
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DUEL -->
+    <div class="screen" id="duelScreen">
+      <div class="setup-wrap">
+        <div style="font-size: 1.3rem; font-weight: 800; margin-bottom: 4px">
+          מי מתחיל?
+        </div>
+        <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 8px">
+          כל קבוצה זורקת – הגבוהה מתחילה
+        </div>
+        <div class="dice-duel">
+          <div class="duel-side">
+            <div class="duel-dice" id="duelDice1">?</div>
+            <div id="duelName1" style="font-weight: 700; font-size: 0.9rem">
+              קבוצה 1
+            </div>
+          </div>
+          <div class="duel-side">
+            <div class="duel-dice" id="duelDice2">?</div>
+            <div id="duelName2" style="font-weight: 700; font-size: 0.9rem">
+              קבוצה 2
+            </div>
+          </div>
+        </div>
+        <div
+          id="duelResult"
+          style="
+            font-size: 1rem;
+            font-weight: 700;
+            min-height: 28px;
+            margin: 8px 0;
+          "
+        ></div>
+        <button
+          class="btn btn-primary"
+          id="duelRollBtn"
+          style="width: auto; padding: 12px 28px"
+        >
+          זרוק קוביות
+        </button>
+        <button
+          class="btn btn-primary hidden"
+          id="duelStartBtn"
+          style="width: auto; padding: 12px 28px; margin-top: 8px"
+        >
+          התחל משחק
+        </button>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div class="screen" id="gameScreen">
+      <div class="game-title">אליס</div>
+      <div class="game-top">
+        <div class="teams-row">
+          <div class="team-pill t1" id="pill1">
+            <div class="team-name" id="name1">הכחולים</div>
+            <div class="team-score" id="score1">0</div>
+          </div>
+          <div class="team-pill t2" id="pill2">
+            <div class="team-name" id="name2">הוורודים</div>
+            <div class="team-score" id="score2">0</div>
+          </div>
+        </div>
+        <div class="tracks">
+          <div class="track-row">
+            <div class="track-label" style="color: var(--team1)">1</div>
+            <div class="track-bar">
+              <div class="track-fill t1" id="fill1" style="width: 0%"></div>
+            </div>
+            <div class="track-num" id="pos1">0/60</div>
+          </div>
+          <div class="track-row">
+            <div class="track-label" style="color: var(--team2)">2</div>
+            <div class="track-bar">
+              <div class="track-fill t2" id="fill2" style="width: 0%"></div>
+            </div>
+            <div class="track-num" id="pos2">0/60</div>
+          </div>
+        </div>
+        <div class="turn-line" id="turnInfo">תור של הכחולים</div>
+      </div>
+      <div class="mid-row">
+        <div class="dice" id="dice" onclick="rollDice()">
+          <span class="dice-label-sm">בונוס</span
+          ><span class="dice-num">?</span>
+        </div>
+        <div class="timer-ring" id="timerRing" style="--progress: 100%">
+          <div class="timer-value" id="timerValue">60</div>
+        </div>
+      </div>
+      <div class="correct-line" id="correctCount">מילים נכונות: 0</div>
+      <div class="word-area">
+        <div class="word-display" id="wordDisplay">••••</div>
+        <div class="hold-hint" id="holdHint">זרוק קובייה</div>
+      </div>
+      <button class="hold-btn" id="holdBtn" disabled>
+        החזק כדי לראות מילה
+      </button>
+      <div class="actions">
+        <button class="btn btn-success btn-sm" id="correctBtn" disabled>
+          ✓ נכון
+        </button>
+        <button class="btn btn-danger btn-sm" id="skipBtn" disabled>
+          ✗ דילוג
+        </button>
+      </div>
+      <div class="bottom-row">
+        <button class="btn btn-ghost" id="endTurnBtn" disabled>סיום תור</button>
+        <button class="btn btn-ghost" id="endGameBtn">סיים משחק</button>
+      </div>
+    </div>
+
+    <div class="confirm-overlay" id="confirmOverlay">
+      <div class="confirm-box">
+        <h3>לסיים את המשחק?</h3>
+        <p>אישור יחזיר למסך הפתיחה.<br />ביטול ימשיך את המשחק.</p>
+        <div class="confirm-actions">
+          <button class="btn btn-ghost" id="confirmCancel">ביטול</button>
+          <button class="btn btn-danger btn-sm" id="confirmOk">סיים</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="winOverlay">
+      <div class="win-title">ניצחון!</div>
+      <div class="win-team" id="winTeamName"></div>
+      <button
+        class="btn btn-primary"
+        style="width: auto; padding: 12px 28px"
+        onclick="location.reload()"
+      >
+        משחק חדש
+      </button>
+    </div>
+
+    <script>
+      const WORDS = [
+        "מטוס",
+        "פיצה",
+        "פיל",
+        "שמש",
+        "ים",
+        "ספר",
+        "כיסא",
+        "טלפון",
+        "כלב",
+        "חתול",
+        "לחם",
+        "גשם",
+        "מכונית",
+        "בית",
+        "עץ",
+        "פרח",
+        "כוכב",
+        "ירח",
+        "כדורגל",
+        "מוזיקה",
+        "קפה",
+        "שוקולד",
+        "מחשב",
+        "מפתח",
+        "דלת",
+        "חלון",
+        "שולחן",
+        "מיטה",
+        "נעל",
+        "כובע",
+        "משקפיים",
+        "שעון",
+        "תיק",
+        "עט",
+        "מצלמה",
+        "טלוויזיה",
+        "מקרר",
+        "תנור",
+        "סכין",
+        "כף",
+        "צלחת",
+        "כוס",
+        "בקבוק",
+        "מים",
+        "אש",
+        "קרח",
+        "שלג",
+        "רוח",
+        "ענן",
+        "הר",
+        "נהר",
+        "יער",
+        "מדבר",
+        "אי",
+        "גשר",
+        "מגדל",
+        "טירה",
+        "מלך",
+        "מלכה",
+        "נסיך",
+        "דרקון",
+        "אביר",
+        "חרב",
+        "מגן",
+        "סוס",
+        "אריה",
+        "נמר",
+        "דולפין",
+        "כריש",
+        "ציפור",
+        "דג",
+        "פרפר",
+        "דבורה",
+        "נחש",
+        "צב",
+        "רופא",
+        "מורה",
+        "שוטר",
+        "כבאי",
+        "טייס",
+        "שף",
+        "זמר",
+        "שחקן",
+        "צייר",
+        "אושר",
+        "עצב",
+        "כעס",
+        "פחד",
+        "אהבה",
+        "חלום",
+        "סוד",
+        "תקווה",
+        "אומץ",
+        "כדורסל",
+        "טניס",
+        "שחייה",
+        "ריצה",
+        "פסנתר",
+        "גיטרה",
+        "תופים",
+        "תפוח",
+        "בננה",
+        "תפוז",
+        "ענבים",
+        "אבטיח",
+        "תות",
+        "עגבנייה",
+        "גזר",
+        "בצל",
+        "חורף",
+        "קיץ",
+        "אביב",
+        "סתיו",
+        "בוקר",
+        "לילה",
+        "יום הולדת",
+        "חתונה",
+        "מסיבה",
+        "מתנה",
+        "עוגה",
+        "עיר",
+        "כפר",
+        "פארק",
+        "מוזיאון",
+        "ספרייה",
+        "בית ספר",
+        "בית חולים",
+        "רכבת",
+        "שוק",
+        "מסעדה",
+        "מלון",
+        "חוף",
+        "בריכה",
+        "גן חיות",
+        "קרקס",
+        "תיאטרון",
+        "קולנוע",
+        "ארנב",
+        "עכבר",
+        "פרה",
+        "כבשה",
+        "תרנגולת",
+        "ברווז",
+        "אווז",
+        "חמור",
+        "גמל",
+        "זברה",
+        "ג'ירפה",
+        "היפופוטם",
+        "קרנף",
+        "קוף",
+        "גורילה",
+        "פינגווין",
+        "ינשוף",
+        "עורב",
+        "יונה",
+        "תוכי",
+        "ברבור",
+        "טווס",
+        "נשר",
+        "עיט",
+        "עטלף",
+        "צב ים",
+        "תנין",
+        "לטאה",
+        "קרפדה",
+        "צפרדע",
+        "תולעת",
+        "נמלה",
+        "זבוב",
+        "יתוש",
+        "חיפושית",
+        "עכביש",
+        "עקרב",
+        "סרטן",
+        "מדוזה",
+        "כוכב ים",
+        "גלידה",
+        "עוגייה",
+        "בייגלה",
+        "המבורגר",
+        "נקניקייה",
+        "שווארמה",
+        "פלאפל",
+        "חומוס",
+        "טחינה",
+        "סלט",
+        "מרק",
+        "אורז",
+        "פסטה",
+        "לזניה",
+        "סושי",
+        "צ'יפס",
+        "פופקורן",
+        "ביצה",
+        "חלב",
+        "גבינה",
+        "יוגורט",
+        "חמאה",
+        "דבש",
+        "ריבה",
+        "סוכר",
+        "מלח",
+        "פלפל",
+        "חרדל",
+        "קטשופ",
+        "מיונז",
+        "מיץ",
+        "תה",
+        "קקאו",
+        "בירה",
+        "יין",
+        "סודה",
+        "שייק",
+        "מים מינרליים",
+        "קרטיב",
+        "סופגנייה",
+        "בורקס",
+        "ג'חנון",
+        "שקשוקה",
+        "חביתה",
+        "טוסט",
+        "סנדוויץ",
+        "פיתה",
+        "בגט",
+        "קרואסון",
+        "מאפין",
+        "ראש",
+        "עין",
+        "אוזן",
+        "אף",
+        "פה",
+        "שן",
+        "לשון",
+        "צוואר",
+        "כתף",
+        "יד",
+        "אצבע",
+        "ציפורן",
+        "רגל",
+        "ברך",
+        "עקב",
+        "גב",
+        "בטן",
+        "לב",
+        "ריאות",
+        "מוח",
+        "חולצה",
+        "מכנס",
+        "שמלה",
+        "חצאית",
+        "מעיל",
+        "סוודר",
+        "ג'קט",
+        "גרביים",
+        "תחתונים",
+        "חזייה",
+        "חגורה",
+        "עניבה",
+        "צעיף",
+        "כפפות",
+        "מגבעת",
+        "קסדה",
+        "תיק גב",
+        "ארנק",
+        "שרשרת",
+        "טבעת",
+        "ספה",
+        "כורסה",
+        "ארון",
+        "מגירה",
+        "מראה",
+        "מנורה",
+        "נורה",
+        "מתג",
+        "שקע",
+        "סוללה",
+        "מזגן",
+        "מאוורר",
+        "תנור חימום",
+        "שואב אבק",
+        "מכונת כביסה",
+        "מייבש",
+        "מגהץ",
+        "מטאטא",
+        "יעה",
+        "סמרטוט",
+        "סבון",
+        "שמפו",
+        "משחת שיניים",
+        "מברשת",
+        "מגבת",
+        "שירותים",
+        "מקלחת",
+        "אמבטיה",
+        "כיור",
+        "ברז",
+        "סיר",
+        "מחבת",
+        "קומקום",
+        "מיקסר",
+        "בלנדר",
+        "טוסטר",
+        "מיקרוגל",
+        "תנור אפייה",
+        "פותחן",
+        "פומפייה",
+        "אגם",
+        "מפל",
+        "מערה",
+        "צוק",
+        "עמק",
+        "מישור",
+        "סוואנה",
+        "ג'ונגל",
+        "קוטב",
+        "הר געש",
+        "רעידת אדמה",
+        "צונאמי",
+        "ברק",
+        "רעם",
+        "קשת בענן",
+        "שקיעה",
+        "זריחה",
+        "צל",
+        "ערפל",
+        "רחוב",
+        "שדרה",
+        "כיכר",
+        "צומת",
+        "כביש",
+        "מנהרה",
+        "מעלית",
+        "מדרגות",
+        "מרפסת",
+        "גג",
+        "חניה",
+        "תחנה",
+        "נמל תעופה",
+        "נמל",
+        "מסילה",
+        "אוטובוס",
+        "מונית",
+        "אופניים",
+        "קטנוע",
+        "משאית",
+        "מהנדס",
+        "עורך דין",
+        "רואה חשבון",
+        "אדריכל",
+        "מעצב",
+        "מתכנת",
+        "נהג",
+        "דייג",
+        "חקלאי",
+        "נגר",
+        "חשמלאי",
+        "אינסטלטור",
+        "קוסמטיקאית",
+        "אחות",
+        "רוקח",
+        "מדען",
+        "חוקר",
+        "עיתונאי",
+        "צלם",
+        "רקדן",
+        "קוסם",
+        "ליצן",
+        "ספורטאי",
+        "שופט",
+        "מאמן",
+        "שוער",
+        "חלוץ",
+        "מגיש",
+        "די ג'יי",
+        "יוגה",
+        "פילאטיס",
+        "כושר",
+        "הליכה",
+        "טיפוס",
+        "גלישה",
+        "סקי",
+        "סנובורד",
+        "צלילה",
+        "רכיבה",
+        "חברות",
+        "משפחה",
+        "שכנות",
+        "כבוד",
+        "אמת",
+        "שקר",
+        "צדק",
+        "חירות",
+        "שלום",
+        "מלחמה",
+        "ניצחון",
+        "הפסד",
+        "הצלחה",
+        "כישלון",
+        "הפתעה",
+        "בדיחה",
+        "צחוק",
+        "בכי",
+        "דמעה",
+        "חיוך",
+        "זיכרון",
+        "שכחה",
+        "רעיון",
+        "דמיון",
+        "מציאות",
+        "עתיד",
+        "עבר",
+        "הווה",
+        "זמן",
+        "שעון חול",
+        "מזל",
+        "סיכוי",
+        "סכנה",
+        "ביטחון",
+        "פחד גבהים",
+        "קלסטרופוביה",
+        "סקרנות",
+        "שעמום",
+        "התרגשות",
+        "רוגע",
+        "אינטרנט",
+        "אתר",
+        "אפליקציה",
+        "סיסמה",
+        "אימייל",
+        "הודעה",
+        "צ'אט",
+        "רשת חברתית",
+        "לייק",
+        "סטטוס",
+        "וידאו",
+        "פודקאסט",
+        "רדיו",
+        "עיתון",
+        "מגזין",
+        "בלוג",
+        "פוד",
+        "אוזניות",
+        "רמקול",
+        "מיקרופון",
+        "מדפסת",
+        "סורק",
+        "דיסק",
+        "ענן מחשוב",
+        "וירוס מחשב",
+        "חומת אש",
+        "רשת",
+        "נתב",
+        "כבל",
+        "סמארטפון",
+        "טאבלט",
+        "מחשב נייד",
+        "מקלדת",
+        "עכבר מחשב",
+        "מסך",
+        "מצלמת רשת",
+        "אוזניית בלוטות'",
+        "מטען",
+        "כבל USB",
+        "כרטיס זיכרון",
+        "שער",
+        "כדור",
+        "מחבט",
+        "שופט קו",
+        "עבירת חוקים",
+        "הארכה",
+        "פנדל",
+        "קרן",
+        "בעיטה",
+        "זריקה",
+        "מסירה",
+        "חסימה",
+        "קפיצה",
+        "ספרינט",
+        "מרתון",
+        "אולימפיאדה",
+        "מדליה",
+        "גביע",
+        "אליפות",
+        "שחמט",
+        "דמקה",
+        "קלפים",
+        "קובייה",
+        "פאזל",
+        "לגו",
+        "בובות",
+        "רחפן",
+        "יו יו",
+        "סביבון",
+        "בדיחות",
+        "חידון",
+        "חידה",
+        "תשבץ",
+        "סודוקו",
+        "מונופול",
+        "טאקי",
+        "אונו",
+        "פוקר",
+        "ברידג'",
+        "ירושלים",
+        "תל אביב",
+        "חיפה",
+        "אילת",
+        "כנרת",
+        "ים המלח",
+        "מצדה",
+        "כותל",
+        "שוק הכרמל",
+        "נווה צדק",
+        "חומוס עם ביצה",
+        "שקשוקה חריפה",
+        "גלידה ארטיק",
+        "במבה",
+        "ביסלי",
+        "שוקולד פרה",
+        "ארטיק קרח",
+        "סולת",
+        "קוסקוס",
+        "חמין",
+        "חנוכה",
+        "פורים",
+        "פסח",
+        "סוכות",
+        "ראש השנה",
+        "יום כיפור",
+        "לג בעומר",
+        "יום העצמאות",
+        "יום הזיכרון",
+        "שבת",
+        "משלוח מנות",
+        "מצה",
+        "לולב",
+        "אתרוג",
+        "שופר",
+        "תפילין",
+        "כיפה",
+        "טלית",
+        "מדרכה",
+        "רמזור",
+        "שלט",
+        "פרסומת",
+        "כרזה",
+        "דגל",
+        "המנון",
+        "מפה",
+        "מצפן",
+        "GPS",
+        "מזוודה",
+        "דרכון",
+        "כרטיס טיסה",
+        "ביקורת דרכונים",
+        "מכס",
+        "מלון בוטיק",
+        "צימר",
+        "קמפינג",
+        "אוהל",
+        "שק שינה",
+        "פנס",
+        "מצית",
+        "גפרור",
+        "נר",
+        "מנורת שמן",
+        "פחם",
+        "מנגל",
+        "על האש",
+        "Barbecue",
+        "שיפוד",
+        "מספריים",
+        "דבק",
+        "נייר דבק",
+        "סיכה",
+        "מהדק",
+        "חורר",
+        "מחדד",
+        "מחק",
+        "סרגל",
+        "מחוגה",
+        "יומן",
+        "מחברת",
+        "קלסר",
+        "תיקייה",
+        "מעטפה",
+        "בול",
+        "גלויה",
+        "מכתב",
+        "חתימה",
+        "חותמת",
+        "כסף",
+        "מטבע",
+        "שטר",
+        "ארנק דיגיטלי",
+        "כרטיס אשראי",
+        "כספומט",
+        "בנק",
+        "הלוואה",
+        "חיסכון",
+        "ריבית",
+        "חשבונית",
+        "קבלה",
+        "מחיר",
+        "הנחה",
+        "מבצע",
+        "קופון",
+        "עגלה",
+        "סל קניות",
+        "קופה",
+        "קופאי",
+        "מדף",
+        "מחסן",
+        "מכולת",
+        "סופרמרקט",
+        "קניון",
+        "חנות",
+        "דוכן",
+        "יריד",
+        "שוק פשפשים",
+        "חנות יד שנייה",
+        "ריח",
+        "טעם",
+        "מגע",
+        "קול",
+        "ראייה",
+        "חם",
+        "קר",
+        "לח",
+        "יבש",
+        "חלק",
+        "מחוספס",
+        "רך",
+        "קשה",
+        "כבד",
+        "קל",
+        "גדול",
+        "קטן",
+        "ארוך",
+        "קצר",
+        "רחב",
+        "צר",
+        "עגול",
+        "מרובע",
+        "משולש",
+        "חד",
+        "קהה",
+        "בריא",
+        "חולה",
+        "עייף",
+        "ערני",
+        "רעב",
+        "צמא",
+        "שבע",
+        "שיכור",
+        "מבושם",
+        "נקי",
+        "מלוכלך",
+        "מסודר",
+        "מבולגן",
+        "שקט",
+        "רועש",
+        "מהיר",
+        "איטי",
+        "חזק",
+        "חלש",
+        "חכם",
+        "טיפש",
+        "יפה",
+        "מכוער",
+        "מצחיק",
+        "בישול",
+        "אפייה",
+        "כביסה",
+        "ניקיון",
+        "תיקון",
+        "בנייה",
+        "ציור",
+        "פיסול",
+        "כתיבה",
+        "קריאה",
+        "לימוד",
+        "הוראה",
+        "נסיעה",
+        "טיול",
+        "חופשה",
+        "עבודה",
+        "ישיבה",
+        "עמידה",
+        "שכיבה",
+        "שינה",
+        "יקיצה",
+        "מקלחת בוקר",
+        "צחצוח שיניים",
+        "גילוח",
+        "איפור",
+        "סירוק",
+        "תספורת",
+        "צביעת שיער",
+        "מניקור",
+        "פדיקור",
+        "ספינה",
+        "יאכטה",
+        "סירה",
+        "קיאק",
+        "מפרשית",
+        "צוללת",
+        "רחפת",
+        "כדור פורח",
+        "מצנח",
+        "דאון",
+        "טרקטור",
+        "קומביין",
+        "מחרשה",
+        "חממה",
+        "אורווה",
+        "לול",
+        "רפת",
+        "דיר",
+        "שדה",
+        "מטע",
+        "כרם",
+        "זית",
+        "תמר",
+        "רימון",
+        "תאנה",
+        "שקד",
+        "אגוז",
+        "בוטן",
+        "גרעין",
+        "זרע",
+        "פנס רחוב",
+        "ספסל",
+        "פח אשפה",
+        "ברז כיבוי",
+        "מדרגות נעות",
+        "דלת מסתובבת",
+        "חלון ראווה",
+        "שלט ניאון",
+        "כביסה על חבל",
+        "עציץ",
+        "דשא",
+        "דשא סינתטי",
+        "גדר",
+        "שער כניסה",
+        "מפתן",
+        "מזוזה",
+        "פעמון דלת",
+        "אינטרקום",
+        "מצלמת אבטחה",
+        "אזעקה",
+        "מטף",
+        "גלגל הצלה",
+        "חגורת הצלה",
+        "אפוד מגן",
+        "קסדת אופניים",
+        "מרפק",
+        "פלסטר",
+        "תחבושת",
+        "אספירין",
+        "ויטמין",
+        "חיסון",
+        "מזרק",
+        "טבלית",
+        "סירופ",
+        "מדחום",
+        "לחץ דם",
+        "דופק",
+        "בדיקת דם",
+        "רנטגן",
+        "אולטרסאונד",
+        "ניתוח",
+        "הרדמה",
+        "תפרים",
+        "גבס",
+        "קביים",
+        "כיסא גלגלים",
+        "משקפי שמש",
+        "עדשות מגע",
+        "מכשיר שמיעה",
+        "פאה",
+        "שיניים תותבות",
+        "קעקוע",
+        "פירסינג",
+        "איפור קבוע",
+        "בוטוקס",
+        "ניתוח פלסטי",
+        "דיאטה",
+        "צום",
+        "ספורט אתגרי",
+        "צניחה חופשית",
+        "בנג'י",
+        "טיפוס הרים",
+        "טרקים",
+        "קמפינג לילי",
+        "מדורה",
+        "זמרה סביב המדורה",
+        "גיטרה אקוסטית",
+        "מארשמלאו",
+        "שוקולד חם",
+        "סיפור לפני השינה",
+        "אגדה",
+        "מיתוס",
+        "אגדת ילדים",
+        "ספר מתח",
+        "רומן",
+        "שירה",
+        "הייקו",
+        "בלוג אישי",
+        "יומן מסע",
+        "מפה עתיקה",
+        "מצפן עתיק",
+        "אוצר",
+        "מפת אוצר",
+        "פיראט",
+        "ספינת פיראטים",
+        "אי בודד",
+        "בקבוק עם פתק",
+        "מגדלור",
+        "סלע",
+        "קונכייה",
+        "חול",
+        "טירה בחול",
+        "דלי",
+        "את חול",
+        "משחק כדור בחוף",
+        "מטקות",
+        "גלשן",
+        "גל",
+        "קצף ים",
+        "שחף",
+        "סרטן נזיר",
+        "מדוזה צורבת",
+        "קרם הגנה",
+        "כובע קש",
+        "כפכפים",
+        "מגבת חוף",
+        "כיסא מתקפל",
+        "שמשייה",
+        "צידנית",
+      ];
+      let BOARD = 60;
+      const BONUS_FACES = [-1, 0, 1, 2, 3, 4];
+
+      let state = {
+        teams: [
+          { name: "הכחולים", score: 0, pos: 0 },
+          { name: "הוורודים", score: 0, pos: 0 },
+        ],
+        current: 0,
+        timer: 60,
+        interval: null,
+        running: false,
+        correct: 0,
+        word: "",
+        used: new Set(),
+        canReveal: false,
+        hasSeenWord: false,
+        muted: false,
+        bonus: 0,
+      };
+
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      let actx = null;
+      function ensureAudio() {
+        if (!actx) actx = new AudioCtx();
+        if (actx.state === "suspended") actx.resume();
+      }
+      function playTone(freq, dur, type = "sine", vol = 0.3) {
+        if (state.muted) return;
+        ensureAudio();
+        const o = actx.createOscillator(),
+          g = actx.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol, actx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + dur);
+        o.connect(g);
+        g.connect(actx.destination);
+        o.start();
+        o.stop(actx.currentTime + dur);
+      }
+      function sndCorrect() {
+        playTone(523, 0.12, "sine", 0.25);
+        setTimeout(() => playTone(659, 0.12, "sine", 0.25), 100);
+        setTimeout(() => playTone(784, 0.18, "sine", 0.3), 200);
+      }
+      function sndSkip() {
+        playTone(200, 0.15, "sawtooth", 0.2);
+        setTimeout(() => playTone(150, 0.2, "sawtooth", 0.15), 80);
+      }
+      function sndWin() {
+        if (state.muted) return;
+        [523, 659, 784, 1047].forEach((f, i) =>
+          setTimeout(() => playTone(f, 0.25, "sine", 0.3), i * 180),
+        );
+        setTimeout(() => playTone(784, 0.4, "triangle", 0.25), 800);
+      }
+      function sndDice() {
+        playTone(300 + Math.random() * 200, 0.08, "square", 0.15);
+      }
+      function sndBonus() {
+        playTone(440, 0.1, "sine", 0.25);
+        setTimeout(() => playTone(554, 0.1, "sine", 0.25), 100);
+        setTimeout(() => playTone(659, 0.2, "sine", 0.3), 200);
+      }
+
+      const $ = (id) => document.getElementById(id);
+      const setupScreen = $("setupScreen"),
+        duelScreen = $("duelScreen"),
+        gameScreen = $("gameScreen"),
+        winOverlay = $("winOverlay");
+      const diceEl = $("dice"),
+        timerRing = $("timerRing"),
+        timerValue = $("timerValue"),
+        wordDisplay = $("wordDisplay");
+      const holdBtn = $("holdBtn"),
+        correctBtn = $("correctBtn"),
+        skipBtn = $("skipBtn"),
+        endTurnBtn = $("endTurnBtn");
+      const correctCount = $("correctCount"),
+        turnInfo = $("turnInfo"),
+        holdHint = $("holdHint"),
+        bonusBanner = $("bonusBanner");
+      const settingsPanel = $("settingsPanel"),
+        rulesBanner = $("rulesBanner");
+
+      function setDiceDisplay(val) {
+        if (val === null || val === undefined || val === "?") {
+          diceEl.innerHTML =
+            '<span class="dice-label-sm">בונוס</span><span class="dice-num">?</span>';
+        } else {
+          const txt = val > 0 ? "+" + val : String(val);
+          diceEl.innerHTML =
+            '<span class="dice-label-sm">בונוס</span><span class="dice-num">' +
+            txt +
+            "</span>";
+        }
+      }
+
+      $("settingsBtn").onclick = (e) => {
+        e.stopPropagation();
+        settingsPanel.classList.toggle("open");
+        rulesBanner.classList.remove("open");
+      };
+      document.addEventListener("click", (e) => {
+        if (!settingsPanel.contains(e.target) && e.target !== $("settingsBtn"))
+          settingsPanel.classList.remove("open");
+      });
+
+      document.querySelectorAll(".target-btn").forEach((btn) => {
+        btn.onclick = () => {
+          document
+            .querySelectorAll(".target-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.target = parseInt(btn.dataset.target, 10);
+          BOARD = state.target;
+          // update labels if already visible
+          if ($("pos1")) {
+            $("pos1").textContent = "0/" + BOARD;
+            $("pos2").textContent = "0/" + BOARD;
+          }
+        };
+      });
+      document.querySelectorAll(".theme-btn").forEach((btn) => {
+        btn.onclick = () => {
+          document
+            .querySelectorAll(".theme-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const t = btn.dataset.theme;
+          if (t === "default") document.body.removeAttribute("data-theme");
+          else document.body.setAttribute("data-theme", t);
+        };
+      });
+
+      $("muteToggle").onclick = () => {
+        state.muted = !state.muted;
+        $("muteToggle").classList.toggle("on", !state.muted);
+        $("muteLabel").textContent = state.muted ? "מושתק" : "מופעל";
+      };
+
+      $("rulesBtn").onclick = () => {
+        rulesBanner.classList.add("open");
+        settingsPanel.classList.remove("open");
+      };
+      $("rulesClose").onclick = () => rulesBanner.classList.remove("open");
+      rulesBanner.onclick = (e) => {
+        if (e.target === rulesBanner) rulesBanner.classList.remove("open");
+      };
+
+      $("startBtn").onclick = () => {
+        ensureAudio();
+        BOARD = state.target || 60;
+        state.teams[0].name = $("team1Name").value.trim() || "הכחולים";
+        state.teams[1].name = $("team2Name").value.trim() || "הוורודים";
+        $("name1").textContent = state.teams[0].name;
+        $("name2").textContent = state.teams[1].name;
+        $("duelName1").textContent = state.teams[0].name;
+        $("duelName2").textContent = state.teams[1].name;
+        setupScreen.classList.remove("active");
+        duelScreen.classList.add("active");
+      };
+
+      let duelRolling = false;
+      $("duelRollBtn").onclick = () => {
+        if (duelRolling) return;
+        duelRolling = true;
+        $("duelResult").textContent = "";
+        $("duelStartBtn").classList.add("hidden");
+        const d1 = $("duelDice1"),
+          d2 = $("duelDice2");
+        d1.classList.add("rolling");
+        d2.classList.add("rolling");
+        let n = 0;
+        const iv = setInterval(() => {
+          d1.textContent = Math.ceil(Math.random() * 6);
+          d2.textContent = Math.ceil(Math.random() * 6);
+          sndDice();
+          if (++n > 10) {
+            clearInterval(iv);
+            const v1 = Math.ceil(Math.random() * 6),
+              v2 = Math.ceil(Math.random() * 6);
+            d1.textContent = v1;
+            d2.textContent = v2;
+            d1.classList.remove("rolling");
+            d2.classList.remove("rolling");
+            duelRolling = false;
+            if (v1 > v2) {
+              state.current = 0;
+              $("duelResult").textContent = state.teams[0].name + " מתחילים!";
+              $("duelRollBtn").classList.add("hidden");
+            } else if (v2 > v1) {
+              state.current = 1;
+              $("duelResult").textContent = state.teams[1].name + " מתחילים!";
+              $("duelRollBtn").classList.add("hidden");
+            } else {
+              $("duelResult").textContent = "תיקו! זרקו שוב";
+              return;
+            }
+            $("duelStartBtn").classList.remove("hidden");
+          }
+        }, 60);
+      };
+      $("duelStartBtn").onclick = () => {
+        duelScreen.classList.remove("active");
+        gameScreen.classList.add("active");
         prepareTurn();
-      },delay);
-    }
+      };
+      $("endGameBtn").onclick = () => {
+        $("confirmOverlay").classList.add("show");
+      };
+      $("confirmCancel").onclick = () =>
+        $("confirmOverlay").classList.remove("show");
+      $("confirmOk").onclick = () => location.reload();
+      $("confirmOverlay").onclick = (e) => {
+        if (e.target === $("confirmOverlay"))
+          $("confirmOverlay").classList.remove("show");
+      };
 
-    function updateUI(){
-      const t0=state.teams[0],t1=state.teams[1];
-      $('score1').textContent=t0.score;$('score2').textContent=t1.score;
-      $('pos1').textContent=t0.pos+'/'+BOARD;$('pos2').textContent=t1.pos+'/'+BOARD;
-      $('fill1').style.width=(t0.pos/BOARD*100)+'%';$('fill2').style.width=(t1.pos/BOARD*100)+'%';
-      $('pill1').classList.toggle('active',state.current===0);$('pill2').classList.toggle('active',state.current===1);
-      turnInfo.textContent='תור של '+state.teams[state.current].name;
-    }
-
-    function showWin(name){
-      sndWin();
-      $('winTeamName').textContent=name+' ניצחו!';
-      winOverlay.classList.add('show');
-      for(let i=0;i<50;i++){
-        setTimeout(()=>{
-          const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'vw';
-          c.style.background=['#a78bfa','#f472b6','#22d3ee','#fbbf24','#00e676'][Math.floor(Math.random()*5)];
-          c.style.borderRadius=Math.random()>0.5?'50%':'2px';document.body.appendChild(c);
-          setTimeout(()=>c.remove(),3000);
-        },i*35);
+      function rollDice() {
+        if (state.running) return;
+        ensureAudio();
+        diceEl.classList.add("rolling");
+        let n = 0;
+        const iv = setInterval(() => {
+          const face = BONUS_FACES[Math.floor(Math.random() * 6)];
+          setDiceDisplay(face);
+          sndDice();
+          if (++n > 9) {
+            clearInterval(iv);
+            const final = BONUS_FACES[Math.floor(Math.random() * 6)];
+            state.bonus = final;
+            setDiceDisplay(final);
+            diceEl.classList.remove("rolling");
+            startTurn();
+          }
+        }, 55);
       }
-    }
-  </script>
 
-  <div class="page-footer">
-    <div>© 2026 כל הזכויות שמורות</div>
-    <img src="images/OG_Green_Logo.png" alt="logo" onerror="this.style.display='none'">
-  </div>
+      function prepareTurn() {
+        state.correct = 0;
+        state.running = false;
+        state.canReveal = false;
+        state.hasSeenWord = false;
+        state.bonus = 0;
+        setDiceDisplay("?");
+        wordDisplay.classList.remove("visible");
+        wordDisplay.textContent = "••••";
+        holdHint.textContent = "זרוק קוביית בונוס";
+        holdBtn.disabled = true;
+        correctBtn.disabled = true;
+        skipBtn.disabled = true;
+        endTurnBtn.disabled = true;
+        timerValue.textContent = "60";
+        timerRing.style.setProperty("--progress", "100%");
+        timerRing.classList.remove("warning", "danger");
+        correctCount.textContent = "מילים נכונות: 0";
+        updateUI();
+      }
 
-</body>
+      function startTurn() {
+        state.running = true;
+        state.canReveal = true;
+        state.hasSeenWord = false;
+        state.timer = 60;
+        holdBtn.disabled = false;
+        correctBtn.disabled = true;
+        skipBtn.disabled = true;
+        endTurnBtn.disabled = false;
+        holdHint.textContent = "החזק כדי לראות";
+        nextWord();
+        clearInterval(state.interval);
+        state.interval = setInterval(() => {
+          state.timer--;
+          timerValue.textContent = state.timer;
+          timerRing.style.setProperty(
+            "--progress",
+            (state.timer / 60) * 100 + "%",
+          );
+          if (state.timer <= 12) {
+            timerRing.classList.add("danger");
+            timerRing.classList.remove("warning");
+          } else if (state.timer <= 25) timerRing.classList.add("warning");
+          if (state.timer <= 0) {
+            clearInterval(state.interval);
+            finishTurn();
+          }
+        }, 1000);
+      }
+
+      function nextWord() {
+        let w,
+          tries = 0;
+        do {
+          w = WORDS[Math.floor(Math.random() * WORDS.length)];
+          tries++;
+        } while (state.used.has(w) && tries < 40);
+        state.used.add(w);
+        if (state.used.size > WORDS.length * 0.75) state.used.clear();
+        state.word = w;
+        state.hasSeenWord = false;
+        correctBtn.disabled = true;
+        skipBtn.disabled = true;
+        wordDisplay.classList.remove("visible");
+        wordDisplay.textContent = "••••";
+      }
+
+      function show() {
+        if (!state.canReveal || !state.running) return;
+        wordDisplay.textContent = state.word;
+        wordDisplay.classList.add("visible");
+        holdHint.textContent = "שחרר להסתרה";
+        if (!state.hasSeenWord) {
+          state.hasSeenWord = true;
+          correctBtn.disabled = false;
+          skipBtn.disabled = false;
+        }
+      }
+      function hide() {
+        wordDisplay.classList.remove("visible");
+        wordDisplay.textContent = "••••";
+        if (state.running) holdHint.textContent = "החזק כדי לראות";
+      }
+
+      holdBtn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        show();
+        holdBtn.classList.add("holding");
+      });
+      holdBtn.addEventListener("touchend", () => {
+        hide();
+        holdBtn.classList.remove("holding");
+      });
+      holdBtn.addEventListener("touchcancel", () => {
+        hide();
+        holdBtn.classList.remove("holding");
+      });
+      holdBtn.addEventListener("mousedown", () => {
+        show();
+        holdBtn.classList.add("holding");
+      });
+      holdBtn.addEventListener("mouseup", () => {
+        hide();
+        holdBtn.classList.remove("holding");
+      });
+      holdBtn.addEventListener("mouseleave", () => {
+        hide();
+        holdBtn.classList.remove("holding");
+      });
+
+      correctBtn.onclick = () => {
+        if (!state.running || !state.hasSeenWord) return;
+        state.correct++;
+        correctCount.textContent = "מילים נכונות: " + state.correct;
+        sndCorrect();
+        // ניצחון מיידי באמצע תור אם הגענו ליעד
+        const projected =
+          state.teams[state.current].pos +
+          state.correct +
+          (state.correct >= 5 ? state.bonus : 0);
+        if (projected >= BOARD) {
+          clearInterval(state.interval);
+          state.running = false;
+          state.canReveal = false;
+          state.hasSeenWord = false;
+          holdBtn.disabled = true;
+          correctBtn.disabled = true;
+          skipBtn.disabled = true;
+          endTurnBtn.disabled = true;
+          hide();
+          let move = state.correct;
+          if (state.correct >= 5) {
+            move = state.correct + state.bonus;
+            showBonusBanner();
+          }
+          const t = state.teams[state.current];
+          t.pos = Math.min(BOARD, Math.max(0, t.pos + move));
+          t.score = t.pos;
+          updateUI();
+          setTimeout(() => showWin(t.name), state.correct >= 5 ? 1600 : 300);
+          return;
+        }
+        nextWord();
+      };
+      skipBtn.onclick = () => {
+        if (!state.running || !state.hasSeenWord) return;
+        sndSkip();
+        nextWord();
+      };
+      endTurnBtn.onclick = () => finishTurn();
+
+      function showBonusBanner() {
+        bonusBanner.classList.add("show");
+        sndBonus();
+        setTimeout(() => bonusBanner.classList.remove("show"), 1500);
+      }
+
+      function finishTurn() {
+        clearInterval(state.interval);
+        state.running = false;
+        state.canReveal = false;
+        state.hasSeenWord = false;
+        hide();
+
+        let move = state.correct;
+        // בונוס רק אם לפחות 5 נכונות
+        if (state.correct >= 5) {
+          move = state.correct + state.bonus;
+          showBonusBanner();
+        }
+
+        const t = state.teams[state.current];
+        // אל תאפשר ירידה מתחת ל-0
+        t.pos = Math.max(0, Math.min(BOARD, t.pos + move));
+        t.score += Math.max(0, move); // או לשמור את המהלך בפועל - נשמור ניקוד מצטבר של מילים+בונוס כפי שחושב
+
+        // עדכון מדויק יותר של ניקוד: ניקוד = מיקום
+        t.score = t.pos;
+
+        updateUI();
+
+        if (t.pos >= BOARD) {
+          setTimeout(() => showWin(t.name), 1600); // אחרי הבאנר
+          return;
+        }
+
+        // אם היה באנר, לחכות קצת לפני מעבר תור
+        const delay = state.correct >= 5 ? 1600 : 0;
+        setTimeout(() => {
+          state.current = 1 - state.current;
+          prepareTurn();
+        }, delay);
+      }
+
+      function updateUI() {
+        const t0 = state.teams[0],
+          t1 = state.teams[1];
+        $("score1").textContent = t0.score;
+        $("score2").textContent = t1.score;
+        $("pos1").textContent = t0.pos + "/" + BOARD;
+        $("pos2").textContent = t1.pos + "/" + BOARD;
+        $("fill1").style.width = (t0.pos / BOARD) * 100 + "%";
+        $("fill2").style.width = (t1.pos / BOARD) * 100 + "%";
+        $("pill1").classList.toggle("active", state.current === 0);
+        $("pill2").classList.toggle("active", state.current === 1);
+        turnInfo.textContent = "תור של " + state.teams[state.current].name;
+      }
+
+      function showWin(name) {
+        sndWin();
+        $("winTeamName").textContent = name + " ניצחו!";
+        winOverlay.classList.add("show");
+        for (let i = 0; i < 50; i++) {
+          setTimeout(() => {
+            const c = document.createElement("div");
+            c.className = "confetti";
+            c.style.left = Math.random() * 100 + "vw";
+            c.style.background = [
+              "#a78bfa",
+              "#f472b6",
+              "#22d3ee",
+              "#fbbf24",
+              "#00e676",
+            ][Math.floor(Math.random() * 5)];
+            c.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 3000);
+          }, i * 35);
+        }
+      }
+    </script>
+
+    <div class="page-footer">
+      <div>© 2026 כל הזכויות שמורות</div>
+      <img
+        src="images/OG_Green_Logo.png"
+        alt="logo"
+        onerror="this.style.display = 'none'"
+      />
+    </div>
+  </body>
 </html>
