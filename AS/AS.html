@@ -199,18 +199,16 @@
         width: 100%;
         flex-direction: column;
         align-items: center;
-        /* מרווח עליון כדי שלא ייכנס מתחת לכפתורי הגדרות/כללים */
-        padding: 48px 10px 52px;
+        padding: 4px 10px 56px;
         overflow: hidden;
       }
-      /* מסך ההגדרות – בלי גלילה */
+      /* מסך ההגדרות צריך לאפשר גלילה פנימית כשיש 4 קבוצות */
       #setupScreen.screen {
         overflow: hidden;
       }
       #setupScreen .setup-wrap {
         flex: 1;
         min-height: 0;
-        overflow: hidden;
       }
       .screen.active {
         display: flex;
@@ -510,20 +508,30 @@
         height: 100%;
         width: 100%;
         max-width: 360px;
-        gap: 2px;
-        overflow: hidden;
-        padding: 0 0 56px;
+        gap: 4px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        /* מרווח תחתון שמפנה מקום לפוטר בלי ליצור גלילה מיותרת */
+        padding: 6px 0 72px;
         box-sizing: border-box;
+        /* הסתרת סרגל גלילה מכוער */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .setup-wrap::-webkit-scrollbar {
+        display: none;
       }
       /* מרכוז אנכי רק כשיש מקום */
-      @media (min-height: 780px) {
+      @media (min-height: 740px) {
         .setup-wrap {
           justify-content: center;
-          padding-bottom: 64px;
+          padding-top: 0;
+          padding-bottom: 85px;
         }
       }
       .logo {
-        font-size: clamp(1.35rem, 6vw, 2rem);
+        font-size: clamp(1.55rem, 7vw, 2.4rem);
         font-weight: 900;
         background: linear-gradient(120deg, #a78bfa, #f472b6, #22d3ee);
         background-size: 200% 200%;
@@ -531,8 +539,7 @@
         -webkit-text-fill-color: transparent;
         animation: grad 5s ease infinite;
         line-height: 1.15;
-        margin-bottom: 6px;
-        flex-shrink: 0;
+        margin-bottom: 8px;
       }
       @keyframes grad {
         0%,
@@ -673,14 +680,35 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2rem;
-        font-weight: 900;
-        color: #1a1a2e;
         margin: 0 auto 8px;
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        position: relative;
+        transition: box-shadow 0.35s ease, filter 0.35s ease, background 0.35s ease;
       }
       .duel-dice.rolling {
         animation: diceAnim3d 0.55s ease;
+      }
+      .duel-dice .dice-face {
+        width: 48px;
+        height: 48px;
+      }
+      .duel-dice .dice-pip {
+        width: 12px;
+        height: 12px;
+      }
+      .duel-dice .duel-q {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #1a1a2e;
+      }
+      .duel-dice.winner {
+        box-shadow:
+          0 0 0 3px rgba(0, 230, 118, 0.95),
+          0 0 22px 6px rgba(0, 230, 118, 0.85),
+          0 0 48px 12px rgba(0, 230, 118, 0.55),
+          0 6px 16px rgba(0, 0, 0, 0.35);
+        filter: brightness(1.12) saturate(1.15);
+        background: linear-gradient(145deg, #e8fff0, #b9f6ca);
       }
       .game-top {
         width: 100%;
@@ -819,8 +847,8 @@
         flex-shrink: 0;
       }
       .dice {
-        width: 50px;
-        height: 50px;
+        width: 54px;
+        height: 54px;
         background: linear-gradient(145deg, #fff, #e0e0e0);
         border-radius: 12px;
         display: flex;
@@ -832,20 +860,68 @@
         box-shadow: 0 5px 14px rgba(0, 0, 0, 0.35);
         cursor: pointer;
         flex-shrink: 0;
-        line-height: 1.1;
+        line-height: 1.05;
         transform-style: preserve-3d;
         perspective: 400px;
         transition: box-shadow 0.35s ease, filter 0.35s ease;
+        position: relative;
+        padding: 2px 1px;
+        box-sizing: border-box;
       }
       .dice .dice-label-sm {
-        font-size: 0.45rem;
-        font-weight: 700;
-        opacity: 0.7;
-        margin-bottom: 0;
+        font-size: 0.5rem;
+        font-weight: 800;
+        opacity: 0.85;
+        margin-bottom: 1px;
+        line-height: 1.05;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .dice .dice-label-sm.two-line {
+        white-space: normal;
+        font-size: 0.68rem;
+        line-height: 1.12;
+        font-weight: 900;
+        opacity: 1;
+      }
+      .dice .dice-label-sm.idle-label {
+        font-size: 0.68rem;
+        font-weight: 900;
+        opacity: 0.95;
+        white-space: normal;
+        line-height: 1.15;
+        max-width: 100%;
       }
       .dice .dice-num {
-        font-size: 1.25rem;
+        font-size: 1.15rem;
       }
+      .dice-face {
+        width: 32px;
+        height: 32px;
+        position: relative;
+        flex-shrink: 0;
+      }
+      .dice-pip {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #1a1a2e;
+        box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.3);
+      }
+      .dice-pip.red {
+        background: #e53935;
+        box-shadow: 0 0 5px rgba(229, 57, 53, 0.6);
+      }
+      .dice-pip.p1 { top: 1px; right: 1px; }
+      .dice-pip.p2 { top: 1px; left: 50%; transform: translateX(-50%); }
+      .dice-pip.p3 { top: 1px; left: 1px; }
+      .dice-pip.p4 { top: 50%; right: 1px; transform: translateY(-50%); }
+      .dice-pip.p5 { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+      .dice-pip.p6 { top: 50%; left: 1px; transform: translateY(-50%); }
+      .dice-pip.p7 { bottom: 1px; right: 1px; }
+      .dice-pip.p8 { bottom: 1px; left: 50%; transform: translateX(-50%); }
+      .dice-pip.p9 { bottom: 1px; left: 1px; }
       .dice.rolling {
         animation: diceAnim3d 0.6s ease;
       }
@@ -866,6 +942,15 @@
           0 6px 16px rgba(0, 0, 0, 0.35);
         filter: brightness(1.08) saturate(1.1);
         background: linear-gradient(145deg, #ffebee, #ffcdd2);
+      }
+      .dice.zero {
+        box-shadow:
+          0 0 0 3px rgba(255, 152, 0, 0.95),
+          0 0 20px 5px rgba(255, 152, 0, 0.75),
+          0 0 40px 10px rgba(255, 152, 0, 0.45),
+          0 6px 16px rgba(0, 0, 0, 0.35);
+        filter: brightness(1.08) saturate(1.1);
+        background: linear-gradient(145deg, #fff8e1, #ffe0b2);
       }
       @keyframes diceAnim3d {
         0% {
@@ -1024,9 +1109,36 @@
         font-size: 0.7rem;
         opacity: 0.5;
         margin-top: 3px;
+        text-align: center;
+        width: 100%;
       }
       .hold-hint.blink {
         animation: hintBlink 1.4s ease-in-out infinite;
+      }
+      .hold-hint.roll-prompt {
+        font-size: 0.95rem;
+        font-weight: 800;
+        opacity: 1;
+        color: #ffb74d;
+        text-shadow:
+          0 0 8px rgba(255, 152, 0, 0.7),
+          0 0 18px rgba(255, 152, 0, 0.45);
+        animation: rollPromptGlow 1.6s ease-in-out infinite;
+      }
+      @keyframes rollPromptGlow {
+        0%,
+        100% {
+          opacity: 0.85;
+          text-shadow:
+            0 0 8px rgba(255, 152, 0, 0.6),
+            0 0 16px rgba(255, 152, 0, 0.35);
+        }
+        50% {
+          opacity: 1;
+          text-shadow:
+            0 0 12px rgba(255, 183, 77, 0.95),
+            0 0 28px rgba(255, 152, 0, 0.65);
+        }
       }
       @keyframes hintBlink {
         0%,
@@ -1088,7 +1200,7 @@
       }
       @media (min-width: 500px) {
         .screen {
-          padding: 52px 18px 56px;
+          padding: 14px 18px;
         }
         .game-top {
           max-width: 420px;
@@ -1158,7 +1270,7 @@
       }
       @media (min-width: 700px) {
         .screen {
-          padding: 56px 28px 60px;
+          padding: 20px 28px;
         }
         .game-top {
           max-width: 460px;
@@ -1407,14 +1519,14 @@
           height: 40px;
         }
         .setup-wrap {
-          padding-bottom: 64px;
+          padding-bottom: 85px;
         }
       }
 
       @media (max-height: 640px) {
         .game-title {
-          font-size: 1.2rem;
-          margin-bottom: 8px;
+          font-size: 1.25rem;
+          margin-bottom: 14px;
         }
         .team-pill {
           padding: 4px 6px;
@@ -1483,18 +1595,17 @@
           height: 16px;
         }
         .screen {
-          padding: 42px 8px 42px;
+          padding: 2px 8px 42px;
         }
-        /* דחיסת מסך ההגדרות במסכים נמוכים – הכל צפוף בלי גלילה */
+        /* דחיסת מסך ההגדרות במסכים נמוכים – הכל צפוף כדי להימנע מגלילה */
         .setup-wrap {
           gap: 1px;
-          padding: 0 0 48px;
+          padding: 2px 0 52px;
           justify-content: flex-start;
-          overflow: hidden;
         }
         .logo {
           font-size: clamp(1.15rem, 5vw, 1.5rem);
-          margin-bottom: 6px;
+          margin-bottom: 10px;
         }
         .tagline {
           display: none;
@@ -1552,16 +1663,15 @@
           height: 12px;
         }
         .screen {
-          padding: 40px 6px 36px;
+          padding: 1px 6px 36px;
         }
         .setup-wrap {
           gap: 0;
-          padding: 0 0 40px;
-          overflow: hidden;
+          padding: 1px 0 44px;
         }
         .logo {
           font-size: 1.05rem;
-          margin-bottom: 4px;
+          margin-bottom: 8px;
         }
         .tagline {
           display: none;
@@ -1842,8 +1952,7 @@
       </div>
       <div class="mid-row">
         <div class="dice" id="dice" onclick="rollDice()">
-          <span class="dice-label-sm">בונוס</span
-          ><span class="dice-num">?</span>
+          <span class="dice-label-sm idle-label">קוביית<br />הבונוס</span>
         </div>
         <div class="timer-ring" id="timerRing" style="--progress: 100%">
           <div class="timer-value" id="timerValue">60</div>
@@ -1852,7 +1961,7 @@
       <div class="correct-line" id="correctCount">מילים נכונות: 0</div>
       <div class="word-area">
         <div class="word-display" id="wordDisplay">••••</div>
-        <div class="hold-hint" id="holdHint">זרוק קובייה</div>
+        <div class="hold-hint roll-prompt" id="holdHint">לחץ על קוביית הבונוס</div>
       </div>
       <button class="hold-btn" id="holdBtn" disabled>
         החזק כדי לראות מילה
@@ -3300,6 +3409,33 @@
         setTimeout(() => playTone(554, 0.1, "sine", 0.25), 100);
         setTimeout(() => playTone(659, 0.2, "sine", 0.3), 200);
       }
+      function sndTimeUp() {
+        // באזר בסגנון שעון התקפה בכדורסל – ~1.5 שניות
+        if (state.muted) return;
+        ensureAudio();
+        const start = actx.currentTime;
+        const dur = 1.5;
+        const o = actx.createOscillator();
+        const o2 = actx.createOscillator();
+        const g = actx.createGain();
+        // תדר נמוך וגס כמו באזר אולם
+        o.type = "sawtooth";
+        o2.type = "square";
+        o.frequency.setValueAtTime(140, start);
+        o2.frequency.setValueAtTime(280, start);
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.exponentialRampToValueAtTime(0.35, start + 0.02);
+        // שמירה על עוצמה גבוהה לאורך רוב הזמן ואז דעיכה
+        g.gain.setValueAtTime(0.35, start + 1.15);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        o.connect(g);
+        o2.connect(g);
+        g.connect(actx.destination);
+        o.start(start);
+        o2.start(start);
+        o.stop(start + dur + 0.05);
+        o2.stop(start + dur + 0.05);
+      }
 
       const $ = (id) => document.getElementById(id);
       const setupScreen = $("setupScreen"),
@@ -3321,16 +3457,41 @@
       const settingsPanel = $("settingsPanel"),
         rulesBanner = $("rulesBanner");
 
+      function diceFaceHtml(n) {
+        const faces = {
+          "-1": '<span class="dice-pip red p5"></span>',
+          0: "",
+          1: '<span class="dice-pip p5"></span>',
+          2: '<span class="dice-pip p1"></span><span class="dice-pip p9"></span>',
+          3: '<span class="dice-pip p1"></span><span class="dice-pip p5"></span><span class="dice-pip p9"></span>',
+          4: '<span class="dice-pip p1"></span><span class="dice-pip p3"></span><span class="dice-pip p7"></span><span class="dice-pip p9"></span>',
+          5: '<span class="dice-pip p1"></span><span class="dice-pip p3"></span><span class="dice-pip p5"></span><span class="dice-pip p7"></span><span class="dice-pip p9"></span>',
+          6: '<span class="dice-pip p1"></span><span class="dice-pip p3"></span><span class="dice-pip p4"></span><span class="dice-pip p6"></span><span class="dice-pip p7"></span><span class="dice-pip p9"></span>',
+        };
+        return '<div class="dice-face">' + (faces[String(n)] || "") + "</div>";
+      }
       function setDiceDisplay(val) {
         if (val === null || val === undefined || val === "?") {
           diceEl.innerHTML =
-            '<span class="dice-label-sm">בונוס</span><span class="dice-num">?</span>';
-        } else {
-          const txt = val > 0 ? "+" + val : String(val);
+            '<span class="dice-label-sm idle-label">קוביית<br />הבונוס</span>';
+          return;
+        }
+        if (val === -1) {
           diceEl.innerHTML =
-            '<span class="dice-label-sm">בונוס</span><span class="dice-num">' +
-            txt +
-            "</span>";
+            '<span class="dice-label-sm">קנס</span>' + diceFaceHtml(-1);
+        } else if (val === 0) {
+          diceEl.innerHTML =
+            '<span class="dice-label-sm two-line">ללא<br />בונוס</span>';
+        } else {
+          diceEl.innerHTML =
+            '<span class="dice-label-sm">בונוס</span>' + diceFaceHtml(val);
+        }
+      }
+      function setDuelDiceDisplay(el, val) {
+        if (val === null || val === undefined || val === "?") {
+          el.innerHTML = '<span class="duel-q">?</span>';
+        } else {
+          el.innerHTML = diceFaceHtml(val);
         }
       }
 
@@ -3483,7 +3644,7 @@
         state.teams.forEach((t, i) => {
           const side = document.createElement("div");
           side.className = "duel-side";
-          side.innerHTML = `<div class="duel-dice" id="duelDice${i}">?</div>
+          side.innerHTML = `<div class="duel-dice" id="duelDice${i}"><span class="duel-q">?</span></div>
             <div style="font-weight:700;font-size:0.85rem">${t.name}</div>`;
           duel.appendChild(side);
         });
@@ -3501,16 +3662,21 @@
         $("duelResult").textContent = "";
         $("duelStartBtn").classList.add("hidden");
         const diceEls = state.teams.map((_, i) => $("duelDice" + i));
-        diceEls.forEach((d) => d.classList.add("rolling"));
+        diceEls.forEach((d) => {
+          d.classList.remove("winner");
+          d.classList.add("rolling");
+        });
         let n = 0;
         const iv = setInterval(() => {
-          diceEls.forEach((d) => (d.textContent = Math.ceil(Math.random() * 6)));
+          diceEls.forEach((d) =>
+            setDuelDiceDisplay(d, Math.ceil(Math.random() * 6)),
+          );
           sndDice();
           if (++n > 10) {
             clearInterval(iv);
             const vals = state.teams.map(() => Math.ceil(Math.random() * 6));
             vals.forEach((v, i) => {
-              diceEls[i].textContent = v;
+              setDuelDiceDisplay(diceEls[i], v);
               diceEls[i].classList.remove("rolling");
             });
             duelRolling = false;
@@ -3521,6 +3687,7 @@
               return;
             }
             state.current = winners[0];
+            diceEls[winners[0]].classList.add("winner");
             $("duelResult").textContent = state.teams[state.current].name + " מתחילים!";
             $("duelRollBtn").classList.add("hidden");
             $("duelStartBtn").classList.remove("hidden");
@@ -3547,7 +3714,7 @@
       function rollDice() {
         if (state.running) return;
         ensureAudio();
-        diceEl.classList.remove("positive", "negative");
+        diceEl.classList.remove("positive", "negative", "zero");
         diceEl.classList.add("rolling");
         let n = 0;
         const iv = setInterval(() => {
@@ -3562,6 +3729,7 @@
             diceEl.classList.remove("rolling");
             if (final > 0) diceEl.classList.add("positive");
             else if (final < 0) diceEl.classList.add("negative");
+            else diceEl.classList.add("zero");
             startTurn();
           }
         }, 55);
@@ -3600,11 +3768,12 @@
         state.hasSeenWord = false;
         state.bonus = 0;
         setDiceDisplay("?");
-        diceEl.classList.remove("positive", "negative", "rolling");
+        diceEl.classList.remove("positive", "negative", "zero", "rolling");
         wordDisplay.classList.remove("visible", "gold-word");
         wordDisplay.textContent = "••••";
-        holdHint.textContent = "זרוק קוביית בונוס";
+        holdHint.textContent = "לחץ על קוביית הבונוס";
         holdHint.classList.remove("blink");
+        holdHint.classList.add("roll-prompt");
         holdBtn.disabled = true;
         correctBtn.disabled = true;
         skipBtn.disabled = true;
@@ -3626,6 +3795,7 @@
         skipBtn.disabled = true;
         endTurnBtn.disabled = false;
         holdHint.textContent = "החזק כדי לראות";
+        holdHint.classList.remove("roll-prompt");
         holdHint.classList.add("blink");
         nextWord();
         clearInterval(state.interval);
@@ -3645,6 +3815,7 @@
           }
           if (state.timer <= 0) {
             clearInterval(state.interval);
+            sndTimeUp();
             finishTurn();
           }
         }, 1000);
