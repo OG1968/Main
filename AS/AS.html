@@ -54,10 +54,10 @@
         --team4: #ffb74d;
       }
       [data-theme="light"] {
-        --bg1: #f0f2f5;
-        --bg2: #e4e6eb;
-        --primary: #5e35b1;
-        --primary-glow: rgba(94, 53, 177, 0.25);
+        --bg1: #e3f2fd;
+        --bg2: #bbdefb;
+        --primary: #1565c0;
+        --primary-glow: rgba(21, 101, 192, 0.3);
         --team1: #00897b;
         --team2: #c2185b;
         --team3: #43a047;
@@ -65,7 +65,7 @@
       }
       body[data-theme="light"] {
         color: #12121f;
-        background: linear-gradient(160deg, var(--bg1), var(--bg2) 60%, #cfd4dc);
+        background: linear-gradient(160deg, var(--bg1), var(--bg2) 55%, #90caf9);
       }
       body[data-theme="light"] .card,
       body[data-theme="light"] .word-area,
@@ -146,12 +146,12 @@
         color: #12121f;
       }
       body[data-theme="light"] .logo {
-        background: linear-gradient(120deg, #5e35b1, #c2185b, #00897b);
+        background: linear-gradient(120deg, #1565c0, #0288d1, #00897b);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
       body[data-theme="light"] .game-title {
-        background: linear-gradient(120deg, #5e35b1, #c2185b, #00897b);
+        background: linear-gradient(120deg, #1565c0, #0288d1, #00897b);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
@@ -159,7 +159,7 @@
         color: #fff;
       }
       body[data-theme="light"] .overlay {
-        background: rgba(240, 242, 245, 0.96);
+        background: rgba(227, 242, 253, 0.96);
       }
       body[data-theme="light"] .win-team {
         color: #12121f;
@@ -541,8 +541,8 @@
         }
       }
       .tagline {
-        font-size: 0.85rem;
-        opacity: 0.65;
+        font-size: 1.2rem;
+        opacity: 0.75;
       }
       .card {
         background: rgba(255, 255, 255, 0.07);
@@ -1569,12 +1569,14 @@
         <div
           class="theme-btn"
           data-theme="dark"
-          style="background: linear-gradient(135deg, #0d0d0d, #bb86fc)"
+          style="background: #111111; border-color: rgba(255,255,255,0.35)"
+          title="תצוגה כהה"
         ></div>
         <div
           class="theme-btn"
           data-theme="light"
-          style="background: linear-gradient(135deg, #f0f2f5, #5e35b1)"
+          style="background: #ffffff; border-color: rgba(0,0,0,0.25)"
+          title="תצוגה בהירה"
         ></div>
       </div>
       <h4>צלילים</h4>
@@ -1625,7 +1627,7 @@
     <div class="screen active" id="setupScreen">
       <div class="setup-wrap">
         <div class="logo">אליס</div>
-        <div class="tagline">משחק המילים</div>
+        <div class="tagline"> משחק מילים חברתי</div>
         <div class="card">
           <div id="teamsInputs">
             <div class="input-group" data-team-idx="0">
