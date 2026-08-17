@@ -21,6 +21,8 @@
         --primary-glow: rgba(124, 92, 252, 0.4);
         --team1: #00d2ff;
         --team2: #ff6b9d;
+        --team3: #69f0ae;
+        --team4: #ffab40;
         --success: #00e676;
         --danger: #ff5252;
         --warning: #ffd740;
@@ -41,22 +43,84 @@
         --team1: #ffca28;
         --team2: #ef5350;
       }
-      [data-theme="forest"] {
-        --bg1: #0a1a0f;
-        --bg2: #1b3a2a;
-        --primary: #66bb6a;
-        --primary-glow: rgba(102, 187, 106, 0.4);
-        --team1: #aed581;
-        --team2: #26a69a;
+      [data-theme="dark"] {
+        --bg1: #0d0d0d;
+        --bg2: #1a1a1a;
+        --primary: #bb86fc;
+        --primary-glow: rgba(187, 134, 252, 0.35);
+        --team1: #03dac6;
+        --team2: #cf6679;
+        --team3: #a5d6a7;
+        --team4: #ffb74d;
       }
-      [data-theme="classic"] {
-        --bg1: #1a120b;
-        --bg2: #3e2723;
-        --primary: #ff8f00;
-        --primary-glow: rgba(255, 143, 0, 0.4);
-        --team1: #ffcc80;
-        --team2: #ef9a9a;
+      [data-theme="light"] {
+        --bg1: #f0f2f5;
+        --bg2: #e4e6eb;
+        --primary: #5e35b1;
+        --primary-glow: rgba(94, 53, 177, 0.25);
+        --team1: #00897b;
+        --team2: #c2185b;
+        --team3: #43a047;
+        --team4: #ef6c00;
       }
+      body[data-theme="light"] {
+        color: #1a1a2e;
+        background: linear-gradient(160deg, var(--bg1), var(--bg2) 60%, #dfe3e8);
+      }
+      body[data-theme="light"] .card,
+      body[data-theme="light"] .word-area,
+      body[data-theme="light"] .team-pill,
+      body[data-theme="light"] .settings-panel,
+      body[data-theme="light"] .rules-box,
+      body[data-theme="light"] .confirm-box {
+        background: rgba(255, 255, 255, 0.85);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: #1a1a2e;
+      }
+      body[data-theme="light"] .input-group input {
+        background: rgba(255, 255, 255, 0.9);
+        color: #1a1a2e;
+        border-color: rgba(0, 0, 0, 0.15);
+      }
+      body[data-theme="light"] .btn-ghost {
+        background: rgba(0, 0, 0, 0.06);
+        color: #1a1a2e;
+        border-color: rgba(0, 0, 0, 0.15);
+      }
+      body[data-theme="light"] .float-btn {
+        background: rgba(0, 0, 0, 0.08);
+        color: #1a1a2e;
+      }
+      body[data-theme="light"] .hold-hint,
+      body[data-theme="light"] .tagline,
+      body[data-theme="light"] .turn-line {
+        opacity: 0.7;
+        color: #333;
+      }
+      body[data-theme="light"] .page-footer {
+        color: #444;
+      }
+      body[data-theme="light"] .dice {
+        background: linear-gradient(145deg, #fff, #f0f0f0);
+        color: #1a1a2e;
+      }
+      body[data-theme="light"] .timer-ring::before {
+        background: linear-gradient(160deg, var(--bg1), var(--bg2));
+      }
+      body[data-theme="light"] .word-display {
+        color: #1a1a2e;
+      }
+      body[data-theme="light"] .logo {
+        background: linear-gradient(120deg, #5e35b1, #c2185b, #00897b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      body[data-theme="light"] .game-title {
+        background: linear-gradient(120deg, #5e35b1, #c2185b, #00897b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      /* team3/team4 already in :root */
 
       * {
         margin: 0;
@@ -443,6 +507,14 @@
         background: var(--team2);
         box-shadow: 0 0 5px var(--team2);
       }
+      .dot.t3 {
+        background: var(--team3);
+        box-shadow: 0 0 5px var(--team3);
+      }
+      .dot.t4 {
+        background: var(--team4);
+        box-shadow: 0 0 5px var(--team4);
+      }
       .btn {
         display: inline-flex;
         align-items: center;
@@ -551,6 +623,14 @@
         border-color: var(--team2);
         background: rgba(255, 107, 157, 0.15);
       }
+      .team-pill.t3.active {
+        border-color: var(--team3);
+        background: rgba(105, 240, 174, 0.15);
+      }
+      .team-pill.t4.active {
+        border-color: var(--team4);
+        background: rgba(255, 171, 64, 0.15);
+      }
       .team-name {
         font-size: 0.7rem;
         font-weight: 700;
@@ -598,6 +678,14 @@
       .track-fill.t2 {
         background: linear-gradient(90deg, var(--team2), #c44569);
         box-shadow: 0 0 7px rgba(255, 107, 157, 0.45);
+      }
+      .track-fill.t3 {
+        background: linear-gradient(90deg, var(--team3), #00c853);
+        box-shadow: 0 0 7px rgba(105, 240, 174, 0.45);
+      }
+      .track-fill.t4 {
+        background: linear-gradient(90deg, var(--team4), #ff6d00);
+        box-shadow: 0 0 7px rgba(255, 171, 64, 0.45);
       }
       .track-num {
         font-size: 0.72rem;
@@ -1146,13 +1234,13 @@
         ></div>
         <div
           class="theme-btn"
-          data-theme="forest"
-          style="background: linear-gradient(135deg, #66bb6a, #26a69a)"
+          data-theme="dark"
+          style="background: linear-gradient(135deg, #0d0d0d, #bb86fc)"
         ></div>
         <div
           class="theme-btn"
-          data-theme="classic"
-          style="background: linear-gradient(135deg, #ff8f00, #ef9a9a)"
+          data-theme="light"
+          style="background: linear-gradient(135deg, #f0f2f5, #5e35b1)"
         ></div>
       </div>
       <h4>צלילים</h4>
@@ -1167,30 +1255,30 @@
         <h3>כללי המשחק</h3>
         <ul>
           <li>
-            משחק לשתי קבוצות. הראשונה שמגיעה ליעד הניקוד (40/60/80/100) מנצחת.
+            משחק ל-2 עד 4 קבוצות. הראשונה שמגיעה ליעד הניקוד (40/60/80/100) מנצחת.
           </li>
           <li>
-            לפני המשחק: נזרקת קובייה – הגבוהה קובעת את זהות הקבוצה המתחילה
+            לפני המשחק: כל קבוצה זורקת קובייה – הגבוהה קובעת את הקבוצה המתחילה
             (תיקו: שוב).
           </li>
           <li>
-            בתחילת תור: מפעילים את קוביית הבונוס + הטיימר רץ 60 שניות, זה הזמן
+            בתחילת תור: מפעילים את קוביית הבונוס + הטיימר רץ (30–120 שניות לפי בחירה), זה הזמן
             לענות.
           </li>
           <li>החזק את הכפתור כדי לראות את המילה (רק המסביר).</li>
           <li>
             הקובייה: <strong>−1, 0, 1, 2, 3, 4</strong> – בונוס/קנס לניקוד התור
-            <strong>רק אם נענו יותר מ-5 תשובות נכונות נכונות</strong>.
+            <strong>רק אם נענו לפחות 5 תשובות נכונות</strong>.
           </li>
           <li>כשזכאים לבונוס – הבאנר יודיע על כך בסוף התור.</li>
           <li>חובה לראות את המילה לפני לחיצה על "נכון" או "דילוג".</li>
           <li>מסבירים בלי לומר את המילה או חלקים ממנה.</li>
           <li>נכון = נקודה · דילוג = ללא נקודה.</li>
           <li>
-            התקדמות = תשובות נכונות <br />(+/− בונוס אם גדול יותר מ-5 תשובות
-            נכונות).
+            התקדמות = תשובות נכונות <br />(+/− בונוס אם לפחות 5 תשובות נכונות).
           </li>
           <li>הגעה ליעד = ניצחון מיידי גם באמצע התור.</li>
+          <li>אין חזרה על אותה מילה במהלך המשחק (מעל 1200 מילים).</li>
           בהצלחה !
         </ul>
         <button class="rules-close" id="rulesClose">סגור</button>
@@ -1205,18 +1293,19 @@
         <div class="logo">אליס</div>
         <div class="tagline">משחק המילים</div>
         <div class="card">
-          <div class="input-group">
-            <label><span class="dot t1"></span> קבוצה 1</label
-            ><input type="text" id="team1Name" value="הכחולים" maxlength="12" />
+          <div id="teamsInputs">
+            <div class="input-group" data-team-idx="0">
+              <label><span class="dot t1"></span> קבוצה 1</label>
+              <input type="text" class="team-name-input" value="הכחולים" maxlength="12" />
+            </div>
+            <div class="input-group" data-team-idx="1">
+              <label><span class="dot t2"></span> קבוצה 2</label>
+              <input type="text" class="team-name-input" value="הוורודים" maxlength="12" />
+            </div>
           </div>
-          <div class="input-group">
-            <label><span class="dot t2"></span> קבוצה 2</label
-            ><input
-              type="text"
-              id="team2Name"
-              value="הוורודים"
-              maxlength="12"
-            />
+          <div style="display: flex; gap: 8px; justify-content: center; margin: 6px 0;">
+            <button type="button" class="btn btn-ghost btn-sm" id="addTeamBtn">+ הוסף קבוצה</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="removeTeamBtn" disabled>− הסר קבוצה</button>
           </div>
           <div
             style="
@@ -1229,18 +1318,27 @@
             נקודות לניצחון
           </div>
           <div class="target-row" id="targetRow">
-            <button type="button" class="target-btn" data-target="40">
-              40
-            </button>
-            <button type="button" class="target-btn active" data-target="60">
-              60
-            </button>
-            <button type="button" class="target-btn" data-target="80">
-              80
-            </button>
-            <button type="button" class="target-btn" data-target="100">
-              100
-            </button>
+            <button type="button" class="target-btn" data-target="40">40</button>
+            <button type="button" class="target-btn active" data-target="60">60</button>
+            <button type="button" class="target-btn" data-target="80">80</button>
+            <button type="button" class="target-btn" data-target="100">100</button>
+          </div>
+          <div
+            style="
+              font-size: 0.75rem;
+              opacity: 0.7;
+              margin: 10px 0 4px;
+              text-align: center;
+            "
+          >
+            זמן לתור (שניות)
+          </div>
+          <div class="target-row" id="timerRow">
+            <button type="button" class="target-btn" data-timer="30">30</button>
+            <button type="button" class="target-btn" data-timer="45">45</button>
+            <button type="button" class="target-btn active" data-timer="60">60</button>
+            <button type="button" class="target-btn" data-timer="90">90</button>
+            <button type="button" class="target-btn" data-timer="120">120</button>
           </div>
           <button
             class="btn btn-primary"
@@ -1262,19 +1360,8 @@
         <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 8px">
           כל קבוצה זורקת – הגבוהה מתחילה
         </div>
-        <div class="dice-duel">
-          <div class="duel-side">
-            <div class="duel-dice" id="duelDice1">?</div>
-            <div id="duelName1" style="font-weight: 700; font-size: 0.9rem">
-              קבוצה 1
-            </div>
-          </div>
-          <div class="duel-side">
-            <div class="duel-dice" id="duelDice2">?</div>
-            <div id="duelName2" style="font-weight: 700; font-size: 0.9rem">
-              קבוצה 2
-            </div>
-          </div>
+        <div class="dice-duel" id="diceDuel" style="flex-wrap: wrap; gap: 12px;">
+          <!-- filled by JS -->
         </div>
         <div
           id="duelResult"
@@ -1306,31 +1393,11 @@
     <div class="screen" id="gameScreen">
       <div class="game-title">אליס</div>
       <div class="game-top">
-        <div class="teams-row">
-          <div class="team-pill t1" id="pill1">
-            <div class="team-name" id="name1">הכחולים</div>
-            <div class="team-score" id="score1">0</div>
-          </div>
-          <div class="team-pill t2" id="pill2">
-            <div class="team-name" id="name2">הוורודים</div>
-            <div class="team-score" id="score2">0</div>
-          </div>
+        <div class="teams-row" id="teamsRow">
+          <!-- filled by JS -->
         </div>
-        <div class="tracks">
-          <div class="track-row">
-            <div class="track-label" style="color: var(--team1)">1</div>
-            <div class="track-bar">
-              <div class="track-fill t1" id="fill1" style="width: 0%"></div>
-            </div>
-            <div class="track-num" id="pos1">0/60</div>
-          </div>
-          <div class="track-row">
-            <div class="track-label" style="color: var(--team2)">2</div>
-            <div class="track-bar">
-              <div class="track-fill t2" id="fill2" style="width: 0%"></div>
-            </div>
-            <div class="track-num" id="pos2">0/60</div>
-          </div>
+        <div class="tracks" id="tracks">
+          <!-- filled by JS -->
         </div>
         <div class="turn-line" id="turnInfo">תור של הכחולים</div>
       </div>
@@ -2231,17 +2298,509 @@
         "כיסא מתקפל",
         "שמשייה",
         "צידנית",
+        "מזלג",
+        "כפית",
+        "צלחת מרק",
+        "סיר לחץ",
+        "מחבת ווק",
+        "טוסטר אובן",
+        "מכונת קפה",
+        "מקיאטו",
+        "אספרסו",
+        "קפוצ'ינו",
+        "לאטה",
+        "תה ירוק",
+        "תה שחור",
+        "חליטת צמחים",
+        "מיץ תפוזים",
+        "מיץ רימונים",
+        "שייק פירות",
+        "יוגורט יווני",
+        "גבינת עיזים",
+        "גבינה צהובה",
+        "גבינה לבנה",
+        "קוטג'",
+        "שמנת",
+        "חלב שקדים",
+        "חלב סויה",
+        "טופו",
+        "סטייק",
+        "שניצל",
+        "קבב",
+        "קציצה",
+        "מרק עוף",
+        "מרק ירקות",
+        "סלט ישראלי",
+        "סלט יווני",
+        "טאבולה",
+        "חומוס מסבחה",
+        "פלאפל בכדור",
+        "שווארמה בפיתה",
+        "בורגר טבעוני",
+        "פיצה מרגריטה",
+        "פיצה פפרוני",
+        "לחם מחמצת",
+        "חלה",
+        "בייגל",
+        "כעך",
+        "עוגת גבינה",
+        "עוגת שוקולד",
+        "בראוניז",
+        "מאפה",
+        "קרואסון חמאה",
+        "דונאט",
+        "סופגנייה בריבה",
+        "לביבה",
+        "לטקה",
+        "סיגר",
+        "בurek",
+        "ממולא",
+        "כרוב ממולא",
+        "עלי גפן",
+        "קוסקוס מרוקאי",
+        "טאג'ין",
+        "שקשוקה ירוקה",
+        "חביתת ירקות",
+        "אומלט",
+        "פנקייק",
+        "וופל",
+        "קרפ",
+        "מילפיי",
+        "אקלייר",
+        "מקרונים",
+        "פודינג",
+        "ג'לי",
+        "קרם ברולה",
+        "מוס שוקולד",
+        "טירמיסו",
+        "פאי תפוחים",
+        "עוגת גזר",
+        "עוגת תפוז",
+        "עוגת שמרים",
+        "בבקה",
+        "רוגלך",
+        "עוגיות חמאה",
+        "עוגיות שוקולדצ'יפס",
+        "קרקר",
+        "ביסקוויט",
+        "וופל בלגי",
+        "פופקורן מתוק",
+        "צ'יפס בטטה",
+        "טבעות בצל",
+        "נאגטס",
+        "כנפי עוף",
+        "צלעות",
+        "כליות",
+        "לשון בקר",
+        "מעיים",
+        "אווז צלוי",
+        "הודו",
+        "תרנגול הודו",
+        "דג סלמון",
+        "דג טונה",
+        "דג בס",
+        "דג אמנון",
+        "דג קרפיון",
+        "דג לברק",
+        "שרימפס",
+        "לובסטר",
+        "צדפות",
+        "מולים",
+        "קיווי",
+        "מנגו",
+        "פפאיה",
+        "אננס",
+        "אבטיח מנוקד",
+        "אפרסק",
+        "נקטרינה",
+        "שזיף",
+        "משמש",
+        "דובדבן",
+        "דובדבנים",
+        "תות שדה",
+        "אוכמניות",
+        "פטל",
+        "דומדמניות",
+        "גויאבה",
+        "ליצ'י",
+        "פסיפלורה",
+        "קוקוס",
+        "בננה ירוקה",
+        "תפוח עץ",
+        "אגס",
+        "חבוש",
+        "אפרסמון",
+        "תאנה יבשה",
+        "תמר מג'הול",
+        "צימוקים",
+        "שזיפים מיובשים",
+        "משמש מיובש",
+        "אגוזי מלך",
+        "אגוזי פקאן",
+        "אגוזי קשיו",
+        "שקדים קלויים",
+        "בוטנים קלויים",
+        "פיסטוק",
+        "צנובר",
+        "גרעיני חמנייה",
+        "גרעיני דלעת",
+        "שומשום",
+        "קמח",
+        "סובין",
+        "אורז מלא",
+        "אורז בסמטי",
+        "קינואה",
+        "כוסמת",
+        "שיבולת שועל",
+        "סולת דקה",
+        "קמח תירס",
+        "קמח שקדים",
+        "קמח קוקוס",
+        "שמן זית",
+        "שמן קנולה",
+        "שמן חמניות",
+        "חומץ בלסמי",
+        "חומץ תפוחים",
+        "רוטב סויה",
+        "רוטב טריאקי",
+        "רוטב ברביקיו",
+        "מיונז ביתי",
+        "חרדל דיז'ון",
+        "קטשופ ביתי",
+        "סחוג",
+        "עמבה",
+        "טחינה גולמית",
+        "חומוס גולמי",
+        "טאבון",
+        "טאבון ביתי",
+        "גריל",
+        "מנגל פחמים",
+        "מנגל גז",
+        "שיפוד מתכת",
+        "שיפוד עץ",
+        "מפת שולחן",
+        "מפית",
+        "כוס יין",
+        "כוס שמפניה",
+        "כוס בירה",
+        "כוס קפה",
+        "ספל",
+        "קנקן",
+        "תרמוס",
+        "בקבוק תרמי",
+        "קופסת אוכל",
+        "צידנית קטנה",
+        "שקית קניות",
+        "עגלת קניות",
+        "מסוע",
+        "קופה רושמת",
+        "כרטיס נאמנות",
+        "קופון הנחה",
+        "תווית מחיר",
+        "ברקוד",
+        "סורק ברקוד",
+        "שקילת פירות",
+        "שקילת ירקות",
+        "מדף עליון",
+        "מדף תחתון",
+        "מקרר תצוגה",
+        "מקפיא",
+        "מחסן קר",
+        "משאית משלוחים",
+        "שליח",
+        "אפליקציית משלוחים",
+        "כתובת משלוח",
+        "קוד אימות",
+        "חתימה דיגיטלית",
+        "חשבונית מס",
+        "קבלה דיגיטלית",
+        "תשלום במזומן",
+        "תשלום באשראי",
+        "תשלום בביט",
+        "תשלום בפייבוקס",
+        "ארנק אלקטרוני",
+        "קריפטו",
+        "ביטקוין",
+        "אתריום",
+        "בלוקצ'יין",
+        "מטבע דיגיטלי",
+        "כספומט ביטקוין",
+        "בורסה",
+        "מניה",
+        "אגח",
+        "קרן נאמנות",
+        "תיק השקעות",
+        "יועץ השקעות",
+        "יועץ מס",
+        "עורך דין לענייני משפחה",
+        "נוטריון",
+        "צוואה",
+        "ירושה",
+        "צו ירושה",
+        "דירה",
+        "בית פרטי",
+        "פנטהאוז",
+        "דירת גן",
+        "סטודיו",
+        "לופט",
+        "משרד",
+        "חלל עבודה משותף",
+        "קומה",
+        "מעלית שירות",
+        "חדר מדרגות",
+        "מחסן דירתי",
+        "חניה תת קרקעית",
+        "שער חשמלי",
+        "אינטרקום וידאו",
+        "מצלמת אבטחה חיצונית",
+        "אזעקת פריצה",
+        "גלאי עשן",
+        "מטף כיבוי",
+        "יציאת חירום",
+        "סולם חירום",
+        "גג ירוק",
+        "מרפסת שמש",
+        "פרגולה",
+        "דק עץ",
+        "בריכת שחייה פרטית",
+        "ג'קוזי",
+        "סאונה",
+        "חדר כושר ביתי",
+        "חדר משחקים",
+        "חדר עבודה",
+        "חדר ילדים",
+        "חדר שינה הורים",
+        "סלון",
+        "פינת אוכל",
+        "מטבח פתוח",
+        "אי מטבח",
+        "כיור כפול",
+        "ברז נשלף",
+        "תנור בנוי",
+        "כיריים גז",
+        "כיריים אינדוקציה",
+        "מדיח כלים",
+        "מכונת ייבוש",
+        "ארון בגדים",
+        "חדר ארונות",
+        "מערכת ארונות",
+        "מיטה זוגית",
+        "מיטת יחיד",
+        "מיטת קומותיים",
+        "מזרן אורתופדי",
+        "כרית",
+        "שמיכה",
+        "סדין",
+        "ציפה",
+        "וילון",
+        "תריס",
+        "וילון האפלה",
+        "שטיח",
+        "שטיח מקיר לקיר",
+        "פרקט",
+        "שיש",
+        "קרמיקה",
+        "אריחי רצפה",
+        "אריחי קיר",
+        "צבע קיר",
+        "טפט",
+        "תמונה",
+        "מסגרת תמונה",
+        "מדף ספרים",
+        "ספרייה ביתית",
+        "שולחן עבודה",
+        "כיסא משרדי",
+        "מנורת שולחן",
+        "מחשב נייח",
+        "מסך כפול",
+        "אוזניות אלחוטיות",
+        "רמקול בלוטות",
+        "סאונד בר",
+        "מקרן",
+        "מסך הקרנה",
+        "קונסולת משחקים",
+        "בקר משחק",
+        "משחק וידאו",
+        "משחק מחשב",
+        "משחק נייד",
+        "אפליקציית משחק",
+        "סטורי",
+        "רילס",
+        "טיקטוק",
+        "אינסטגרם",
+        "פייסבוק",
+        "טוויטר",
+        "לינקדאין",
+        "וואטסאפ",
+        "טלגרם",
+        "סיגנל",
+        "דואר אלקטרוני",
+        "תיבת דואר",
+        "ספאם",
+        "פילטר",
+        "תוסף דפדפן",
+        "סיסמת מנהל",
+        "אימות דו שלבי",
+        "מפתח אבטחה",
+        "חומת אש אישית",
+        "אנטי וירוס",
+        "תוכנה זדונית",
+        "האקר",
+        "פריצה",
+        "גיבוי ענן",
+        "גיבוי מקומי",
+        "דיסק קשיח חיצוני",
+        "כונן SSD",
+        "כרטיס זיכרון מיקרו",
+        "כבל טעינה",
+        "מטען אלחוטי",
+        "פאוור בנק",
+        "סוללת גיבוי",
+        "פנס ראש",
+        "פנס יד",
+        "מצפן דיגיטלי",
+        "שעון חכם",
+        "צמיד כושר",
+        "מד צעדים",
+        "מד דופק",
+        "אפליקציית בריאות",
+        "תזונה",
+        "קלוריות",
+        "חלבון",
+        "פחמימה",
+        "שומן",
+        "ויטמין C",
+        "ויטמין D",
+        "אומגה 3",
+        "ברזל",
+        "סידן",
+        "מגנזיום",
+        "אבץ",
+        "תוסף תזונה",
+        "חלבון אבקה",
+        "שייק חלבון",
+        "בר חלבון",
+        "חטיף אנרגיה",
+        "ג'ל אנרגיה",
+        "מים עם אלקטרוליטים",
+        "משקה איזוטוני",
+        "משקה אנרגיה",
+        "קפאין",
+        "תה ירוק מאצ'ה",
+        "קפה קר",
+        "אייס קפה",
+        "פראפצ'ינו",
+        "סמודי",
+        "מיץ ירוק",
+        "מיץ גזר",
+        "מיץ סלק",
+        "שייק ירוק",
+        "סלט פירות",
+        "יוגורט עם גרנולה",
+        "דגני בוקר",
+        "קורנפלקס",
+        "שיבולת שועל מבושלת",
+        "פנקייק בננה",
+        "וופל בלגי עם סירופ",
+        "קרפ עם נוטלה",
+        "טוסט אבוקדו",
+        "ביצה עלומה",
+        "ביצה קשה",
+        "ביצה רכה",
+        "חביתה צרפתית",
+        "שקשוקה קלאסית",
+        "פיתה עם זעתר",
+        "לחם עם גבינה",
+        "סנדוויץ' טונה",
+        "סנדוויץ' סלמון",
+        "סנדוויץ' עוף",
+        "בורגר ביתי",
+        "נקניקייה בגריל",
+        "קבב על האש",
+        "שניצל פריך",
+        "תפוחי אדמה אפויים",
+        "בטטה אפויה",
+        "ירקות קלויים",
+        "אספרגוס",
+        "ברוקולי",
+        "כרובית",
+        "קישוא",
+        "חציל",
+        "פלפל ממולא",
+        "עגבנייה שרי",
+        "מלפפון חמוץ",
+        "זיתים ירוקים",
+        "זיתים שחורים",
+        "חמוציות",
+        "כרוב אדום",
+        "כרוב לבן",
+        "חסה",
+        "רוקט",
+        "תרד",
+        "עלי בייבי",
+        "עשבי תיבול",
+        "פטרוזיליה",
+        "כוסברה",
+        "שמיר",
+        "נענע",
+        "בזיליקום",
+        "אורגנו",
+        "טימין",
+        "רוזמרין",
+        "מרווה",
+        "לוונדר",
+        "קמומיל",
+        "לואיזה",
+        "נענע מרוקאית",
+        "תה נענע",
+        "קפה טורקי",
+        "קפה שחור",
+        "קפה עם חלב",
+        "קפה הפוך",
+        "אספרסו כפול",
+        "ריסטרטו",
+        "לונגו",
+        "אמריקנו",
+        "קפוצ'ינו יבש",
+        "מקיאטו קר",
+        "לאטה אמנותי",
+        "קפה קר עם קרח",
+        "שייק חלב",
+        "מילקשייק וניל",
+        "מילקשייק שוקולד",
+        "מילקשייק תות",
+        "סודה בטעמים",
+        "מים מוגזים",
+        "מים מינרליים מוגזים",
+        "בירה בהירה",
+        "בירה כהה",
+        "בירה חיטה",
+        "יין אדום",
+        "יין לבן",
+        "יין רוזה",
+        "שמפניה",
+        "פרוסקו",
+        "קוקטייל",
+        "מוחיטו",
+        "מרגריטה",
+        "פינה קולדה",
+        "דם יאנג",
+        "קוסמופוליטן"
       ];
       let BOARD = 60;
       const BONUS_FACES = [-1, 0, 1, 2, 3, 4];
+      const TEAM_COLORS = ["t1", "t2", "t3", "t4"];
+      const DEFAULT_NAMES = ["הכחולים", "הוורודים", "הירוקים", "הכתומים"];
 
       let state = {
         teams: [
           { name: "הכחולים", score: 0, pos: 0 },
           { name: "הוורודים", score: 0, pos: 0 },
         ],
+        numTeams: 2,
         current: 0,
         timer: 60,
+        duration: 60,
         interval: null,
         running: false,
         correct: 0,
@@ -2251,6 +2810,7 @@
         hasSeenWord: false,
         muted: false,
         bonus: 0,
+        target: 60,
       };
 
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -2341,19 +2901,25 @@
           settingsPanel.classList.remove("open");
       });
 
-      document.querySelectorAll(".target-btn").forEach((btn) => {
+      // Target score buttons
+      document.querySelectorAll("#targetRow .target-btn").forEach((btn) => {
         btn.onclick = () => {
           document
-            .querySelectorAll(".target-btn")
+            .querySelectorAll("#targetRow .target-btn")
             .forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           state.target = parseInt(btn.dataset.target, 10);
           BOARD = state.target;
-          // update labels if already visible
-          if ($("pos1")) {
-            $("pos1").textContent = "0/" + BOARD;
-            $("pos2").textContent = "0/" + BOARD;
-          }
+        };
+      });
+      // Timer duration buttons
+      document.querySelectorAll("#timerRow .target-btn").forEach((btn) => {
+        btn.onclick = () => {
+          document
+            .querySelectorAll("#timerRow .target-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.duration = parseInt(btn.dataset.timer, 10);
         };
       });
       document.querySelectorAll(".theme-btn").forEach((btn) => {
@@ -2383,17 +2949,62 @@
         if (e.target === rulesBanner) rulesBanner.classList.remove("open");
       };
 
+      // Team add/remove
+      function updateTeamButtons() {
+        const n = document.querySelectorAll("#teamsInputs .input-group").length;
+        $("addTeamBtn").disabled = n >= 4;
+        $("removeTeamBtn").disabled = n <= 2;
+      }
+      $("addTeamBtn").onclick = () => {
+        const container = $("teamsInputs");
+        const n = container.querySelectorAll(".input-group").length;
+        if (n >= 4) return;
+        const idx = n;
+        const div = document.createElement("div");
+        div.className = "input-group";
+        div.dataset.teamIdx = idx;
+        div.innerHTML = `<label><span class="dot ${TEAM_COLORS[idx]}"></span> קבוצה ${idx + 1}</label>
+          <input type="text" class="team-name-input" value="${DEFAULT_NAMES[idx]}" maxlength="12" />`;
+        container.appendChild(div);
+        updateTeamButtons();
+      };
+      $("removeTeamBtn").onclick = () => {
+        const container = $("teamsInputs");
+        const groups = container.querySelectorAll(".input-group");
+        if (groups.length <= 2) return;
+        groups[groups.length - 1].remove();
+        updateTeamButtons();
+      };
+      updateTeamButtons();
+
       $("startBtn").onclick = () => {
         ensureAudio();
         BOARD = state.target || 60;
-        state.teams[0].name = $("team1Name").value.trim() || "הכחולים";
-        state.teams[1].name = $("team2Name").value.trim() || "הוורודים";
-        $("name1").textContent = state.teams[0].name;
-        $("name2").textContent = state.teams[1].name;
-        $("duelName1").textContent = state.teams[0].name;
-        $("duelName2").textContent = state.teams[1].name;
+        state.duration = state.duration || 60;
+        const inputs = document.querySelectorAll("#teamsInputs .team-name-input");
+        state.numTeams = inputs.length;
+        state.teams = [];
+        for (let i = 0; i < state.numTeams; i++) {
+          const name = inputs[i].value.trim() || DEFAULT_NAMES[i];
+          state.teams.push({ name, score: 0, pos: 0 });
+        }
+        state.current = 0;
+        state.used = new Set();
+        // Build duel dice UI
+        const duel = $("diceDuel");
+        duel.innerHTML = "";
+        state.teams.forEach((t, i) => {
+          const side = document.createElement("div");
+          side.className = "duel-side";
+          side.innerHTML = `<div class="duel-dice" id="duelDice${i}">?</div>
+            <div style="font-weight:700;font-size:0.85rem">${t.name}</div>`;
+          duel.appendChild(side);
+        });
         setupScreen.classList.remove("active");
         duelScreen.classList.add("active");
+        $("duelResult").textContent = "";
+        $("duelRollBtn").classList.remove("hidden");
+        $("duelStartBtn").classList.add("hidden");
       };
 
       let duelRolling = false;
@@ -2402,36 +3013,29 @@
         duelRolling = true;
         $("duelResult").textContent = "";
         $("duelStartBtn").classList.add("hidden");
-        const d1 = $("duelDice1"),
-          d2 = $("duelDice2");
-        d1.classList.add("rolling");
-        d2.classList.add("rolling");
+        const diceEls = state.teams.map((_, i) => $("duelDice" + i));
+        diceEls.forEach((d) => d.classList.add("rolling"));
         let n = 0;
         const iv = setInterval(() => {
-          d1.textContent = Math.ceil(Math.random() * 6);
-          d2.textContent = Math.ceil(Math.random() * 6);
+          diceEls.forEach((d) => (d.textContent = Math.ceil(Math.random() * 6)));
           sndDice();
           if (++n > 10) {
             clearInterval(iv);
-            const v1 = Math.ceil(Math.random() * 6),
-              v2 = Math.ceil(Math.random() * 6);
-            d1.textContent = v1;
-            d2.textContent = v2;
-            d1.classList.remove("rolling");
-            d2.classList.remove("rolling");
+            const vals = state.teams.map(() => Math.ceil(Math.random() * 6));
+            vals.forEach((v, i) => {
+              diceEls[i].textContent = v;
+              diceEls[i].classList.remove("rolling");
+            });
             duelRolling = false;
-            if (v1 > v2) {
-              state.current = 0;
-              $("duelResult").textContent = state.teams[0].name + " מתחילים!";
-              $("duelRollBtn").classList.add("hidden");
-            } else if (v2 > v1) {
-              state.current = 1;
-              $("duelResult").textContent = state.teams[1].name + " מתחילים!";
-              $("duelRollBtn").classList.add("hidden");
-            } else {
+            const maxV = Math.max(...vals);
+            const winners = vals.map((v, i) => (v === maxV ? i : -1)).filter((i) => i >= 0);
+            if (winners.length > 1) {
               $("duelResult").textContent = "תיקו! זרקו שוב";
               return;
             }
+            state.current = winners[0];
+            $("duelResult").textContent = state.teams[state.current].name + " מתחילים!";
+            $("duelRollBtn").classList.add("hidden");
             $("duelStartBtn").classList.remove("hidden");
           }
         }, 60);
@@ -2439,6 +3043,7 @@
       $("duelStartBtn").onclick = () => {
         duelScreen.classList.remove("active");
         gameScreen.classList.add("active");
+        buildGameUI();
         prepareTurn();
       };
       $("endGameBtn").onclick = () => {
@@ -2472,6 +3077,29 @@
         }, 55);
       }
 
+      function buildGameUI() {
+        const teamsRow = $("teamsRow");
+        const tracks = $("tracks");
+        teamsRow.innerHTML = "";
+        tracks.innerHTML = "";
+        state.teams.forEach((t, i) => {
+          const tc = TEAM_COLORS[i];
+          const pill = document.createElement("div");
+          pill.className = `team-pill ${tc}`;
+          pill.id = "pill" + i;
+          pill.innerHTML = `<div class="team-name" id="name${i}">${t.name}</div>
+            <div class="team-score" id="score${i}">0</div>`;
+          teamsRow.appendChild(pill);
+
+          const row = document.createElement("div");
+          row.className = "track-row";
+          row.innerHTML = `<div class="track-label" style="color: var(--team${i + 1})">${i + 1}</div>
+            <div class="track-bar"><div class="track-fill ${tc}" id="fill${i}" style="width:0%"></div></div>
+            <div class="track-num" id="pos${i}">0/${BOARD}</div>`;
+          tracks.appendChild(row);
+        });
+      }
+
       function prepareTurn() {
         state.correct = 0;
         state.running = false;
@@ -2486,7 +3114,7 @@
         correctBtn.disabled = true;
         skipBtn.disabled = true;
         endTurnBtn.disabled = true;
-        timerValue.textContent = "60";
+        timerValue.textContent = String(state.duration);
         timerRing.style.setProperty("--progress", "100%");
         timerRing.classList.remove("warning", "danger");
         correctCount.textContent = "מילים נכונות: 0";
@@ -2497,7 +3125,7 @@
         state.running = true;
         state.canReveal = true;
         state.hasSeenWord = false;
-        state.timer = 60;
+        state.timer = state.duration;
         holdBtn.disabled = false;
         correctBtn.disabled = true;
         skipBtn.disabled = true;
@@ -2510,12 +3138,14 @@
           timerValue.textContent = state.timer;
           timerRing.style.setProperty(
             "--progress",
-            (state.timer / 60) * 100 + "%",
+            (state.timer / state.duration) * 100 + "%",
           );
-          if (state.timer <= 12) {
+          if (state.timer <= Math.max(8, Math.floor(state.duration * 0.2))) {
             timerRing.classList.add("danger");
             timerRing.classList.remove("warning");
-          } else if (state.timer <= 25) timerRing.classList.add("warning");
+          } else if (state.timer <= Math.max(15, Math.floor(state.duration * 0.4))) {
+            timerRing.classList.add("warning");
+          }
           if (state.timer <= 0) {
             clearInterval(state.interval);
             finishTurn();
@@ -2524,14 +3154,16 @@
       }
 
       function nextWord() {
-        let w,
-          tries = 0;
-        do {
+        // No repeats in the game: pick only from unused. If exhausted, clear (rare with 1200+).
+        const available = WORDS.filter((w) => !state.used.has(w));
+        let w;
+        if (available.length === 0) {
+          state.used.clear();
           w = WORDS[Math.floor(Math.random() * WORDS.length)];
-          tries++;
-        } while (state.used.has(w) && tries < 40);
+        } else {
+          w = available[Math.floor(Math.random() * available.length)];
+        }
         state.used.add(w);
-        if (state.used.size > WORDS.length * 0.75) state.used.clear();
         state.word = w;
         state.hasSeenWord = false;
         correctBtn.disabled = true;
@@ -2647,37 +3279,34 @@
         const t = state.teams[state.current];
         // אל תאפשר ירידה מתחת ל-0
         t.pos = Math.max(0, Math.min(BOARD, t.pos + move));
-        t.score += Math.max(0, move); // או לשמור את המהלך בפועל - נשמור ניקוד מצטבר של מילים+בונוס כפי שחושב
-
-        // עדכון מדויק יותר של ניקוד: ניקוד = מיקום
         t.score = t.pos;
 
         updateUI();
 
         if (t.pos >= BOARD) {
-          setTimeout(() => showWin(t.name), 1600); // אחרי הבאנר
+          setTimeout(() => showWin(t.name), state.correct >= 5 ? 1600 : 300);
           return;
         }
 
         // אם היה באנר, לחכות קצת לפני מעבר תור
         const delay = state.correct >= 5 ? 1600 : 0;
         setTimeout(() => {
-          state.current = 1 - state.current;
+          state.current = (state.current + 1) % state.numTeams;
           prepareTurn();
         }, delay);
       }
 
       function updateUI() {
-        const t0 = state.teams[0],
-          t1 = state.teams[1];
-        $("score1").textContent = t0.score;
-        $("score2").textContent = t1.score;
-        $("pos1").textContent = t0.pos + "/" + BOARD;
-        $("pos2").textContent = t1.pos + "/" + BOARD;
-        $("fill1").style.width = (t0.pos / BOARD) * 100 + "%";
-        $("fill2").style.width = (t1.pos / BOARD) * 100 + "%";
-        $("pill1").classList.toggle("active", state.current === 0);
-        $("pill2").classList.toggle("active", state.current === 1);
+        state.teams.forEach((t, i) => {
+          const scoreEl = $("score" + i);
+          const posEl = $("pos" + i);
+          const fillEl = $("fill" + i);
+          const pillEl = $("pill" + i);
+          if (scoreEl) scoreEl.textContent = t.score;
+          if (posEl) posEl.textContent = t.pos + "/" + BOARD;
+          if (fillEl) fillEl.style.width = (t.pos / BOARD) * 100 + "%";
+          if (pillEl) pillEl.classList.toggle("active", state.current === i);
+        });
         turnInfo.textContent = "תור של " + state.teams[state.current].name;
       }
 
