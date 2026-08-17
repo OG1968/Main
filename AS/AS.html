@@ -152,8 +152,16 @@
         width: 100%;
         flex-direction: column;
         align-items: center;
-        padding: 4px 10px 52px;
+        padding: 4px 10px 56px;
         overflow: hidden;
+      }
+      /* מסך ההגדרות צריך לאפשר גלילה פנימית כשיש 4 קבוצות */
+      #setupScreen.screen {
+        overflow: hidden;
+      }
+      #setupScreen .setup-wrap {
+        flex: 1;
+        min-height: 0;
       }
       .screen.active {
         display: flex;
@@ -430,11 +438,23 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         height: 100%;
         width: 100%;
         max-width: 360px;
-        gap: 8px;
+        gap: 6px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding: 8px 0 12px;
+        box-sizing: border-box;
+      }
+      /* מרכוז אנכי רק כשיש מקום – במסכים קצרים התוכן מתחיל מלמעלה וגלילה אפשרית */
+      @media (min-height: 700px) {
+        .setup-wrap {
+          justify-content: center;
+          padding-top: 0;
+        }
       }
       .logo {
         font-size: clamp(1.8rem, 8vw, 2.8rem);
@@ -1193,13 +1213,97 @@
           font-size: 0.7rem;
         }
         .page-footer {
-          font-size: 0.95rem;
+          font-size: 0.85rem;
         }
         .page-footer img {
-          height: 24px;
+          height: 20px;
         }
         .screen {
-          padding: 3px 8px 48px;
+          padding: 2px 8px 44px;
+        }
+        /* דחיסת מסך ההגדרות במסכים נמוכים */
+        .setup-wrap {
+          gap: 4px;
+          padding: 4px 0 8px;
+          justify-content: flex-start;
+        }
+        .logo {
+          font-size: clamp(1.35rem, 6vw, 1.9rem);
+        }
+        .tagline {
+          font-size: 0.75rem;
+          margin-bottom: 2px;
+        }
+        .card {
+          padding: 8px 10px;
+        }
+        .input-group {
+          margin-bottom: 6px;
+        }
+        .input-group label {
+          font-size: 0.72rem;
+          margin-bottom: 2px;
+        }
+        .input-group input {
+          padding: 7px 10px;
+          font-size: 0.88rem;
+        }
+        .target-row {
+          gap: 4px;
+          margin-top: 2px;
+        }
+        .target-btn {
+          min-width: 44px;
+          padding: 6px 8px;
+          font-size: 0.85rem;
+        }
+        #startBtn {
+          margin-top: 8px !important;
+          padding: 10px 14px;
+          font-size: 0.9rem;
+        }
+      }
+
+      /* מסכים נמוכים במיוחד (טלפונים קטנים / מצב אופקי) */
+      @media (max-height: 520px) {
+        .page-footer {
+          font-size: 0.75rem;
+        }
+        .page-footer img {
+          height: 16px;
+        }
+        .screen {
+          padding: 2px 6px 36px;
+        }
+        .setup-wrap {
+          gap: 2px;
+          padding: 2px 0 4px;
+        }
+        .logo {
+          font-size: 1.2rem;
+        }
+        .tagline {
+          display: none;
+        }
+        .card {
+          padding: 6px 8px;
+        }
+        .input-group {
+          margin-bottom: 4px;
+        }
+        .input-group input {
+          padding: 5px 8px;
+          font-size: 0.82rem;
+        }
+        .target-btn {
+          min-width: 40px;
+          padding: 5px 6px;
+          font-size: 0.78rem;
+        }
+        #startBtn {
+          margin-top: 6px !important;
+          padding: 8px 12px;
+          font-size: 0.85rem;
         }
       }
 
