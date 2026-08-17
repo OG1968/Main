@@ -508,28 +508,38 @@
         height: 100%;
         width: 100%;
         max-width: 360px;
-        gap: 6px;
+        gap: 4px;
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
-        padding: 8px 0 12px;
+        /* מרווח תחתון שמפנה מקום לפוטר בלי ליצור גלילה מיותרת */
+        padding: 6px 0 72px;
         box-sizing: border-box;
+        /* הסתרת סרגל גלילה מכוער */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
       }
-      /* מרכוז אנכי רק כשיש מקום – במסכים קצרים התוכן מתחיל מלמעלה וגלילה אפשרית */
-      @media (min-height: 700px) {
+      .setup-wrap::-webkit-scrollbar {
+        display: none;
+      }
+      /* מרכוז אנכי רק כשיש מקום */
+      @media (min-height: 740px) {
         .setup-wrap {
           justify-content: center;
           padding-top: 0;
+          padding-bottom: 85px;
         }
       }
       .logo {
-        font-size: clamp(1.8rem, 8vw, 2.8rem);
+        font-size: clamp(1.55rem, 7vw, 2.4rem);
         font-weight: 900;
         background: linear-gradient(120deg, #a78bfa, #f472b6, #22d3ee);
         background-size: 200% 200%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         animation: grad 5s ease infinite;
+        line-height: 1.15;
+        margin-bottom: 8px;
       }
       @keyframes grad {
         0%,
@@ -541,34 +551,35 @@
         }
       }
       .tagline {
-        font-size: 1.2rem;
+        font-size: 1rem;
         opacity: 0.75;
+        margin-bottom: 2px;
       }
       .card {
         background: rgba(255, 255, 255, 0.07);
         border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 14px;
-        padding: 12px;
+        padding: 10px;
         width: 100%;
       }
       .input-group {
-        margin-bottom: 10px;
+        margin-bottom: 7px;
       }
       .input-group label {
         display: block;
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         font-weight: 600;
-        margin-bottom: 4px;
+        margin-bottom: 3px;
         opacity: 0.8;
       }
       .input-group input {
         width: 100%;
-        padding: 10px 12px;
+        padding: 8px 11px;
         border-radius: 10px;
         border: 2px solid rgba(255, 255, 255, 0.12);
         background: rgba(0, 0, 0, 0.3);
         color: #fff;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         font-family: inherit;
         font-weight: 600;
       }
@@ -996,6 +1007,26 @@
         opacity: 1;
         transform: scale(1);
       }
+      .word-display.gold-word {
+        color: #fbbf24;
+        text-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+      }
+      .gold-star {
+        font-size: 0.85em;
+        vertical-align: middle;
+      }
+      .gold-plus {
+        display: inline-block;
+        margin-right: 4px;
+        color: #fbbf24;
+        font-weight: 900;
+        animation: goldPop 0.45s ease;
+      }
+      @keyframes goldPop {
+        0% { transform: scale(0.5); opacity: 0; }
+        60% { transform: scale(1.25); }
+        100% { transform: scale(1); opacity: 1; }
+      }
       .hold-hint {
         font-size: 0.7rem;
         opacity: 0.5;
@@ -1275,6 +1306,13 @@
         position: relative;
         overflow: hidden;
       }
+      #goldRow .target-btn,
+      #diffRow .target-btn {
+        font-size: 0.82rem;
+        padding: 8px 12px;
+        min-width: 0;
+        flex: 1;
+      }
       .target-btn:active {
         transform: scale(0.9);
       }
@@ -1373,7 +1411,10 @@
           bottom: 6px;
         }
         .page-footer img {
-          height: 60px;
+          height: 40px;
+        }
+        .setup-wrap {
+          padding-bottom: 85px;
         }
       }
 
@@ -1443,97 +1484,128 @@
           font-size: 0.7rem;
         }
         .page-footer {
-          font-size: 0.85rem;
-        }
-        .page-footer img {
-          height: 20px;
-        }
-        .screen {
-          padding: 2px 8px 44px;
-        }
-        /* דחיסת מסך ההגדרות במסכים נמוכים */
-        .setup-wrap {
-          gap: 4px;
-          padding: 4px 0 8px;
-          justify-content: flex-start;
-        }
-        .logo {
-          font-size: clamp(1.35rem, 6vw, 1.9rem);
-        }
-        .tagline {
-          font-size: 0.75rem;
-          margin-bottom: 2px;
-        }
-        .card {
-          padding: 8px 10px;
-        }
-        .input-group {
-          margin-bottom: 6px;
-        }
-        .input-group label {
-          font-size: 0.72rem;
-          margin-bottom: 2px;
-        }
-        .input-group input {
-          padding: 7px 10px;
-          font-size: 0.88rem;
-        }
-        .target-row {
-          gap: 4px;
-          margin-top: 2px;
-        }
-        .target-btn {
-          min-width: 44px;
-          padding: 6px 8px;
-          font-size: 0.85rem;
-        }
-        #startBtn {
-          margin-top: 8px !important;
-          padding: 10px 14px;
-          font-size: 0.9rem;
-        }
-      }
-
-      /* מסכים נמוכים במיוחד (טלפונים קטנים / מצב אופקי) */
-      @media (max-height: 520px) {
-        .page-footer {
           font-size: 0.75rem;
         }
         .page-footer img {
           height: 16px;
         }
         .screen {
-          padding: 2px 6px 36px;
+          padding: 2px 8px 42px;
         }
+        /* דחיסת מסך ההגדרות במסכים נמוכים – הכל צפוף כדי להימנע מגלילה */
         .setup-wrap {
-          gap: 2px;
-          padding: 2px 0 4px;
+          gap: 1px;
+          padding: 2px 0 52px;
+          justify-content: flex-start;
         }
         .logo {
-          font-size: 1.2rem;
+          font-size: clamp(1.15rem, 5vw, 1.5rem);
+          margin-bottom: 10px;
         }
         .tagline {
           display: none;
         }
         .card {
-          padding: 6px 8px;
+          padding: 5px 8px;
         }
         .input-group {
-          margin-bottom: 4px;
+          margin-bottom: 2px;
+        }
+        .input-group label {
+          font-size: 0.65rem;
+          margin-bottom: 0;
         }
         .input-group input {
-          padding: 5px 8px;
-          font-size: 0.82rem;
+          padding: 4px 8px;
+          font-size: 0.8rem;
+        }
+        .target-row {
+          gap: 2px;
+          margin-top: 0;
         }
         .target-btn {
-          min-width: 40px;
-          padding: 5px 6px;
-          font-size: 0.78rem;
+          min-width: 36px;
+          padding: 4px 6px;
+          font-size: 0.75rem;
+        }
+        #goldRow .target-btn,
+        #diffRow .target-btn {
+          font-size: 0.68rem;
+          padding: 4px 6px;
         }
         #startBtn {
-          margin-top: 6px !important;
-          padding: 8px 12px;
-          font-size: 0.85rem;
+          margin-top: 4px !important;
+          padding: 7px 10px;
+          font-size: 0.82rem;
+        }
+        .btn-ghost.btn-sm {
+          padding: 4px 8px;
+          font-size: 0.7rem;
+        }
+        /* כיווץ תוויות האפשרויות */
+        #setupScreen .card > div[style*="opacity"] {
+          margin: 3px 0 1px !important;
+          font-size: 0.65rem !important;
+        }
+      }
+
+      /* מסכים נמוכים במיוחד (טלפונים קטנים / מצב אופקי) */
+      @media (max-height: 560px) {
+        .page-footer {
+          font-size: 0.7rem;
+        }
+        .page-footer img {
+          height: 12px;
+        }
+        .screen {
+          padding: 1px 6px 36px;
+        }
+        .setup-wrap {
+          gap: 0;
+          padding: 1px 0 44px;
+        }
+        .logo {
+          font-size: 1.05rem;
+          margin-bottom: 8px;
+        }
+        .tagline {
+          display: none;
+        }
+        .card {
+          padding: 4px 6px;
+        }
+        .input-group {
+          margin-bottom: 1px;
+        }
+        .input-group label {
+          font-size: 0.6rem;
+        }
+        .input-group input {
+          padding: 3px 6px;
+          font-size: 0.75rem;
+        }
+        .target-btn {
+          min-width: 32px;
+          padding: 3px 4px;
+          font-size: 0.7rem;
+        }
+        #goldRow .target-btn,
+        #diffRow .target-btn {
+          font-size: 0.62rem;
+          padding: 3px 5px;
+        }
+        #startBtn {
+          margin-top: 3px !important;
+          padding: 6px 8px;
+          font-size: 0.78rem;
+        }
+        .btn-ghost.btn-sm {
+          padding: 3px 6px;
+          font-size: 0.65rem;
+        }
+        #setupScreen .card > div[style*="opacity"] {
+          margin: 2px 0 0 !important;
+          font-size: 0.6rem !important;
         }
       }
 
@@ -1611,7 +1683,15 @@
           <li>מסבירים בלי לומר את המילה או חלקים ממנה.</li>
           <li>נכון = נקודה · דילוג = ללא נקודה.</li>
           <li>
-            התקדמות = תשובות נכונות <br />(+/− בונוס אם לפחות 5 תשובות נכונות).
+            <strong>מילת זהב</strong> (אם הופעלה): כל מילה 10 לקבוצה היא מילת זהב
+            ושווה <strong>+3 נקודות</strong>. מסומנת בכוכבים ⭐.
+          </li>
+          <li>
+            <strong>רמת קושי עולה</strong> (אם הופעלה): ככל שמתקדמים בניקוד –
+            המילים נהיות ארוכות ומאתגרות יותר.
+          </li>
+          <li>
+            התקדמות = נקודות מתשובות נכונות <br />(+/− בונוס אם לפחות 5 תשובות נכונות).
           </li>
           <li>הגעה ליעד = ניצחון מיידי גם באמצע התור.</li>
           <li>אין חזרה על אותה מילה במהלך המשחק (מעל 1200 מילים).</li>
@@ -1639,15 +1719,15 @@
               <input type="text" class="team-name-input" value="הוורודים" maxlength="12" />
             </div>
           </div>
-          <div style="display: flex; gap: 8px; justify-content: center; margin: 6px 0;">
+          <div style="display: flex; gap: 8px; justify-content: center; margin: 4px 0;">
             <button type="button" class="btn btn-ghost btn-sm" id="addTeamBtn">+ הוסף קבוצה</button>
             <button type="button" class="btn btn-ghost btn-sm" id="removeTeamBtn" disabled>− הסר קבוצה</button>
           </div>
           <div
             style="
-              font-size: 0.75rem;
+              font-size: 0.72rem;
               opacity: 0.7;
-              margin: 8px 0 4px;
+              margin: 5px 0 3px;
               text-align: center;
             "
           >
@@ -1661,9 +1741,9 @@
           </div>
           <div
             style="
-              font-size: 0.75rem;
+              font-size: 0.72rem;
               opacity: 0.7;
-              margin: 10px 0 4px;
+              margin: 5px 0 3px;
               text-align: center;
             "
           >
@@ -1676,10 +1756,38 @@
             <button type="button" class="target-btn" data-timer="90">90</button>
             <button type="button" class="target-btn" data-timer="120">120</button>
           </div>
+          <div
+            style="
+              font-size: 0.72rem;
+              opacity: 0.7;
+              margin: 6px 0 3px;
+              text-align: center;
+            "
+          >
+            מילות זהב
+          </div>
+          <div class="target-row" id="goldRow">
+            <button type="button" class="target-btn active" data-gold="1">עם מילות זהב</button>
+            <button type="button" class="target-btn" data-gold="0">בלי מילות זהב</button>
+          </div>
+          <div
+            style="
+              font-size: 0.72rem;
+              opacity: 0.7;
+              margin: 6px 0 3px;
+              text-align: center;
+            "
+          >
+            רמת קושי
+          </div>
+          <div class="target-row" id="diffRow">
+            <button type="button" class="target-btn active" data-diff="1">עולה אוטומטית</button>
+            <button type="button" class="target-btn" data-diff="0">קבועה</button>
+          </div>
           <button
             class="btn btn-primary"
             id="startBtn"
-            style="margin-top: 12px"
+            style="margin-top: 8px"
           >
             המשך לזריקת קובייה
           </button>
@@ -3130,8 +3238,8 @@
 
       let state = {
         teams: [
-          { name: "הכחולים", score: 0, pos: 0 },
-          { name: "הוורודים", score: 0, pos: 0 },
+          { name: "הכחולים", score: 0, pos: 0, wordsShown: 0 },
+          { name: "הוורודים", score: 0, pos: 0, wordsShown: 0 },
         ],
         numTeams: 2,
         current: 0,
@@ -3140,6 +3248,7 @@
         interval: null,
         running: false,
         correct: 0,
+        turnPoints: 0,
         word: "",
         used: new Set(),
         canReveal: false,
@@ -3147,6 +3256,9 @@
         muted: false,
         bonus: 0,
         target: 60,
+        goldEnabled: true,
+        dynamicDiff: true,
+        isGoldWord: false,
       };
 
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -3273,6 +3385,28 @@
           state.duration = parseInt(btn.dataset.timer, 10);
         };
       });
+      // Gold words toggle
+      document.querySelectorAll("#goldRow .target-btn").forEach((btn) => {
+        btn.onclick = (e) => {
+          addRipple(btn, e);
+          document
+            .querySelectorAll("#goldRow .target-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.goldEnabled = btn.dataset.gold === "1";
+        };
+      });
+      // Dynamic difficulty toggle
+      document.querySelectorAll("#diffRow .target-btn").forEach((btn) => {
+        btn.onclick = (e) => {
+          addRipple(btn, e);
+          document
+            .querySelectorAll("#diffRow .target-btn")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.dynamicDiff = btn.dataset.diff === "1";
+        };
+      });
       document.querySelectorAll(".theme-btn").forEach((btn) => {
         btn.onclick = () => {
           document
@@ -3342,10 +3476,12 @@
         state.teams = [];
         for (let i = 0; i < state.numTeams; i++) {
           const name = inputs[i].value.trim() || DEFAULT_NAMES[i];
-          state.teams.push({ name, score: 0, pos: 0 });
+          state.teams.push({ name, score: 0, pos: 0, wordsShown: 0 });
         }
         state.current = 0;
         state.used = new Set();
+        state.turnPoints = 0;
+        state.isGoldWord = false;
         // Build duel dice UI
         const duel = $("diceDuel");
         duel.innerHTML = "";
@@ -3462,13 +3598,15 @@
 
       function prepareTurn() {
         state.correct = 0;
+        state.turnPoints = 0;
+        state.isGoldWord = false;
         state.running = false;
         state.canReveal = false;
         state.hasSeenWord = false;
         state.bonus = 0;
         setDiceDisplay("?");
         diceEl.classList.remove("positive", "negative", "rolling");
-        wordDisplay.classList.remove("visible");
+        wordDisplay.classList.remove("visible", "gold-word");
         wordDisplay.textContent = "••••";
         holdHint.textContent = "זרוק קוביית בונוס";
         holdHint.classList.remove("blink");
@@ -3517,30 +3655,76 @@
         }, 1000);
       }
 
+      function getWordDifficulty(w) {
+        // אורך ללא רווחים כמדד פשוט לקושי
+        return w.replace(/\s/g, "").length;
+      }
+
       function nextWord() {
         // No repeats in the game: pick only from unused. If exhausted, clear (rare with 1200+).
-        const available = WORDS.filter((w) => !state.used.has(w));
-        let w;
+        let available = WORDS.filter((w) => !state.used.has(w));
         if (available.length === 0) {
           state.used.clear();
-          w = WORDS[Math.floor(Math.random() * WORDS.length)];
-        } else {
-          w = available[Math.floor(Math.random() * available.length)];
+          available = [...WORDS];
         }
+
+        // רמת קושי דינמית לפי התקדמות המשחק
+        if (state.dynamicDiff && available.length > 10) {
+          const maxPos = Math.max(...state.teams.map((t) => t.pos));
+          const pct = maxPos / BOARD;
+          let filtered;
+          if (pct < 0.4) {
+            // קל: מילים קצרות
+            filtered = available.filter((w) => getWordDifficulty(w) <= 5);
+          } else if (pct < 0.75) {
+            // בינוני
+            filtered = available.filter((w) => {
+              const d = getWordDifficulty(w);
+              return d >= 4 && d <= 9;
+            });
+          } else {
+            // קשה: מילים ארוכות יותר
+            filtered = available.filter((w) => getWordDifficulty(w) >= 6);
+          }
+          if (filtered.length >= 5) {
+            available = filtered;
+          }
+        }
+
+        const w = available[Math.floor(Math.random() * available.length)];
         state.used.add(w);
         state.word = w;
+
+        // ספירת מילים שהופיעו לקבוצה הנוכחית (למילת זהב הוגנת)
+        const team = state.teams[state.current];
+        team.wordsShown = (team.wordsShown || 0) + 1;
+        state.isGoldWord =
+          state.goldEnabled && team.wordsShown > 0 && team.wordsShown % 10 === 0;
+
         state.hasSeenWord = false;
         correctBtn.disabled = true;
         skipBtn.disabled = true;
         wordDisplay.classList.remove("visible");
         wordDisplay.textContent = "••••";
+        wordDisplay.classList.remove("gold-word");
       }
 
       function show() {
         if (!state.canReveal || !state.running) return;
-        wordDisplay.textContent = state.word;
+        if (state.isGoldWord) {
+          wordDisplay.innerHTML =
+            '<span class="gold-star">⭐</span> ' +
+            state.word +
+            ' <span class="gold-star">⭐</span>';
+          wordDisplay.classList.add("gold-word");
+        } else {
+          wordDisplay.textContent = state.word;
+          wordDisplay.classList.remove("gold-word");
+        }
         wordDisplay.classList.add("visible");
-        holdHint.textContent = "שחרר להסתרה";
+        holdHint.textContent = state.isGoldWord
+          ? "מילת זהב! +3 · שחרר להסתרה"
+          : "שחרר להסתרה";
         holdHint.classList.remove("blink");
         if (!state.hasSeenWord) {
           state.hasSeenWord = true;
@@ -3551,6 +3735,7 @@
       function hide() {
         wordDisplay.classList.remove("visible");
         wordDisplay.textContent = "••••";
+        wordDisplay.classList.remove("gold-word");
         if (state.running) {
           holdHint.textContent = "החזק כדי לראות";
           if (!state.hasSeenWord) holdHint.classList.add("blink");
@@ -3585,13 +3770,23 @@
 
       correctBtn.onclick = () => {
         if (!state.running || !state.hasSeenWord) return;
+        const pts = state.isGoldWord ? 3 : 1;
         state.correct++;
-        correctCount.textContent = "מילים נכונות: " + state.correct;
-        sndCorrect();
+        state.turnPoints += pts;
+        if (state.isGoldWord) {
+          correctCount.innerHTML =
+            "מילים נכונות: " +
+            state.correct +
+            ' <span class="gold-plus">(+3 זהב!)</span>';
+          sndBonus();
+        } else {
+          correctCount.textContent = "מילים נכונות: " + state.correct;
+          sndCorrect();
+        }
         // ניצחון מיידי באמצע תור אם הגענו ליעד
         const projected =
           state.teams[state.current].pos +
-          state.correct +
+          state.turnPoints +
           (state.correct >= 5 ? state.bonus : 0);
         if (projected >= BOARD) {
           clearInterval(state.interval);
@@ -3603,9 +3798,9 @@
           skipBtn.disabled = true;
           endTurnBtn.disabled = true;
           hide();
-          let move = state.correct;
+          let move = state.turnPoints;
           if (state.correct >= 5) {
-            move = state.correct + state.bonus;
+            move = state.turnPoints + state.bonus;
             showBonusBanner();
           }
           const t = state.teams[state.current];
@@ -3658,10 +3853,10 @@
         state.hasSeenWord = false;
         hide();
 
-        let move = state.correct;
-        // בונוס רק אם לפחות 5 נכונות
+        let move = state.turnPoints;
+        // בונוס רק אם לפחות 5 נכונות (מילים, לא נקודות)
         if (state.correct >= 5) {
-          move = state.correct + state.bonus;
+          move = state.turnPoints + state.bonus;
           showBonusBanner();
         }
 
