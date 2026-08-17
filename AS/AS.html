@@ -199,16 +199,18 @@
         width: 100%;
         flex-direction: column;
         align-items: center;
-        padding: 4px 10px 56px;
+        /* מרווח עליון כדי שלא ייכנס מתחת לכפתורי הגדרות/כללים */
+        padding: 48px 10px 52px;
         overflow: hidden;
       }
-      /* מסך ההגדרות צריך לאפשר גלילה פנימית כשיש 4 קבוצות */
+      /* מסך ההגדרות – בלי גלילה */
       #setupScreen.screen {
         overflow: hidden;
       }
       #setupScreen .setup-wrap {
         flex: 1;
         min-height: 0;
+        overflow: hidden;
       }
       .screen.active {
         display: flex;
@@ -508,30 +510,20 @@
         height: 100%;
         width: 100%;
         max-width: 360px;
-        gap: 4px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
-        /* מרווח תחתון שמפנה מקום לפוטר בלי ליצור גלילה מיותרת */
-        padding: 6px 0 72px;
+        gap: 2px;
+        overflow: hidden;
+        padding: 0 0 56px;
         box-sizing: border-box;
-        /* הסתרת סרגל גלילה מכוער */
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-      }
-      .setup-wrap::-webkit-scrollbar {
-        display: none;
       }
       /* מרכוז אנכי רק כשיש מקום */
-      @media (min-height: 740px) {
+      @media (min-height: 780px) {
         .setup-wrap {
           justify-content: center;
-          padding-top: 0;
-          padding-bottom: 85px;
+          padding-bottom: 64px;
         }
       }
       .logo {
-        font-size: clamp(1.55rem, 7vw, 2.4rem);
+        font-size: clamp(1.35rem, 6vw, 2rem);
         font-weight: 900;
         background: linear-gradient(120deg, #a78bfa, #f472b6, #22d3ee);
         background-size: 200% 200%;
@@ -539,7 +531,8 @@
         -webkit-text-fill-color: transparent;
         animation: grad 5s ease infinite;
         line-height: 1.15;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
+        flex-shrink: 0;
       }
       @keyframes grad {
         0%,
@@ -1095,7 +1088,7 @@
       }
       @media (min-width: 500px) {
         .screen {
-          padding: 14px 18px;
+          padding: 52px 18px 56px;
         }
         .game-top {
           max-width: 420px;
@@ -1165,7 +1158,7 @@
       }
       @media (min-width: 700px) {
         .screen {
-          padding: 20px 28px;
+          padding: 56px 28px 60px;
         }
         .game-top {
           max-width: 460px;
@@ -1414,14 +1407,14 @@
           height: 40px;
         }
         .setup-wrap {
-          padding-bottom: 85px;
+          padding-bottom: 64px;
         }
       }
 
       @media (max-height: 640px) {
         .game-title {
-          font-size: 1.25rem;
-          margin-bottom: 14px;
+          font-size: 1.2rem;
+          margin-bottom: 8px;
         }
         .team-pill {
           padding: 4px 6px;
@@ -1490,17 +1483,18 @@
           height: 16px;
         }
         .screen {
-          padding: 2px 8px 42px;
+          padding: 42px 8px 42px;
         }
-        /* דחיסת מסך ההגדרות במסכים נמוכים – הכל צפוף כדי להימנע מגלילה */
+        /* דחיסת מסך ההגדרות במסכים נמוכים – הכל צפוף בלי גלילה */
         .setup-wrap {
           gap: 1px;
-          padding: 2px 0 52px;
+          padding: 0 0 48px;
           justify-content: flex-start;
+          overflow: hidden;
         }
         .logo {
           font-size: clamp(1.15rem, 5vw, 1.5rem);
-          margin-bottom: 10px;
+          margin-bottom: 6px;
         }
         .tagline {
           display: none;
@@ -1558,15 +1552,16 @@
           height: 12px;
         }
         .screen {
-          padding: 1px 6px 36px;
+          padding: 40px 6px 36px;
         }
         .setup-wrap {
           gap: 0;
-          padding: 1px 0 44px;
+          padding: 0 0 40px;
+          overflow: hidden;
         }
         .logo {
           font-size: 1.05rem;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
         }
         .tagline {
           display: none;
