@@ -71,12 +71,19 @@
       body[data-theme="light"] .word-area,
       body[data-theme="light"] .team-pill,
       body[data-theme="light"] .settings-panel,
-      body[data-theme="light"] .rules-box,
-      body[data-theme="light"] .confirm-box {
+      body[data-theme="light"] .rules-box {
         background: rgba(255, 255, 255, 0.92);
         border-color: rgba(0, 0, 0, 0.14);
         color: #12121f;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      }
+      body[data-theme="light"] .confirm-box {
+        background: linear-gradient(160deg, #c62828, #b71c1c 55%, #8e0000);
+        border-color: rgba(255, 255, 255, 0.25);
+        color: #fff;
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.55),
+          0 0 40px rgba(198, 40, 40, 0.45);
       }
       body[data-theme="light"] .input-group input {
         background: #fff;
@@ -453,41 +460,42 @@
         display: flex;
       }
       .confirm-box {
-        background: linear-gradient(
-          160deg,
-          rgba(40, 30, 70, 0.98),
-          rgba(25, 18, 50, 0.98)
-        );
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: linear-gradient(160deg, #c62828, #b71c1c 55%, #8e0000);
+        border: 1px solid rgba(255, 255, 255, 0.25);
         border-radius: 20px;
-        padding: 22px 20px;
+        padding: 24px 20px;
         max-width: 300px;
         width: 100%;
         box-shadow:
           0 20px 50px rgba(0, 0, 0, 0.55),
-          0 0 40px rgba(124, 92, 252, 0.2);
+          0 0 40px rgba(198, 40, 40, 0.45);
         text-align: center;
         transform: scale(0.9);
         opacity: 0;
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        color: #fff;
       }
       .confirm-overlay.show .confirm-box {
         transform: scale(1);
         opacity: 1;
       }
       .confirm-box h3 {
-        font-size: 1.15rem;
-        font-weight: 800;
-        margin-bottom: 8px;
-        background: linear-gradient(120deg, #a78bfa, #f472b6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 1.25rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        color: #fff;
+        background: none;
+        -webkit-background-clip: unset;
+        -webkit-text-fill-color: #fff;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
       }
       .confirm-box p {
-        font-size: 0.85rem;
-        opacity: 0.8;
+        font-size: 0.95rem;
+        font-weight: 700;
+        opacity: 1;
         margin-bottom: 18px;
         line-height: 1.4;
+        color: #fff;
       }
       .confirm-actions {
         display: flex;
@@ -498,6 +506,16 @@
         flex: 1;
         padding: 11px 14px;
         font-size: 0.9rem;
+      }
+      .confirm-actions .btn-ghost {
+        background: rgba(255, 255, 255, 0.18);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.35);
+      }
+      .confirm-actions .btn-danger {
+        background: #fff;
+        color: #b71c1c;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       }
 
       .setup-wrap {
@@ -1116,14 +1134,28 @@
         animation: hintBlink 1.4s ease-in-out infinite;
       }
       .hold-hint.roll-prompt {
-        font-size: 0.95rem;
-        font-weight: 800;
+        font-size: clamp(1.15rem, 4.5vw, 1.45rem);
+        font-weight: 900;
         opacity: 1;
         color: #ffb74d;
+        margin-top: 0;
+        line-height: 1.25;
         text-shadow:
-          0 0 8px rgba(255, 152, 0, 0.7),
-          0 0 18px rgba(255, 152, 0, 0.45);
+          0 0 10px rgba(255, 152, 0, 0.75),
+          0 0 22px rgba(255, 152, 0, 0.5);
         animation: rollPromptGlow 1.6s ease-in-out infinite;
+      }
+      /* כשמוצגת הנחיית הזריקה – ממורכז אנכית בתיבה */
+      .word-area.prompt-mode .word-display {
+        display: none;
+      }
+      .word-area.prompt-mode .hold-hint.roll-prompt {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100%;
+        flex: 1;
       }
       @keyframes rollPromptGlow {
         0%,
@@ -1959,7 +1991,7 @@
         </div>
       </div>
       <div class="correct-line" id="correctCount">מילים נכונות: 0</div>
-      <div class="word-area">
+      <div class="word-area prompt-mode">
         <div class="word-display" id="wordDisplay">••••</div>
         <div class="hold-hint roll-prompt" id="holdHint">לחץ על קוביית הבונוס</div>
       </div>
@@ -1982,8 +2014,8 @@
 
     <div class="confirm-overlay" id="confirmOverlay">
       <div class="confirm-box">
-        <h3>לסיים את המשחק?</h3>
-        <p>אישור יחזיר למסך הפתיחה.<br />ביטול ימשיך את המשחק.</p>
+        <h3>סיום משחק</h3>
+        <p>האם אתה בטוח?</p>
         <div class="confirm-actions">
           <button class="btn btn-ghost" id="confirmCancel">ביטול</button>
           <button class="btn btn-danger btn-sm" id="confirmOk">סיים</button>
@@ -3774,6 +3806,7 @@
         holdHint.textContent = "לחץ על קוביית הבונוס";
         holdHint.classList.remove("blink");
         holdHint.classList.add("roll-prompt");
+        wordDisplay.parentElement.classList.add("prompt-mode");
         holdBtn.disabled = true;
         correctBtn.disabled = true;
         skipBtn.disabled = true;
@@ -3797,6 +3830,7 @@
         holdHint.textContent = "החזק כדי לראות";
         holdHint.classList.remove("roll-prompt");
         holdHint.classList.add("blink");
+        wordDisplay.parentElement.classList.remove("prompt-mode");
         nextWord();
         clearInterval(state.interval);
         state.interval = setInterval(() => {
