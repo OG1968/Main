@@ -897,7 +897,7 @@
 <body>
     <div class="container">
         <div class="toolbar">
-            <h1>📦 ניהול משלוחים</h1>
+            <h1>📦 סטטוס משלוחים</h1>
             <div class="filter-area">
                 <label for="statusFilter">🔎 סינון:</label>
                 <select id="statusFilter">
@@ -928,8 +928,11 @@
         </div>
 
         <div class="view-tabs" id="viewTabs">
-            <button type="button" class="view-tab active" id="tabMain" data-view="main">
-                📦 משלוחים <span class="tab-count" id="tabMainCount">0</span>
+            <button type="button" class="view-tab active" id="tabToys" data-view="toys">
+                🧸 צעצועים <span class="tab-count" id="tabToysCount">0</span>
+            </button>
+            <button type="button" class="view-tab" id="tabElectronics" data-view="electronics">
+                🔌 אלקטרוניקה קלה <span class="tab-count" id="tabElectronicsCount">0</span>
             </button>
             <button type="button" class="view-tab archive-tab" id="tabArchive" data-view="archive">
                 📁 ארכיב <span class="tab-count" id="tabArchiveCount">0</span>
@@ -1148,8 +1151,10 @@
                     status: "cancelled", note: "בוטל לעת עתה" }
             ];
 
-            const STORAGE_KEY = 'deliveryData';
+            const STORAGE_KEY_TOYS = 'toysData';
+            const STORAGE_KEY_ELECTRONICS = 'electronicsData';
             const ARCHIVE_KEY = 'deliveryArchive';
+            const LEGACY_STORAGE_KEY = 'deliveryData'; // מיגרציה מגרסה ישנה
 
             // פונקציות עזר לעיצוב מספרים
             function formatNumber(value) {
@@ -1170,8 +1175,19 @@
                 return num.toFixed(2);
             }
 
-            function loadData() {
-                const saved = localStorage.getItem(STORAGE_KEY);
+            function loadToysData() {
+                let saved = localStorage.getItem(STORAGE_KEY_TOYS);
+                if (!saved) {
+                    // מיגרציה מנתונים ישנים (משלוחים → צעצועים)
+                    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+                    if (legacy) {
+                        try {
+                            const parsed = JSON.parse(legacy);
+                            localStorage.setItem(STORAGE_KEY_TOYS, legacy);
+                            return parsed;
+                        } catch (e) {}
+                    }
+                }
                 if (saved) {
                     try {
                         return JSON.parse(saved);
@@ -1182,6 +1198,14 @@
                 return JSON.parse(JSON.stringify(defaultData));
             }
 
+            function loadElectronicsData() {
+                const saved = localStorage.getItem(STORAGE_KEY_ELECTRONICS);
+                if (saved) {
+                    try { return JSON.parse(saved); } catch (e) { return []; }
+                }
+                return [];
+            }
+
             function loadArchive() {
                 const saved = localStorage.getItem(ARCHIVE_KEY);
                 if (saved) {
@@ -1190,13 +1214,24 @@
                 return [];
             }
 
-            function saveData(data) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            function flashSaveIndicator() {
                 const indicator = document.getElementById('saveIndicator');
+                if (!indicator) return;
                 indicator.classList.add('saving');
                 setTimeout(() => {
                     indicator.classList.remove('saving');
                 }, 400);
+            }
+
+            function saveToysData(data) {
+                localStorage.setItem(STORAGE_KEY_TOYS, JSON.stringify(data));
+                flashSaveIndicator();
+                updateStats(data);
+            }
+
+            function saveElectronicsData(data) {
+                localStorage.setItem(STORAGE_KEY_ELECTRONICS, JSON.stringify(data));
+                flashSaveIndicator();
                 updateStats(data);
             }
 
@@ -1204,12 +1239,14 @@
                 localStorage.setItem(ARCHIVE_KEY, JSON.stringify(data));
             }
 
-            let currentData = loadData();
+            let toysData = loadToysData();
+            let electronicsData = loadElectronicsData();
             let archiveData = loadArchive();
-            let nextId = currentData.length + archiveData.length + 1000;
+            let nextId = toysData.length + electronicsData.length + archiveData.length + 1000;
             let showSelectedOnly = false;
             let selectedIdsSnapshot = [];
-            let currentView = 'main'; // 'main' | 'archive'
+            let currentView = 'toys'; // 'toys' | 'electronics' | 'archive'
+            let lastMainView = 'toys'; // לשחזור מארכיב – לאיזה טאב להחזיר
 
 
             const tbody = document.getElementById('tableBody');
@@ -1254,8 +1291,7 @@
                     const orderB = sortOrder[b.status] || 8;
                     return orderA - orderB;
                 });
-                if (currentView === 'archive') saveArchive(archiveData);
-                else saveData(currentData);
+                saveActive();
                 renderTable(filterSelect.value);
                 updateStats(getActiveData());
             }
@@ -1269,23 +1305,27 @@
                 const temp = data[index];
                 data[index] = data[newIndex];
                 data[newIndex] = temp;
-                if (currentView === 'archive') saveArchive(archiveData);
-                else saveData(currentData);
+                saveActive();
                 renderTable(filterSelect.value);
                 updateStats(getActiveData());
             }
 
             function getActiveData() {
-                return currentView === 'archive' ? archiveData : currentData;
+                if (currentView === 'archive') return archiveData;
+                if (currentView === 'electronics') return electronicsData;
+                return toysData;
             }
 
             function setActiveData(data) {
                 if (currentView === 'archive') {
                     archiveData = data;
                     saveArchive(archiveData);
+                } else if (currentView === 'electronics') {
+                    electronicsData = data;
+                    saveElectronicsData(electronicsData);
                 } else {
-                    currentData = data;
-                    saveData(currentData);
+                    toysData = data;
+                    saveToysData(toysData);
                 }
             }
 
@@ -1297,20 +1337,24 @@
             function saveActive() {
                 if (currentView === 'archive') {
                     saveArchive(archiveData);
+                } else if (currentView === 'electronics') {
+                    saveElectronicsData(electronicsData);
                 } else {
-                    saveData(currentData);
+                    saveToysData(toysData);
                 }
                 updateStats(getActiveData());
             }
 
             function switchView(view) {
                 currentView = view;
+                if (view === 'toys' || view === 'electronics') lastMainView = view;
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
                 const selBtn = document.getElementById('showSelectedBtn');
                 if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
 
-                document.getElementById('tabMain').classList.toggle('active', view === 'main');
+                document.getElementById('tabToys').classList.toggle('active', view === 'toys');
+                document.getElementById('tabElectronics').classList.toggle('active', view === 'electronics');
                 document.getElementById('tabArchive').classList.toggle('active', view === 'archive');
 
                 // כפתור ארכיב / שחזור לפי תצוגה
@@ -1318,7 +1362,7 @@
                 if (archBtn) {
                     if (view === 'archive') {
                         archBtn.textContent = '↩️ שחזר';
-                        archBtn.setAttribute('data-tip', 'החזר שורות נבחרות למשלוחים');
+                        archBtn.setAttribute('data-tip', 'החזר שורות נבחרות לטאב האחרון');
                     } else {
                         archBtn.textContent = '📁 ארכיב';
                         archBtn.setAttribute('data-tip', 'העבר שורות לטאב הארכיב');
@@ -1468,23 +1512,26 @@
                     const tdStatus = document.createElement('td');
                     const statusSelect = document.createElement('select');
                     statusSelect.className = 'status-select';
-                    const statusOptions = ['empty', 'arrived', 'onway', 'inprogress', 'missing', 'preparing',
+                    // אפשרות ריקה ראשונה – משאירה את הקוביה לבנה בלי טקסט
+                    const statusOptions = ['', 'empty', 'arrived', 'onway', 'inprogress', 'missing', 'preparing',
                         'cancelled', 'pending'
                     ];
                     statusOptions.forEach(opt => {
                         const option = document.createElement('option');
                         option.value = opt;
-                        option.textContent = statusMap[opt] || opt;
-                        if (row.status === opt || (!row.status && opt === 'empty')) option.selected = true;
+                        option.textContent = opt === '' ? '' : (statusMap[opt] || opt);
+                        const currentStatus = row.status || '';
+                        if (currentStatus === opt || (currentStatus === '' && opt === '')) option.selected = true;
                         statusSelect.appendChild(option);
                     });
                     statusSelect.addEventListener('change', function() {
                         const newStatus = this.value;
                         const rowData = findActiveRow(tr.dataset.rowId);
                         if (rowData) {
-                            rowData.status = newStatus === 'empty' ? '' : newStatus;
-                            tr.className = getStatusClass(newStatus);
-                            if (!rowData.note || rowData.note === '') {
+                            // '' ו-'empty' נשמרים כריק (קוביה לבנה)
+                            rowData.status = (newStatus === 'empty' || newStatus === '') ? '' : newStatus;
+                            tr.className = getStatusClass(newStatus || 'empty');
+                            if (newStatus && newStatus !== '' && (!rowData.note || rowData.note === '')) {
                                 rowData.note = statusMap[newStatus] || '';
                                 const noteTd = tr.querySelector('td[data-field="note"]');
                                 if (noteTd) noteTd.textContent = rowData.note;
@@ -1568,7 +1615,9 @@
 
             function updateCounter(count) {
                 const n = getActiveData().length;
-                const label = currentView === 'archive' ? 'ארכיב' : 'משלוחים';
+                let label = 'צעצועים';
+                if (currentView === 'archive') label = 'ארכיב';
+                else if (currentView === 'electronics') label = 'אלקטרוניקה קלה';
                 rowCounter.textContent = label + ': ' + n + ' שורות';
             }
 
@@ -1590,15 +1639,17 @@
                 document.getElementById('missingCount').textContent = missing;
                 document.getElementById('cancelledCount').textContent = cancelled;
                 document.getElementById('pendingCount').textContent = pending;
-                const tabMainCount = document.getElementById('tabMainCount');
+                const tabToysCount = document.getElementById('tabToysCount');
+                const tabElectronicsCount = document.getElementById('tabElectronicsCount');
                 const tabArchiveCount = document.getElementById('tabArchiveCount');
-                if (tabMainCount) tabMainCount.textContent = currentData.length;
+                if (tabToysCount) tabToysCount.textContent = toysData.length;
+                if (tabElectronicsCount) tabElectronicsCount.textContent = electronicsData.length;
                 if (tabArchiveCount) tabArchiveCount.textContent = archiveData.length;
             }
 
             function addNewRow() {
                 if (currentView === 'archive') {
-                    alert('לא ניתן להוסיף שורה בארכיב. עבור לטאב משלוחים.');
+                    alert('לא ניתן להוסיף שורה בארכיב. עבור לטאב צעצועים או אלקטרוניקה קלה.');
                     return;
                 }
                 const newRow = {
@@ -1616,7 +1667,11 @@
                     status: '',
                     note: ''
                 };
-                currentData.push(newRow);
+                if (currentView === 'electronics') {
+                    electronicsData.push(newRow);
+                } else {
+                    toysData.push(newRow);
+                }
                 renderTable(filterSelect.value);
                 saveAndUpdate();
             }
@@ -1641,9 +1696,12 @@
                 if (currentView === 'archive') {
                     archiveData = filtered;
                     saveArchive(archiveData);
+                } else if (currentView === 'electronics') {
+                    electronicsData = filtered;
+                    saveElectronicsData(electronicsData);
                 } else {
-                    currentData = filtered;
-                    saveData(currentData);
+                    toysData = filtered;
+                    saveToysData(toysData);
                 }
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
@@ -1685,8 +1743,9 @@
                 }
 
                 if (currentView === 'archive') {
-                    // שחזור מארכיב למשלוחים
-                    if (!confirm('לשחזר ' + checkboxes.length + ' שורות למשלוחים?')) return;
+                    // שחזור מארכיב לטאב האחרון (צעצועים / אלקטרוניקה)
+                    const targetLabel = lastMainView === 'electronics' ? 'אלקטרוניקה קלה' : 'צעצועים';
+                    if (!confirm('לשחזר ' + checkboxes.length + ' שורות ל' + targetLabel + '?')) return;
                     const idsToRestore = [];
                     checkboxes.forEach(cb => {
                         const tr = cb.closest('tr');
@@ -1698,29 +1757,30 @@
                         if (idsToRestore.includes(id)) { toRestore.push(r); return false; }
                         return true;
                     });
-                    // מניעת כפילות בהזמנות במשלוחים
+                    const targetData = lastMainView === 'electronics' ? electronicsData : toysData;
                     const existingOrders = new Set(
-                        currentData.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
+                        targetData.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
                     );
                     toRestore.forEach(r => {
                         const k = String(r.order || '').trim();
                         if (k && k !== 'חדש' && k !== 'x' && existingOrders.has(k)) return;
-                        currentData.push(r);
+                        targetData.push(r);
                         if (k) existingOrders.add(k);
                     });
                     saveArchive(archiveData);
-                    saveData(currentData);
+                    if (lastMainView === 'electronics') saveElectronicsData(electronicsData);
+                    else saveToysData(toysData);
                     showSelectedOnly = false;
                     selectedIdsSnapshot = [];
                     const selBtn = document.getElementById('showSelectedBtn');
                     if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
                     renderTable(filterSelect.value);
                     updateStats(getActiveData());
-                    alert('↩️ שוחזרו ' + toRestore.length + ' שורות למשלוחים');
+                    alert('↩️ שוחזרו ' + toRestore.length + ' שורות ל' + targetLabel);
                     return;
                 }
 
-                // העברה ממשלוחים לארכיב
+                // העברה מטאב נוכחי לארכיב
                 if (!confirm('להעביר ' + checkboxes.length + ' שורות לארכיב?\nהן לא יוצגו כאן, אך יופיעו בטאב "ארכיב".')) return;
                 const idsToArchive = [];
                 checkboxes.forEach(cb => {
@@ -1728,11 +1788,19 @@
                     if (tr) idsToArchive.push(tr.dataset.rowId);
                 });
                 const toArchive = [];
-                currentData = currentData.filter(r => {
-                    const id = r._id || ('row-' + currentData.indexOf(r));
-                    if (idsToArchive.includes(id)) { toArchive.push(r); return false; }
-                    return true;
-                });
+                if (currentView === 'electronics') {
+                    electronicsData = electronicsData.filter(r => {
+                        const id = r._id || ('row-' + electronicsData.indexOf(r));
+                        if (idsToArchive.includes(id)) { toArchive.push(r); return false; }
+                        return true;
+                    });
+                } else {
+                    toysData = toysData.filter(r => {
+                        const id = r._id || ('row-' + toysData.indexOf(r));
+                        if (idsToArchive.includes(id)) { toArchive.push(r); return false; }
+                        return true;
+                    });
+                }
                 const existingOrders = new Set(
                     archiveData.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
                 );
@@ -1743,7 +1811,8 @@
                     if (k) existingOrders.add(k);
                 });
                 saveArchive(archiveData);
-                saveData(currentData);
+                if (currentView === 'electronics') saveElectronicsData(electronicsData);
+                else saveToysData(toysData);
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
                 const selBtn = document.getElementById('showSelectedBtn');
@@ -1819,45 +1888,37 @@
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
 
-                        // זיהוי טאב ארכיב – לעולם לא ישמש כטאב ראשי
+                        // זיהוי גיליונות לפי שם
                         let archiveSheetName = null;
+                        let toysSheetName = null;
+                        let electronicsSheetName = null;
                         for (const name of workbook.SheetNames) {
                             const n = String(name);
-                            if (n.includes('ארכיב') || n.toLowerCase().includes('archive')) {
+                            if (!archiveSheetName && (n.includes('ארכיב') || n.toLowerCase().includes('archive'))) {
                                 archiveSheetName = name;
-                                break;
+                            } else if (!electronicsSheetName && (n.includes('אלקטרוניקה') || n.toLowerCase().includes('electronic'))) {
+                                electronicsSheetName = name;
+                            } else if (!toysSheetName && (n.includes('צעצועים') || n.includes('סטטוס') || n.includes('משלוח') || n === 'Sheet1')) {
+                                toysSheetName = name;
                             }
                         }
-
-                        // זיהוי טאב ראשי – מדלג על טאב הארכיב
-                        let mainSheetName = null;
-                        for (const name of workbook.SheetNames) {
-                            if (name === archiveSheetName) continue;
-                            const n = String(name);
-                            if (n.includes('סטטוס') || n === 'Sheet1' || n.includes('משלוח')) {
-                                mainSheetName = name;
-                                break;
-                            }
-                        }
-                        if (!mainSheetName) {
+                        // אם לא זוהה צעצועים – קח את הראשון שאינו ארכיב/אלקטרוניקה
+                        if (!toysSheetName) {
                             for (const name of workbook.SheetNames) {
-                                if (name !== archiveSheetName) {
-                                    mainSheetName = name;
+                                if (name !== archiveSheetName && name !== electronicsSheetName) {
+                                    toysSheetName = name;
                                     break;
                                 }
                             }
                         }
-                        if (!mainSheetName) mainSheetName = workbook.SheetNames[0];
 
                         progressFill.style.width = '50%';
 
-                        let newRows = parseSheetToRows(workbook.Sheets[mainSheetName] || {});
-                        let importedArchive = [];
-                        if (archiveSheetName && workbook.Sheets[archiveSheetName]) {
-                            importedArchive = parseSheetToRows(workbook.Sheets[archiveSheetName]);
-                        }
+                        let importedToys = toysSheetName ? parseSheetToRows(workbook.Sheets[toysSheetName] || {}) : [];
+                        let importedElectronics = electronicsSheetName ? parseSheetToRows(workbook.Sheets[electronicsSheetName] || {}) : [];
+                        let importedArchive = archiveSheetName ? parseSheetToRows(workbook.Sheets[archiveSheetName] || {}) : [];
 
-                        if (newRows.length === 0 && importedArchive.length === 0) {
+                        if (importedToys.length === 0 && importedElectronics.length === 0 && importedArchive.length === 0) {
                             alert('הקובץ ריק או לא נמצאו נתונים');
                             progressBar.style.display = 'none';
                             return;
@@ -1871,7 +1932,7 @@
                             return o && o !== 'חדש' && o !== 'x' && o !== '—';
                         }
 
-                        // הסרת כפילויות בתוך הארכיב המיובא (לפי הזמנה)
+                        // הסרת כפילויות בתוך רשימה (לפי הזמנה)
                         function dedupeByOrder(rows) {
                             const seen = new Set();
                             const out = [];
@@ -1886,49 +1947,57 @@
                             return out;
                         }
 
-                        // עדכון ארכיב: אם יש טאב ארכיב בקובץ – מחליפים לגמרי (לא מוסיפים)
+                        // עדכון ארכיב: אם יש גיליון ארכיב בקובץ – מחליפים לגמרי
                         if (archiveSheetName) {
                             archiveData = dedupeByOrder(importedArchive);
                             saveArchive(archiveData);
                         } else {
-                            // אין טאב ארכיב – שומרים את הארכיב הקיים ומנקים כפילויות
                             archiveData = dedupeByOrder(archiveData);
                             saveArchive(archiveData);
                         }
 
-                        // סט הזמנות שנמצאות בארכיב – לא יוצגו בדף
                         const archiveOrders = new Set(
                             archiveData.map(orderKey).filter(isValidOrder)
                         );
 
-                        // סינון שורות ראשיות: בלי שורות שכבר בארכיב + בלי כפילויות
-                        const seenMain = new Set();
-                        newRows = newRows.filter(r => {
-                            const k = orderKey(r);
-                            if (isValidOrder(k)) {
-                                if (archiveOrders.has(k)) return false; // קיים בארכיב – לא להציג
-                                if (seenMain.has(k)) return false;
-                                seenMain.add(k);
-                            }
-                            return true;
-                        });
+                        function filterAgainstArchive(rows) {
+                            const seen = new Set();
+                            return rows.filter(r => {
+                                const k = orderKey(r);
+                                if (isValidOrder(k)) {
+                                    if (archiveOrders.has(k)) return false;
+                                    if (seen.has(k)) return false;
+                                    seen.add(k);
+                                }
+                                return true;
+                            });
+                        }
+
+                        // אם יש גיליון מתאים – מחליפים; אחרת משאירים קיים
+                        if (toysSheetName) {
+                            toysData = filterAgainstArchive(dedupeByOrder(importedToys));
+                            saveToysData(toysData);
+                        }
+                        if (electronicsSheetName) {
+                            electronicsData = filterAgainstArchive(dedupeByOrder(importedElectronics));
+                            saveElectronicsData(electronicsData);
+                        }
 
                         progressFill.style.width = '100%';
-                        currentData = newRows;
                         showSelectedOnly = false;
                         selectedIdsSnapshot = [];
                         const selBtn = document.getElementById('showSelectedBtn');
                         if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
                         renderTable(filterSelect.value);
-                        saveAndUpdate();
+                        updateStats(getActiveData());
                         setTimeout(() => {
                             progressBar.style.display = 'none';
                             progressFill.style.width = '0%';
                             loadModal.classList.remove('active');
-                            let msg = '✅ נטענו ' + newRows.length + ' שורות לתצוגה';
-                            if (archiveData.length > 0) {
-                                msg += '\n📁 ארכיב: ' + archiveData.length + ' שורות (לא מוצגות בדף)';
-                            }
+                            let msg = '✅ ייבוא הושלם';
+                            if (toysSheetName) msg += '\n🧸 צעצועים: ' + toysData.length + ' שורות';
+                            if (electronicsSheetName) msg += '\n🔌 אלקטרוניקה קלה: ' + electronicsData.length + ' שורות';
+                            if (archiveData.length > 0) msg += '\n📁 ארכיב: ' + archiveData.length + ' שורות';
                             alert(msg);
                         }, 500);
                     } catch (error) {
@@ -2010,8 +2079,9 @@
 
             confirmLoadBtn.addEventListener('click', function() {
                 if (selectedFile) {
-                    if (currentData.length > 0) {
-                        if (!confirm(`⚠️ פעולה זו תחליף את כל ${currentData.length} השורות הקיימות. להמשיך?`)) {
+                    const totalExisting = toysData.length + electronicsData.length + archiveData.length;
+                    if (totalExisting > 0) {
+                        if (!confirm(`⚠️ פעולה זו תחליף נתונים קיימים לפי הגיליונות בקובץ (סה"כ כעת: ${totalExisting} שורות). להמשיך?`)) {
                             return;
                         }
                     }
@@ -2119,9 +2189,11 @@
                     if (!wb.Workbook.Views) wb.Workbook.Views = [{}];
                     wb.Workbook.Views[0].RTL = true;
 
-                    const mainWs = buildSheet(currentData, 'סטטוס משלוחים עדכני ל ' + dateStr);
-                    XLSX.utils.book_append_sheet(wb, mainWs, 'סטטוס משלוחים');
-                    const archWs = buildSheet(archiveData, 'ארכיב משלוחים עדכני ל ' + dateStr);
+                    const toysWs = buildSheet(toysData, 'סטטוס צעצועים עדכני ל ' + dateStr);
+                    XLSX.utils.book_append_sheet(wb, toysWs, 'צעצועים');
+                    const elecWs = buildSheet(electronicsData, 'סטטוס אלקטרוניקה קלה עדכני ל ' + dateStr);
+                    XLSX.utils.book_append_sheet(wb, elecWs, 'אלקטרוניקה קלה');
+                    const archWs = buildSheet(archiveData, 'ארכיב עדכני ל ' + dateStr);
                     XLSX.utils.book_append_sheet(wb, archWs, 'ארכיב');
                     XLSX.writeFile(wb, 'סטטוס משלוחים.xlsx');
                 } catch (error) {
@@ -2142,14 +2214,15 @@
             document.getElementById('archiveBtn').addEventListener('click', moveToArchive);
             document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
             document.getElementById('sortBtn').addEventListener('click', sortData);
-            document.getElementById('tabMain').addEventListener('click', function() { switchView('main'); });
+            document.getElementById('tabToys').addEventListener('click', function() { switchView('toys'); });
+            document.getElementById('tabElectronics').addEventListener('click', function() { switchView('electronics'); });
             document.getElementById('tabArchive').addEventListener('click', function() { switchView('archive'); });
             selectAllCheck.addEventListener('change', function() {
                 const checkboxes = document.querySelectorAll('.row-checkbox');
                 checkboxes.forEach(cb => cb.checked = this.checked);
             });
             renderTable('all');
-            updateStats(currentData);
+            updateStats(toysData);
         })();
     </script>
 </body>
