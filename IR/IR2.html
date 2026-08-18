@@ -352,14 +352,16 @@
         border-radius: 14px;
         overflow: hidden;
         position: relative;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
       }
       .progress-fill {
         height: 100%;
         width: 0%;
         background: #dc3545;
         border-radius: 14px;
-        transition: width 0.25s ease, background 0.35s ease;
+        transition:
+          width 0.25s ease,
+          background 0.35s ease;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -425,7 +427,7 @@
         font-size: 13px;
         color: #fff;
         pointer-events: none;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
         transition: color 0.3s ease;
         z-index: 1;
       }
@@ -448,7 +450,9 @@
         display: flex;
         flex-direction: column;
         position: relative;
-        transition: border-color 0.2s, box-shadow 0.2s;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
       }
       .frame.processed {
         border-color: #28a745;
@@ -476,8 +480,10 @@
         align-items: center;
         justify-content: center;
         z-index: 5;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        transition: transform 0.15s, background 0.15s;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        transition:
+          transform 0.15s,
+          background 0.15s;
         padding: 0;
       }
       .frame-remove:hover {
@@ -758,7 +764,11 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-        transition: background 0.2s, color 0.2s, transform 0.2s, border-color 0.2s;
+        transition:
+          background 0.2s,
+          color 0.2s,
+          transform 0.2s,
+          border-color 0.2s;
       }
       .theme-toggle:hover {
         background: #703efa;
@@ -967,14 +977,26 @@
     </style>
   </head>
   <body>
-    <button class="theme-toggle" id="themeToggle" title="מצב כהה / בהיר" aria-label="החלף מצב תצוגה"><span class="theme-icon" id="themeIcon">🌙</span></button>
+    <button
+      class="theme-toggle"
+      id="themeToggle"
+      title="מצב כהה / בהיר"
+      aria-label="החלף מצב תצוגה"
+    >
+      <span class="theme-icon" id="themeIcon">🌙</span>
+    </button>
     <div class="container">
       <div class="header">
         <h1>🖼️ עורך תמונות</h1>
         <h2>שינוי גודל דחיסה / כיווץ תמונות</h2>
       </div>
       <div class="dropzone" id="dropzone">
-        <input type="file" id="fileInput" multiple accept="image/*,.tif,.tiff,image/tiff,.bmp,image/bmp" />
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          accept="image/*,.tif,.tiff,image/tiff,.bmp,image/bmp"
+        />
         <input
           type="file"
           id="folderInput"
@@ -1087,7 +1109,11 @@
           </div>
         </div>
       </div>
-      <div class="header-actions" id="actionsBar" style="display: none; margin: 12px 0;">
+      <div
+        class="header-actions"
+        id="actionsBar"
+        style="display: none; margin: 12px 0"
+      >
         <button class="btn btn-primary" id="runBtn">🛠️ התחל עיבוד</button>
         <button class="btn btn-outline" id="pauseBtn" style="display: none">
           ⏸️ השהה
@@ -1098,11 +1124,7 @@
         <button class="btn btn-danger" id="cancelBtn" style="display: none">
           ⏹️ בטל עיבוד
         </button>
-        <button
-          class="btn btn-ghost"
-          id="downloadAllBtn"
-          style="display: none"
-        >
+        <button class="btn btn-ghost" id="downloadAllBtn" style="display: none">
           📥 ZIP
         </button>
         <button class="btn btn-danger" id="clearBtn">🗑️ נקה</button>
@@ -1118,10 +1140,22 @@
     </div>
     <div class="sticky-actions" id="stickyActions">
       <button class="btn btn-primary" id="stickyRunBtn">🛠️ התחל עיבוד</button>
-      <button class="btn btn-outline" id="stickyPauseBtn" style="display: none">⏸️ השהה</button>
-      <button class="btn btn-outline" id="stickyResumeBtn" style="display: none">▶️ המשך</button>
-      <button class="btn btn-danger" id="stickyCancelBtn" style="display: none">⏹️ בטל עיבוד</button>
-      <button class="btn btn-ghost" id="stickyZipBtn" style="display: none">📥 ZIP</button>
+      <button class="btn btn-outline" id="stickyPauseBtn" style="display: none">
+        ⏸️ השהה
+      </button>
+      <button
+        class="btn btn-outline"
+        id="stickyResumeBtn"
+        style="display: none"
+      >
+        ▶️ המשך
+      </button>
+      <button class="btn btn-danger" id="stickyCancelBtn" style="display: none">
+        ⏹️ בטל עיבוד
+      </button>
+      <button class="btn btn-ghost" id="stickyZipBtn" style="display: none">
+        📥 ZIP
+      </button>
       <button class="btn btn-danger" id="stickyClearBtn">🗑️ נקה</button>
     </div>
     <div class="toast" id="toast"></div>
@@ -1153,7 +1187,8 @@
         const statusLine = document.getElementById("statusLine");
         const toastEl = document.getElementById("toast");
         const loadProgressRow = document.getElementById("loadProgressRow");
-        const processProgressRow = document.getElementById("processProgressRow");
+        const processProgressRow =
+          document.getElementById("processProgressRow");
         const stickyActions = document.getElementById("stickyActions");
         const stickyRunBtn = document.getElementById("stickyRunBtn");
         const stickyPauseBtn = document.getElementById("stickyPauseBtn");
@@ -1217,8 +1252,10 @@
           // Main bar
           runBtn.style.display = processing ? "none" : "inline-flex";
           runBtn.disabled = processing || !items.length;
-          pauseBtn.style.display = processing && !paused ? "inline-flex" : "none";
-          resumeBtn.style.display = processing && paused ? "inline-flex" : "none";
+          pauseBtn.style.display =
+            processing && !paused ? "inline-flex" : "none";
+          resumeBtn.style.display =
+            processing && paused ? "inline-flex" : "none";
           cancelBtn.style.display = processing ? "inline-flex" : "none";
           cancelBtn.disabled = cancelRequested;
           clearBtn.disabled = processing;
@@ -1227,12 +1264,16 @@
           stickyRunBtn.style.display = processing ? "none" : "inline-flex";
           stickyRunBtn.disabled = processing || !items.length;
           stickyRunBtn.textContent = "🛠️ התחל עיבוד";
-          stickyPauseBtn.style.display = processing && !paused ? "inline-flex" : "none";
-          stickyResumeBtn.style.display = processing && paused ? "inline-flex" : "none";
+          stickyPauseBtn.style.display =
+            processing && !paused ? "inline-flex" : "none";
+          stickyResumeBtn.style.display =
+            processing && paused ? "inline-flex" : "none";
           stickyCancelBtn.style.display = processing ? "inline-flex" : "none";
           stickyCancelBtn.disabled = cancelRequested;
           stickyClearBtn.disabled = processing;
-          stickyZipBtn.style.display = items.some((i) => i.resultBlob) ? "inline-flex" : "none";
+          stickyZipBtn.style.display = items.some((i) => i.resultBlob)
+            ? "inline-flex"
+            : "none";
         }
 
         function updateStickyBar() {
@@ -1248,7 +1289,8 @@
             actionsBarVisible = true;
           } else {
             const rect = actionsBar.getBoundingClientRect();
-            actionsBarVisible = rect.bottom > 0 && rect.top < window.innerHeight;
+            actionsBarVisible =
+              rect.bottom > 0 && rect.top < window.innerHeight;
           }
           updateStickyBar();
         }
@@ -1261,12 +1303,16 @@
                 updateStickyBar();
               });
             },
-            { threshold: 0, rootMargin: "0px" }
+            { threshold: 0, rootMargin: "0px" },
           );
           stickyObserver.observe(actionsBar);
         }
-        window.addEventListener("scroll", checkActionsBarVisibility, { passive: true });
-        window.addEventListener("resize", checkActionsBarVisibility, { passive: true });
+        window.addEventListener("scroll", checkActionsBarVisibility, {
+          passive: true,
+        });
+        window.addEventListener("resize", checkActionsBarVisibility, {
+          passive: true,
+        });
 
         function setProcessingUI(active) {
           isProcessing = active;
@@ -1328,7 +1374,9 @@
               if (badge) badge.textContent = "";
             }
 
-            const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
+            const imgEl = document.querySelector(
+              "#frame-" + item.id + " .frame-img-wrap img",
+            );
             if (imgEl && item.origUrl) {
               imgEl.src = item.origUrl;
             }
@@ -1382,11 +1430,22 @@
           if (!isProcessing) resetResults();
         };
 
-        ["maxW", "maxH", "targetSize", "targetUnit", "capDim", "format"].forEach((id) => {
+        [
+          "maxW",
+          "maxH",
+          "targetSize",
+          "targetUnit",
+          "capDim",
+          "format",
+        ].forEach((id) => {
           const el = document.getElementById(id);
           if (el) {
-            el.addEventListener("change", () => { if (!isProcessing) resetResults(); });
-            el.addEventListener("input", () => { if (!isProcessing) resetResults(); });
+            el.addEventListener("change", () => {
+              if (!isProcessing) resetResults();
+            });
+            el.addEventListener("input", () => {
+              if (!isProcessing) resetResults();
+            });
           }
         });
 
@@ -1426,7 +1485,11 @@
           dropzone.classList.remove("drag");
           try {
             let files = await getFilesFromDataTransfer(e.dataTransfer);
-            if ((!files || files.length === 0) && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            if (
+              (!files || files.length === 0) &&
+              e.dataTransfer.files &&
+              e.dataTransfer.files.length > 0
+            ) {
               files = Array.from(e.dataTransfer.files);
             }
             handleFiles(files || []);
@@ -1510,7 +1573,9 @@
                 asFile = item.getAsFile();
               } catch (_) {}
               if (asFile && asFile.size >= 0) {
-                const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+                const entry = item.webkitGetAsEntry
+                  ? item.webkitGetAsEntry()
+                  : null;
                 if (!entry || entry.isFile) {
                   files.push(asFile);
                   continue;
@@ -1520,7 +1585,9 @@
                   continue;
                 }
               }
-              const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+              const entry = item.webkitGetAsEntry
+                ? item.webkitGetAsEntry()
+                : null;
               if (entry) {
                 files.push(...(await walk(entry)));
               }
@@ -1570,9 +1637,14 @@
                 const r = getUnsupportedReason(f) || "אחר";
                 reasons[r] = (reasons[r] || 0) + 1;
               });
-              const parts = Object.keys(reasons).map((k) => k + " ×" + reasons[k]);
+              const parts = Object.keys(reasons).map(
+                (k) => k + " ×" + reasons[k],
+              );
               showToast(
-                "⚠️ " + raw.length + " קבצים לא נתמכים: " + parts.join(", ") +
+                "⚠️ " +
+                  raw.length +
+                  " קבצים לא נתמכים: " +
+                  parts.join(", ") +
                   " (GIF ו-HEIC/HEIF אינם נתמכים)",
                 5000,
               );
@@ -1584,10 +1656,15 @@
 
           if (skipped > 0) {
             const unsupported = raw.filter((f) => !isSupportedImage(f));
-            const hasGif = unsupported.some((f) => getUnsupportedReason(f) === "GIF");
-            const hasHeic = unsupported.some((f) => getUnsupportedReason(f) === "HEIC/HEIF");
+            const hasGif = unsupported.some(
+              (f) => getUnsupportedReason(f) === "GIF",
+            );
+            const hasHeic = unsupported.some(
+              (f) => getUnsupportedReason(f) === "HEIC/HEIF",
+            );
             let detail = "";
-            if (hasGif && hasHeic) detail = " (כולל GIF ו-HEIC/HEIF שאינם נתמכים)";
+            if (hasGif && hasHeic)
+              detail = " (כולל GIF ו-HEIC/HEIF שאינם נתמכים)";
             else if (hasGif) detail = " (GIF אינו נתמך)";
             else if (hasHeic) detail = " (HEIC/HEIF אינו נתמך)";
             else detail = " (פורמט לא נתמך)";
@@ -1610,7 +1687,8 @@
             return (
               name.endsWith(".tif") ||
               name.endsWith(".tiff") ||
-              (file.type && (file.type === "image/tiff" || file.type === "image/tif"))
+              (file.type &&
+                (file.type === "image/tiff" || file.type === "image/tif"))
             );
           }
 
@@ -1621,7 +1699,8 @@
               if (isTiff(file) && typeof UTIF !== "undefined") {
                 const buffer = await file.arrayBuffer();
                 const ifds = UTIF.decode(buffer);
-                if (!ifds || !ifds.length) throw new Error("לא ניתן לפענח קובץ TIFF");
+                if (!ifds || !ifds.length)
+                  throw new Error("לא ניתן לפענח קובץ TIFF");
                 // First page only (multi-page TIFF: use first frame)
                 UTIF.decodeImage(buffer, ifds[0]);
                 const rgba = UTIF.toRGBA8(ifds[0]);
@@ -1635,7 +1714,9 @@
                 const imgData = ctx.createImageData(w, h);
                 imgData.data.set(rgba);
                 ctx.putImageData(imgData, 0, 0);
-                const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+                const blob = await new Promise((res) =>
+                  canvas.toBlob(res, "image/png"),
+                );
                 if (!blob) throw new Error("כשל ביצירת תצוגה מקדימה");
                 origUrl = URL.createObjectURL(blob);
                 // TIFF via canvas – בודקים שקיפות על הקנבס
@@ -1643,7 +1724,10 @@
                 try {
                   const sampleImg = new Image();
                   sampleImg.src = origUrl;
-                  await new Promise((r) => { sampleImg.onload = r; sampleImg.onerror = r; });
+                  await new Promise((r) => {
+                    sampleImg.onload = r;
+                    sampleImg.onerror = r;
+                  });
                   hasAlpha = hasTransparency(sampleImg);
                 } catch (_) {}
                 const item = {
@@ -1696,13 +1780,24 @@
             } catch (err) {
               console.error("Failed to load", file.name, err);
               if (origUrl) {
-                try { URL.revokeObjectURL(origUrl); } catch (_) {}
+                try {
+                  URL.revokeObjectURL(origUrl);
+                } catch (_) {}
               }
               failed++;
-              showToast("⚠️ לא ניתן לטעון: " + (file.name || "קובץ") + " (" + (err.message || err) + ")");
+              showToast(
+                "⚠️ לא ניתן לטעון: " +
+                  (file.name || "קובץ") +
+                  " (" +
+                  (err.message || err) +
+                  ")",
+              );
             } finally {
               loaded++;
-              updateLoadProgress(baseCount + loaded - failed, expectedTotal - failed);
+              updateLoadProgress(
+                baseCount + loaded - failed,
+                expectedTotal - failed,
+              );
               updateStatus();
               if (loaded === totalToLoad) {
                 const realTotal = items.length;
@@ -1710,9 +1805,13 @@
                 if (realTotal === 0) {
                   loadProgressRow.classList.add("hidden");
                 }
-                const msg = realTotal > 0
-                  ? "✅ " + realTotal + " תמונות נטענו" + (failed ? " (" + failed + " נכשלו)" : "")
-                  : "⚠️ 0 תמונות נטענו – בדוק את סוג הקבצים";
+                const msg =
+                  realTotal > 0
+                    ? "✅ " +
+                      realTotal +
+                      " תמונות נטענו" +
+                      (failed ? " (" + failed + " נכשלו)" : "")
+                    : "⚠️ 0 תמונות נטענו – בדוק את סוג הקבצים";
                 showToast(msg);
               }
             }
@@ -1782,7 +1881,14 @@
           const { active, paused, complete } = opts || {};
           fill.style.width = pct + "%";
 
-          fill.classList.remove("stage-low", "stage-mid", "stage-high", "done", "shimmer", "paused-fill");
+          fill.classList.remove(
+            "stage-low",
+            "stage-mid",
+            "stage-high",
+            "done",
+            "shimmer",
+            "paused-fill",
+          );
           if (bar) bar.classList.remove("done");
 
           if (complete) {
@@ -2047,13 +2153,16 @@
           }
 
           // Show processed image as preview
-          const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
+          const imgEl = document.querySelector(
+            "#frame-" + item.id + " .frame-img-wrap img",
+          );
           if (imgEl) {
             imgEl.src = item.resultUrl;
           }
 
           const sizeDisplay = fmtBytes(result.blob.size);
-          document.getElementById("new-" + item.id).textContent = "✅ " + sizeDisplay;
+          document.getElementById("new-" + item.id).textContent =
+            "✅ " + sizeDisplay;
 
           const dimsEl = document.getElementById("dims-" + item.id);
           if (dimsEl) {
@@ -2126,22 +2235,34 @@
               format = "image/png";
               if (!transparencyToastShown) {
                 transparencyToastShown = true;
-                showToast("ℹ️ תמונות שקופות יוצאו כ-PNG (או WEBP אם נבחר) כדי לשמור על הרקע השקוף", 5000);
+                showToast(
+                  "ℹ️ תמונות שקופות יוצאו כ-PNG (או WEBP אם נבחר) כדי לשמור על הרקע השקוף",
+                  5000,
+                );
               }
             }
           } catch (_) {}
 
           let result;
           if (mode === "dim") {
-            const maxW = parseInt(document.getElementById("maxW").value, 10) || item.w;
-            const maxH = parseInt(document.getElementById("maxH").value, 10) || item.h;
+            const maxW =
+              parseInt(document.getElementById("maxW").value, 10) || item.w;
+            const maxH =
+              parseInt(document.getElementById("maxH").value, 10) || item.h;
             result = await resizeByDimension(item, maxW, maxH, format, quality);
           } else {
-            const val = parseFloat(document.getElementById("targetSize").value) || 200;
+            const val =
+              parseFloat(document.getElementById("targetSize").value) || 200;
             const unit = document.getElementById("targetUnit").value;
             const targetBytes = unit === "MB" ? val * 1048576 : val * 1024;
-            const capDim = parseInt(document.getElementById("capDim").value, 10) || 0;
-            result = await resizeByTargetSize(item, targetBytes, capDim, format);
+            const capDim =
+              parseInt(document.getElementById("capDim").value, 10) || 0;
+            result = await resizeByTargetSize(
+              item,
+              targetBytes,
+              capDim,
+              format,
+            );
           }
           return result;
         }
@@ -2262,7 +2383,9 @@
               const badge = frame.querySelector(".frame-badge");
               if (badge) badge.textContent = "";
             }
-            const imgEl = document.querySelector("#frame-" + item.id + " .frame-img-wrap img");
+            const imgEl = document.querySelector(
+              "#frame-" + item.id + " .frame-img-wrap img",
+            );
             if (imgEl && item.origUrl) imgEl.src = item.origUrl;
             const newEl = document.getElementById("new-" + item.id);
             if (newEl) newEl.textContent = "—";
