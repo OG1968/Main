@@ -1823,6 +1823,29 @@
           });
         }
 
+        // בודק אם לתמונה יש שקיפות (אלפא < 255) – דגימה מהירה לביצועים
+        function hasTransparency(img) {
+          try {
+            const maxSample = 128;
+            const sw = Math.min(img.naturalWidth || img.width, maxSample);
+            const sh = Math.min(img.naturalHeight || img.height, maxSample);
+            if (!sw || !sh) return false;
+            const c = document.createElement("canvas");
+            c.width = sw;
+            c.height = sh;
+            const ctx = c.getContext("2d", { willReadFrequently: true });
+            if (!ctx) return false;
+            ctx.drawImage(img, 0, 0, sw, sh);
+            const data = ctx.getImageData(0, 0, sw, sh).data;
+            for (let i = 3; i < data.length; i += 4) {
+              if (data[i] < 255) return true;
+            }
+            return false;
+          } catch (_) {
+            return false;
+          }
+        }
+
         function canvasToBlob(canvas, type, quality) {
           return new Promise((res) => {
             if (type === "image/png") {
@@ -1838,6 +1861,7 @@
           canvas.width = w;
           canvas.height = h;
           const ctx = canvas.getContext("2d");
+          // חשוב: לא ממלאים רקע – שומרים על שקיפות (אלפא)
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = "high";
           ctx.drawImage(img, 0, 0, w, h);
@@ -2039,9 +2063,24 @@
           }
         }
 
+        let transparencyToastShown = false;
+
         async function processOne(item) {
-          const format = formatSel.value;
+          let format = formatSel.value;
           const quality = parseInt(qualitySlider.value, 10) / 100;
+
+          // שמירת שקיפות: JPEG אינו תומך באלפא – מחליפים אוטומטית ל-PNG
+          try {
+            const img = await loadImage(item.origUrl);
+            if (hasTransparency(img) && format === "image/jpeg") {
+              format = "image/png";
+              if (!transparencyToastShown) {
+                transparencyToastShown = true;
+                showToast("ℹ️ תמונות שקופות יוצאו כ-PNG כדי לשמור על הרקע השקוף", 4500);
+              }
+            }
+          } catch (_) {}
+
           let result;
           if (mode === "dim") {
             const maxW = parseInt(document.getElementById("maxW").value, 10) || item.w;
@@ -2148,6 +2187,7 @@
           cancelRequested = false;
           isPaused = false;
           pauseWaiters = [];
+          transparencyToastShown = false;
           cancelBtn.disabled = false;
           stickyCancelBtn.disabled = false;
           cancelBtn.textContent = "⏹️ בטל עיבוד";
