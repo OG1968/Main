@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>מסיר רקעים לתמונות</title>
+  <link rel="icon" type="image/png" href="BR.png" />
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #242836;
+      --border: #2e3345;
+      --text: #e8eaed;
+      --muted: #9aa0a6;
+      --primary: #5b8def;
+      --accent: #34d399;
+      --danger: #f87171;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.35;
+    }
+    body.light {
+      --bg: #64a6d1;
+      --surface: #e8f4fc;
+      --surface2: #c5e0f5;
+      --border: #4a8fbf;
+      --text: #0a3a5c;
+      --muted: #1a5a80;
+      --primary: #0b6a9e;
+      --accent: #059669;
+      --danger: #dc2626;
+    }
+    body.light .area {
+      background-image:
+        linear-gradient(45deg,#bae6fd 25%,transparent 25%),
+        linear-gradient(-45deg,#bae6fd 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#bae6fd 75%),
+        linear-gradient(-45deg,transparent 75%,#bae6fd 75%);
+    }
+    body.light .msg {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      color: #1e40af;
+    }
+    body.light .msg strong { color: #1e3a8a; }
+    body.light .logo {
+      background: linear-gradient(135deg, #0b6a9e, #059669);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Full-page flex column: header + content + footer always visible */
+    .app {
+      height: 100%;
+      height: 100dvh;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6px 10px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      overflow: hidden;
+    }
+
+    .top-header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      min-height: 42px;
+      padding: 0 40px;
+    }
+    .logo {
+      font-size: 1.55rem;
+      font-weight: 800;
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.01em;
+    }
+    .theme-btn {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+      font-family: inherit;
+      padding: 0;
+    }
+    .theme-btn:hover { background: var(--border); }
+
+    .msg {
+      background: #1e3a5f;
+      border: 1px solid #3b82f6;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      color: #bfdbfe;
+      text-align: center;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .msg strong { color: #fff; }
+
+    .drop {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .drop:hover, .drop.over { border-color: var(--primary); background: rgba(91,141,239,.07); }
+    .drop.hidden { display: none; }
+    .drop .icon { font-size: 2rem; margin-bottom: 6px; }
+    .drop h2 { font-size: 1rem; margin-bottom: 4px; }
+    .drop p { color: var(--muted); font-size: .85rem; }
+    .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+    .ws { display: none; flex-direction: column; gap: 5px; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+    .ws.on { display: flex; }
+
+    .bar {
+      display: flex; flex-wrap: wrap; gap: 4px; align-items: center;
+      background: var(--surface); padding: 5px 8px;
+      border-radius: 8px; border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .grp { display: flex; gap: 4px; align-items: center; }
+    .grp + .grp {
+      border-right: 1px solid var(--border);
+      padding-right: 6px; margin-right: 2px;
+    }
+    button {
+      background: var(--surface2); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 4px 8px; font-size: .75rem; cursor: pointer;
+      font-family: inherit; white-space: nowrap;
+    }
+    button:hover:not(:disabled) { background: var(--border); }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    button.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+    button.ok { background: var(--accent); border-color: var(--accent); color: #064e3b; font-weight: 600; }
+    button.bad { background: transparent; border-color: var(--danger); color: var(--danger); }
+    .sl { display: flex; align-items: center; gap: 3px; font-size: .72rem; color: var(--muted); }
+    input[type=range] { width: 64px; accent-color: var(--primary); }
+    input[type=color] {
+      width: 28px; height: 24px; border: 1px solid var(--border);
+      border-radius: 5px; padding: 0; cursor: pointer; background: transparent;
+    }
+    input[type=number] {
+      width: 48px; padding: 3px; border-radius: 5px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: 0.75rem; text-align: center; font-family: inherit;
+    }
+
+    /* Image area: takes remaining space but NEVER pushes footer out */
+    .area {
+      position: relative;
+      background: var(--surface);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      flex: 1 1 auto;
+      min-height: 0; /* critical for flex child to shrink */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image:
+        linear-gradient(45deg,#1e222e 25%,transparent 25%),
+        linear-gradient(-45deg,#1e222e 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#1e222e 75%),
+        linear-gradient(-45deg,transparent 75%,#1e222e 75%);
+      background-size: 14px 14px;
+      background-position: 0 0,0 7px,7px -7px,-7px 0;
+    }
+    .cwrap {
+      max-width: 100%;
+      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .cwrap.zoomed { overflow: auto; }
+    canvas {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      cursor: crosshair;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    }
+    canvas.zoomed {
+      max-width: none;
+      max-height: none;
+    }
+    #previewSvg {
+      position: absolute; left: 0; top: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 5; display: none; overflow: visible;
+    }
+    #previewSvg line { stroke: #f87171; stroke-width: 2; stroke-dasharray: 6 4; }
+    #rectPreview {
+      position: absolute;
+      border: 2px dashed #f87171;
+      background: rgba(248,113,113,.15);
+      pointer-events: none; display: none; z-index: 6;
+    }
+
+    .info {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      justify-content: space-between; font-size: .7rem; color: var(--muted);
+      flex-shrink: 0;
+      flex-direction: row; /* with dir=rtl: first item on the right */
+    }
+    .info #modeHint { order: 0; }
+    .info #info { order: 1; }
+    footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0 10px;
+      flex-shrink: 0;
+    }
+    footer img { height: 56px; width: auto; max-width: 180px; object-fit: contain; }
+    footer div { font-size: 1.15rem; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
+
+    .enhance-panel {
+      display: none; flex-wrap: wrap; gap: 6px 10px; align-items: center;
+      background: var(--surface); padding: 6px 10px; border-radius: 8px;
+      border: 1px solid var(--border); flex-shrink: 0;
+    }
+    .enhance-panel.on { display: flex; }
+    .enhance-panel .sl { font-size: .72rem; }
+    .enhance-panel input[type=range] { width: 72px; }
+    #cropFrame {
+      position: absolute; border: 2px solid #34d399;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,.45);
+      display: none; z-index: 8; pointer-events: auto; box-sizing: border-box;
+    }
+    #cropFrame .ch {
+      position: absolute; width: 12px; height: 12px; background: #34d399;
+      border: 2px solid #fff; border-radius: 2px; z-index: 9;
+    }
+    #cropFrame .ch.n { top:-7px; left:50%; transform:translateX(-50%); cursor:n-resize; }
+    #cropFrame .ch.s { bottom:-7px; left:50%; transform:translateX(-50%); cursor:s-resize; }
+    #cropFrame .ch.e { right:-7px; top:50%; transform:translateY(-50%); cursor:e-resize; }
+    #cropFrame .ch.w { left:-7px; top:50%; transform:translateY(-50%); cursor:w-resize; }
+    #cropFrame .ch.nw { top:-7px; left:-7px; cursor:nw-resize; }
+    #cropFrame .ch.ne { top:-7px; right:-7px; cursor:ne-resize; }
+    #cropFrame .ch.sw { bottom:-7px; left:-7px; cursor:sw-resize; }
+    #cropFrame .ch.se { bottom:-7px; right:-7px; cursor:se-resize; }
+    #cropInfo {
+      position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: #14532d; color: #fff; font-size: 0.75rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+      border: 1px solid #000;
+    }
+    #cropActions {
+      position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+      display: flex; gap: 6px; pointer-events: auto;
+    }
+    #cropActions button { font-size: 0.75rem; padding: 4px 12px; }
+    .tip-banner {
+      position: fixed; z-index: 9999;
+      background: #14532d; color: #fff;
+      border: 1px solid #000; border-radius: 6px;
+      padding: 6px 12px; font-size: 0.8rem; font-weight: 500;
+      pointer-events: none; opacity: 0; transition: opacity .12s;
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+      max-width: 280px; text-align: center; line-height: 1.35;
+    }
+    .tip-banner.show { opacity: 1; }
+
+    @media (max-width: 600px) {
+      .app { padding: 4px 6px 2px; gap: 4px; }
+      .logo { font-size: 1.2rem; }
+      .theme-btn { width: 28px; height: 28px; font-size: 0.9rem; }
+      .msg { font-size: 0.7rem; padding: 4px 8px; }
+      .bar { padding: 4px; gap: 3px; }
+      button { padding: 3px 5px; font-size: 0.65rem; }
+      .sl { font-size: 0.65rem; }
+      input[type=range] { width: 48px; }
+      input[type=number] { width: 40px; font-size: 0.65rem; }
+      footer img { height: 42px; max-width: 140px; }
+      footer div { font-size: 0.95rem; }
+      .info { font-size: 0.62rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="top-header">
+      <button class="theme-btn" id="themeBtn" type="button" title="מצב בהיר" data-tip="מעבר למצב בהיר">☀️</button>
+      <div class="logo">✂️ מסיר רקעים לתמונות</div>
+    </header>
+
+    <div class="msg" id="guide"><strong>שלב 1:</strong> העלה תמונה</div>
+
+    <div class="drop" id="drop">
+      <div class="icon">🖼️</div>
+      <h2>גרור תמונה לכאן או לחץ לבחירה</h2>
+      <p>JPG / PNG / WEBP • 100% אופליין</p>
+      <input type="file" id="file" accept="image/*" />
+    </div>
+
+    <div class="ws" id="ws">
+      <div class="bar">
+        <div class="grp">
+          <button id="bPick" data-tip="בחירת רקע – לחץ על הרקע בתמונה להסרה">🎯 רקע</button>
+          <button id="bBrush" data-tip="שחזור – צייר כדי להחזיר חלקים שהוסרו">🖌️ שחזור</button>
+          <button id="bErase" data-tip="מחק חופשי – צייר כדי להסיר אזורים">🧹 מחק</button>
+          <button id="bLine" data-tip="מחיקת קו ישר – לחץ התחלה ואז סיום">📏 קו</button>
+          <button id="bRect" data-tip="מחיקת אזור – גרור באלכסון לסימון מלבן">▢ אזור</button>
+        </div>
+        <div class="grp">
+          <div class="sl">
+            <span>סף</span>
+            <input type="range" id="tol" min="5" max="100" value="32" data-tip="סף רגישות צבע – כמה דומה צבע רקע לפיקסל שנלחץ (נמוך = מדויק יותר)" />
+            <span id="tolV">32</span>
+          </div>
+          <div class="sl">
+            <span>ריכוך</span>
+            <input type="range" id="feather" min="0" max="25" value="5" data-tip="ריכוך קצוות – מעבר רך בין רקע לאובייקט (גבוה = קצה רך יותר)" />
+            <span id="featherV">5</span>
+          </div>
+          <div class="sl">
+            <span>עובי</span>
+            <input type="range" id="size" min="2" max="50" value="12" data-tip="עובי מברשת / קו / אזור – גודל כלי הציור והמחיקה" />
+            <span id="sizeV">12</span>
+          </div>
+        </div>
+        <div class="grp">
+          <span style="font-size:.72rem;color:var(--muted)">רקע:</span>
+          <input type="color" id="bgColor" value="#ffffff" data-tip="בחר צבע רקע" />
+          <button id="bApplyBg" data-tip="החל צבע רקע מתחת לאובייקט">החל</button>
+          <button id="bClearBg" data-tip="הסר רקע צבע – חזרה לשקיפות">שקוף</button>
+        </div>
+        <div class="grp">
+          <button id="bZoomOut" data-tip="הקטן ב־1%">−</button>
+          <input type="number" id="zoomPct" value="100" min="25" max="400" step="1" data-tip="זום – כל לחיצה = 1%" />
+          <span style="font-size:0.72rem;color:var(--muted)">%</span>
+          <button id="bZoomIn" data-tip="הגדל ב־1%">+</button>
+          <button id="bZoomFit" data-tip="התאם לחלון">🖥️</button>
+        </div>
+        <div class="grp">
+          <button id="bRotCCW05" data-tip="סובב שמאלה 0.5°">↺0.5°</button>
+          <button id="bRotCW05" data-tip="סובב ימינה 0.5°">↻0.5°</button>
+          <button id="bRotCCW90" data-tip="סובב שמאלה 90°">↺90°</button>
+          <button id="bRotCW90" data-tip="סובב ימינה 90°">↻90°</button>
+          <button id="bRot180" data-tip="סובב 180°">180°</button>
+        </div>
+        <div class="grp">
+          <button id="bEnhance" data-tip="שיפור תמונה – שינוי מיידי">✨ שיפור</button>
+          <button id="bCrop" data-tip="חיתוך – גרור צלעות">✂️ חיתוך</button>
+        </div>
+        <div class="grp">
+          <button id="bUndo" data-tip="בטל פעולה אחרונה" disabled>↩️</button>
+          <button id="bReset" data-tip="איפוס לתמונה המקורית">🔄</button>
+        </div>
+        <div class="grp" style="margin-right:auto">
+          <button id="bNew" class="bad" data-tip="תמונה חדשה">📁</button>
+          <button id="bDl" class="ok" data-tip="הורד כקובץ PNG">⬇️ PNG</button>
+        </div>
+      </div>
+
+      <div class="enhance-panel" id="enhancePanel">
+        <div class="sl"><span>בהירות</span><input type="range" id="adjBright" min="-50" max="50" value="0" /><span id="adjBrightV">0</span></div>
+        <div class="sl"><span>ניגודיות</span><input type="range" id="adjContrast" min="-50" max="50" value="0" /><span id="adjContrastV">0</span></div>
+        <div class="sl"><span>רוויה</span><input type="range" id="adjSat" min="-50" max="50" value="0" /><span id="adjSatV">0</span></div>
+        <div class="sl"><span>חידוד</span><input type="range" id="adjSharp" min="0" max="10" value="0" /><span id="adjSharpV">0</span></div>
+        <div class="sl"><span>הדגשה</span><input type="range" id="adjVibrance" min="-30" max="50" value="0" /><span id="adjVibranceV">0</span></div>
+        <button id="bResetEnhance">אפס</button>
+      </div>
+      <div class="area">
+        <div class="cwrap" id="cwrap">
+          <div id="rectPreview"></div>
+          <div id="cropFrame">
+            <div class="ch n" data-dir="n"></div><div class="ch s" data-dir="s"></div>
+            <div class="ch e" data-dir="e"></div><div class="ch w" data-dir="w"></div>
+            <div class="ch nw" data-dir="nw"></div><div class="ch ne" data-dir="ne"></div>
+            <div class="ch sw" data-dir="sw"></div><div class="ch se" data-dir="se"></div>
+            <div id="cropInfo">—</div>
+            <div id="cropActions">
+              <button id="bCropOk" class="ok">אישור חיתוך</button>
+              <button id="bCropCancel" class="bad">ביטול</button>
+            </div>
+          </div>
+          <canvas id="cv"></canvas>
+          <svg id="previewSvg" xmlns="http://www.w3.org/2000/svg">
+            <line id="previewLineSeg" x1="0" y1="0" x2="0" y2="0" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="info">
+        <span id="modeHint">מצב: בחירת רקע</span>
+        <span id="info">—</span>
+      </div>
+    </div>
+
+    <footer>
+      <div>© 2026 כל הזכויות שמורות</div>
+      <img src="OG_Blue_Logo2.png" alt="OG Logo" />
+    </footer>
+  </div>
+
+  <script>
+
+    const drop = document.getElementById('drop');
+    const file = document.getElementById('file');
+    const ws = document.getElementById('ws');
+    const cv = document.getElementById('cv');
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    const guide = document.getElementById('guide');
+    const info = document.getElementById('info');
+    const modeHint = document.getElementById('modeHint');
+    const cwrap = document.getElementById('cwrap');
+    // preview uses SVG now
+
+    const bPick = document.getElementById('bPick');
+    const bBrush = document.getElementById('bBrush');
+    const bErase = document.getElementById('bErase');
+    const bLine = document.getElementById('bLine');
+    const tol = document.getElementById('tol');
+    const tolV = document.getElementById('tolV');
+    const feather = document.getElementById('feather');
+    const featherV = document.getElementById('featherV');
+    const size = document.getElementById('size');
+    const sizeV = document.getElementById('sizeV');
+    const bgColor = document.getElementById('bgColor');
+    const bApplyBg = document.getElementById('bApplyBg');
+    const bClearBg = document.getElementById('bClearBg');
+    const bUndo = document.getElementById('bUndo');
+    const bReset = document.getElementById('bReset');
+    const bNew = document.getElementById('bNew');
+    const bDl = document.getElementById('bDl');
+
+    let orig = null;
+    let alphaData = null;
+    let hist = [];
+    let mode = 'pick';
+    let drawing = false;
+    let lx = 0, ly = 0;
+    let lineStart = null;
+    let currentBg = null;
+    let fineAngle = 0, rotBaseOrig = null, rotBaseAlpha = null;
+    let enhBaseOrig = null, enhBaseAlpha = null, enhPushed = false;
+    let cropRect = null, cropDrag = null;
+
+    function setGuide(html) { guide.innerHTML = html; }
+
+    function setMode(m) {
+      mode = m;
+      lineStart = null;
+      rectStart = null;
+      if (rectPreview) rectPreview.style.display = 'none';
+      document.getElementById('previewSvg').style.display = 'none';
+      if (m !== 'crop' && typeof hideCropUI === 'function') hideCropUI();
+      [bPick, bBrush, bErase, bLine, bRect].forEach(b => b && b.classList.remove('on'));
+      const bCropBtn = document.getElementById('bCrop');
+      if (bCropBtn && m !== 'crop') bCropBtn.classList.remove('on');
+      if (m === 'pick') {
+        bPick.classList.add('on');
+        modeHint.textContent = 'מצב: בחירת רקע – לחץ על הרקע';
+        setGuide('<strong>שלב 2:</strong> לחץ על הרקע בתמונה');
+      } else if (m === 'brush') {
+        bBrush.classList.add('on');
+        modeHint.textContent = 'מצב: שחזור';
+        setGuide('<strong>שחזור:</strong> צייר על אזורים שרוצים להחזיר');
+      } else if (m === 'erase') {
+        bErase.classList.add('on');
+        modeHint.textContent = 'מצב: מחק חופשי';
+        setGuide('<strong>מחק חופשי:</strong> צייר כדי להסיר');
+      } else if (m === 'line') {
+        bLine.classList.add('on');
+        modeHint.textContent = 'מצב: קו מחק – לחץ התחלה ואז סוף';
+        setGuide('<strong>קו מחק:</strong> לחץ התחלה → הזז → לחץ סיום');
+      } else if (m === 'rect') {
+        bRect.classList.add('on');
+        modeHint.textContent = 'מצב: מחיקת אזור – גרור באלכסון';
+        setGuide('<strong>מחיקת אזור:</strong> לחץ וגרור באלכסון לסימון מלבן למחיקה');
+      } else if (m === 'crop') {
+        const bc = document.getElementById('bCrop');
+        if (bc) bc.classList.add('on');
+        modeHint.textContent = 'מצב: חיתוך';
+        setGuide('<strong>חיתוך:</strong> גרור צלעות/פינות ואשר');
+      }
+    }
+
+    function clone(d) {
+      const c = new ImageData(d.width, d.height);
+      c.data.set(d.data);
+      return c;
+    }
+
+    function push() {
+      if (!alphaData) return;
+      hist.push({
+        alpha: clone(alphaData), orig: orig ? clone(orig) : null,
+        fineAngle: fineAngle,
+        rotBaseOrig: rotBaseOrig ? clone(rotBaseOrig) : null,
+        rotBaseAlpha: rotBaseAlpha ? clone(rotBaseAlpha) : null
+      });
+      if (hist.length > 18) hist.shift();
+      bUndo.disabled = false;
+    }
+
+    // Render current state to canvas (alpha + optional solid bg)
+    function render() {
+      if (!alphaData) return;
+      const w = alphaData.width, h = alphaData.height;
+      ctx.clearRect(0, 0, w, h);
+
+      if (currentBg) {
+        ctx.fillStyle = currentBg;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      // draw the cutout on top
+      const tmp = document.createElement('canvas');
+      tmp.width = w; tmp.height = h;
+      tmp.getContext('2d').putImageData(alphaData, 0, 0);
+      ctx.drawImage(tmp, 0, 0);
+    }
+
+    function colorDist(r1,g1,b1,r2,g2,b2) {
+      const dr=r1-r2, dg=g1-g2, db=b1-b2;
+      return Math.sqrt(dr*dr+dg*dg+db*db);
+    }
+
+    function floodRemove(cx, cy) {
+      if (!alphaData || !orig) return;
+      if (typeof commitEnhance==='function') commitEnhance();
+      if (typeof bakeFineRotation==='function') bakeFineRotation();
+      push();
+      const w = alphaData.width, h = alphaData.height;
+      const o = orig.data, d = alphaData.data;
+      const t = +tol.value, f = +feather.value;
+      const sx = Math.max(0, Math.min(w-1, Math.floor(cx)));
+      const sy = Math.max(0, Math.min(h-1, Math.floor(cy)));
+      const si = (sy*w+sx)*4;
+      const sr=o[si], sg=o[si+1], sb=o[si+2];
+
+      const visited = new Uint8Array(w*h);
+      const queue = [sx, sy];
+      visited[sy*w+sx] = 1;
+      const bgPixels = [];
+
+      while (queue.length) {
+        const x = queue.shift(), y = queue.shift();
+        const idx = (y*w+x)*4;
+        if (d[idx+3] === 0) continue;
+        const r=o[idx], g=o[idx+1], b=o[idx+2];
+        if (colorDist(r,g,b,sr,sg,sb) > t) continue;
+        bgPixels.push(x,y);
+        d[idx+3] = 0;
+        for (const [nx,ny] of [[x-1,y],[x+1,y],[x,y-1],[x,y+1]]) {
+          if (nx<0||ny<0||nx>=w||ny>=h) continue;
+          const ni = ny*w+nx;
+          if (visited[ni]) continue;
+          visited[ni]=1;
+          queue.push(nx,ny);
+        }
+      }
+
+      if (f > 0 && bgPixels.length) {
+        const tempA = new Uint8Array(w*h);
+        for (let i=0;i<d.length;i+=4) tempA[i/4]=d[i+3];
+        for (let i=0;i<bgPixels.length;i+=2) {
+          const bx=bgPixels[i], by=bgPixels[i+1];
+          for (let dy=-f;dy<=f;dy++) for (let dx=-f;dx<=f;dx++) {
+            const nx=bx+dx, ny=by+dy;
+            if (nx<0||ny<0||nx>=w||ny>=h) continue;
+            const ni=ny*w+nx;
+            const dist=Math.sqrt(dx*dx+dy*dy);
+            if (dist>f) continue;
+            const factor=1-dist/f;
+            const newA=Math.max(0, Math.round(tempA[ni]*(1-factor*0.85)));
+            if (newA < tempA[ni]) tempA[ni]=newA;
+          }
+        }
+        for (let i=0;i<w*h;i++) d[i*4+3]=tempA[i];
+      }
+
+      for (let i=0;i<d.length;i+=4) {
+        if (d[i+3]>0) { d[i]=o[i]; d[i+1]=o[i+1]; d[i+2]=o[i+2]; }
+      }
+      render();
+      setGuide('<strong>הוסר!</strong> אפשר להוסיף רקע צבע, או לתקן עם קו/מברשת');
+    }
+
+    function stroke(x0,y0,x1,y1, isErase) {
+      if (!alphaData || !orig) return;
+      const r = +size.value / 2;
+      const d = alphaData.data, o = orig.data;
+      const w=alphaData.width, h=alphaData.height;
+      const steps = Math.max(1, Math.ceil(Math.hypot(x1-x0,y1-y0)/(r*0.35)));
+      for (let s=0;s<=steps;s++) {
+        const t=s/steps;
+        const cx=x0+(x1-x0)*t, cy=y0+(y1-y0)*t;
+        const minX=Math.max(0,Math.floor(cx-r-1)), maxX=Math.min(w-1,Math.ceil(cx+r+1));
+        const minY=Math.max(0,Math.floor(cy-r-1)), maxY=Math.min(h-1,Math.ceil(cy+r+1));
+        for (let y=minY;y<=maxY;y++) for (let x=minX;x<=maxX;x++) {
+          const dx=x-cx, dy=y-cy, dd=Math.sqrt(dx*dx+dy*dy);
+          if (dd>r) continue;
+          const fall=1-dd/r;
+          const idx=(y*w+x)*4;
+          if (isErase) {
+            d[idx+3] = Math.max(0, d[idx+3]-Math.round(255*fall));
+          } else {
+            d[idx]=o[idx]; d[idx+1]=o[idx+1]; d[idx+2]=o[idx+2];
+            d[idx+3]=Math.min(255, d[idx+3]+Math.round(255*fall));
+          }
+        }
+      }
+      render();
+    }
+
+    function eraseLine(x0, y0, x1, y1) {
+      if (!alphaData || !orig) return;
+      if (typeof commitEnhance==='function') commitEnhance();
+      if (typeof bakeFineRotation==='function') bakeFineRotation();
+      push();
+      const thickness = +size.value;
+      const d = alphaData.data;
+      const w = alphaData.width, h = alphaData.height;
+      const len = Math.hypot(x1-x0, y1-y0);
+      const steps = Math.max(1, Math.ceil(len));
+      const r = thickness / 2;
+      for (let s = 0; s <= steps; s++) {
+        const t = s / steps;
+        const cx = x0 + (x1-x0)*t;
+        const cy = y0 + (y1-y0)*t;
+        const minX = Math.max(0, Math.floor(cx-r-1));
+        const maxX = Math.min(w-1, Math.ceil(cx+r+1));
+        const minY = Math.max(0, Math.floor(cy-r-1));
+        const maxY = Math.min(h-1, Math.ceil(cy+r+1));
+        for (let y=minY; y<=maxY; y++) {
+          for (let x=minX; x<=maxX; x++) {
+            const dx=x-cx, dy=y-cy;
+            if (Math.sqrt(dx*dx+dy*dy) <= r) {
+              d[(y*w+x)*4 + 3] = 0;
+            }
+          }
+        }
+      }
+      render();
+      setGuide('<strong>קו נמחק.</strong> אפשר להמשיך או להוסיף רקע');
+    }
+
+    function getPos(e) {
+      const rect = cv.getBoundingClientRect();
+      const sx = cv.width / rect.width;
+      const sy = cv.height / rect.height;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: (clientX-rect.left)*sx, y: (clientY-rect.top)*sy };
+    }
+
+    function showPreviewLine(x0, y0, x1, y1) {
+      const cvRect = cv.getBoundingClientRect();
+      const wrapRect = cwrap.getBoundingClientRect();
+      const offsetX = cvRect.left - wrapRect.left + cwrap.scrollLeft;
+      const offsetY = cvRect.top - wrapRect.top + cwrap.scrollTop;
+      const scaleX = cvRect.width / cv.width;
+      const scaleY = cvRect.height / cv.height;
+
+      const svg = document.getElementById('previewSvg');
+      const line = document.getElementById('previewLineSeg');
+      svg.style.display = 'block';
+      // position SVG to cover the canvas area inside the wrapper
+      svg.style.left = offsetX + 'px';
+      svg.style.top = offsetY + 'px';
+      svg.style.width = cvRect.width + 'px';
+      svg.style.height = cvRect.height + 'px';
+      svg.setAttribute('viewBox', '0 0 ' + cv.width + ' ' + cv.height);
+      svg.setAttribute('preserveAspectRatio', 'none');
+
+      line.setAttribute('x1', x0);
+      line.setAttribute('y1', y0);
+      line.setAttribute('x2', x1);
+      line.setAttribute('y2', y1);
+    }
+
+    function onDown(e) {
+      if (!alphaData) return;
+      e.preventDefault();
+      const p = getPos(e);
+
+      if (mode === 'pick') {
+        floodRemove(p.x, p.y);
+        return;
+      }
+      if (mode === 'line') {
+        if (!lineStart) {
+          lineStart = { x: p.x, y: p.y };
+          setGuide('<strong>קו מחק:</strong> הזז ובחר נקודת סיום');
+        } else {
+          eraseLine(lineStart.x, lineStart.y, p.x, p.y);
+          lineStart = null;
+          document.getElementById('previewSvg').style.display = 'none';
+        }
+        return;
+      }
+      if (mode === 'rect') {
+        rectStart = { x: p.x, y: p.y };
+        drawing = true;
+        return;
+      }
+      drawing = true;
+      if (typeof commitEnhance==='function') commitEnhance();
+      if (typeof bakeFineRotation==='function') bakeFineRotation();
+      push();
+      lx = p.x; ly = p.y;
+      stroke(lx, ly, lx, ly, mode === 'erase');
+    }
+
+    function onMove(e) {
+      if (!alphaData) return;
+      const p = getPos(e);
+      if (mode === 'line' && lineStart) {
+        showPreviewLine(lineStart.x, lineStart.y, p.x, p.y);
+        return;
+      }
+      if (mode === 'rect' && rectStart && drawing) {
+        window._lastRectP = p;
+        showRectPreview(rectStart.x, rectStart.y, p.x, p.y);
+        return;
+      }
+      if (!drawing) return;
+      e.preventDefault();
+      stroke(lx, ly, p.x, p.y, mode === 'erase');
+      lx = p.x; ly = p.y;
+    }
+
+    function onUp(e) {
+      if (mode === 'rect' && rectStart && drawing) {
+        const p = e && (e.clientX !== undefined || (e.changedTouches && e.changedTouches[0]))
+          ? getPos(e.changedTouches ? e.changedTouches[0] : e)
+          : null;
+        // use last known from move - store
+        if (window._lastRectP) {
+          eraseRect(rectStart.x, rectStart.y, window._lastRectP.x, window._lastRectP.y);
+        }
+        rectStart = null;
+        window._lastRectP = null;
+        if (rectPreview) rectPreview.style.display = 'none';
+      }
+      drawing = false;
+    }
+
+    cv.addEventListener('mousedown', onDown);
+    cv.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    cv.addEventListener('touchstart', onDown, {passive:false});
+    cv.addEventListener('touchmove', onMove, {passive:false});
+    window.addEventListener('touchend', onUp);
+
+    // Background controls
+    bApplyBg.onclick = () => {
+      if (!alphaData) return;
+      currentBg = bgColor.value;
+      render();
+      setGuide('<strong>רקע הוחל:</strong> ' + currentBg + ' – אפשר לשנות צבע או לחזור לשקוף');
+    };
+    bClearBg.onclick = () => {
+      currentBg = null;
+      render();
+      setGuide('<strong>רקע שקוף.</strong> ההורדה תהיה PNG עם שקיפות');
+    };
+
+    // File
+    function prevent(e){e.preventDefault();e.stopPropagation();}
+    ['dragenter','dragover','dragleave','drop'].forEach(ev=>{
+      drop.addEventListener(ev,prevent);
+      document.body.addEventListener(ev,prevent);
+    });
+    drop.addEventListener('dragenter',()=>drop.classList.add('over'));
+    drop.addEventListener('dragover',()=>drop.classList.add('over'));
+    drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+    drop.addEventListener('drop',e=>{
+      drop.classList.remove('over');
+      if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+    });
+    file.addEventListener('change',e=>{
+      if(e.target.files[0]) loadFile(e.target.files[0]);
+    });
+
+    function loadFile(f) {
+      if (!f.type.startsWith('image/')) { alert('בחר תמונה'); return; }
+      const url = URL.createObjectURL(f);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const max=1600;
+        let w=img.naturalWidth, h=img.naturalHeight;
+        if (w>max||h>max){ const s=max/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+        cv.width=w; cv.height=h;
+        ctx.drawImage(img,0,0,w,h);
+        orig = ctx.getImageData(0,0,w,h);
+        alphaData = clone(orig);
+        hist = []; bUndo.disabled = true; currentBg = null;
+        fineAngle = 0; rotBaseOrig = rotBaseAlpha = null;
+        enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
+        if (typeof hideCropUI === 'function') hideCropUI();
+        const ep = document.getElementById('enhancePanel');
+        if (ep) ep.classList.remove('on');
+        if (typeof resetEnhanceSliders === 'function') resetEnhanceSliders();
+        drop.classList.add('hidden');
+        ws.classList.add('on');
+        info.textContent = img.naturalWidth+'×'+img.naturalHeight+' • '+f.name;
+        if (typeof zoomLevel !== 'undefined') {
+          zoomLevel = 1; applyZoom();
+          setTimeout(() => { if (bZoomFit) bZoomFit.click(); }, 0);
+        }
+        setMode('pick');
+        setGuide('<strong>שלב 2:</strong> לחץ על הרקע בתמונה');
+      };
+      img.onerror = () => alert('שגיאה בטעינת התמונה');
+      img.src = url;
+    }
+
+    bPick.onclick = () => setMode('pick');
+    bBrush.onclick = () => setMode('brush');
+    bErase.onclick = () => setMode('erase');
+    bLine.onclick = () => setMode('line');
+    const bRect = document.getElementById('bRect');
+    if (bRect) bRect.onclick = () => setMode('rect');
+    tol.oninput = () => tolV.textContent = tol.value;
+    feather.oninput = () => featherV.textContent = feather.value;
+    size.oninput = () => sizeV.textContent = size.value;
+
+    bUndo.onclick = () => {
+      if (!hist.length) return;
+      const entry = hist.pop();
+      if (entry && entry.alpha) {
+        alphaData = entry.alpha;
+        if (entry.orig) orig = entry.orig;
+        fineAngle = entry.fineAngle || 0;
+        rotBaseOrig = entry.rotBaseOrig || null;
+        rotBaseAlpha = entry.rotBaseAlpha || null;
+        cv.width = alphaData.width; cv.height = alphaData.height;
+        enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
+        if (typeof applyZoom === 'function') applyZoom();
+      } else if (entry) alphaData = entry;
+      render();
+      bUndo.disabled = !hist.length;
+    };
+    bReset.onclick = () => {
+      if (!orig) return;
+      push();
+      alphaData = clone(orig); currentBg = null;
+      fineAngle = 0; rotBaseOrig = rotBaseAlpha = null;
+      enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
+      cv.width = alphaData.width; cv.height = alphaData.height;
+      if (typeof applyZoom === 'function') applyZoom();
+      render();
+      setGuide('<strong>אופס:</strong> חזרת למקור');
+    };
+    bNew.onclick = () => {
+      orig = alphaData = null; hist = []; currentBg = null;
+      fineAngle = 0; rotBaseOrig = rotBaseAlpha = null;
+      enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
+      if (typeof hideCropUI === 'function') hideCropUI();
+      const ep = document.getElementById('enhancePanel');
+      if (ep) ep.classList.remove('on');
+      cv.width = cv.height = 0;
+      ws.classList.remove('on');
+      drop.classList.remove('hidden');
+      file.value = '';
+      info.textContent = '—';
+      lineStart = null;
+      rectStart = null;
+      if (rectPreview) rectPreview.style.display = 'none';
+      document.getElementById('previewSvg').style.display = 'none';
+      setGuide('<strong>שלב 1:</strong> העלה תמונה');
+    };
+
+    // Download: if bg is set → composite with color, else transparent PNG
+    bDl.onclick = () => {
+      if (!alphaData) return;
+      const w = alphaData.width, h = alphaData.height;
+      const out = document.createElement('canvas');
+      out.width = w; out.height = h;
+      const octx = out.getContext('2d');
+
+      if (currentBg) {
+        octx.fillStyle = currentBg;
+        octx.fillRect(0, 0, w, h);
+      }
+      const tmp = document.createElement('canvas');
+      tmp.width = w; tmp.height = h;
+      tmp.getContext('2d').putImageData(alphaData, 0, 0);
+      octx.drawImage(tmp, 0, 0);
+
+      out.toBlob(b => {
+        if (!b) return;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(b);
+        a.download = currentBg ? 'with-bg.png' : 'no-bg.png';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }, 'image/png');
+    };
+
+    // Zoom — 100% = 1:1; step exactly 1%
+    let zoomLevel = 1;
+    const bZoomIn = document.getElementById('bZoomIn');
+    const bZoomOut = document.getElementById('bZoomOut');
+    const bZoomFit = document.getElementById('bZoomFit');
+    const zoomPctEl = document.getElementById('zoomPct');
+
+    function applyZoom() {
+      if (!cv.width) return;
+      let pct = Math.round(zoomLevel * 100);
+      pct = Math.max(25, Math.min(400, pct));
+      zoomLevel = pct / 100;
+      if (zoomPctEl) zoomPctEl.value = String(pct);
+      cv.classList.add('zoomed');
+      cwrap.classList.add('zoomed');
+      cv.style.maxWidth = 'none';
+      cv.style.maxHeight = 'none';
+      cv.style.width = (cv.width * zoomLevel) + 'px';
+      cv.style.height = (cv.height * zoomLevel) + 'px';
+      if (typeof cropRect !== 'undefined' && cropRect && typeof updateCropFrame === 'function') updateCropFrame();
+    }
+    function setZoomFromPct(pct) {
+      pct = Math.max(25, Math.min(400, Math.round(Number(pct) || 100)));
+      zoomLevel = pct / 100;
+      applyZoom();
+    }
+    function zoomBy(delta) { setZoomFromPct(Math.round(zoomLevel * 100) + delta); }
+    if (bZoomIn) bZoomIn.onclick = () => zoomBy(1);
+    if (bZoomOut) bZoomOut.onclick = () => zoomBy(-1);
+    if (bZoomFit) bZoomFit.onclick = () => {
+      if (!cv.width) return;
+      const aw = cwrap.clientWidth, ah = cwrap.clientHeight;
+      if (aw < 10 || ah < 10) { setZoomFromPct(100); return; }
+      setZoomFromPct(Math.max(25, Math.min(400, Math.floor(Math.min(aw/cv.width, ah/cv.height)*100))));
+    };
+    if (zoomPctEl) {
+      zoomPctEl.addEventListener('wheel', (e) => { e.preventDefault(); zoomBy(e.deltaY < 0 ? 1 : -1); }, {passive:false});
+      zoomPctEl.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp') { e.preventDefault(); zoomBy(1); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); zoomBy(-1); }
+        else if (e.key === 'Enter') { e.preventDefault(); setZoomFromPct(+zoomPctEl.value || 100); }
+      });
+      zoomPctEl.addEventListener('change', () => setZoomFromPct(+zoomPctEl.value || 100));
+      zoomPctEl.addEventListener('input', () => {
+        const v = +zoomPctEl.value;
+        if (Number.isFinite(v) && Math.round(v) !== Math.round(zoomLevel*100)) setZoomFromPct(v);
+      });
+    }
+
+    
+    
+    // Rectangle area erase
+    let rectStart = null;
+    const rectPreview = document.getElementById('rectPreview');
+
+    function showRectPreview(x0, y0, x1, y1) {
+      if (!rectPreview) return;
+      const cvRect = cv.getBoundingClientRect();
+      const wrapRect = cwrap.getBoundingClientRect();
+      const offsetX = cvRect.left - wrapRect.left + cwrap.scrollLeft;
+      const offsetY = cvRect.top - wrapRect.top + cwrap.scrollTop;
+      const scaleX = cvRect.width / cv.width;
+      const scaleY = cvRect.height / cv.height;
+      const left = Math.min(x0, x1) * scaleX + offsetX;
+      const top = Math.min(y0, y1) * scaleY + offsetY;
+      const w = Math.abs(x1 - x0) * scaleX;
+      const h = Math.abs(y1 - y0) * scaleY;
+      rectPreview.style.display = 'block';
+      rectPreview.style.left = left + 'px';
+      rectPreview.style.top = top + 'px';
+      rectPreview.style.width = w + 'px';
+      rectPreview.style.height = h + 'px';
+    }
+
+    function eraseRect(x0, y0, x1, y1) {
+      if (!alphaData) return;
+      if (typeof commitEnhance==='function') commitEnhance();
+      if (typeof bakeFineRotation==='function') bakeFineRotation();
+      push();
+      const d = alphaData.data;
+      const w = alphaData.width, h = alphaData.height;
+      const minX = Math.max(0, Math.floor(Math.min(x0, x1)));
+      const maxX = Math.min(w - 1, Math.ceil(Math.max(x0, x1)));
+      const minY = Math.max(0, Math.floor(Math.min(y0, y1)));
+      const maxY = Math.min(h - 1, Math.ceil(Math.max(y0, y1)));
+      for (let y = minY; y <= maxY; y++) {
+        for (let x = minX; x <= maxX; x++) {
+          d[(y * w + x) * 4 + 3] = 0;
+        }
+      }
+      render();
+      setGuide('<strong>אזור נמחק.</strong> אפשר לסמן אזור נוסף או לעבור למצב אחר');
+    }
+
+    // (zoom handlers already bound above)
+
+
+
+
+    function rotateImageData90(src, clockwise) {
+      const w=src.width,h=src.height,out=new ImageData(h,w),s=src.data,d=out.data;
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+        const si=(y*w+x)*4, nx=clockwise?(h-1-y):y, ny=clockwise?x:(w-1-x), di=(ny*h+nx)*4;
+        d[di]=s[si];d[di+1]=s[si+1];d[di+2]=s[si+2];d[di+3]=s[si+3];
+      }
+      return out;
+    }
+    function rotateImageData180(src) {
+      const w=src.width,h=src.height,out=new ImageData(w,h),s=src.data,d=out.data,n=w*h;
+      for(let i=0;i<n;i++){const si=i*4,di=(n-1-i)*4;d[di]=s[si];d[di+1]=s[si+1];d[di+2]=s[si+2];d[di+3]=s[si+3];}
+      return out;
+    }
+    function rotateImageDataFine(src, degrees) {
+      if(Math.abs(degrees)<0.0001) return clone(src);
+      const rad=degrees*Math.PI/180,cos=Math.cos(rad),sin=Math.sin(rad);
+      const w=src.width,h=src.height,cx=(w-1)/2,cy=(h-1)/2;
+      let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+      for(const [x,y] of [[0,0],[w-1,0],[0,h-1],[w-1,h-1]]){
+        const rx=cos*(x-cx)-sin*(y-cy),ry=sin*(x-cx)+cos*(y-cy);
+        if(rx<minX)minX=rx;if(rx>maxX)maxX=rx;if(ry<minY)minY=ry;if(ry>maxY)maxY=ry;
+      }
+      const nw=Math.max(1,Math.ceil(maxX-minX)+1),nh=Math.max(1,Math.ceil(maxY-minY)+1);
+      const out=new ImageData(nw,nh),s=src.data,d=out.data,ncx=(nw-1)/2,ncy=(nh-1)/2;
+      for(let ny=0;ny<nh;ny++) for(let nx=0;nx<nw;nx++){
+        const dx=nx-ncx,dy=ny-ncy,sx=cos*dx+sin*dy+cx,sy=-sin*dx+cos*dy+cy,di=(ny*nw+nx)*4;
+        if(sx<-0.5||sy<-0.5||sx>=w-0.5||sy>=h-0.5){d[di]=d[di+1]=d[di+2]=d[di+3]=0;continue;}
+        const csx=Math.max(0,Math.min(w-1.001,sx)),csy=Math.max(0,Math.min(h-1.001,sy));
+        const x0=Math.floor(csx),y0=Math.floor(csy),x1=Math.min(w-1,x0+1),y1=Math.min(h-1,y0+1);
+        const fx=csx-x0,fy=csy-y0;
+        const i00=(y0*w+x0)*4,i10=(y0*w+x1)*4,i01=(y1*w+x0)*4,i11=(y1*w+x1)*4;
+        for(let c=0;c<4;c++) d[di+c]=Math.round((1-fx)*(1-fy)*s[i00+c]+fx*(1-fy)*s[i10+c]+(1-fx)*fy*s[i01+c]+fx*fy*s[i11+c]);
+      }
+      return out;
+    }
+    function bakeFineRotation(){ if(fineAngle!==0){fineAngle=0;rotBaseOrig=rotBaseAlpha=null;} }
+    function applyRotation(degrees){
+      if(!alphaData||!orig) return;
+      if(typeof commitEnhance==='function') commitEnhance();
+      push();
+      if(Math.abs(degrees)===90||Math.abs(degrees)===180){
+        fineAngle=0;rotBaseOrig=rotBaseAlpha=null;
+        if(degrees===90){orig=rotateImageData90(orig,true);alphaData=rotateImageData90(alphaData,true);}
+        else if(degrees===-90){orig=rotateImageData90(orig,false);alphaData=rotateImageData90(alphaData,false);}
+        else{orig=rotateImageData180(orig);alphaData=rotateImageData180(alphaData);}
+      } else {
+        if(!rotBaseOrig){rotBaseOrig=clone(orig);rotBaseAlpha=clone(alphaData);fineAngle=0;}
+        fineAngle+=degrees;
+        if(Math.abs(fineAngle)>45){
+          orig=rotateImageDataFine(rotBaseOrig,fineAngle);alphaData=rotateImageDataFine(rotBaseAlpha,fineAngle);
+          rotBaseOrig=clone(orig);rotBaseAlpha=clone(alphaData);fineAngle=0;
+        } else {
+          orig=rotateImageDataFine(rotBaseOrig,fineAngle);alphaData=rotateImageDataFine(rotBaseAlpha,fineAngle);
+        }
+      }
+      cv.width=alphaData.width;cv.height=alphaData.height;applyZoom();render();
+      const shown=(Math.abs(degrees)===90||Math.abs(degrees)===180)?degrees:fineAngle;
+      setGuide('<strong>סובב:</strong> '+(shown>0?'+':'')+shown+'°');
+    }
+    document.getElementById('bRotCCW05').onclick=()=>applyRotation(-0.5);
+    document.getElementById('bRotCW05').onclick=()=>applyRotation(0.5);
+    document.getElementById('bRotCCW90').onclick=()=>applyRotation(-90);
+    document.getElementById('bRotCW90').onclick=()=>applyRotation(90);
+    document.getElementById('bRot180').onclick=()=>applyRotation(180);
+
+    function resetEnhanceSliders(){
+      ['adjBright','adjContrast','adjSat','adjSharp','adjVibrance'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.value=0;
+        const v=document.getElementById(id+'V'); if(v) v.textContent='0';
+      });
+    }
+    function applyEnhanceToImageData(src,bright,contrast,sat,sharp,vibrance){
+      const w=src.width,h=src.height,out=new ImageData(w,h),s=src.data,d=out.data;
+      const bAdd=bright*2.55,cFactor=(259*(contrast+100))/(100*(259-contrast));
+      for(let i=0;i<s.length;i+=4){
+        let r=s[i],g=s[i+1],b=s[i+2],a=s[i+3];
+        if(a===0){d[i]=d[i+1]=d[i+2]=d[i+3]=0;continue;}
+        r+=bAdd;g+=bAdd;b+=bAdd;
+        r=cFactor*(r-128)+128;g=cFactor*(g-128)+128;b=cFactor*(b-128)+128;
+        const gray=0.2989*r+0.587*g+0.114*b,satF=1+sat/100;
+        r=gray+(r-gray)*satF;g=gray+(g-gray)*satF;b=gray+(b-gray)*satF;
+        if(vibrance!==0){
+          const maxc=Math.max(r,g,b),minc=Math.min(r,g,b),avg=(r+g+b)/3;
+          const satLevel=maxc===0?0:(maxc-minc)/maxc,vibF=1+(vibrance/100)*(1-satLevel);
+          r=avg+(r-avg)*vibF;g=avg+(g-avg)*vibF;b=avg+(b-avg)*vibF;
+        }
+        d[i]=Math.max(0,Math.min(255,Math.round(r)));
+        d[i+1]=Math.max(0,Math.min(255,Math.round(g)));
+        d[i+2]=Math.max(0,Math.min(255,Math.round(b)));
+        d[i+3]=a;
+      }
+      if(sharp>0){
+        const tmp=new Uint8ClampedArray(d),amount=sharp/5;
+        for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
+          const i=(y*w+x)*4; if(tmp[i+3]===0) continue;
+          for(let c=0;c<3;c++){
+            const center=tmp[i+c];
+            const blur=(tmp[((y-1)*w+x)*4+c]+tmp[((y+1)*w+x)*4+c]+tmp[(y*w+x-1)*4+c]+tmp[(y*w+x+1)*4+c]+center*4)/8;
+            d[i+c]=Math.max(0,Math.min(255,Math.round(center+(center-blur)*amount*2)));
+          }
+        }
+      }
+      return out;
+    }
+    function ensureEnhBase(){ if(!enhBaseAlpha){enhBaseAlpha=clone(alphaData);enhBaseOrig=clone(orig);enhPushed=false;} }
+    function liveEnhance(){
+      if(!alphaData||!orig) return;
+      ensureEnhBase();
+      const bright=+document.getElementById('adjBright').value;
+      const contrast=+document.getElementById('adjContrast').value;
+      const sat=+document.getElementById('adjSat').value;
+      const sharp=+document.getElementById('adjSharp').value;
+      const vibrance=+document.getElementById('adjVibrance').value;
+      if(!enhPushed&&(bright||contrast||sat||sharp||vibrance)){
+        hist.push({alpha:clone(enhBaseAlpha),orig:clone(enhBaseOrig),fineAngle,rotBaseOrig:rotBaseOrig?clone(rotBaseOrig):null,rotBaseAlpha:rotBaseAlpha?clone(rotBaseAlpha):null});
+        if(hist.length>18) hist.shift(); bUndo.disabled=false; enhPushed=true;
+      }
+      if(!bright&&!contrast&&!sat&&!sharp&&!vibrance){alphaData=clone(enhBaseAlpha);orig=clone(enhBaseOrig);}
+      else{alphaData=applyEnhanceToImageData(enhBaseAlpha,bright,contrast,sat,sharp,vibrance);orig=applyEnhanceToImageData(enhBaseOrig,bright,contrast,sat,sharp,vibrance);}
+      render();
+    }
+    function commitEnhance(){ if(enhBaseAlpha){enhBaseAlpha=enhBaseOrig=null;enhPushed=false;resetEnhanceSliders();} }
+    const enhancePanel=document.getElementById('enhancePanel');
+    document.getElementById('bEnhance').onclick=()=>{
+      if(!alphaData) return;
+      const opening=!enhancePanel.classList.contains('on');
+      enhancePanel.classList.toggle('on');
+      document.getElementById('bEnhance').classList.toggle('on',enhancePanel.classList.contains('on'));
+      if(opening){commitEnhance();ensureEnhBase();setGuide('<strong>שיפור:</strong> שינוי מיידי');}
+      else commitEnhance();
+    };
+    ['adjBright','adjContrast','adjSat','adjSharp','adjVibrance'].forEach(id=>{
+      document.getElementById(id).oninput=function(){document.getElementById(id+'V').textContent=this.value;liveEnhance();};
+    });
+    document.getElementById('bResetEnhance').onclick=()=>{
+      if(enhBaseAlpha){alphaData=clone(enhBaseAlpha);orig=clone(enhBaseOrig);render();}
+      resetEnhanceSliders();enhPushed=false;setGuide('<strong>שיפור אופס</strong>');
+    };
+
+    const cropFrame=document.getElementById('cropFrame');
+    const cropInfo=document.getElementById('cropInfo');
+    function hideCropUI(){cropRect=null;cropDrag=null;if(cropFrame)cropFrame.style.display='none';}
+    function imgToScreen(){
+      const cvRect=cv.getBoundingClientRect(),wrapRect=cwrap.getBoundingClientRect();
+      return{ox:cvRect.left-wrapRect.left+cwrap.scrollLeft,oy:cvRect.top-wrapRect.top+cwrap.scrollTop,sx:cvRect.width/cv.width,sy:cvRect.height/cv.height};
+    }
+    function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){const t=b;b=a%b;a=t;}return a||1;}
+    function updateCropFrame(){
+      if(!cropRect||!alphaData) return;
+      const t=imgToScreen();
+      cropFrame.style.display='block';
+      cropFrame.style.left=(cropRect.x0*t.sx+t.ox)+'px';
+      cropFrame.style.top=(cropRect.y0*t.sy+t.oy)+'px';
+      cropFrame.style.width=((cropRect.x1-cropRect.x0)*t.sx)+'px';
+      cropFrame.style.height=((cropRect.y1-cropRect.y0)*t.sy)+'px';
+      const pw=Math.round(cropRect.x1-cropRect.x0),ph=Math.round(cropRect.y1-cropRect.y0),g=gcd(pw,ph);
+      cropInfo.textContent=pw+' × '+ph+' px  ·  יחס '+(pw/g)+':'+(ph/g);
+    }
+    function startCropMode(){
+      if(!alphaData) return;
+      commitEnhance(); setMode('crop');
+      cropRect={x0:0,y0:0,x1:alphaData.width,y1:alphaData.height};
+      updateCropFrame();
+      setGuide('<strong>חיתוך:</strong> גרור צלעות/פינות');
+    }
+    function applyCrop(){
+      if(!alphaData||!cropRect) return;
+      const x0=Math.max(0,Math.floor(cropRect.x0)),y0=Math.max(0,Math.floor(cropRect.y0));
+      const x1=Math.min(alphaData.width,Math.ceil(cropRect.x1)),y1=Math.min(alphaData.height,Math.ceil(cropRect.y1));
+      const nw=x1-x0,nh=y1-y0;
+      if(nw<2||nh<2){setGuide('<strong>חיתוך:</strong> אזור קטן מדי');return;}
+      if(nw===alphaData.width&&nh===alphaData.height){hideCropUI();setMode('pick');setGuide('<strong>ללא שינוי</strong>');return;}
+      bakeFineRotation(); push();
+      function cropID(src){
+        const out=new ImageData(nw,nh),s=src.data,d=out.data;
+        for(let y=0;y<nh;y++) for(let x=0;x<nw;x++){
+          const si=((y0+y)*src.width+(x0+x))*4,di=(y*nw+x)*4;
+          d[di]=s[si];d[di+1]=s[si+1];d[di+2]=s[si+2];d[di+3]=s[si+3];
+        }
+        return out;
+      }
+      orig=cropID(orig);alphaData=cropID(alphaData);
+      cv.width=nw;cv.height=nh;hideCropUI();zoomLevel=1;applyZoom();
+      if(bZoomFit) bZoomFit.click();
+      render();setMode('pick');setGuide('<strong>נחתך!</strong> '+nw+'×'+nh);
+    }
+    document.getElementById('bCrop').onclick=()=>{if(!alphaData)return;if(mode==='crop')applyCrop();else startCropMode();};
+    document.getElementById('bCropOk').onclick=e=>{e.stopPropagation();applyCrop();};
+    document.getElementById('bCropCancel').onclick=e=>{e.stopPropagation();hideCropUI();setMode('pick');setGuide('<strong>חיתוך בוטל</strong>');};
+    cropFrame.querySelectorAll('.ch').forEach(ch=>{
+      const start=e=>{e.preventDefault();e.stopPropagation();if(!cropRect)return;const p=getPos(e);cropDrag={dir:ch.getAttribute('data-dir'),sx:p.x,sy:p.y,rect:{...cropRect}};};
+      ch.addEventListener('mousedown',start);
+      ch.addEventListener('touchstart',start,{passive:false});
+    });
+    function onCropMove(e){
+      if(!cropDrag||!cropRect||!alphaData)return;e.preventDefault();
+      const p=getPos(e);const dx=p.x-cropDrag.sx,dy=p.y-cropDrag.sy;
+      const r={...cropDrag.rect},dir=cropDrag.dir,minSize=8;
+      if(dir.includes('n')) r.y0=Math.min(r.y1-minSize,Math.max(0,cropDrag.rect.y0+dy));
+      if(dir.includes('s')) r.y1=Math.max(r.y0+minSize,Math.min(alphaData.height,cropDrag.rect.y1+dy));
+      if(dir.includes('w')) r.x0=Math.min(r.x1-minSize,Math.max(0,cropDrag.rect.x0+dx));
+      if(dir.includes('e')) r.x1=Math.max(r.x0+minSize,Math.min(alphaData.width,cropDrag.rect.x1+dx));
+      cropRect=r;updateCropFrame();
+    }
+    window.addEventListener('mousemove',e=>{if(cropDrag)onCropMove(e);});
+    window.addEventListener('mouseup',()=>{cropDrag=null;});
+    window.addEventListener('touchmove',e=>{if(cropDrag)onCropMove(e);},{passive:false});
+    window.addEventListener('touchend',()=>{cropDrag=null;});
+    window.addEventListener('keydown',e=>{
+      if(e.key==='Escape'&&mode==='crop'){hideCropUI();setMode('pick');setGuide('<strong>חיתוך בוטל</strong>');}
+      if(e.key==='Enter'&&mode==='crop') applyCrop();
+    });
+    window.addEventListener('resize',()=>{if(cropRect)updateCropFrame();});
+    cwrap.addEventListener('scroll',()=>{if(cropRect)updateCropFrame();});
+
+
+    // Theme toggle – show icon of the mode you can switch TO
+    const themeBtn = document.getElementById('themeBtn');
+    function updateThemeIcon() {
+      if (!themeBtn) return;
+      if (document.body.classList.contains('light')) {
+        themeBtn.textContent = '🌙';
+        themeBtn.title = 'מצב כהה';
+        themeBtn.setAttribute('data-tip', 'מעבר למצב כהה');
+      } else {
+        themeBtn.textContent = '☀️';
+        themeBtn.title = 'מצב בהיר';
+        themeBtn.setAttribute('data-tip', 'מעבר למצב בהיר');
+      }
+    }
+    if (themeBtn) {
+      if (localStorage.getItem('bgTheme') === 'light') document.body.classList.add('light');
+      updateThemeIcon();
+      themeBtn.onclick = () => {
+        document.body.classList.toggle('light');
+        localStorage.setItem('bgTheme', document.body.classList.contains('light') ? 'light' : 'dark');
+        updateThemeIcon();
+      };
+    }
+
+
+    // Custom hover tooltips
+    (function() {
+      const tip = document.createElement('div');
+      tip.className = 'tip-banner';
+      document.body.appendChild(tip);
+      let hideTimer = null;
+
+      function showTip(el, e) {
+        const text = el.getAttribute('data-tip');
+        if (!text) return;
+        tip.textContent = text;
+        tip.classList.add('show');
+        const rect = el.getBoundingClientRect();
+        const tipRect = tip.getBoundingClientRect();
+        let left = rect.left + rect.width/2 - tipRect.width/2;
+        let top = rect.bottom + 8;
+        if (left < 6) left = 6;
+        if (left + tipRect.width > window.innerWidth - 6) left = window.innerWidth - tipRect.width - 6;
+        if (top + tipRect.height > window.innerHeight - 6) top = rect.top - tipRect.height - 8;
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+      }
+      function hideTip() {
+        tip.classList.remove('show');
+      }
+
+      document.addEventListener('mouseover', (e) => {
+        const el = e.target.closest('[data-tip]');
+        if (el) {
+          clearTimeout(hideTimer);
+          showTip(el, e);
+        }
+      });
+      document.addEventListener('mouseout', (e) => {
+        const el = e.target.closest('[data-tip]');
+        if (el) {
+          hideTimer = setTimeout(hideTip, 80);
+        }
+      });
+      document.addEventListener('scroll', hideTip, true);
+    })();
+
+  
+  </script>
+</body>
+</html>
