@@ -245,7 +245,6 @@
       display: flex; flex-wrap: wrap; gap: 6px;
       justify-content: space-between; font-size: .7rem; color: var(--muted);
       flex-shrink: 0;
-      flex-direction: row; /* with dir=rtl: first item on the right */
     }
     .info #modeHint { order: 0; }
     .info #info { order: 1; }
@@ -296,6 +295,29 @@
       display: flex; gap: 6px; pointer-events: auto;
     }
     #cropActions button { font-size: 0.75rem; padding: 4px 12px; }
+    #straightenUI {
+      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+      display: none; gap: 8px; z-index: 10; pointer-events: auto;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 10px; align-items: center;
+    }
+    #straightenUI.on { display: flex; }
+    #straightenUI button { font-size: 0.75rem; padding: 4px 12px; }
+    #straightenPts {
+      position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 7; overflow: visible;
+    }
+    #straightenPts .sp {
+      position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+      border-radius: 50%; background: #fbbf24; border: 2px solid #fff;
+      box-shadow: 0 0 0 1px #000, 0 2px 6px rgba(0,0,0,.4);
+      font-size: 10px; font-weight: 700; color: #000;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    #straightenPts polyline {
+      fill: none; stroke: #fbbf24; stroke-width: 2; stroke-dasharray: 6 3;
+    }
     .tip-banner {
       position: fixed; z-index: 9999;
       background: #14532d; color: #fff;
@@ -361,8 +383,8 @@
           </div>
           <div class="sl">
             <span>עובי</span>
-            <input type="range" id="size" min="2" max="50" value="12" data-tip="עובי מברשת / קו / אזור – גודל כלי הציור והמחיקה" />
-            <span id="sizeV">12</span>
+            <input type="range" id="size" min="2" max="50" value="6" data-tip="עובי מברשת / קו / אזור – גודל כלי הציור והמחיקה" />
+            <span id="sizeV">6</span>
           </div>
         </div>
         <div class="grp">
@@ -388,6 +410,7 @@
         <div class="grp">
           <button id="bEnhance" data-tip="שיפור תמונה – שינוי מיידי">✨ שיפור</button>
           <button id="bCrop" data-tip="חיתוך – גרור צלעות">✂️ חיתוך</button>
+          <button id="bStraighten" data-tip="יישור מסמך – סמן 4 פינות של המסמך ואשר">📐 יישור</button>
         </div>
         <div class="grp">
           <button id="bUndo" data-tip="בטל פעולה אחרונה" disabled>↩️</button>
@@ -420,6 +443,12 @@
               <button id="bCropOk" class="ok">אישור חיתוך</button>
               <button id="bCropCancel" class="bad">ביטול</button>
             </div>
+          </div>
+          <svg id="straightenPts" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div id="straightenUI">
+            <span id="straightenHint" style="font-size:0.75rem;color:var(--muted)">סמן 4 פינות</span>
+            <button id="bStraightenOk" class="ok" disabled>אישור יישור</button>
+            <button id="bStraightenCancel" class="bad">ביטול</button>
           </div>
           <canvas id="cv"></canvas>
           <svg id="previewSvg" xmlns="http://www.w3.org/2000/svg">
@@ -479,6 +508,7 @@
     let lx = 0, ly = 0;
     let lineStart = null;
     let currentBg = null;
+    let originalFileName = '';
     let fineAngle = 0, rotBaseOrig = null, rotBaseAlpha = null;
     let enhBaseOrig = null, enhBaseAlpha = null, enhPushed = false;
     let cropRect = null, cropDrag = null;
@@ -492,9 +522,12 @@
       if (rectPreview) rectPreview.style.display = 'none';
       document.getElementById('previewSvg').style.display = 'none';
       if (m !== 'crop' && typeof hideCropUI === 'function') hideCropUI();
+      if (m !== 'straighten' && typeof hideStraightenUI === 'function') hideStraightenUI();
       [bPick, bBrush, bErase, bLine, bRect].forEach(b => b && b.classList.remove('on'));
       const bCropBtn = document.getElementById('bCrop');
       if (bCropBtn && m !== 'crop') bCropBtn.classList.remove('on');
+      const bStrBtn = document.getElementById('bStraighten');
+      if (bStrBtn && m !== 'straighten') bStrBtn.classList.remove('on');
       if (m === 'pick') {
         bPick.classList.add('on');
         modeHint.textContent = 'מצב: בחירת רקע – לחץ על הרקע';
@@ -520,6 +553,11 @@
         if (bc) bc.classList.add('on');
         modeHint.textContent = 'מצב: חיתוך';
         setGuide('<strong>חיתוך:</strong> גרור צלעות/פינות ואשר');
+      } else if (m === 'straighten') {
+        const bs = document.getElementById('bStraighten');
+        if (bs) bs.classList.add('on');
+        modeHint.textContent = 'מצב: יישור מסמך – סמן 4 פינות';
+        setGuide('<strong>יישור:</strong> לחץ על 4 פינות המסמך לפי הסדר: שמאל-עליון → ימין-עליון → ימין-תחתון → שמאל-תחתון');
       }
     }
 
@@ -743,6 +781,10 @@
         drawing = true;
         return;
       }
+      if (mode === 'straighten') {
+        if (typeof addStraightenPoint === 'function') addStraightenPoint(p.x, p.y);
+        return;
+      }
       drawing = true;
       if (typeof commitEnhance==='function') commitEnhance();
       if (typeof bakeFineRotation==='function') bakeFineRotation();
@@ -836,9 +878,11 @@
         orig = ctx.getImageData(0,0,w,h);
         alphaData = clone(orig);
         hist = []; bUndo.disabled = true; currentBg = null;
+        originalFileName = f.name || '';
         fineAngle = 0; rotBaseOrig = rotBaseAlpha = null;
         enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
         if (typeof hideCropUI === 'function') hideCropUI();
+        if (typeof hideStraightenUI === 'function') hideStraightenUI();
         const ep = document.getElementById('enhancePanel');
         if (ep) ep.classList.remove('on');
         if (typeof resetEnhanceSliders === 'function') resetEnhanceSliders();
@@ -895,9 +939,11 @@
     };
     bNew.onclick = () => {
       orig = alphaData = null; hist = []; currentBg = null;
+      originalFileName = '';
       fineAngle = 0; rotBaseOrig = rotBaseAlpha = null;
       enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
       if (typeof hideCropUI === 'function') hideCropUI();
+      if (typeof hideStraightenUI === 'function') hideStraightenUI();
       const ep = document.getElementById('enhancePanel');
       if (ep) ep.classList.remove('on');
       cv.width = cv.height = 0;
@@ -933,7 +979,9 @@
         if (!b) return;
         const a = document.createElement('a');
         a.href = URL.createObjectURL(b);
-        a.download = currentBg ? 'with-bg.png' : 'no-bg.png';
+        // שמירה בשם המקורי של הקובץ שהועלה (תמיד .png)
+        const base = (originalFileName || 'image').replace(/\.[^/.]+$/, '') || 'image';
+        a.download = base + '.png';
         a.click();
         URL.revokeObjectURL(a.href);
       }, 'image/png');
@@ -1249,10 +1297,271 @@
     window.addEventListener('keydown',e=>{
       if(e.key==='Escape'&&mode==='crop'){hideCropUI();setMode('pick');setGuide('<strong>חיתוך בוטל</strong>');}
       if(e.key==='Enter'&&mode==='crop') applyCrop();
+      if(e.key==='Escape'&&mode==='straighten'){hideStraightenUI();setMode('pick');setGuide('<strong>יישור בוטל</strong>');}
+      if(e.key==='Enter'&&mode==='straighten'&&straightenPts.length===4) applyStraighten();
     });
-    window.addEventListener('resize',()=>{if(cropRect)updateCropFrame();});
-    cwrap.addEventListener('scroll',()=>{if(cropRect)updateCropFrame();});
+    window.addEventListener('resize',()=>{if(cropRect)updateCropFrame(); if(mode==='straighten') updateStraightenUI();});
+    cwrap.addEventListener('scroll',()=>{if(cropRect)updateCropFrame(); if(mode==='straighten') updateStraightenUI();});
 
+
+    // ========== Document Straighten (4-point perspective) ==========
+    let straightenPts = [];
+    const straightenPtsEl = document.getElementById('straightenPts');
+    const straightenUI = document.getElementById('straightenUI');
+    const bStraightenOk = document.getElementById('bStraightenOk');
+    const bStraightenCancel = document.getElementById('bStraightenCancel');
+    const straightenHint = document.getElementById('straightenHint');
+
+    function hideStraightenUI() {
+      straightenPts = [];
+      if (straightenPtsEl) {
+        straightenPtsEl.innerHTML = '';
+        straightenPtsEl.style.display = 'none';
+      }
+      if (straightenUI) straightenUI.classList.remove('on');
+      if (bStraightenOk) bStraightenOk.disabled = true;
+    }
+
+    function startStraightenMode() {
+      if (!alphaData) return;
+      if (typeof commitEnhance === 'function') commitEnhance();
+      if (typeof bakeFineRotation === 'function') bakeFineRotation();
+      if (typeof hideCropUI === 'function') hideCropUI();
+      setMode('straighten');
+      straightenPts = [];
+      if (straightenUI) straightenUI.classList.add('on');
+      if (bStraightenOk) bStraightenOk.disabled = true;
+      if (straightenHint) straightenHint.textContent = 'סמן פינה 1/4 (שמאל-עליון)';
+      updateStraightenUI();
+    }
+
+    function addStraightenPoint(x, y) {
+      if (straightenPts.length >= 4) return;
+      straightenPts.push({ x, y });
+      const labels = ['שמאל-עליון', 'ימין-עליון', 'ימין-תחתון', 'שמאל-תחתון'];
+      if (straightenPts.length < 4) {
+        if (straightenHint) straightenHint.textContent = 'סמן פינה ' + (straightenPts.length + 1) + '/4 (' + labels[straightenPts.length] + ')';
+        setGuide('<strong>יישור:</strong> סמן את הפינה הבאה – ' + labels[straightenPts.length]);
+      } else {
+        if (straightenHint) straightenHint.textContent = '4 פינות סומנו – לחץ אישור';
+        if (bStraightenOk) bStraightenOk.disabled = false;
+        setGuide('<strong>יישור:</strong> בדוק את הסימון ולחץ אישור יישור');
+      }
+      updateStraightenUI();
+    }
+
+    function updateStraightenUI() {
+      if (!straightenPtsEl || !alphaData) return;
+      const t = imgToScreen();
+      straightenPtsEl.style.display = 'block';
+      straightenPtsEl.style.left = t.ox + 'px';
+      straightenPtsEl.style.top = t.oy + 'px';
+      straightenPtsEl.style.width = (cv.width * t.sx) + 'px';
+      straightenPtsEl.style.height = (cv.height * t.sy) + 'px';
+      straightenPtsEl.setAttribute('viewBox', '0 0 ' + cv.width + ' ' + cv.height);
+      straightenPtsEl.setAttribute('preserveAspectRatio', 'none');
+
+      let html = '';
+      if (straightenPts.length >= 2) {
+        let ptsStr = straightenPts.map(p => p.x + ',' + p.y).join(' ');
+        if (straightenPts.length === 4) ptsStr += ' ' + straightenPts[0].x + ',' + straightenPts[0].y;
+        html += '<polyline points="' + ptsStr + '" />';
+      }
+      straightenPts.forEach((p, i) => {
+        html += '<circle cx="' + p.x + '" cy="' + p.y + '" r="8" fill="#fbbf24" stroke="#fff" stroke-width="2"/>';
+        html += '<text x="' + p.x + '" y="' + (p.y + 4) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#000">' + (i + 1) + '</text>';
+      });
+      straightenPtsEl.innerHTML = html;
+    }
+
+    // Solve 8x8 system for perspective matrix (src -> dst)
+    function computeHomography(src, dst) {
+      // src/dst: arrays of 4 {x,y}
+      const A = [];
+      for (let i = 0; i < 4; i++) {
+        const sx = src[i].x, sy = src[i].y, dx = dst[i].x, dy = dst[i].y;
+        A.push([sx, sy, 1, 0, 0, 0, -sx * dx, -sy * dx, dx]);
+        A.push([0, 0, 0, sx, sy, 1, -sx * dy, -sy * dy, dy]);
+      }
+      // Gaussian elimination
+      for (let col = 0; col < 8; col++) {
+        let pivot = col;
+        for (let r = col + 1; r < 8; r++) if (Math.abs(A[r][col]) > Math.abs(A[pivot][col])) pivot = r;
+        [A[col], A[pivot]] = [A[pivot], A[col]];
+        const div = A[col][col];
+        if (Math.abs(div) < 1e-12) return null;
+        for (let c = col; c < 9; c++) A[col][c] /= div;
+        for (let r = 0; r < 8; r++) {
+          if (r === col) continue;
+          const f = A[r][col];
+          for (let c = col; c < 9; c++) A[r][c] -= f * A[col][c];
+        }
+      }
+      return [A[0][8], A[1][8], A[2][8], A[3][8], A[4][8], A[5][8], A[6][8], A[7][8], 1];
+    }
+
+    function applyHomography(H, x, y) {
+      const w = H[6] * x + H[7] * y + H[8];
+      return {
+        x: (H[0] * x + H[1] * y + H[2]) / w,
+        y: (H[3] * x + H[4] * y + H[5]) / w
+      };
+    }
+
+    function invertHomography(H) {
+      // 3x3 inverse
+      const a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7], i = H[8];
+      const A = e * i - f * h, B = f * g - d * i, C = d * h - e * g;
+      const D = c * h - b * i, E = a * i - c * g, F = b * g - a * h;
+      const G = b * f - c * e, Hh = c * d - a * f, I = a * e - b * d;
+      const det = a * A + b * B + c * C;
+      if (Math.abs(det) < 1e-12) return null;
+      return [A/det, D/det, G/det, B/det, E/det, Hh/det, C/det, F/det, I/det];
+    }
+
+    function sampleBilinear(data, w, h, x, y) {
+      if (x < -0.5 || y < -0.5 || x >= w - 0.5 || y >= h - 0.5) return [0, 0, 0, 0];
+      const x0 = Math.max(0, Math.min(w - 1, Math.floor(x)));
+      const y0 = Math.max(0, Math.min(h - 1, Math.floor(y)));
+      const x1 = Math.min(w - 1, x0 + 1);
+      const y1 = Math.min(h - 1, y0 + 1);
+      const fx = x - x0, fy = y - y0;
+      const i00 = (y0 * w + x0) * 4, i10 = (y0 * w + x1) * 4;
+      const i01 = (y1 * w + x0) * 4, i11 = (y1 * w + x1) * 4;
+      const out = [0, 0, 0, 0];
+      for (let c = 0; c < 4; c++) {
+        out[c] = Math.round(
+          (1 - fx) * (1 - fy) * data[i00 + c] +
+          fx * (1 - fy) * data[i10 + c] +
+          (1 - fx) * fy * data[i01 + c] +
+          fx * fy * data[i11 + c]
+        );
+      }
+      return out;
+    }
+
+    function warpPerspective(srcData, srcPts, dstW, dstH) {
+      // Tight map: 4 corners → full rectangle corners (clean document only)
+      const dstPts = [
+        { x: 0, y: 0 },
+        { x: dstW - 1, y: 0 },
+        { x: dstW - 1, y: dstH - 1 },
+        { x: 0, y: dstH - 1 }
+      ];
+      const Hfwd = computeHomography(srcPts, dstPts);
+      if (!Hfwd) return null;
+      const Hinv = invertHomography(Hfwd);
+      if (!Hinv) return null;
+
+      const out = new ImageData(dstW, dstH);
+      const s = srcData.data, d = out.data;
+      const sw = srcData.width, sh = srcData.height;
+      for (let y = 0; y < dstH; y++) {
+        for (let x = 0; x < dstW; x++) {
+          const p = applyHomography(Hinv, x, y);
+          const pix = sampleBilinear(s, sw, sh, p.x, p.y);
+          const di = (y * dstW + x) * 4;
+          d[di] = pix[0]; d[di + 1] = pix[1]; d[di + 2] = pix[2]; d[di + 3] = pix[3];
+        }
+      }
+      return out;
+    }
+
+    function applyStraighten() {
+      if (!alphaData || straightenPts.length !== 4) return;
+      const pts = straightenPts.slice();
+      // Natural size of the document from the 4 sides
+      function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+      const wTop = dist(pts[0], pts[1]);
+      const wBot = dist(pts[3], pts[2]);
+      const hLeft = dist(pts[0], pts[3]);
+      const hRight = dist(pts[1], pts[2]);
+      let contentW = Math.round(Math.max(wTop, wBot));
+      let contentH = Math.round(Math.max(hLeft, hRight));
+      // Clamp content
+      const maxDim = 2400;
+      if (contentW > maxDim || contentH > maxDim) {
+        const s = maxDim / Math.max(contentW, contentH);
+        contentW = Math.round(contentW * s);
+        contentH = Math.round(contentH * s);
+      }
+      if (contentW < 8 || contentH < 8) {
+        setGuide('<strong>יישור:</strong> האזור קטן מדי');
+        return;
+      }
+
+      // Final canvas larger so document occupies 70%; margins = pure rectangular transparency
+      const FILL = 0.70;
+      let dstW = Math.round(contentW / FILL);
+      let dstH = Math.round(contentH / FILL);
+      if (dstW > maxDim || dstH > maxDim) {
+        const s = maxDim / Math.max(dstW, dstH);
+        dstW = Math.round(dstW * s);
+        dstH = Math.round(dstH * s);
+        contentW = Math.round(contentW * s);
+        contentH = Math.round(contentH * s);
+      }
+      const ox = Math.floor((dstW - contentW) / 2);
+      const oy = Math.floor((dstH - contentH) / 2);
+
+      push();
+      // 1) Warp document tightly into a clean rectangle
+      const warpedOrig = warpPerspective(orig, pts, contentW, contentH);
+      const warpedAlpha = warpPerspective(alphaData, pts, contentW, contentH);
+      if (!warpedOrig || !warpedAlpha) {
+        setGuide('<strong>יישור נכשל</strong> – נסה לסמן מחדש');
+        return;
+      }
+
+      // 2) Place centered on larger canvas → margins are pure axis-aligned transparent rectangles
+      function placeCentered(src, outW, outH, px, py) {
+        const out = new ImageData(outW, outH); // zeros = fully transparent
+        const s = src.data, d = out.data;
+        const sw = src.width, sh = src.height;
+        for (let y = 0; y < sh; y++) {
+          const sy = y * sw * 4;
+          const dy = (py + y) * outW * 4 + px * 4;
+          for (let x = 0; x < sw; x++) {
+            const si = sy + x * 4;
+            const di = dy + x * 4;
+            d[di] = s[si]; d[di+1] = s[si+1]; d[di+2] = s[si+2]; d[di+3] = s[si+3];
+          }
+        }
+        return out;
+      }
+      orig = placeCentered(warpedOrig, dstW, dstH, ox, oy);
+      alphaData = placeCentered(warpedAlpha, dstW, dstH, ox, oy);
+
+      fineAngle = 0; rotBaseOrig = rotBaseAlpha = null;
+      enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
+      currentBg = null; // keep margins transparent
+      cv.width = dstW; cv.height = dstH;
+      hideStraightenUI();
+      zoomLevel = 1;
+      applyZoom();
+      if (bZoomFit) bZoomFit.click();
+      render();
+      setMode('pick');
+      setGuide('<strong>יושר!</strong> ' + dstW + '×' + dstH + ' – מסמך מלבני במרכז + שוליים ישרים');
+      info.textContent = dstW + '×' + dstH + ' • יושר (70%)';
+    }
+
+    document.getElementById('bStraighten').onclick = () => {
+      if (!alphaData) return;
+      if (mode === 'straighten') {
+        if (straightenPts.length === 4) applyStraighten();
+        else { hideStraightenUI(); setMode('pick'); setGuide('<strong>יישור בוטל</strong>'); }
+      } else {
+        startStraightenMode();
+      }
+    };
+    if (bStraightenOk) bStraightenOk.onclick = e => { e.stopPropagation(); applyStraighten(); };
+    if (bStraightenCancel) bStraightenCancel.onclick = e => {
+      e.stopPropagation();
+      hideStraightenUI();
+      setMode('pick');
+      setGuide('<strong>יישור בוטל</strong>');
+    };
 
     // Theme toggle – show icon of the mode you can switch TO
     const themeBtn = document.getElementById('themeBtn');
