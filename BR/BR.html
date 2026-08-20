@@ -329,19 +329,66 @@
     }
     .tip-banner.show { opacity: 1; }
 
+    /* Text input overlay (all text options inside) */
+    #textInputOverlay {
+      position: absolute; z-index: 30; display: none;
+      background: var(--surface); border: 2px solid var(--primary);
+      border-radius: 8px; padding: 10px; box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      min-width: 240px; max-width: 320px;
+      direction: rtl; text-align: right;
+    }
+    #textInputOverlay input[type=text] {
+      width: 100%; padding: 8px 10px; border-radius: 5px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: 0.95rem; font-family: inherit;
+      margin-bottom: 8px; direction: rtl; text-align: right;
+    }
+    #textInputOverlay .text-opts {
+      display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center;
+      margin-bottom: 8px; font-size: 0.75rem; color: var(--muted);
+    }
+    #textInputOverlay .text-opts .sl { display: flex; align-items: center; gap: 3px; }
+    #textInputOverlay .text-opts input[type=number] {
+      width: 48px; padding: 3px; border-radius: 5px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--text); font-size: 0.75rem; text-align: center; font-family: inherit;
+    }
+    #textInputOverlay .text-opts input[type=color] {
+      width: 28px; height: 24px; border: 1px solid var(--border);
+      border-radius: 5px; padding: 0; cursor: pointer; background: transparent;
+    }
+    #textInputOverlay .text-opts label {
+      display: flex; align-items: center; gap: 3px; cursor: pointer; font-size: 0.75rem;
+    }
+    #textInputOverlay .text-btns { display: flex; gap: 6px; justify-content: flex-start; }
+
     @media (max-width: 600px) {
       .app { padding: 4px 6px 2px; gap: 4px; }
       .logo { font-size: 1.2rem; }
-      .theme-btn { width: 28px; height: 28px; font-size: 0.9rem; }
-      .msg { font-size: 0.7rem; padding: 4px 8px; }
-      .bar { padding: 4px; gap: 3px; }
-      button { padding: 3px 5px; font-size: 0.65rem; }
-      .sl { font-size: 0.65rem; }
-      input[type=range] { width: 48px; }
-      input[type=number] { width: 40px; font-size: 0.65rem; }
+      .theme-btn { width: 32px; height: 32px; font-size: 1rem; }
+      .msg { font-size: 0.72rem; padding: 5px 8px; }
+      .bar {
+        padding: 6px 4px; gap: 5px;
+        overflow-x: auto; -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap; scrollbar-width: thin;
+      }
+      .bar .grp { flex-shrink: 0; }
+      button {
+        padding: 7px 10px; font-size: 0.78rem; min-height: 36px;
+        border-radius: 8px;
+      }
+      .sl { font-size: 0.7rem; }
+      input[type=range] { width: 56px; height: 28px; }
+      input[type=number] { width: 44px; font-size: 0.75rem; min-height: 32px; }
+      input[type=color] { width: 36px; height: 32px; }
       footer img { height: 42px; max-width: 140px; }
       footer div { font-size: 0.95rem; }
-      .info { font-size: 0.62rem; }
+      .info { font-size: 0.65rem; }
+      .enhance-panel { padding: 8px 6px; gap: 8px; }
+      .enhance-panel input[type=range] { width: 64px; }
+    }
+    @media (max-width: 400px) {
+      button { padding: 6px 8px; font-size: 0.72rem; }
     }
   </style>
 </head>
@@ -411,6 +458,7 @@
           <button id="bEnhance" data-tip="שיפור תמונה – שינוי מיידי">✨ שיפור</button>
           <button id="bCrop" data-tip="חיתוך – גרור צלעות">✂️ חיתוך</button>
           <button id="bStraighten" data-tip="יישור מסמך – סמן 4 פינות של המסמך ואשר">📐 יישור</button>
+          <button id="bText" data-tip="הוספת טקסט – לחץ על התמונה למיקום">🔤 טקסט</button>
         </div>
         <div class="grp">
           <button id="bUndo" data-tip="בטל פעולה אחרונה" disabled>↩️</button>
@@ -430,9 +478,23 @@
         <div class="sl"><span>הדגשה</span><input type="range" id="adjVibrance" min="-30" max="50" value="0" /><span id="adjVibranceV">0</span></div>
         <button id="bResetEnhance">אפס</button>
       </div>
+
       <div class="area">
         <div class="cwrap" id="cwrap">
           <div id="rectPreview"></div>
+          <div id="textInputOverlay">
+            <input type="text" id="textContent" placeholder="הקלד טקסט כאן..." dir="rtl" />
+            <div class="text-opts">
+              <div class="sl"><span>גודל</span><input type="number" id="textSize" value="32" min="8" max="200" step="1" /><span>px</span></div>
+              <div class="sl"><span>צבע</span><input type="color" id="textColor" value="#ffffff" /></div>
+              <label><input type="checkbox" id="textBold" /> <strong>מודגש</strong></label>
+              <label><input type="checkbox" id="textUnderline" /> קו תחתון</label>
+            </div>
+            <div class="text-btns">
+              <button id="bTextOk" class="ok">הטמע</button>
+              <button id="bTextCancelPos" class="bad">ביטול</button>
+            </div>
+          </div>
           <div id="cropFrame">
             <div class="ch n" data-dir="n"></div><div class="ch s" data-dir="s"></div>
             <div class="ch e" data-dir="e"></div><div class="ch w" data-dir="w"></div>
@@ -523,11 +585,14 @@
       document.getElementById('previewSvg').style.display = 'none';
       if (m !== 'crop' && typeof hideCropUI === 'function') hideCropUI();
       if (m !== 'straighten' && typeof hideStraightenUI === 'function') hideStraightenUI();
+      if (m !== 'text' && typeof hideTextUI === 'function') hideTextUI();
       [bPick, bBrush, bErase, bLine, bRect].forEach(b => b && b.classList.remove('on'));
       const bCropBtn = document.getElementById('bCrop');
       if (bCropBtn && m !== 'crop') bCropBtn.classList.remove('on');
       const bStrBtn = document.getElementById('bStraighten');
       if (bStrBtn && m !== 'straighten') bStrBtn.classList.remove('on');
+      const bTextBtn = document.getElementById('bText');
+      if (bTextBtn && m !== 'text') bTextBtn.classList.remove('on');
       if (m === 'pick') {
         bPick.classList.add('on');
         modeHint.textContent = 'מצב: בחירת רקע – לחץ על הרקע';
@@ -558,6 +623,11 @@
         if (bs) bs.classList.add('on');
         modeHint.textContent = 'מצב: יישור מסמך – סמן 4 פינות';
         setGuide('<strong>יישור:</strong> לחץ על 4 פינות המסמך לפי הסדר: שמאל-עליון → ימין-עליון → ימין-תחתון → שמאל-תחתון');
+      } else if (m === 'text') {
+        const bt = document.getElementById('bText');
+        if (bt) bt.classList.add('on');
+        modeHint.textContent = 'מצב: הוספת טקסט – לחץ למיקום';
+        setGuide('<strong>טקסט:</strong> בחר גודל/צבע/סגנון ואז לחץ על התמונה למיקום');
       }
     }
 
@@ -761,6 +831,10 @@
       e.preventDefault();
       const p = getPos(e);
 
+      if (mode === 'text') {
+        if (typeof placeTextAt === 'function') placeTextAt(p.x, p.y);
+        return;
+      }
       if (mode === 'pick') {
         floodRemove(p.x, p.y);
         return;
@@ -870,12 +944,31 @@
       const img = new Image();
       img.onload = () => {
         URL.revokeObjectURL(url);
-        const max=1600;
-        let w=img.naturalWidth, h=img.naturalHeight;
-        if (w>max||h>max){ const s=max/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
-        cv.width=w; cv.height=h;
-        ctx.drawImage(img,0,0,w,h);
-        orig = ctx.getImageData(0,0,w,h);
+        // Smart max resolution: higher on capable devices, with warning
+        let max = 2000;
+        try {
+          if (navigator.deviceMemory && navigator.deviceMemory >= 8) max = 3200;
+          else if (navigator.deviceMemory && navigator.deviceMemory >= 4) max = 2400;
+          else if (window.innerWidth > 1200) max = 2400;
+        } catch(e) {}
+        let w = img.naturalWidth, h = img.naturalHeight;
+        const origW = w, origH = h;
+        let wasResized = false;
+        if (w > max || h > max) {
+          const s = max / Math.max(w, h);
+          const newW = Math.round(w * s), newH = Math.round(h * s);
+          const msg = 'התמונה גדולה (' + origW + '×' + origH + ').\n' +
+            'לביצועים טובים יותר היא תוקטן ל-' + newW + '×' + newH + '.\n\n' +
+            'לחץ OK להמשך (מומלץ) או Cancel לביטול.';
+          if (!confirm(msg)) {
+            return;
+          }
+          w = newW; h = newH;
+          wasResized = true;
+        }
+        cv.width = w; cv.height = h;
+        ctx.drawImage(img, 0, 0, w, h);
+        orig = ctx.getImageData(0, 0, w, h);
         alphaData = clone(orig);
         hist = []; bUndo.disabled = true; currentBg = null;
         originalFileName = f.name || '';
@@ -883,12 +976,15 @@
         enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
         if (typeof hideCropUI === 'function') hideCropUI();
         if (typeof hideStraightenUI === 'function') hideStraightenUI();
+        if (typeof hideTextUI === 'function') hideTextUI();
         const ep = document.getElementById('enhancePanel');
         if (ep) ep.classList.remove('on');
         if (typeof resetEnhanceSliders === 'function') resetEnhanceSliders();
         drop.classList.add('hidden');
         ws.classList.add('on');
-        info.textContent = img.naturalWidth+'×'+img.naturalHeight+' • '+f.name;
+        let infoTxt = origW + '×' + origH + ' • ' + f.name;
+        if (wasResized) infoTxt += ' (הוקטן ל-' + w + '×' + h + ')';
+        info.textContent = infoTxt;
         if (typeof zoomLevel !== 'undefined') {
           zoomLevel = 1; applyZoom();
           setTimeout(() => { if (bZoomFit) bZoomFit.click(); }, 0);
@@ -944,6 +1040,7 @@
       enhBaseOrig = enhBaseAlpha = null; enhPushed = false;
       if (typeof hideCropUI === 'function') hideCropUI();
       if (typeof hideStraightenUI === 'function') hideStraightenUI();
+      if (typeof hideTextUI === 'function') hideTextUI();
       const ep = document.getElementById('enhancePanel');
       if (ep) ep.classList.remove('on');
       cv.width = cv.height = 0;
@@ -1007,6 +1104,7 @@
       cv.style.width = (cv.width * zoomLevel) + 'px';
       cv.style.height = (cv.height * zoomLevel) + 'px';
       if (typeof cropRect !== 'undefined' && cropRect && typeof updateCropFrame === 'function') updateCropFrame();
+      if (mode === 'straighten' && typeof updateStraightenUI === 'function') updateStraightenUI();
     }
     function setZoomFromPct(pct) {
       pct = Math.max(25, Math.min(400, Math.round(Number(pct) || 100)));
@@ -1562,6 +1660,199 @@
       setMode('pick');
       setGuide('<strong>יישור בוטל</strong>');
     };
+
+    // ========== Text Tool ==========
+    let textPendingPos = null;
+    let textPreviewActive = false;
+
+    function hideTextUI() {
+      const ov = document.getElementById('textInputOverlay');
+      if (ov) ov.style.display = 'none';
+      textPendingPos = null;
+      textPreviewActive = false;
+      const bt = document.getElementById('bText');
+      if (bt) bt.classList.remove('on');
+    }
+
+    function startTextMode() {
+      if (!alphaData) return;
+      if (typeof commitEnhance === 'function') commitEnhance();
+      if (typeof bakeFineRotation === 'function') bakeFineRotation();
+      if (typeof hideCropUI === 'function') hideCropUI();
+      if (typeof hideStraightenUI === 'function') hideStraightenUI();
+      setMode('text');
+      setGuide('<strong>טקסט:</strong> לחץ על התמונה למיקום – הגדרות יופיעו בתיבה');
+    }
+
+    function placeTextAt(x, y) {
+      textPendingPos = { x, y };
+      const ov = document.getElementById('textInputOverlay');
+      const inp = document.getElementById('textContent');
+      if (!ov || !inp) return;
+      // Position overlay near click (in screen space)
+      const cvRect = cv.getBoundingClientRect();
+      const wrapRect = cwrap.getBoundingClientRect();
+      const scaleX = cvRect.width / cv.width;
+      const scaleY = cvRect.height / cv.height;
+      const ox = cvRect.left - wrapRect.left + cwrap.scrollLeft;
+      const oy = cvRect.top - wrapRect.top + cwrap.scrollTop;
+      let left = ox + x * scaleX;
+      let top = oy + y * scaleY + 12;
+      // Keep inside wrap (overlay is taller now with options)
+      left = Math.max(4, Math.min(left, cwrap.clientWidth - 260));
+      top = Math.max(4, Math.min(top, cwrap.clientHeight - 160));
+      ov.style.left = left + 'px';
+      ov.style.top = top + 'px';
+      ov.style.display = 'block';
+      inp.value = '';
+      inp.focus();
+    }
+
+    function commitText() {
+      const inp = document.getElementById('textContent');
+      if (!inp || !textPendingPos || !alphaData) return;
+      const txt = (inp.value || '').trim();
+      if (!txt) {
+        document.getElementById('textInputOverlay').style.display = 'none';
+        textPendingPos = null;
+        return;
+      }
+      const size = Math.max(8, Math.min(200, +document.getElementById('textSize').value || 32));
+      const color = document.getElementById('textColor').value || '#ffffff';
+      const bold = document.getElementById('textBold').checked;
+      const underline = document.getElementById('textUnderline').checked;
+
+      push();
+      // Draw text onto a temp canvas then composite into alphaData & orig
+      const w = alphaData.width, h = alphaData.height;
+      const tmp = document.createElement('canvas');
+      tmp.width = w; tmp.height = h;
+      const tctx = tmp.getContext('2d');
+      tctx.font = (bold ? 'bold ' : '') + size + 'px "Segoe UI", system-ui, sans-serif';
+      tctx.fillStyle = color;
+      tctx.textBaseline = 'top';
+      tctx.direction = 'inherit';
+      // Measure for underline
+      const metrics = tctx.measureText(txt);
+      const tw = metrics.width;
+      const th = size * 1.2;
+      tctx.fillText(txt, textPendingPos.x, textPendingPos.y);
+      if (underline) {
+        tctx.strokeStyle = color;
+        tctx.lineWidth = Math.max(1, size / 12);
+        tctx.beginPath();
+        tctx.moveTo(textPendingPos.x, textPendingPos.y + size + 2);
+        tctx.lineTo(textPendingPos.x + tw, textPendingPos.y + size + 2);
+        tctx.stroke();
+      }
+      // Composite: where text has alpha, overwrite both orig and alphaData
+      const tdata = tctx.getImageData(0, 0, w, h);
+      const od = orig.data, ad = alphaData.data, td = tdata.data;
+      for (let i = 0; i < td.length; i += 4) {
+        if (td[i + 3] > 10) {
+          // Blend text over existing
+          const a = td[i + 3] / 255;
+          od[i] = Math.round(td[i] * a + od[i] * (1 - a));
+          od[i + 1] = Math.round(td[i + 1] * a + od[i + 1] * (1 - a));
+          od[i + 2] = Math.round(td[i + 2] * a + od[i + 2] * (1 - a));
+          od[i + 3] = Math.min(255, od[i + 3] + td[i + 3]);
+          ad[i] = od[i]; ad[i + 1] = od[i + 1]; ad[i + 2] = od[i + 2];
+          ad[i + 3] = Math.min(255, Math.max(ad[i + 3], td[i + 3]));
+        }
+      }
+      render();
+      document.getElementById('textInputOverlay').style.display = 'none';
+      textPendingPos = null;
+      setGuide('<strong>טקסט הוטמע!</strong> אפשר להוסיף עוד או לעבור לכלי אחר');
+    }
+
+    document.getElementById('bText').onclick = () => {
+      if (!alphaData) return;
+      if (mode === 'text') {
+        hideTextUI();
+        setMode('pick');
+        setGuide('<strong>מצב טקסט בוטל</strong>');
+      } else {
+        startTextMode();
+      }
+    };
+    document.getElementById('bTextOk').onclick = (e) => { e.stopPropagation(); commitText(); };
+    document.getElementById('bTextCancelPos').onclick = (e) => {
+      e.stopPropagation();
+      document.getElementById('textInputOverlay').style.display = 'none';
+      textPendingPos = null;
+    };
+    document.getElementById('textContent').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); commitText(); }
+      if (e.key === 'Escape') {
+        document.getElementById('textInputOverlay').style.display = 'none';
+        textPendingPos = null;
+      }
+    });
+
+    // ========== Mobile gestures: pinch-to-zoom + two-finger pan ==========
+    (function() {
+      let lastTouchDist = 0;
+      let lastTouchCenter = null;
+      let isPinching = false;
+      let isPanning = false;
+      let panStartScroll = null;
+
+      function getTouchDist(t0, t1) {
+        return Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+      }
+      function getTouchCenter(t0, t1) {
+        return { x: (t0.clientX + t1.clientX) / 2, y: (t0.clientY + t1.clientY) / 2 };
+      }
+
+      cwrap.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          isPinching = true;
+          isPanning = true;
+          lastTouchDist = getTouchDist(e.touches[0], e.touches[1]);
+          lastTouchCenter = getTouchCenter(e.touches[0], e.touches[1]);
+          panStartScroll = { left: cwrap.scrollLeft, top: cwrap.scrollTop };
+          // Cancel any single-finger drawing
+          drawing = false;
+          lineStart = null;
+          rectStart = null;
+        }
+      }, { passive: false });
+
+      cwrap.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && (isPinching || isPanning)) {
+          e.preventDefault();
+          const dist = getTouchDist(e.touches[0], e.touches[1]);
+          const center = getTouchCenter(e.touches[0], e.touches[1]);
+
+          // Pinch zoom
+          if (lastTouchDist > 0) {
+            const scale = dist / lastTouchDist;
+            const newPct = Math.round(zoomLevel * 100 * scale);
+            setZoomFromPct(Math.max(25, Math.min(400, newPct)));
+          }
+          lastTouchDist = dist;
+
+          // Two-finger pan
+          if (lastTouchCenter && panStartScroll) {
+            const dx = center.x - lastTouchCenter.x;
+            const dy = center.y - lastTouchCenter.y;
+            cwrap.scrollLeft = panStartScroll.left - dx;
+            cwrap.scrollTop = panStartScroll.top - dy;
+          }
+        }
+      }, { passive: false });
+
+      cwrap.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) {
+          isPinching = false;
+          isPanning = false;
+          lastTouchDist = 0;
+          lastTouchCenter = null;
+        }
+      });
+    })();
 
     // Theme toggle – show icon of the mode you can switch TO
     const themeBtn = document.getElementById('themeBtn');
