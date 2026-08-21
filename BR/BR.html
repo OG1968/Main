@@ -99,6 +99,7 @@
         -webkit-text-fill-color: transparent;
         letter-spacing: 0.01em;
       }
+      
       .theme-btn {
         position: absolute;
         left: 0;
@@ -308,7 +309,8 @@
         max-height: 100%;
         width: 100%;
         height: 100%;
-        overflow: hidden;
+        overflow: auto;
+        scrollbar-gutter: stable;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -316,6 +318,15 @@
       }
       .cwrap.zoomed {
         overflow: auto;
+        scrollbar-gutter: stable;
+      }
+      /* Owns the canvas + every overlay. Overlays are absolute relative to this
+         box, which is always the exact visual size of the canvas → no scrollbar shift. */
+      #canvasLayer {
+        position: relative;
+        display: block;
+        flex-shrink: 0;
+        line-height: 0;
       }
       canvas {
         display: block;
@@ -932,74 +943,79 @@
 
         <div class="area">
           <div class="cwrap" id="cwrap">
-            <div id="rectPreview"></div>
-            <div id="textInputOverlay">
-              <input
-                type="text"
-                id="textContent"
-                placeholder="הקלד טקסט כאן..."
-                dir="rtl"
-              />
-              <div class="text-opts">
-                <div class="sl">
-                  <span>גודל</span
-                  ><input
-                    type="number"
-                    id="textSize"
-                    value="32"
-                    min="8"
-                    max="200"
-                    step="1"
-                  /><span>px</span>
+            <!-- canvasLayer: single relative box that owns the canvas + all overlays.
+                 This keeps every selection tool in the exact same coordinate system
+                 as the canvas, so scrollbars / RTL never shift them. -->
+            <div id="canvasLayer">
+              <canvas id="cv"></canvas>
+              <div id="rectPreview"></div>
+              <div id="textInputOverlay">
+                <input
+                  type="text"
+                  id="textContent"
+                  placeholder="הקלד טקסט כאן..."
+                  dir="rtl"
+                />
+                <div class="text-opts">
+                  <div class="sl">
+                    <span>גודל</span
+                    ><input
+                      type="number"
+                      id="textSize"
+                      value="32"
+                      min="8"
+                      max="200"
+                      step="1"
+                    /><span>px</span>
+                  </div>
+                  <div class="sl">
+                    <span>צבע</span
+                    ><input type="color" id="textColor" value="#ffffff" />
+                  </div>
+                  <label
+                    ><input type="checkbox" id="textBold" />
+                    <strong>מודגש</strong></label
+                  >
+                  <label
+                    ><input type="checkbox" id="textUnderline" /> קו תחתון</label
+                  >
                 </div>
-                <div class="sl">
-                  <span>צבע</span
-                  ><input type="color" id="textColor" value="#ffffff" />
+                <div class="text-btns">
+                  <button id="bTextOk" class="ok">הטמע</button>
+                  <button id="bTextCancelPos" class="bad">ביטול</button>
                 </div>
-                <label
-                  ><input type="checkbox" id="textBold" />
-                  <strong>מודגש</strong></label
+              </div>
+              <div id="cropFrame">
+                <div class="ch n" data-dir="n"></div>
+                <div class="ch s" data-dir="s"></div>
+                <div class="ch e" data-dir="e"></div>
+                <div class="ch w" data-dir="w"></div>
+                <div class="ch nw" data-dir="nw"></div>
+                <div class="ch ne" data-dir="ne"></div>
+                <div class="ch sw" data-dir="sw"></div>
+                <div class="ch se" data-dir="se"></div>
+                <div id="cropInfo">—</div>
+                <div id="cropActions">
+                  <button id="bCropOk" class="ok">אישור חיתוך</button>
+                  <button id="bCropCancel" class="bad">ביטול</button>
+                </div>
+              </div>
+              <svg id="straightenPts" xmlns="http://www.w3.org/2000/svg"></svg>
+              <div id="straightenUI">
+                <span
+                  id="straightenHint"
+                  style="font-size: 0.75rem; color: var(--muted)"
+                  >סמן 4 פינות</span
                 >
-                <label
-                  ><input type="checkbox" id="textUnderline" /> קו תחתון</label
-                >
+                <button id="bStraightenOk" class="ok" disabled>
+                  אישור יישור
+                </button>
+                <button id="bStraightenCancel" class="bad">ביטול</button>
               </div>
-              <div class="text-btns">
-                <button id="bTextOk" class="ok">הטמע</button>
-                <button id="bTextCancelPos" class="bad">ביטול</button>
-              </div>
+              <svg id="previewSvg" xmlns="http://www.w3.org/2000/svg">
+                <line id="previewLineSeg" x1="0" y1="0" x2="0" y2="0" />
+              </svg>
             </div>
-            <div id="cropFrame">
-              <div class="ch n" data-dir="n"></div>
-              <div class="ch s" data-dir="s"></div>
-              <div class="ch e" data-dir="e"></div>
-              <div class="ch w" data-dir="w"></div>
-              <div class="ch nw" data-dir="nw"></div>
-              <div class="ch ne" data-dir="ne"></div>
-              <div class="ch sw" data-dir="sw"></div>
-              <div class="ch se" data-dir="se"></div>
-              <div id="cropInfo">—</div>
-              <div id="cropActions">
-                <button id="bCropOk" class="ok">אישור חיתוך</button>
-                <button id="bCropCancel" class="bad">ביטול</button>
-              </div>
-            </div>
-            <svg id="straightenPts" xmlns="http://www.w3.org/2000/svg"></svg>
-            <div id="straightenUI">
-              <span
-                id="straightenHint"
-                style="font-size: 0.75rem; color: var(--muted)"
-                >סמן 4 פינות</span
-              >
-              <button id="bStraightenOk" class="ok" disabled>
-                אישור יישור
-              </button>
-              <button id="bStraightenCancel" class="bad">ביטול</button>
-            </div>
-            <canvas id="cv"></canvas>
-            <svg id="previewSvg" xmlns="http://www.w3.org/2000/svg">
-              <line id="previewLineSeg" x1="0" y1="0" x2="0" y2="0" />
-            </svg>
           </div>
         </div>
 
@@ -1347,21 +1363,15 @@
       }
 
       function showPreviewLine(x0, y0, x1, y1) {
-        const cvRect = cv.getBoundingClientRect();
-        const wrapRect = cwrap.getBoundingClientRect();
-        const offsetX = cvRect.left - wrapRect.left + cwrap.scrollLeft;
-        const offsetY = cvRect.top - wrapRect.top + cwrap.scrollTop;
-        const scaleX = cvRect.width / cv.width;
-        const scaleY = cvRect.height / cv.height;
-
+        const t = imgToScreen();
         const svg = document.getElementById("previewSvg");
         const line = document.getElementById("previewLineSeg");
         svg.style.display = "block";
         // position SVG to cover the canvas area inside the wrapper
-        svg.style.left = offsetX + "px";
-        svg.style.top = offsetY + "px";
-        svg.style.width = cvRect.width + "px";
-        svg.style.height = cvRect.height + "px";
+        svg.style.left = t.ox + "px";
+        svg.style.top = t.oy + "px";
+        svg.style.width = cv.width * t.sx + "px";
+        svg.style.height = cv.height * t.sy + "px";
         svg.setAttribute("viewBox", "0 0 " + cv.width + " " + cv.height);
         svg.setAttribute("preserveAspectRatio", "none");
 
@@ -1704,8 +1714,16 @@
         cwrap.classList.add("zoomed");
         cv.style.maxWidth = "none";
         cv.style.maxHeight = "none";
-        cv.style.width = cv.width * zoomLevel + "px";
-        cv.style.height = cv.height * zoomLevel + "px";
+        const dispW = cv.width * zoomLevel;
+        const dispH = cv.height * zoomLevel;
+        cv.style.width = dispW + "px";
+        cv.style.height = dispH + "px";
+        // Keep the shared layer exactly the same size as the displayed canvas
+        const layer = document.getElementById("canvasLayer");
+        if (layer) {
+          layer.style.width = dispW + "px";
+          layer.style.height = dispH + "px";
+        }
         if (
           typeof cropRect !== "undefined" &&
           cropRect &&
@@ -1784,16 +1802,11 @@
 
       function showRectPreview(x0, y0, x1, y1) {
         if (!rectPreview) return;
-        const cvRect = cv.getBoundingClientRect();
-        const wrapRect = cwrap.getBoundingClientRect();
-        const offsetX = cvRect.left - wrapRect.left + cwrap.scrollLeft;
-        const offsetY = cvRect.top - wrapRect.top + cwrap.scrollTop;
-        const scaleX = cvRect.width / cv.width;
-        const scaleY = cvRect.height / cv.height;
-        const left = Math.min(x0, x1) * scaleX + offsetX;
-        const top = Math.min(y0, y1) * scaleY + offsetY;
-        const w = Math.abs(x1 - x0) * scaleX;
-        const h = Math.abs(y1 - y0) * scaleY;
+        const t = imgToScreen();
+        const left = Math.min(x0, x1) * t.sx + t.ox;
+        const top = Math.min(y0, y1) * t.sy + t.oy;
+        const w = Math.abs(x1 - x0) * t.sx;
+        const h = Math.abs(y1 - y0) * t.sy;
         rectPreview.style.display = "block";
         rectPreview.style.left = left + "px";
         rectPreview.style.top = top + "px";
@@ -2149,6 +2162,12 @@
           ensureEnhBase();
           setGuide("<strong>שיפור:</strong> שינוי מיידי");
         } else commitEnhance();
+        // After layout shift (panel height change / possible scrollbar), realign crop frame
+        requestAnimationFrame(() => {
+          if (cropRect && typeof updateCropFrame === "function") updateCropFrame();
+          if (mode === "straighten" && typeof updateStraightenUI === "function")
+            updateStraightenUI();
+        });
       };
       ["adjBright", "adjContrast", "adjSat", "adjSharp", "adjVibrance"].forEach(
         (id) => {
@@ -2177,13 +2196,14 @@
         if (cropFrame) cropFrame.style.display = "none";
       }
       function imgToScreen() {
-        const cvRect = cv.getBoundingClientRect(),
-          wrapRect = cwrap.getBoundingClientRect();
+        // canvasLayer is the positioning context and is sized exactly to the
+        // displayed canvas, so overlays live at origin (0,0) of that layer.
+        const cvRect = cv.getBoundingClientRect();
         return {
-          ox: cvRect.left - wrapRect.left + cwrap.scrollLeft,
-          oy: cvRect.top - wrapRect.top + cwrap.scrollTop,
-          sx: cvRect.width / cv.width,
-          sy: cvRect.height / cv.height,
+          ox: 0,
+          oy: 0,
+          sx: cvRect.width / cv.width || 1,
+          sy: cvRect.height / cv.height || 1,
         };
       }
       function gcd(a, b) {
@@ -2215,7 +2235,8 @@
         commitEnhance();
         setMode("crop");
         cropRect = { x0: 0, y0: 0, x1: alphaData.width, y1: alphaData.height };
-        updateCropFrame();
+        // Wait for any pending layout (e.g. scrollbar after enhance panel) before positioning
+        requestAnimationFrame(() => updateCropFrame());
         setGuide("<strong>חיתוך:</strong> גרור צלעות/פינות");
       }
       function applyCrop() {
@@ -2754,15 +2775,10 @@
         const ov = document.getElementById("textInputOverlay");
         const inp = document.getElementById("textContent");
         if (!ov || !inp) return;
-        // Position overlay near click (in screen space)
-        const cvRect = cv.getBoundingClientRect();
-        const wrapRect = cwrap.getBoundingClientRect();
-        const scaleX = cvRect.width / cv.width;
-        const scaleY = cvRect.height / cv.height;
-        const ox = cvRect.left - wrapRect.left + cwrap.scrollLeft;
-        const oy = cvRect.top - wrapRect.top + cwrap.scrollTop;
-        let left = ox + x * scaleX;
-        let top = oy + y * scaleY + 12;
+        // Position overlay near click using shared imgToScreen (handles scrollbar / RTL)
+        const t = imgToScreen();
+        let left = t.ox + x * t.sx;
+        let top = t.oy + y * t.sy + 12;
         // Keep inside wrap (overlay is taller now with options)
         left = Math.max(4, Math.min(left, cwrap.clientWidth - 260));
         top = Math.max(4, Math.min(top, cwrap.clientHeight - 160));
