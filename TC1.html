@@ -267,7 +267,7 @@
             border-radius: var(--radius-sm);
             transition: var(--transition);
             cursor: grab;
-            touch-action: none;
+            touch-action: pan-y; /* Allows vertical scrolling while touching the item */
             border: 1px solid transparent;
             animation: fadeIn 0.25s ease;
             user-select: none;
@@ -501,12 +501,6 @@
 
         #confirm-exit:hover { background: #d32f2f; }
         #cancel-exit:hover { background: var(--text-secondary); color: white; }
-
-        /* Scroll area for touch - entire page scrolls naturally */
-        .scroll-area {
-            min-height: 100vh;
-            padding-bottom: 40px;
-        }
 
         @media (max-width: 600px) {
             body { padding: 10px; }
@@ -860,7 +854,6 @@
                 checklistEl.appendChild(el);
                 initSortable();
                 updateUI();
-                // Smooth scroll to new item
                 setTimeout(() => {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 150);
@@ -936,7 +929,7 @@
                     animation: 200,
                     ghostClass: 'dragging',
                     chosenClass: 'sortable-chosen',
-                    delay: 600, // 600ms delay for touch devices to prevent accidental drag
+                    delay: 600,
                     delayOnTouchOnly: true,
                     touchStartThreshold: 5,
                     scroll: true,
