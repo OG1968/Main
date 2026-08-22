@@ -42,19 +42,22 @@
             padding: 0;
         }
 
+        html, body {
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
             padding: 16px;
             transition: var(--transition);
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
         }
 
         body::-webkit-scrollbar {
@@ -74,6 +77,7 @@
             box-shadow: var(--shadow);
             transition: var(--transition);
             border: 1px solid var(--border);
+            position: relative;
         }
 
         .header {
@@ -300,6 +304,7 @@
             min-width: 22px;
             accent-color: var(--primary);
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .item-text {
@@ -343,6 +348,7 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            flex-shrink: 0;
         }
 
         .delete-btn:hover {
@@ -496,6 +502,12 @@
         #confirm-exit:hover { background: #d32f2f; }
         #cancel-exit:hover { background: var(--text-secondary); color: white; }
 
+        /* Scroll area for touch - entire page scrolls naturally */
+        .scroll-area {
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
         @media (max-width: 600px) {
             body { padding: 10px; }
             .card { padding: 16px 14px; border-radius: 12px; }
@@ -562,7 +574,7 @@
 
                 <div class="note">
                     <i class="fas fa-arrows-alt"></i>
-                    <span id="drag-note">גרור כדי לשנות סדר</span>
+                    <span id="drag-note">לחץ והחזק שניה לגרירה</span>
                 </div>
             </div>
 
@@ -619,7 +631,7 @@
                     exportSuccess: '✅ הרשימה יוצאה בהצלחה!',
                     importSuccess: '✅ הרשימה יובאה בהצלחה!',
                     importError: '❌ שגיאה בייבוא. נא לבחור קובץ JSON תקין.',
-                    dragNote: 'גרור כדי לשנות סדר',
+                    dragNote: 'לחץ והחזק שניה לגרירה',
                     exitTitle: 'האם לצאת?',
                     exitConfirm: 'יציאה',
                     exitCancel: 'ביטול',
@@ -638,7 +650,7 @@
                     exportSuccess: '✅ Checklist exported successfully!',
                     importSuccess: '✅ Checklist imported successfully!',
                     importError: '❌ Import error. Please select a valid JSON file.',
-                    dragNote: 'Drag to reorder',
+                    dragNote: 'Press and hold 1s to drag',
                     exitTitle: 'Exit?',
                     exitConfirm: 'Exit',
                     exitCancel: 'Cancel',
@@ -848,10 +860,10 @@
                 checklistEl.appendChild(el);
                 initSortable();
                 updateUI();
-                // Auto-scroll to show new item
+                // Smooth scroll to new item
                 setTimeout(() => {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
+                }, 150);
             }
 
             function addItem() {
@@ -924,7 +936,7 @@
                     animation: 200,
                     ghostClass: 'dragging',
                     chosenClass: 'sortable-chosen',
-                    delay: 150,
+                    delay: 600, // 600ms delay for touch devices to prevent accidental drag
                     delayOnTouchOnly: true,
                     touchStartThreshold: 5,
                     scroll: true,
