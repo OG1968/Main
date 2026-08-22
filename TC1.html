@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <title>צ'קליסט למטייל</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --danger: #f44336;
+            --warning: #FF9800;
+            --info: #2196F3;
+            --purple: #9C27B0;
+            --bg: #e8f0fe;
+            --surface: #ffffff;
+            --text: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --border: #d0d8e8;
+            --shadow: 0 8px 30px rgba(0, 20, 50, 0.12);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f0f1a;
+            --surface: #1a1a2e;
+            --text: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --border: #2a2a44;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 16px;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app-container {
+            max-width: 720px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--primary), #45a049);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .icon-btn:hover {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .progress-container {
+            width: 100%;
+            margin: 4px 0 8px;
+        }
+
+        .progress-bar {
+            height: 28px;
+            background: var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #66bb6a);
+            border-radius: 20px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text);
+            text-shadow: 0 1px 4px rgba(255,255,255,0.3);
+            white-space: nowrap;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin: 4px 0 8px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+            text-align: right;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        .note {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin: 4px 0 12px;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .note i {
+            font-size: 0.9rem;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 80px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            cursor: grab;
+            touch-action: none;
+            border: 1px solid transparent;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .checklist-item:active {
+            cursor: grabbing;
+        }
+
+        .checklist-item:hover {
+            border-color: var(--border);
+        }
+
+        .checklist-item.dragging {
+            opacity: 0.4;
+            transform: scale(0.98);
+        }
+
+        .checklist-item.sortable-chosen {
+            opacity: 0.8;
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .item-text {
+            flex: 1;
+            font-size: 1rem;
+            word-break: break-word;
+            padding: 2px 0;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .completed .item-text {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .edit-input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 1rem;
+            display: none;
+            outline: none;
+        }
+
+        .editing .item-text { display: none; }
+        .editing .edit-input { display: block; }
+
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .delete-btn:hover {
+            background: rgba(244, 67, 54, 0.12);
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid var(--border);
+        }
+
+        .button-group .btn {
+            flex: 1 1 auto;
+            min-width: 80px;
+            padding: 10px 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: white;
+        }
+
+        .btn-info { background: var(--info); }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); }
+        .btn-purple { background: var(--purple); }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .btn:active { transform: scale(0.96); }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .footer-logo img {
+            width: 56px;
+            height: 56px;
+            opacity: 0.75;
+            transition: var(--transition);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .footer-logo img:hover {
+            opacity: 1;
+            transform: scale(1.08);
+        }
+
+        .footer-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            letter-spacing: 0.3px;
+            font-weight: 500;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+            font-weight: 500;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        #exit-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(6px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #exit-modal-content {
+            background: var(--surface);
+            padding: 30px 24px;
+            border-radius: var(--radius);
+            text-align: center;
+            max-width: 340px;
+            width: 90%;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        #exit-modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: var(--text);
+        }
+
+        #exit-modal-content .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        #exit-modal-content .modal-actions button {
+            padding: 10px 28px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        #confirm-exit { background: var(--danger); color: white; }
+        #cancel-exit { background: var(--border); color: var(--text); }
+
+        #confirm-exit:hover { background: #d32f2f; }
+        #cancel-exit:hover { background: var(--text-secondary); color: white; }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .card { padding: 16px 14px; border-radius: 12px; }
+            h1 { font-size: 1.3rem; }
+            .input-group { flex-direction: column; }
+            .btn-primary { justify-content: center; width: 100%; }
+            .button-group .btn { flex: 1 1 45%; font-size: 0.75rem; padding: 10px 8px; }
+            .button-group .btn i { font-size: 0.9rem; }
+            .header-top { flex-wrap: wrap; }
+            .title-group h1 { font-size: 1.2rem; }
+            .note { font-size: 0.65rem; }
+            .checklist-item { padding: 8px 10px; }
+            .delete-btn { font-size: 0.8rem; padding: 4px 6px; }
+            .footer-logo img { width: 48px; height: 48px; }
+            .footer-text { font-size: 0.75rem; }
+        }
+
+        @media (max-width: 400px) {
+            .button-group .btn { flex: 1 1 100%; }
+            .icon-btn { width: 36px; height: 36px; font-size: 1.1rem; }
+            .footer-logo img { width: 40px; height: 40px; }
+            .footer-text { font-size: 0.7rem; }
+        }
+
+        @media print {
+            .card { box-shadow: none; border: 1px solid #ccc; }
+            .icon-btn, .btn, .input-group, .progress-container, .note, .delete-btn, .footer { display: none !important; }
+            .checklist-item { border: 1px solid #ddd; background: #f9f9f9; }
+            h1 { -webkit-text-fill-color: #1a1a2e; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="card">
+
+            <div class="header">
+                <div class="header-top">
+                    <div class="title-group">
+                        <h1 id="title">📋 צ'קליסט למטייל</h1>
+                    </div>
+                    <div class="header-actions">
+                        <button class="icon-btn" onclick="toggleLanguage()" title="Toggle Language">
+                            <span id="lang-icon">🇮🇱</span>
+                        </button>
+                        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">
+                            <span id="theme-icon">🌙</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                        <div class="progress-text" id="progress-text">0% הושלמו</div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="newItem" placeholder="הוסף פריט חדש..." maxlength="100" />
+                    <button class="btn-primary" id="add-item-btn">➕ הוסף</button>
+                </div>
+
+                <div class="note">
+                    <i class="fas fa-arrows-alt"></i>
+                    <span id="drag-note">גרור כדי לשנות סדר</span>
+                </div>
+            </div>
+
+            <ul class="checklist" id="checklist"></ul>
+
+            <div class="button-group">
+                <button class="btn btn-info" id="clear-completed-btn"><i class="fas fa-check-circle"></i> נקה שהושלמו</button>
+                <button class="btn btn-danger" id="clear-all-btn"><i class="fas fa-trash-alt"></i> מחק הכל</button>
+                <button class="btn btn-warning" id="export-btn"><i class="fas fa-file-export"></i> ייצא JSON</button>
+                <button class="btn btn-purple" id="import-btn"><i class="fas fa-file-import"></i> ייבא JSON</button>
+                <input type="file" id="import-file" accept=".json" style="display:none" />
+            </div>
+
+            <div class="footer">
+                <div class="footer-text">© 2026 כל הזכויות שמורות</div>
+                <div class="footer-logo">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdib3g9IjAgMCAxMDAgMTAwIj4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzRDQUY1MCIgb3BhY2l0eT0iMC4xNSIvPgogIDxyZWN0IHg9IjI4IiB5PSIzMiIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjM2IiByeD0iNCIgZmlsbD0iIzRDQUY1MCIgb3BhY2l0eT0iMC45Ii8+CiAgPHJlY3QgeD0iMzQiIHk9IjM4IiB3aWR0aD0iMzIiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjgiLz4KICA8cmVjdCB4PSIzNCIgeT0iNDYiIHdpZHRoPSIyNCIgaGVpZ2h0PSI0IiByeD0iMiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOCIvPgogIDxyZWN0IHg9IjM0IiB5PSI1NCIgd2lkdGg9IjI4IiBoZWlnaHQ9IjQiIHJ4PSIyIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC44Ii8+CiAgPGNpcmNsZSBjeD0iNzIiIGN5PSIzOCIgcj0iNiIgZmlsbD0iI0ZGQzEwNyIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iNzIiIGN5PSIzOCIgcj0iMyIgZmlsbD0iI0ZGQTAwMCIvPgogIDxwYXRoIGQ9Ik0gMjggNjggTCA0MiA4MCBMIDU4IDgwIEwgNzIgNjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzRDQUY1MCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIzOCIgY3k9Ijc4IiByPSI0IiBmaWxsPSIjNENBRjUwIiBvcGFjaXR5PSIwLjMiLz4KICA8Y2lyY2xlIGN4PSI2MiIgY3k9Ijc4IiByPSI0IiBmaWxsPSIjNENBRjUwIiBvcGFjaXR5PSIwLjMiLz4KPC9zdmc+" 
+                         alt="Checklist Logo" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="exit-modal">
+        <div id="exit-modal-content">
+            <h3 id="exit-modal-title">האם לצאת?</h3>
+            <div class="modal-actions">
+                <button id="confirm-exit">יציאה</button>
+                <button id="cancel-exit">ביטול</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            let items = [];
+            let currentLanguage = 'he';
+            const LANGUAGES = {
+                he: {
+                    title: '📋 צ\'קליסט למטייל',
+                    addPlaceholder: 'הוסף פריט חדש...',
+                    addBtn: '➕ הוסף',
+                    clearCompleted: 'נקה שהושלמו',
+                    clearAll: 'מחק הכל',
+                    exportBtn: 'ייצא JSON',
+                    importBtn: 'ייבא JSON',
+                    progress: 'הושלמו',
+                    deleteBtn: 'מחק',
+                    confirmDelete: 'האם למחוק את כל הפריטים?',
+                    exportSuccess: '✅ הרשימה יוצאה בהצלחה!',
+                    importSuccess: '✅ הרשימה יובאה בהצלחה!',
+                    importError: '❌ שגיאה בייבוא. נא לבחור קובץ JSON תקין.',
+                    dragNote: 'גרור כדי לשנות סדר',
+                    exitTitle: 'האם לצאת?',
+                    exitConfirm: 'יציאה',
+                    exitCancel: 'ביטול',
+                },
+                en: {
+                    title: '📋 Traveler Checklist',
+                    addPlaceholder: 'Add new item...',
+                    addBtn: '➕ Add',
+                    clearCompleted: 'Clear Completed',
+                    clearAll: 'Delete All',
+                    exportBtn: 'Export JSON',
+                    importBtn: 'Import JSON',
+                    progress: 'Completed',
+                    deleteBtn: 'Delete',
+                    confirmDelete: 'Delete all items?',
+                    exportSuccess: '✅ Checklist exported successfully!',
+                    importSuccess: '✅ Checklist imported successfully!',
+                    importError: '❌ Import error. Please select a valid JSON file.',
+                    dragNote: 'Drag to reorder',
+                    exitTitle: 'Exit?',
+                    exitConfirm: 'Exit',
+                    exitCancel: 'Cancel',
+                }
+            };
+
+            const $ = (id) => document.getElementById(id);
+            const checklistEl = $('checklist');
+            const newItemInput = $('newItem');
+            const progressFill = $('progress-fill');
+            const progressText = $('progress-text');
+            const toastEl = $('toast');
+            const modal = $('exit-modal');
+            const langIcon = $('lang-icon');
+
+            let sortableInstance = null;
+
+            function setTextContent(el, text) {
+                if (el) el.textContent = text;
+            }
+
+            function loadItems() {
+                try {
+                    const stored = localStorage.getItem('checklistItems');
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        if (Array.isArray(parsed)) {
+                            items = parsed.filter(item =>
+                                item && typeof item === 'object' &&
+                                typeof item.id === 'number' &&
+                                typeof item.text === 'string' &&
+                                typeof item.completed === 'boolean'
+                            );
+                            const ids = new Set();
+                            items = items.filter(item => {
+                                if (ids.has(item.id)) return false;
+                                ids.add(item.id);
+                                return true;
+                            });
+                            return;
+                        }
+                    }
+                } catch (_) { /* ignore */ }
+                items = [];
+            }
+
+            function saveItems() {
+                try {
+                    localStorage.setItem('checklistItems', JSON.stringify(items));
+                } catch (_) { /* ignore */ }
+                updateProgress();
+            }
+
+            function loadLanguage() {
+                try {
+                    const lang = localStorage.getItem('checklistLanguage');
+                    if (lang === 'he' || lang === 'en') currentLanguage = lang;
+                } catch (_) { /* ignore */ }
+                document.documentElement.lang = currentLanguage === 'he' ? 'he' : 'en';
+                document.dir = currentLanguage === 'he' ? 'rtl' : 'ltr';
+            }
+
+            function getLang() { return LANGUAGES[currentLanguage] || LANGUAGES.he; }
+
+            function updateUI() {
+                const lang = getLang();
+                setTextContent($('title'), lang.title);
+                newItemInput.placeholder = lang.addPlaceholder;
+                setTextContent($('add-item-btn'), lang.addBtn);
+                setTextContent($('clear-completed-btn'), lang.clearCompleted);
+                setTextContent($('clear-all-btn'), lang.clearAll);
+                setTextContent($('export-btn'), lang.exportBtn);
+                setTextContent($('import-btn'), lang.importBtn);
+                setTextContent($('drag-note'), lang.dragNote);
+                setTextContent($('exit-modal-title'), lang.exitTitle);
+                setTextContent($('confirm-exit'), lang.exitConfirm);
+                setTextContent($('cancel-exit'), lang.exitCancel);
+
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.textContent = lang.deleteBtn;
+                });
+
+                langIcon.textContent = currentLanguage === 'he' ? '🇮🇱' : '🇬🇧';
+                updateProgress();
+            }
+
+            function toggleLanguage() {
+                currentLanguage = (currentLanguage === 'he' ? 'en' : 'he');
+                localStorage.setItem('checklistLanguage', currentLanguage);
+                document.documentElement.lang = currentLanguage === 'he' ? 'he' : 'en';
+                document.dir = currentLanguage === 'he' ? 'rtl' : 'ltr';
+                updateUI();
+                renderAllItems();
+            }
+
+            function loadTheme() {
+                try {
+                    const theme = localStorage.getItem('checklistTheme') || 'light';
+                    document.body.setAttribute('data-theme', theme);
+                    updateThemeIcon(theme);
+                } catch (_) { /* ignore */ }
+            }
+
+            function toggleTheme() {
+                const current = document.body.getAttribute('data-theme') || 'light';
+                const next = current === 'light' ? 'dark' : 'light';
+                document.body.setAttribute('data-theme', next);
+                localStorage.setItem('checklistTheme', next);
+                updateThemeIcon(next);
+            }
+
+            function updateThemeIcon(theme) {
+                const icon = $('theme-icon');
+                if (icon) icon.textContent = theme === 'light' ? '🌙' : '☀️';
+            }
+
+            function updateProgress() {
+                const total = items.length;
+                const completed = items.filter(i => i.completed).length;
+                const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+                const lang = getLang();
+
+                if (progressFill) progressFill.style.width = pct + '%';
+                if (progressText) {
+                    progressText.textContent = total === 0 ?
+                        (currentLanguage === 'he' ? '0% הושלמו' : '0% Completed') :
+                        `${pct}% ${lang.progress}`;
+                }
+            }
+
+            function createItemElement(item) {
+                const li = document.createElement('li');
+                li.className = `checklist-item${item.completed ? ' completed' : ''}`;
+                li.dataset.id = item.id;
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'checkbox';
+                checkbox.checked = item.completed;
+                checkbox.addEventListener('change', () => toggleComplete(item.id));
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'item-text';
+                textSpan.textContent = item.text;
+                textSpan.addEventListener('dblclick', () => editItem(item.id));
+
+                const editInput = document.createElement('input');
+                editInput.type = 'text';
+                editInput.className = 'edit-input';
+                editInput.value = item.text;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = getLang().deleteBtn;
+                deleteBtn.addEventListener('click', () => deleteItem(item.id));
+
+                li.appendChild(checkbox);
+                li.appendChild(textSpan);
+                li.appendChild(editInput);
+                li.appendChild(deleteBtn);
+
+                let editing = false;
+                const startEdit = () => {
+                    if (editing) return;
+                    editing = true;
+                    li.classList.add('editing');
+                    editInput.value = item.text;
+                    editInput.focus();
+                    editInput.select();
+                };
+
+                const finishEdit = (save = true) => {
+                    if (!editing) return;
+                    editing = false;
+                    li.classList.remove('editing');
+                    if (save) {
+                        const val = editInput.value.trim();
+                        if (val) {
+                            item.text = val;
+                            textSpan.textContent = val;
+                            saveItems();
+                        }
+                    }
+                };
+
+                editInput.addEventListener('blur', () => finishEdit(true));
+                editInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); finishEdit(true); }
+                    if (e.key === 'Escape') { e.preventDefault(); finishEdit(false); }
+                });
+                textSpan.addEventListener('dblclick', startEdit);
+
+                return li;
+            }
+
+            function renderAllItems() {
+                checklistEl.innerHTML = '';
+                items.forEach(item => {
+                    checklistEl.appendChild(createItemElement(item));
+                });
+                initSortable();
+                updateUI();
+            }
+
+            function addItemToList(item) {
+                const el = createItemElement(item);
+                checklistEl.appendChild(el);
+                initSortable();
+                updateUI();
+            }
+
+            function addItem() {
+                const text = newItemInput.value.trim();
+                if (!text) return;
+                const newItem = {
+                    id: Date.now() + Math.random() * 1000,
+                    text: text,
+                    completed: false,
+                };
+                items.push(newItem);
+                addItemToList(newItem);
+                saveItems();
+                newItemInput.value = '';
+                newItemInput.focus();
+            }
+
+            function toggleComplete(id) {
+                const item = items.find(i => i.id === id);
+                if (!item) return;
+                item.completed = !item.completed;
+                const el = document.querySelector(`.checklist-item[data-id="${id}"]`);
+                if (el) el.classList.toggle('completed');
+                saveItems();
+            }
+
+            function deleteItem(id) {
+                items = items.filter(i => i.id !== id);
+                const el = document.querySelector(`.checklist-item[data-id="${id}"]`);
+                if (el) {
+                    el.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+                    el.style.transform = 'translateX(30px)';
+                    el.style.opacity = '0';
+                    setTimeout(() => {
+                        el.remove();
+                        saveItems();
+                        initSortable();
+                    }, 200);
+                } else {
+                    saveItems();
+                }
+            }
+
+            function editItem(id) {
+                const el = document.querySelector(`.checklist-item[data-id="${id}"] .item-text`);
+                if (el) el.dispatchEvent(new Event('dblclick'));
+            }
+
+            function clearCompleted() {
+                items = items.filter(i => !i.completed);
+                renderAllItems();
+                saveItems();
+            }
+
+            function clearAll() {
+                if (!confirm(getLang().confirmDelete)) return;
+                items = [];
+                renderAllItems();
+                saveItems();
+            }
+
+            function initSortable() {
+                if (sortableInstance) {
+                    sortableInstance.destroy();
+                    sortableInstance = null;
+                }
+                if (!checklistEl) return;
+
+                sortableInstance = new Sortable(checklistEl, {
+                    animation: 200,
+                    ghostClass: 'dragging',
+                    chosenClass: 'sortable-chosen',
+                    delay: 150,
+                    touchStartThreshold: 5,
+                    onEnd: function(evt) {
+                        const children = checklistEl.children;
+                        const newOrder = [];
+                        for (let i = 0; i < children.length; i++) {
+                            const id = Number(children[i].dataset.id);
+                            const item = items.find(it => it.id === id);
+                            if (item) newOrder.push(item);
+                        }
+                        if (newOrder.length === items.length) {
+                            items = newOrder;
+                            saveItems();
+                        } else {
+                            renderAllItems();
+                        }
+                    }
+                });
+            }
+
+            function exportToJSON() {
+                const data = JSON.stringify(items, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const date = new Date().toISOString().slice(0,10);
+                a.download = `checklist-${date}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast(getLang().exportSuccess);
+            }
+
+            function importFromJSON(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (!Array.isArray(data)) throw new Error('Not an array');
+                        const valid = data.filter(item =>
+                            item && typeof item === 'object' &&
+                            typeof item.id === 'number' &&
+                            typeof item.text === 'string' &&
+                            typeof item.completed === 'boolean'
+                        );
+                        if (valid.length === 0) throw new Error('No valid items');
+                        if (items.length > 0) {
+                            if (!confirm(currentLanguage === 'he' ?
+                                    'הרשימה הקיימת תוחלף. להמשיך?' :
+                                    'Existing list will be replaced. Continue?')) {
+                                event.target.value = '';
+                                return;
+                            }
+                        }
+                        items = valid;
+                        renderAllItems();
+                        saveItems();
+                        showToast(getLang().importSuccess);
+                    } catch (err) {
+                        showToast(getLang().importError);
+                        console.warn('Import error:', err);
+                    }
+                    event.target.value = '';
+                };
+                reader.onerror = function() {
+                    showToast(getLang().importError);
+                    event.target.value = '';
+                };
+                reader.readAsText(file);
+            }
+
+            let toastTimeout = null;
+
+            function showToast(msg) {
+                if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
+                toastEl.textContent = msg;
+                toastEl.classList.add('show');
+                toastTimeout = setTimeout(() => {
+                    toastEl.classList.remove('show');
+                    toastTimeout = null;
+                }, 3000);
+            }
+
+            function showExitModal() {
+                modal.style.display = 'flex';
+            }
+
+            function hideExitModal() {
+                modal.style.display = 'none';
+            }
+
+            function exitApp() {
+                window.location.href = 'about:blank';
+            }
+
+            function init() {
+                loadTheme();
+                loadLanguage();
+                loadItems();
+                renderAllItems();
+                updateUI();
+
+                $('add-item-btn').addEventListener('click', addItem);
+                newItemInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addItem(); });
+                $('clear-completed-btn').addEventListener('click', clearCompleted);
+                $('clear-all-btn').addEventListener('click', clearAll);
+                $('export-btn').addEventListener('click', exportToJSON);
+                $('import-btn').addEventListener('click', () => $('import-file').click());
+                $('import-file').addEventListener('change', importFromJSON);
+
+                $('confirm-exit').addEventListener('click', exitApp);
+                $('cancel-exit').addEventListener('click', hideExitModal);
+
+                history.pushState(null, null, window.location.pathname);
+                window.addEventListener('popstate', function(e) {
+                    showExitModal();
+                    history.pushState(null, null, window.location.pathname);
+                });
+
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) hideExitModal();
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && modal.style.display === 'flex') {
+                        hideExitModal();
+                    }
+                });
+
+                setTimeout(() => newItemInput.focus(), 100);
+            }
+
+            window.toggleTheme = toggleTheme;
+            window.toggleLanguage = toggleLanguage;
+            window.addItem = addItem;
+            window.clearCompleted = clearCompleted;
+            window.clearAll = clearAll;
+            window.exportToJSON = exportToJSON;
+            window.importFromJSON = importFromJSON;
+            window.deleteItem = deleteItem;
+            window.toggleComplete = toggleComplete;
+            window.editItem = editItem;
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+</html>
