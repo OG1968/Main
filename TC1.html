@@ -52,6 +52,8 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .app-container {
@@ -67,6 +69,23 @@
             box-shadow: var(--shadow);
             transition: var(--transition);
             border: 1px solid var(--border);
+            max-height: 95vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .card::-webkit-scrollbar-track {
+            background: var(--bg);
+            border-radius: 10px;
+        }
+
+        .card::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
         }
 
         .header {
@@ -78,6 +97,7 @@
             padding-bottom: 16px;
             border-bottom: 2px solid var(--border);
             margin-bottom: 16px;
+            flex-shrink: 0;
         }
 
         .header-top {
@@ -237,6 +257,30 @@
             font-size: 0.9rem;
         }
 
+        .checklist-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            max-height: 50vh;
+            min-height: 150px;
+            padding: 2px;
+            margin: 0 -4px;
+        }
+
+        .checklist-wrapper::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .checklist-wrapper::-webkit-scrollbar-track {
+            background: var(--bg);
+            border-radius: 10px;
+        }
+
+        .checklist-wrapper::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
         .checklist {
             list-style: none;
             padding: 0;
@@ -259,6 +303,8 @@
             touch-action: none;
             border: 1px solid transparent;
             animation: fadeIn 0.25s ease;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .checklist-item:active {
@@ -347,6 +393,7 @@
             margin-top: 16px;
             padding-top: 16px;
             border-top: 2px solid var(--border);
+            flex-shrink: 0;
         }
 
         .button-group .btn {
@@ -382,6 +429,7 @@
             margin-top: 20px;
             padding-top: 16px;
             border-top: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .footer-logo {
@@ -489,7 +537,7 @@
 
         @media (max-width: 600px) {
             body { padding: 10px; }
-            .card { padding: 16px 14px; border-radius: 12px; }
+            .card { padding: 16px 14px; border-radius: 12px; max-height: 98vh; }
             h1 { font-size: 1.3rem; }
             .input-group { flex-direction: column; }
             .btn-primary { justify-content: center; width: 100%; }
@@ -502,6 +550,7 @@
             .delete-btn { font-size: 0.8rem; padding: 4px 6px; }
             .footer-logo img { width: 48px; height: 48px; }
             .footer-text { font-size: 0.75rem; }
+            .checklist-wrapper { max-height: 40vh; }
         }
 
         @media (max-width: 400px) {
@@ -509,13 +558,15 @@
             .icon-btn { width: 36px; height: 36px; font-size: 1.1rem; }
             .footer-logo img { width: 40px; height: 40px; }
             .footer-text { font-size: 0.7rem; }
+            .checklist-wrapper { max-height: 35vh; }
         }
 
         @media print {
-            .card { box-shadow: none; border: 1px solid #ccc; }
+            .card { box-shadow: none; border: 1px solid #ccc; max-height: none; overflow: visible; }
             .icon-btn, .btn, .input-group, .progress-container, .note, .delete-btn, .footer { display: none !important; }
             .checklist-item { border: 1px solid #ddd; background: #f9f9f9; }
             h1 { -webkit-text-fill-color: #1a1a2e; }
+            .checklist-wrapper { max-height: none; overflow: visible; }
         }
     </style>
 </head>
@@ -557,7 +608,9 @@
                 </div>
             </div>
 
-            <ul class="checklist" id="checklist"></ul>
+            <div class="checklist-wrapper" id="checklist-wrapper">
+                <ul class="checklist" id="checklist"></ul>
+            </div>
 
             <div class="button-group">
                 <button class="btn btn-info" id="clear-completed-btn"><i class="fas fa-check-circle"></i> נקה שהושלמו</button>
@@ -638,6 +691,7 @@
 
             const $ = (id) => document.getElementById(id);
             const checklistEl = $('checklist');
+            const checklistWrapper = $('checklist-wrapper');
             const newItemInput = $('newItem');
             const progressFill = $('progress-fill');
             const progressText = $('progress-text');
@@ -832,6 +886,8 @@
                 });
                 initSortable();
                 updateUI();
+                // Scroll to top of wrapper after render
+                if (checklistWrapper) checklistWrapper.scrollTop = 0;
             }
 
             function addItemToList(item) {
@@ -839,6 +895,12 @@
                 checklistEl.appendChild(el);
                 initSortable();
                 updateUI();
+                // Scroll to show new item
+                if (checklistWrapper) {
+                    setTimeout(() => {
+                        checklistWrapper.scrollTop = checklistWrapper.scrollHeight;
+                    }, 50);
+                }
             }
 
             function addItem() {
@@ -912,7 +974,12 @@
                     ghostClass: 'dragging',
                     chosenClass: 'sortable-chosen',
                     delay: 150,
+                    delayOnTouchOnly: true,
                     touchStartThreshold: 5,
+                    scroll: true,
+                    scrollSensitivity: 30,
+                    scrollSpeed: 10,
+                    bubbleScroll: true,
                     onEnd: function(evt) {
                         const children = checklistEl.children;
                         const newOrder = [];
