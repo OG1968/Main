@@ -1,0 +1,2033 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+<!-- תגי favicon -->
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACmElEQVR4AexWTWsaQRh+diHkInjwYiQFk1oxlOYPVBqkuUroL3Ct+QUN6cWardJDVml6SU8NDRK1h/SQRoiF9KCpPVi91khOHjyI+IF60IvYnSldFLzUAXcLI7yz776778zzMTqK2Wx2HA6H5wrSC50/Yi6XgyyHIatxdPQOqdQnKEoMmcxXHB5GUSj8hKw+u77+hljsLWQ1/xukV2f8ECcBKIqigozC5XLB4/FgaWmJXv1+CYFAAAcHocnXDZFPEUilUiiVSiiXyzg+fo9+vw+n8wEuL9MU7Pn5Z3o10jBF4ObmOyKRNxgOhxT8eDzGzs4ztFot+P3PUSwWjYSdYhFNJhMkyTdXkF46i46DaLFYcHr6ca4gvTpip0tPbSFSWVu7j42Nh0in/+x7UiOxv/8S5BnJjRQagW63i/V1B+7uKri9/QWv16vhbDab2Nx8BPKOVjRIohFQlChWVqxIJlO4usqg1+tRiIPBgJ4Nq6v3YDabac1Ig0agXq+j3W5TbPl8Hvn8D5oT9SuVCtzux/TeaINGQBAEBINB+mvkdDrRaDQo1tFohLOzhHoeuFCr1eDzSbRulEEjcHLyAbL8GtVqlZ4By8vLFKPdblfvu+oZUIDVakU0qtC6UQaNgCAIIOdBOBxBp9PB1taTKYwXF1+wvf0UiURyqq73jUaAAAmFXtHzgPznsdlspKTF7m6APtvbe6HVjJCIDocD8Xh8riC9epMQ3W63IEnSXEF6dSegNwDW9ae+A6yT6dHPCeih+uSa/+DAZJtxck5Aby+4A9wBRgX4FmIUkLmdO8AsIeME3AFGAZnbuQPMEjJOwB1gFJC5nTvALCHjBNwBRgGZ27kDMyVcYJE7sECxZy7FHZgpywKL/70DvwEAAP//+NVs7gAAAAZJREFUAwBHwDBwrk3aZQAAAABJRU5ErkJggg==">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" sizes="48x48" href="data:image/png;base64,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">
+    <title>גיליון מפרט לוגו — קוד ההטמעה הרזה ביותר</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0f1117;
+        --surface: #1a1d27;
+        --surface2: #242836;
+        --border: #2e3345;
+        --text: #e8eaed;
+        --muted: #9aa0a6;
+        --primary: #5b8def;
+        --accent: #34d399;
+        --danger: #f87171;
+        --green-bg: #14532d;
+        --amber-bg: #78350f;
+        --mono: "IBM Plex Mono", monospace;
+        --display: "Space Grotesk", sans-serif;
+        --body: "Inter", sans-serif;
+      }
+
+      body.light {
+        --bg: #f0f4f8;
+        --surface: #ffffff;
+        --surface2: #e8edf3;
+        --border: #cbd5e1;
+        --text: #152238;
+        --muted: #5b6b80;
+        --primary: #2f5d8a;
+        --accent: #1f7a4d;
+        --danger: #b0362b;
+        --green-bg: #e5f4ec;
+        --amber-bg: #fbf0dc;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--body);
+        min-height: 100vh;
+        padding: 24px 16px 40px;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        padding: 0 4px;
+      }
+
+      .header-left {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .eyebrow::before {
+        content: "◆";
+        font-size: 10px;
+      }
+
+      h1 {
+        font-family: var(--display);
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 4px;
+        color: var(--text);
+        letter-spacing: -0.01em;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 64ch;
+        line-height: 1.6;
+      }
+
+      .theme-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+        flex-shrink: 0;
+      }
+      .theme-btn:hover {
+        background: var(--border);
+      }
+
+      /* Panel */
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      /* Dropzone */
+      .dropzone {
+        position: relative;
+        margin-top: 20px;
+        padding: 48px 20px;
+        text-align: center;
+        cursor: pointer;
+        background: var(--surface);
+        border: 2px dashed var(--border);
+        border-radius: 8px;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
+      .dropzone.drag {
+        border-color: var(--primary);
+        background: rgba(91, 141, 239, 0.08);
+      }
+      .dropzone .corner {
+        display: none;
+        /* we use dashed border instead */
+      }
+      .dz-title {
+        font-family: var(--display);
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+      .dz-sub {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+      input[type="file"] {
+        display: none;
+      }
+
+      /* Workspace */
+      .workspace {
+        display: none;
+        margin-top: 22px;
+      }
+
+      /* File meta bar */
+      .file-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 16px;
+        background: var(--surface2);
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 12.5px;
+      }
+      .file-meta button {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 4px;
+        padding: 4px 12px;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .file-meta button:hover {
+        background: var(--border);
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        padding: 8px 12px 0;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        flex-wrap: wrap;
+      }
+      .tab {
+        padding: 6px 14px;
+        border-radius: 6px 6px 0 0;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 12px;
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--muted);
+        transition:
+          background 0.15s,
+          color 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .tab.active {
+        background: var(--surface2);
+        border-color: var(--border) var(--border) transparent;
+        color: var(--text);
+        font-weight: 500;
+      }
+      .tab:hover {
+        background: var(--surface2);
+      }
+      .tab-close {
+        color: var(--danger);
+        cursor: pointer;
+        font-weight: bold;
+        margin-right: 4px;
+      }
+      .tab-close:hover {
+        opacity: 0.7;
+      }
+
+      /* Grid 2 columns */
+      .grid2 {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 0;
+      }
+      @media (max-width: 760px) {
+        .grid2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .left {
+        padding: 18px;
+        border-left: 1px solid var(--border);
+        background: var(--surface);
+      }
+      @media (max-width: 760px) {
+        .left {
+          border-left: none;
+          border-bottom: 1px solid var(--border);
+        }
+      }
+
+      .right {
+        padding: 18px;
+        background: var(--surface);
+      }
+
+      /* Preview */
+      .preview-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 140px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--surface2);
+        margin-bottom: 10px;
+        position: relative;
+        overflow: hidden;
+      }
+      .preview-box img {
+        max-width: 90%;
+        max-height: 90%;
+      }
+
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .compare-box {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px;
+        text-align: center;
+        background: var(--surface2);
+      }
+      .compare-box .label {
+        font-size: 10px;
+        font-family: var(--mono);
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .compare-box img {
+        max-width: 100%;
+        max-height: 80px;
+      }
+
+      /* Controls */
+      .zoom-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .zoom-control input[type="range"] {
+        flex: 1;
+        accent-color: var(--primary);
+        background: var(--surface2);
+        height: 4px;
+        border-radius: 2px;
+      }
+
+      .field {
+        margin-bottom: 14px;
+      }
+      .field label {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .field label span.val {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .field input[type="range"] {
+        width: 100%;
+        accent-color: var(--primary);
+        background: var(--surface2);
+        height: 4px;
+        border-radius: 2px;
+      }
+      .field input[type="text"] {
+        width: 100%;
+        padding: 7px 8px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        background: var(--surface2);
+        color: var(--text);
+      }
+      .field input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--muted);
+        font-family: var(--mono);
+        margin-bottom: 8px;
+      }
+      .toggle-row input[type="checkbox"] {
+        accent-color: var(--primary);
+        width: 16px;
+        height: 16px;
+      }
+
+      .badge-info {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 6px 8px;
+        background: var(--surface2);
+        line-height: 1.6;
+        margin-bottom: 12px;
+      }
+
+      .bg-check {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin: 6px 0 12px;
+      }
+      .bg-check button {
+        padding: 4px 12px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        background: var(--surface2);
+        font-family: var(--mono);
+        font-size: 11px;
+        cursor: pointer;
+        color: var(--text);
+        transition: background 0.15s;
+      }
+      .bg-check button.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+      }
+      .bg-check button:hover:not(.active) {
+        background: var(--border);
+      }
+
+      /* Table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        margin-bottom: 14px;
+      }
+      th {
+        text-align: right;
+        color: var(--muted);
+        font-weight: 500;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        padding: 6px 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        padding: 8px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+      }
+      tr.best td {
+        background: var(--green-bg);
+      }
+      .pick-btn {
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 4px 10px;
+        border-radius: 4px;
+        border: 1px solid var(--primary);
+        background: transparent;
+        color: var(--primary);
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .pick-btn.active {
+        background: var(--primary);
+        color: #fff;
+      }
+      .pick-btn:hover:not(.active) {
+        background: var(--primary);
+        color: #fff;
+      }
+      .tag-best {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 20px;
+        padding: 1px 8px;
+        margin-right: 6px;
+      }
+
+      /* Savings stats */
+      .savings {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+      }
+      .stat {
+        font-family: var(--mono);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 12px;
+        flex: 1;
+        min-width: 100px;
+        background: var(--surface2);
+      }
+      .stat .n {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text);
+        display: block;
+      }
+      .stat .l {
+        font-size: 10.5px;
+        color: var(--muted);
+        letter-spacing: 0.05em;
+      }
+
+      /* Code block */
+      .code-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .code-head h3 {
+        font-family: var(--display);
+        font-size: 14px;
+        margin: 0;
+        color: var(--text);
+      }
+      .code-head .actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .code-head button {
+        font-family: var(--mono);
+        font-size: 12px;
+        padding: 6px 14px;
+        border-radius: 4px;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .code-head button:hover {
+        background: var(--primary);
+        filter: brightness(1.1);
+      }
+      .code-head button.copied {
+        background: var(--accent);
+      }
+      .code-head button:not(:first-child) {
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .code-head button:not(:first-child):hover {
+        background: var(--border);
+      }
+
+      pre {
+        background: #0b0d14;
+        color: #d7e6f5;
+        padding: 14px;
+        border-radius: 6px;
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1.6;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+        direction: ltr;
+        text-align: left;
+        border: 1px solid var(--border);
+      }
+
+      .note {
+        margin-top: 12px;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--text);
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 8px 12px;
+        line-height: 1.6;
+      }
+      .note.ok {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--green-bg);
+      }
+      .note.warn {
+        border-color: var(--danger);
+        color: var(--danger);
+        background: #451a1a;
+      }
+
+      .calc {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: -6px;
+        margin-bottom: 14px;
+      }
+
+      /* History bar */
+      .history-bar {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+      .history-bar .item {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 4px 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text);
+      }
+      .history-bar .item:hover {
+        background: var(--border);
+      }
+      .history-bar .item .del {
+        cursor: pointer;
+        color: var(--danger);
+        font-weight: bold;
+      }
+
+      .extra-outputs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .extra-outputs button {
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 3px 12px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        background: var(--surface2);
+        cursor: pointer;
+        color: var(--text);
+      }
+      .extra-outputs button:hover {
+        background: var(--border);
+      }
+
+      footer {
+        margin-top: 34px;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        text-align: center;
+      }
+      footer .copyright {
+        font-family: var(--body);
+        font-size: 13px;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+      footer .embed-code {
+        margin-top: 8px;
+        display: inline-block;
+      }
+      footer .embed-code img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+      }
+
+      /* Light mode overrides for code pre */
+      body.light pre {
+        background: #f0f4f8;
+        color: #152238;
+        border-color: var(--border);
+      }
+      body.light .note.warn {
+        background: #fde8e5;
+        color: var(--danger);
+      }
+      body.light .note.ok {
+        background: var(--green-bg);
+      }
+      body.light .stat {
+        background: var(--surface2);
+      }
+      body.light .compare-box {
+        background: var(--surface2);
+      }
+      body.light .preview-box {
+        background: var(--surface2);
+      }
+      body.light .file-meta {
+        background: var(--surface2);
+      }
+      body.light .tab.active {
+        background: var(--surface);
+        border-color: var(--border) var(--border) transparent;
+      }
+      body.light .dropzone.drag {
+        background: rgba(47, 93, 138, 0.08);
+      }
+      body.light .code-head button:not(:first-child) {
+        background: var(--surface2);
+        color: var(--text);
+      }
+      body.light .code-head button:not(:first-child):hover {
+        background: var(--border);
+      }
+
+      /* Tooltip (optional) */
+      .tip-banner {
+        position: fixed;
+        z-index: 9999;
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.12s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        max-width: 240px;
+        text-align: center;
+        line-height: 1.35;
+      }
+      .tip-banner.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="header-left">
+          <div class="eyebrow">SPEC SHEET · לוגו → קוד הטמעה</div>
+          <h1>מכווץ הלוגו לקוד ההטמעה הרזה ביותר</h1>
+          <p class="sub">
+            מעלים קובץ לוגו בכל פורמט. הכלי חותך שוליים שקופים מיותרים, בודק כמה
+            שיטות קידוד (PNG / PNG מקוונטז / WebP / AVIF / JPEG, או SVG מוטבע /
+            Base64 / URL-encoded), ומשווה משקל בבייטים בפועל, ומפיק תג
+            &lt;img&gt; אחד — הקטן ביותר האפשרי — להדבקה ישירה ב-HTML.
+          </p>
+        </div>
+        <button
+          class="theme-btn"
+          id="themeBtn"
+          title="מעבר למצב בהיר"
+          aria-label="מעבר למצב בהיר"
+        >
+          ☀️
+        </button>
+      </header>
+
+      <div id="dz" class="dropzone">
+        <div class="dz-title">
+          גררו לכאן קבצים (אחד או יותר), או לחצו לבחירה
+        </div>
+        <div class="dz-sub">
+          ANY FORMAT · PNG / JPG / GIF / WEBP / BMP / SVG / ICO
+        </div>
+        <input type="file" id="fileInput" accept="image/*,.svg" multiple />
+      </div>
+
+      <div class="panel workspace" id="workspace">
+        <div class="file-meta">
+          <span id="fileMetaText">—</span>
+          <button id="resetBtn">קובץ חדש</button>
+        </div>
+
+        <div class="tabs" id="tabsContainer"></div>
+
+        <div class="grid2">
+          <div class="left">
+            <div class="compare-row" id="compareRow">
+              <div class="compare-box">
+                <div class="label">מקור</div>
+                <img id="origCompare" alt="מקור" />
+              </div>
+              <div class="compare-box">
+                <div class="label">אחרי עיבוד</div>
+                <img id="processedCompare" alt="אחרי" />
+              </div>
+            </div>
+
+            <div class="zoom-control">
+              <span>🔍</span>
+              <input
+                type="range"
+                id="zoomRange"
+                min="20"
+                max="300"
+                value="100"
+                step="5"
+              />
+              <span id="zoomLabel">100%</span>
+            </div>
+
+            <div id="rasterControls">
+              <div class="field">
+                <label
+                  >רוחב מקסימלי (px)
+                  <span class="val" id="widthVal">—</span></label
+                >
+                <input
+                  type="range"
+                  id="widthRange"
+                  min="8"
+                  max="1024"
+                  step="1"
+                />
+              </div>
+              <div class="field">
+                <label
+                  >איכות דחיסה (WebP / AVIF / JPEG)
+                  <span class="val" id="qualityVal">85%</span></label
+                >
+                <input
+                  type="range"
+                  id="qualityRange"
+                  min="10"
+                  max="100"
+                  value="85"
+                  step="1"
+                />
+              </div>
+              <div class="toggle-row" id="autoCropRow" style="display: none">
+                <input type="checkbox" id="autoCropToggle" checked />
+                <label for="autoCropToggle" style="margin: 0"
+                  >חיתוך שוליים שקופים (סימטרי, ללא שינוי יחס)</label
+                >
+              </div>
+              <div class="toggle-row">
+                <input type="checkbox" id="quantizeToggle" checked />
+                <label for="quantizeToggle" style="margin: 0"
+                  >כלול PNG עם צבעים מצומצמים (~216 גוונים)</label
+                >
+              </div>
+              <div class="badge-info" id="alphaInfo">בודק שקיפות…</div>
+            </div>
+
+            <div class="field">
+              <label>טקסט חלופי (alt)</label>
+              <input type="text" id="altText" value="לוגו" />
+            </div>
+            <div class="toggle-row">
+              <input type="checkbox" id="includeDims" checked />
+              <label for="includeDims" style="margin: 0"
+                >לכלול width/height בתג</label
+              >
+            </div>
+
+            <div class="bg-check">
+              <span
+                style="
+                  font-size: 12px;
+                  font-family: var(--mono);
+                  color: var(--muted);
+                "
+                >רקע תצוגה:</span
+              >
+              <button data-bg="light" class="active">בהיר</button>
+              <button data-bg="dark">כהה</button>
+            </div>
+          </div>
+
+          <div class="right">
+            <div class="savings">
+              <div class="stat">
+                <span class="n" id="origSize">—</span
+                ><span class="l">גודל מקור</span>
+              </div>
+              <div class="stat">
+                <span class="n" id="finalSize">—</span
+                ><span class="l">גודל קוד ההטמעה</span>
+              </div>
+              <div class="stat">
+                <span class="n" id="savedPct">—</span
+                ><span class="l">חיסכון</span>
+              </div>
+            </div>
+
+            <table id="formatTable">
+              <thead>
+                <tr>
+                  <th>פורמט</th>
+                  <th>משקל תג ה-img</th>
+                  <th>הערה</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="formatBody"></tbody>
+            </table>
+
+            <div class="code-head">
+              <h3>קוד ההטמעה — הדביקו ב-HTML</h3>
+              <div class="actions">
+                <button class="copy-btn" id="copyBtn">העתקה</button>
+                <button
+                  class="copy-btn"
+                  id="copyBgBtn"
+                  style="
+                    background: var(--surface2);
+                    color: var(--text);
+                    border: 1px solid var(--border);
+                  "
+                >
+                  background-image
+                </button>
+                <button
+                  class="copy-btn"
+                  id="copyPictureBtn"
+                  style="background: var(--accent); color: #fff"
+                >
+                  תג picture
+                </button>
+                <button
+                  class="copy-btn"
+                  id="faviconBtn"
+                  style="background: var(--amber); color: #fff"
+                >
+                  favicon
+                </button>
+              </div>
+            </div>
+            <pre id="codeOut">—</pre>
+            <div class="note" id="sizeNote"></div>
+
+            <div class="history-bar" id="historyBar"></div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div class="copyright">© 2026 כל הזכויות שמורות</div>
+          <img
+            src="data:image/png;base64,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"
+            alt="לוגו"
+          />
+        </div>
+      </footer>
+    </div>
+
+    <canvas id="workCanvas" style="display: none"></canvas>
+
+    <script>
+      // -------------------------------------------------------------
+      //  STATE
+      // -------------------------------------------------------------
+      const state = {
+        files: [], // array of { id, name, origBytes, isSvg, img, naturalW, naturalH, hasAlpha, dims, candidates, chosenFormat, svgOptimized, origDataUrl, processedDataUrl }
+        activeFileId: null,
+        settings: {
+          width: 256,
+          quality: 85,
+          quantize: true,
+          autoCrop: true,
+          alt: "לוגו",
+          includeDims: true,
+          zoom: 100,
+          bg: "light",
+        },
+        history: [], // array of { id, name, code, timestamp }
+      };
+
+      // Load settings from localStorage
+      function loadSettings() {
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem("logoCompressorSettings"),
+          );
+          if (saved) Object.assign(state.settings, saved);
+        } catch (e) {}
+      }
+
+      function saveSettings() {
+        try {
+          localStorage.setItem(
+            "logoCompressorSettings",
+            JSON.stringify(state.settings),
+          );
+        } catch (e) {}
+      }
+      loadSettings();
+
+      // Load history
+      function loadHistory() {
+        try {
+          const h = JSON.parse(localStorage.getItem("logoCompressorHistory"));
+          if (Array.isArray(h)) state.history = h.slice(0, 5);
+        } catch (e) {}
+      }
+
+      function saveHistory() {
+        try {
+          localStorage.setItem(
+            "logoCompressorHistory",
+            JSON.stringify(state.history.slice(0, 5)),
+          );
+        } catch (e) {}
+      }
+      loadHistory();
+
+      // -------------------------------------------------------------
+      //  DOM refs
+      // -------------------------------------------------------------
+      const dz = document.getElementById("dz");
+      const fileInput = document.getElementById("fileInput");
+      const workspace = document.getElementById("workspace");
+      const fileMetaText = document.getElementById("fileMetaText");
+      const resetBtn = document.getElementById("resetBtn");
+      const tabsContainer = document.getElementById("tabsContainer");
+
+      const origCompare = document.getElementById("origCompare");
+      const processedCompare = document.getElementById("processedCompare");
+      const zoomRange = document.getElementById("zoomRange");
+      const zoomLabel = document.getElementById("zoomLabel");
+
+      const rasterControls = document.getElementById("rasterControls");
+      const widthRange = document.getElementById("widthRange");
+      const widthVal = document.getElementById("widthVal");
+      const qualityRange = document.getElementById("qualityRange");
+      const qualityVal = document.getElementById("qualityVal");
+      const autoCropRow = document.getElementById("autoCropRow");
+      const autoCropToggle = document.getElementById("autoCropToggle");
+      const quantizeToggle = document.getElementById("quantizeToggle");
+      const alphaInfo = document.getElementById("alphaInfo");
+      const altText = document.getElementById("altText");
+      const includeDims = document.getElementById("includeDims");
+
+      const origSizeEl = document.getElementById("origSize");
+      const finalSizeEl = document.getElementById("finalSize");
+      const savedPctEl = document.getElementById("savedPct");
+      const formatBody = document.getElementById("formatBody");
+      const codeOut = document.getElementById("codeOut");
+      const copyBtn = document.getElementById("copyBtn");
+      const copyBgBtn = document.getElementById("copyBgBtn");
+      const copyPictureBtn = document.getElementById("copyPictureBtn");
+      const faviconBtn = document.getElementById("faviconBtn");
+      const sizeNote = document.getElementById("sizeNote");
+      const historyBar = document.getElementById("historyBar");
+
+      const canvas = document.getElementById("workCanvas");
+      const ctx = canvas.getContext("2d");
+
+      let renderToken = 0;
+      let fileCounter = 0;
+
+      // -------------------------------------------------------------
+      //  Settings sync
+      // -------------------------------------------------------------
+      function syncSettingsToUI() {
+        widthRange.value = state.settings.width;
+        widthVal.textContent = state.settings.width + "px";
+        qualityRange.value = state.settings.quality;
+        qualityVal.textContent = state.settings.quality + "%";
+        autoCropToggle.checked = state.settings.autoCrop;
+        quantizeToggle.checked = state.settings.quantize;
+        altText.value = state.settings.alt;
+        includeDims.checked = state.settings.includeDims;
+        zoomRange.value = state.settings.zoom;
+        zoomLabel.textContent = state.settings.zoom + "%";
+        // bg buttons
+        document
+          .querySelectorAll("[data-bg]")
+          .forEach((b) =>
+            b.classList.toggle("active", b.dataset.bg === state.settings.bg),
+          );
+      }
+      syncSettingsToUI();
+
+      function gatherSettings() {
+        state.settings.width = parseInt(widthRange.value, 10);
+        state.settings.quality = parseInt(qualityRange.value, 10);
+        state.settings.autoCrop = autoCropToggle.checked;
+        state.settings.quantize = quantizeToggle.checked;
+        state.settings.alt = altText.value || "לוגו";
+        state.settings.includeDims = includeDims.checked;
+        state.settings.zoom = parseInt(zoomRange.value, 10);
+        // bg is set by click
+        saveSettings();
+      }
+
+      // -------------------------------------------------------------
+      //  File handling (multiple)
+      // -------------------------------------------------------------
+      function handleFiles(files) {
+        for (const file of files) {
+          const id = ++fileCounter;
+          const entry = {
+            id,
+            name: file.name,
+            origBytes: file.size,
+            isSvg: file.type === "image/svg+xml" || /\.svg$/i.test(file.name),
+          };
+          state.files.push(entry);
+          if (entry.isSvg) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              entry.svgRaw = e.target.result;
+              processSvgFile(entry);
+            };
+            reader.readAsText(file);
+          } else {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = new Image();
+              img.onload = () => {
+                entry.img = img;
+                entry.naturalW = img.width;
+                entry.naturalH = img.height;
+                entry.origDataUrl = e.target.result;
+                // Start processing with current settings
+                const token = ++renderToken;
+                processRasterWithSettings(entry, token);
+              };
+              img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+        // activate last file
+        if (state.files.length) {
+          state.activeFileId = state.files[state.files.length - 1].id;
+          renderTabs();
+          renderActiveFile();
+        }
+        workspace.style.display = "block";
+      }
+
+      function getActiveFile() {
+        return state.files.find((f) => f.id === state.activeFileId) || null;
+      }
+
+      // -------------------------------------------------------------
+      //  Reprocessing functions (for settings changes)
+      // -------------------------------------------------------------
+      function reprocessActiveFile() {
+        const f = getActiveFile();
+        if (!f) return;
+        reprocessFile(f);
+      }
+
+      function reprocessFile(entry) {
+        if (entry.isSvg) {
+          // SVG doesn't need reprocessing, just re-render output
+          renderActiveFile();
+          return;
+        }
+        // Raster: reprocess with current settings
+        const token = ++renderToken;
+        processRasterWithSettings(entry, token);
+      }
+
+      // -------------------------------------------------------------
+      //  SVG processing
+      // -------------------------------------------------------------
+      function processSvgFile(entry) {
+        const optimized = optimizeSvg(entry.svgRaw);
+        entry.svgOptimized = optimized;
+        const inlineBytes = new Blob([optimized]).size;
+        const b64 = btoa(unescape(encodeURIComponent(optimized)));
+        const base64Uri = `data:image/svg+xml;base64,${b64}`;
+        const urlEncUri = svgToUrlEncoded(optimized);
+        const tagBase = buildImgTag("__URL__", null, null);
+        const urlEncTag = tagBase.replace("__URL__", urlEncUri);
+        const base64Tag = tagBase.replace("__URL__", base64Uri);
+
+        entry.candidates = [
+          {
+            format: "SVG מוטבע (inline)",
+            bytes: inlineBytes,
+            note: "ניתן לעצב עם CSS",
+            kind: "inline",
+            url: null,
+          },
+          {
+            format: "SVG URL-encoded (img)",
+            bytes: urlEncTag.length,
+            note: "תג img, ללא ניפוח base64",
+            kind: "urlenc",
+            url: urlEncUri,
+          },
+          {
+            format: "SVG Base64 (img)",
+            bytes: base64Tag.length,
+            note: "תג img, תאימות מרבית",
+            kind: "base64",
+            url: base64Uri,
+          },
+        ];
+        entry.candidates.sort((a, b) => a.bytes - b.bytes);
+        entry.chosenFormat = entry.candidates[0].format;
+        entry.dims = { w: null, h: null };
+        entry.hasAlpha = true; // SVG has transparency
+        entry.processedDataUrl = base64Uri; // for preview
+
+        if (getActiveFile()?.id === entry.id) renderActiveFile();
+        renderTabs();
+      }
+
+      // -------------------------------------------------------------
+      //  Raster processing
+      // -------------------------------------------------------------
+      function processRasterWithSettings(entry, token) {
+        if (!entry.img) return;
+        const w = entry.naturalW,
+          h = entry.naturalH;
+        const canvasTmp = document.createElement("canvas");
+        canvasTmp.width = w;
+        canvasTmp.height = h;
+        const cctx = canvasTmp.getContext("2d");
+        cctx.drawImage(entry.img, 0, 0);
+        const imageData = cctx.getImageData(0, 0, w, h);
+        const data = imageData.data;
+        let hasAlpha = false;
+        let minX = w,
+          minY = h,
+          maxX = 0,
+          maxY = 0;
+        const step = Math.max(1, Math.floor(Math.sqrt((w * h) / 300000)));
+        for (let py = 0; py < h; py += step) {
+          for (let px = 0; px < w; px += step) {
+            const idx = (py * w + px) * 4;
+            const a = data[idx + 3];
+            if (a < 255) hasAlpha = true;
+            if (a > 10) {
+              if (px < minX) minX = px;
+              if (px > maxX) maxX = px;
+              if (py < minY) minY = py;
+              if (py > maxY) maxY = py;
+            }
+          }
+        }
+        if (maxX < minX || maxY < minY) {
+          minX = 0;
+          minY = 0;
+          maxX = w - 1;
+          maxY = h - 1;
+        }
+        entry.hasAlpha = hasAlpha;
+        entry.naturalW = w;
+        entry.naturalH = h;
+
+        // Crop
+        let srcX = 0,
+          srcY = 0,
+          srcW = w,
+          srcH = h;
+        if (hasAlpha && state.settings.autoCrop) {
+          const padLeft = minX,
+            padRight = w - 1 - maxX;
+          const padTop = minY,
+            padBottom = h - 1 - maxY;
+          const evenPadX = Math.min(padLeft, padRight);
+          const evenPadY = Math.min(padTop, padBottom);
+          const fracX = evenPadX / (w / 2);
+          const fracY = evenPadY / (h / 2);
+          const frac = Math.min(fracX, fracY, 0.98);
+          const trimX = Math.round(frac * (w / 2));
+          const trimY = Math.round(frac * (h / 2));
+          srcX = trimX;
+          srcY = trimY;
+          srcW = w - 2 * trimX;
+          srcH = h - 2 * trimY;
+        }
+
+        const targetW = Math.min(state.settings.width, srcW);
+        const scale = targetW / srcW;
+        const outW = Math.max(1, Math.round(srcW * scale));
+        const outH = Math.max(1, Math.round(srcH * scale));
+
+        const outCanvas = document.createElement("canvas");
+        outCanvas.width = outW;
+        outCanvas.height = outH;
+        const outCtx = outCanvas.getContext("2d");
+        outCtx.drawImage(entry.img, srcX, srcY, srcW, srcH, 0, 0, outW, outH);
+
+        const quality = state.settings.quality / 100;
+        (async () => {
+          const results = await encodeAllFormats(
+            outCanvas,
+            hasAlpha,
+            quality,
+            state.settings.quantize,
+          );
+          if (token !== renderToken) return;
+          const withUrls = await Promise.all(
+            results.map(async (c) => {
+              const url = await blobToDataURL(c.blob);
+              return { ...c, url, bytes: url.length };
+            }),
+          );
+          if (token !== renderToken) return;
+          withUrls.sort((a, b) => a.bytes - b.bytes);
+          entry.candidates = withUrls;
+          entry.dims = { w: outW, h: outH };
+          entry.processedDataUrl = outCanvas.toDataURL("image/png");
+          if (
+            !entry.chosenFormat ||
+            !withUrls.find((c) => c.format === entry.chosenFormat)
+          ) {
+            entry.chosenFormat = withUrls[0].format;
+          }
+          if (getActiveFile()?.id === entry.id) {
+            renderActiveFile();
+            renderTabs();
+          } else {
+            renderTabs();
+          }
+        })();
+      }
+
+      async function encodeAllFormats(
+        finalCanvas,
+        hasAlpha,
+        quality,
+        quantize,
+      ) {
+        const results = [];
+        const pngBlob = await canvasToBlobAsync(finalCanvas, "image/png");
+        if (pngBlob)
+          results.push({
+            format: "PNG",
+            blob: pngBlob,
+            note: "איכות מלאה, ללא אובדן",
+          });
+        if (quantize) {
+          const qCanvas = document.createElement("canvas");
+          qCanvas.width = finalCanvas.width;
+          qCanvas.height = finalCanvas.height;
+          const qCtx = qCanvas.getContext("2d");
+          qCtx.drawImage(finalCanvas, 0, 0);
+          let imgData = qCtx.getImageData(0, 0, qCanvas.width, qCanvas.height);
+          imgData = quantizeImageData(imgData, 6);
+          qCtx.putImageData(imgData, 0, 0);
+          const qBlob = await canvasToBlobAsync(qCanvas, "image/png");
+          if (qBlob)
+            results.push({
+              format: "PNG מקוונטז",
+              blob: qBlob,
+              note: "~216 גוונים",
+            });
+        }
+        const webpBlob = await canvasToBlobAsync(
+          finalCanvas,
+          "image/webp",
+          quality,
+        );
+        if (webpBlob && webpBlob.type === "image/webp")
+          results.push({
+            format: "WebP",
+            blob: webpBlob,
+            note: `דחיסה ${Math.round(quality * 100)}%`,
+          });
+        const avifBlob = await canvasToBlobAsync(
+          finalCanvas,
+          "image/avif",
+          quality,
+        );
+        if (avifBlob && avifBlob.type === "image/avif")
+          results.push({
+            format: "AVIF",
+            blob: avifBlob,
+            note: `דחיסה ${Math.round(quality * 100)}%`,
+          });
+        if (!hasAlpha) {
+          const jpegBlob = await canvasToBlobAsync(
+            finalCanvas,
+            "image/jpeg",
+            quality,
+          );
+          if (jpegBlob)
+            results.push({
+              format: "JPEG",
+              blob: jpegBlob,
+              note: `דחיסה ${Math.round(quality * 100)}%, ללא שקיפות`,
+            });
+        }
+        return results;
+      }
+
+      function canvasToBlobAsync(cnv, type, quality) {
+        return new Promise((resolve) => {
+          try {
+            cnv.toBlob((blob) => resolve(blob), type, quality);
+          } catch (e) {
+            resolve(null);
+          }
+        });
+      }
+
+      function blobToDataURL(blob) {
+        return new Promise((resolve) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.readAsDataURL(blob);
+        });
+      }
+
+      function quantizeImageData(imgData, levels) {
+        const step = 255 / (levels - 1);
+        const d = imgData.data;
+        for (let i = 0; i < d.length; i += 4) {
+          d[i] = Math.min(255, Math.round(Math.round(d[i] / step) * step));
+          d[i + 1] = Math.min(
+            255,
+            Math.round(Math.round(d[i + 1] / step) * step),
+          );
+          d[i + 2] = Math.min(
+            255,
+            Math.round(Math.round(d[i + 2] / step) * step),
+          );
+        }
+        return imgData;
+      }
+
+      // -------------------------------------------------------------
+      //  SVG helpers
+      // -------------------------------------------------------------
+      const NUMERIC_ATTRS = [
+        "d",
+        "points",
+        "viewBox",
+        "x",
+        "y",
+        "cx",
+        "cy",
+        "r",
+        "rx",
+        "ry",
+        "width",
+        "height",
+        "x1",
+        "y1",
+        "x2",
+        "y2",
+        "offset",
+        "stroke-width",
+        "transform",
+        "stroke-dasharray",
+      ];
+
+      function roundNumbersInString(str, precision) {
+        return str.replace(/-?\d+\.\d+/g, (m) =>
+          parseFloat(parseFloat(m).toFixed(precision)).toString(),
+        );
+      }
+
+      function optimizeSvg(text) {
+        let s = text;
+        s = s.replace(/<\?xml[^>]*\?>/gi, "");
+        s = s.replace(/<!DOCTYPE[^>]*>/gi, "");
+        s = s.replace(/<!--[\s\S]*?-->/g, "");
+        s = s.replace(/\s+(inkscape|sodipodi):[\w-]+="[^"]*"/gi, "");
+        s = s.replace(/\s+xmlns:(inkscape|sodipodi)="[^"]*"/gi, "");
+        s = s.replace(/<metadata[\s\S]*?<\/metadata>/gi, "");
+        s = s.replace(/<(title|desc)>\s*<\/\1>/gi, "");
+        s = s.replace(/\s+(class|style)=""/g, "");
+        NUMERIC_ATTRS.forEach((attr) => {
+          const re = new RegExp(`(${attr}=")([^"]+)(")`, "gi");
+          s = s.replace(
+            re,
+            (m, a, val, c) => a + roundNumbersInString(val, 2) + c,
+          );
+        });
+        s = s.replace(/([\s,"'=])0\.(\d)/g, "$1.$2");
+        s = s.replace(/-0\.(\d)/g, "-.$1");
+        s = s.replace(/>\s+</g, "><");
+        s = s.replace(/\s{2,}/g, " ");
+        s = s.replace(/\s+>/g, ">");
+        return s.trim();
+      }
+
+      function svgToUrlEncoded(svg) {
+        let s = svg.replace(/"/g, "'");
+        s = encodeURIComponent(s)
+          .replace(/%20/g, " ")
+          .replace(/%3D/g, "=")
+          .replace(/%3A/g, ":")
+          .replace(/%2F/g, "/")
+          .replace(/%22/g, "'")
+          .replace(/%2C/g, ",")
+          .replace(/%3B/g, ";")
+          .replace(/%28/g, "(")
+          .replace(/%29/g, ")");
+        return "data:image/svg+xml," + s;
+      }
+
+      function checkSvgSecurity(svg) {
+        if (/<script[\s\S]*?<\/script>/gi.test(svg))
+          return "⚠️ קובץ SVG מכיל תגית <script> – סיכון אבטחה בהטמעה ישירה.";
+        if (/ on\w+\s*=/gi.test(svg))
+          return "⚠️ קובץ SVG מכיל מאפייני on* (למשל onclick) – סיכון אבטחה.";
+        return null;
+      }
+
+      // -------------------------------------------------------------
+      //  Render
+      // -------------------------------------------------------------
+      function renderTabs() {
+        if (!state.files.length) {
+          tabsContainer.innerHTML = "";
+          return;
+        }
+        let html = "";
+        state.files.forEach((f) => {
+          const active = f.id === state.activeFileId ? "active" : "";
+          const label = f.name.length > 18 ? f.name.slice(0, 16) + "…" : f.name;
+          html += `<div class="tab ${active}" data-id="${f.id}"><span class="tab-close" data-id="${f.id}">✕</span>${label}</div>`;
+        });
+        tabsContainer.innerHTML = html;
+        tabsContainer.querySelectorAll(".tab").forEach((el) => {
+          el.addEventListener("click", (e) => {
+            if (e.target.classList.contains("tab-close")) {
+              const id = parseInt(e.target.dataset.id, 10);
+              removeFile(id);
+              return;
+            }
+            const id = parseInt(el.dataset.id, 10);
+            state.activeFileId = id;
+            renderTabs();
+            renderActiveFile();
+          });
+        });
+      }
+
+      function removeFile(id) {
+        state.files = state.files.filter((f) => f.id !== id);
+        if (state.activeFileId === id) {
+          state.activeFileId = state.files.length
+            ? state.files[state.files.length - 1].id
+            : null;
+        }
+        if (!state.files.length) {
+          workspace.style.display = "none";
+          fileInput.value = "";
+        } else {
+          renderTabs();
+          renderActiveFile();
+        }
+      }
+
+      function renderActiveFile() {
+        const f = getActiveFile();
+        if (!f) return;
+        fileMetaText.textContent = `${f.name} · ${fmtBytes(f.origBytes)}`;
+        // Compare images
+        origCompare.src = f.origDataUrl || "";
+        processedCompare.src = f.processedDataUrl || "";
+        // Zoom
+        const zoom = state.settings.zoom / 100;
+        origCompare.style.transform = `scale(${zoom})`;
+        processedCompare.style.transform = `scale(${zoom})`;
+
+        // Raster controls visibility
+        rasterControls.style.display = f.isSvg ? "none" : "block";
+        if (!f.isSvg && f.hasAlpha !== undefined) {
+          autoCropRow.style.display = f.hasAlpha ? "flex" : "none";
+          alphaInfo.textContent = f.hasAlpha
+            ? "⚠ נמצאה שקיפות — JPEG לא זמין"
+            : "✓ אין שקיפות — JPEG זמין";
+        }
+
+        // Security warning for SVG
+        if (f.isSvg && f.svgOptimized) {
+          const warn = checkSvgSecurity(f.svgRaw || f.svgOptimized);
+          if (warn) {
+            sizeNote.className = "note warn";
+            sizeNote.textContent = warn;
+          } else {
+            sizeNote.className = "note ok";
+            sizeNote.textContent =
+              "✓ קובץ SVG תקין – ללא סקריפטים או מאפיינים חשודים.";
+          }
+        }
+
+        // Table & output
+        if (f.candidates) {
+          renderTable(f);
+          renderOutput(f);
+          // Update savings
+          const chosen = f.candidates.find((c) => c.format === f.chosenFormat);
+          if (chosen) {
+            origSizeEl.textContent = fmtBytes(f.origBytes);
+            finalSizeEl.textContent = fmtBytes(chosen.bytes);
+            const pct =
+              f.origBytes > 0
+                ? Math.max(
+                    0,
+                    Math.round((1 - chosen.bytes / f.origBytes) * 100),
+                  )
+                : 0;
+            savedPctEl.textContent = pct + "%";
+            // Note
+            if (chosen.bytes > 15000) {
+              sizeNote.className = "note";
+              sizeNote.textContent =
+                "הקוד עדיין שוקל יותר מ-15KB. עבור לוגו כבד כדאי לארח את הקובץ בנפרד.";
+            } else {
+              sizeNote.className = "note ok";
+              sizeNote.textContent =
+                "קובץ קטן דיו — הטמעת base64 ישירה מומלצת.";
+            }
+          }
+          updateHistoryBar();
+        }
+        updatePreviewBackground();
+      }
+
+      function renderTable(f) {
+        formatBody.innerHTML = "";
+        const minBytes = Math.min(...f.candidates.map((c) => c.bytes));
+        f.candidates.forEach((c) => {
+          const tr = document.createElement("tr");
+          if (c.bytes === minBytes) tr.classList.add("best");
+          const active = c.format === f.chosenFormat;
+          tr.innerHTML = `
+              <td>${c.format}${c.bytes === minBytes ? '<span class="tag-best">מומלץ</span>' : ""}</td>
+              <td>${fmtBytes(c.bytes)}</td>
+              <td style="color:var(--muted);">${c.note}</td>
+              <td><button class="pick-btn ${active ? "active" : ""}" data-format="${c.format}">${active ? "נבחר" : "בחר"}</button></td>`;
+          formatBody.appendChild(tr);
+        });
+        formatBody.querySelectorAll(".pick-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            f.chosenFormat = btn.dataset.format;
+            renderTable(f);
+            renderOutput(f);
+            // update savings
+            const chosen = f.candidates.find(
+              (c) => c.format === f.chosenFormat,
+            );
+            if (chosen) {
+              finalSizeEl.textContent = fmtBytes(chosen.bytes);
+              const pct =
+                f.origBytes > 0
+                  ? Math.max(
+                      0,
+                      Math.round((1 - chosen.bytes / f.origBytes) * 100),
+                    )
+                  : 0;
+              savedPctEl.textContent = pct + "%";
+            }
+            saveHistoryForFile(f);
+          });
+        });
+      }
+
+      function buildImgTag(url, w, h) {
+        const alt = (state.settings.alt || "לוגו").replace(/"/g, "&quot;");
+        const dims =
+          state.settings.includeDims && w && h
+            ? ` width="${w}" height="${h}"`
+            : "";
+        return `<img src="${url}" alt="${alt}"${dims}>`;
+      }
+
+      function renderOutput(f) {
+        const chosen = f.candidates.find((c) => c.format === f.chosenFormat);
+        if (!chosen) return;
+        let code;
+        if (f.isSvg && chosen.kind === "inline") {
+          code = f.svgOptimized;
+        } else {
+          const url = chosen.url || "";
+          code = buildImgTag(url, f.dims?.w, f.dims?.h);
+        }
+        codeOut.textContent = code;
+        // Store for history
+        f.currentCode = code;
+      }
+
+      // -------------------------------------------------------------
+      //  Extra outputs: background-image, picture, favicon
+      // -------------------------------------------------------------
+      function getChosen(f) {
+        return f?.candidates?.find((c) => c.format === f.chosenFormat);
+      }
+
+      function getPictureHtml(f) {
+        if (!f || !f.candidates) return "";
+        // order: AVIF, WebP, PNG
+        const avif = f.candidates.find((c) => c.format === "AVIF");
+        const webp = f.candidates.find((c) => c.format === "WebP");
+        const png = f.candidates.find((c) => c.format === "PNG");
+        const fallback =
+          f.candidates.find((c) => c.format === f.chosenFormat) ||
+          f.candidates[0];
+        const alt = state.settings.alt || "לוגו";
+        let html = `<picture>\n`;
+        if (avif) html += `  <source srcset="${avif.url}" type="image/avif">\n`;
+        if (webp) html += `  <source srcset="${webp.url}" type="image/webp">\n`;
+        if (png) html += `  <source srcset="${png.url}" type="image/png">\n`;
+        html += `  <img src="${fallback.url}" alt="${alt}">\n</picture>`;
+        return html;
+      }
+
+      function getFaviconHtml(f) {
+        if (!f || !f.candidates) return "";
+        // generate 16,32,48 PNGs from processed image
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const sizes = [16, 32, 48];
+        const urls = [];
+        return new Promise((resolve) => {
+          let done = 0;
+          sizes.forEach((size) => {
+            canvas.width = size;
+            canvas.height = size;
+            ctx.clearRect(0, 0, size, size);
+            const img = new Image();
+            img.onload = () => {
+              ctx.drawImage(img, 0, 0, size, size);
+              const url = canvas.toDataURL("image/png");
+              urls.push({ size, url });
+              done++;
+              if (done === sizes.length) {
+                let html = `<!-- תגי favicon -->\n`;
+                urls.forEach((u) => {
+                  html += `<link rel="icon" type="image/png" sizes="${u.size}x${u.size}" href="${u.url}">\n`;
+                });
+                resolve(html);
+              }
+            };
+            img.src = f.processedDataUrl || f.origDataUrl;
+          });
+        });
+      }
+
+      copyBtn.addEventListener("click", () =>
+        copyText(codeOut.textContent, copyBtn),
+      );
+      copyBgBtn.addEventListener("click", () => {
+        const f = getActiveFile();
+        if (!f) return;
+        const chosen = getChosen(f);
+        if (!chosen) return;
+        const url = chosen.url || "";
+        const bgCode = `background-image: url("${url}");`;
+        copyText(bgCode, copyBgBtn);
+      });
+      copyPictureBtn.addEventListener("click", async () => {
+        const f = getActiveFile();
+        if (!f) return;
+        const html = getPictureHtml(f);
+        copyText(html, copyPictureBtn);
+      });
+      faviconBtn.addEventListener("click", async () => {
+        const f = getActiveFile();
+        if (!f) return;
+        const html = await getFaviconHtml(f);
+        copyText(html, faviconBtn);
+      });
+
+      function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.textContent;
+          btn.textContent = "✓ הועתק";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = orig;
+            btn.classList.remove("copied");
+          }, 1500);
+        });
+      }
+
+      // -------------------------------------------------------------
+      //  History
+      // -------------------------------------------------------------
+      function saveHistoryForFile(f) {
+        const code = f.currentCode || "";
+        if (!code) return;
+        const entry = { id: f.id, name: f.name, code, timestamp: Date.now() };
+        state.history = state.history.filter((h) => h.id !== f.id);
+        state.history.unshift(entry);
+        if (state.history.length > 5) state.history.pop();
+        saveHistory();
+        updateHistoryBar();
+      }
+
+      function updateHistoryBar() {
+        if (!state.history.length) {
+          historyBar.innerHTML = "";
+          return;
+        }
+        let html =
+          '<span style="color:var(--muted);font-size:11px;">היסטוריה:</span>';
+        state.history.forEach((h) => {
+          html += `<div class="item" data-id="${h.id}"><span>${h.name}</span><span class="del" data-id="${h.id}">✕</span></div>`;
+        });
+        historyBar.innerHTML = html;
+        historyBar.querySelectorAll(".item").forEach((el) => {
+          el.addEventListener("click", (e) => {
+            if (e.target.classList.contains("del")) {
+              const id = parseInt(e.target.dataset.id, 10);
+              state.history = state.history.filter((h) => h.id !== id);
+              saveHistory();
+              updateHistoryBar();
+              return;
+            }
+            const id = parseInt(el.dataset.id, 10);
+            const h = state.history.find((h) => h.id === id);
+            if (h) {
+              codeOut.textContent = h.code;
+              // find file and set active
+              const f = state.files.find((f) => f.id === id);
+              if (f) {
+                state.activeFileId = f.id;
+                renderTabs();
+                renderActiveFile();
+              }
+            }
+          });
+        });
+      }
+
+      // -------------------------------------------------------------
+      //  Drag & drop (multiple)
+      // -------------------------------------------------------------
+      ["dragenter", "dragover"].forEach((ev) =>
+        dz.addEventListener(ev, (e) => {
+          e.preventDefault();
+          dz.classList.add("drag");
+        }),
+      );
+      ["dragleave", "drop"].forEach((ev) =>
+        dz.addEventListener(ev, (e) => {
+          e.preventDefault();
+          dz.classList.remove("drag");
+        }),
+      );
+      dz.addEventListener("drop", (e) => {
+        if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+      });
+      dz.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files.length) handleFiles(e.target.files);
+      });
+      resetBtn.addEventListener("click", () => {
+        workspace.style.display = "none";
+        fileInput.value = "";
+        state.files = [];
+        state.activeFileId = null;
+        renderTabs();
+      });
+
+      // -------------------------------------------------------------
+      //  UI event listeners
+      // -------------------------------------------------------------
+      // Settings that affect processing
+      widthRange.addEventListener("input", () => {
+        widthVal.textContent = widthRange.value + "px";
+        gatherSettings();
+        reprocessActiveFile();
+      });
+      qualityRange.addEventListener("input", () => {
+        qualityVal.textContent = qualityRange.value + "%";
+        gatherSettings();
+        reprocessActiveFile();
+      });
+      autoCropToggle.addEventListener("change", () => {
+        gatherSettings();
+        reprocessActiveFile();
+      });
+      quantizeToggle.addEventListener("change", () => {
+        gatherSettings();
+        reprocessActiveFile();
+      });
+
+      // Settings that affect only output
+      altText.addEventListener("input", () => {
+        gatherSettings();
+        renderActiveFile();
+      });
+      includeDims.addEventListener("change", () => {
+        gatherSettings();
+        renderActiveFile();
+      });
+
+      // Zoom
+      zoomRange.addEventListener("input", () => {
+        state.settings.zoom = parseInt(zoomRange.value, 10);
+        zoomLabel.textContent = state.settings.zoom + "%";
+        renderActiveFile();
+      });
+
+      // Background toggle
+      document.querySelectorAll("[data-bg]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.settings.bg = btn.dataset.bg;
+          document
+            .querySelectorAll("[data-bg]")
+            .forEach((b) =>
+              b.classList.toggle("active", b.dataset.bg === state.settings.bg),
+            );
+          saveSettings();
+          updatePreviewBackground();
+        });
+      });
+
+      function updatePreviewBackground() {
+        const bg = state.settings.bg;
+        const boxes = document.querySelectorAll(".preview-box, .compare-box");
+        boxes.forEach((box) => {
+          box.style.background =
+            bg === "light"
+              ? "linear-gradient(45deg,#f0f0f0 25%,transparent 25%),linear-gradient(-45deg,#f0f0f0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#f0f0f0 75%),linear-gradient(-45deg,transparent 75%,#f0f0f0 75%)"
+              : "#1a1a1a";
+          box.style.backgroundSize = "16px 16px";
+          box.style.backgroundPosition = "0 0,0 8px,8px -8px,-8px 0";
+        });
+      }
+
+      // -------------------------------------------------------------
+      //  Utilities
+      // -------------------------------------------------------------
+      function fmtBytes(n) {
+        if (n < 1024) return n + " B";
+        return (n / 1024).toFixed(2) + " KB";
+      }
+
+      // -------------------------------------------------------------
+      //  Theme toggle
+      // -------------------------------------------------------------
+      const themeBtn = document.getElementById("themeBtn");
+
+      function updateThemeIcon() {
+        if (!themeBtn) return;
+        if (document.body.classList.contains("light")) {
+          themeBtn.textContent = "🌙";
+          themeBtn.title = "מעבר למצב כהה";
+        } else {
+          themeBtn.textContent = "☀️";
+          themeBtn.title = "מעבר למצב בהיר";
+        }
+      }
+      // Load saved theme
+      const savedTheme = localStorage.getItem("logoCompressorTheme");
+      if (savedTheme === "light") document.body.classList.add("light");
+      else if (savedTheme === "dark") document.body.classList.remove("light");
+      else if (
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: light)").matches
+      ) {
+        document.body.classList.add("light");
+      }
+      updateThemeIcon();
+
+      themeBtn.addEventListener("click", () => {
+        document.body.classList.toggle("light");
+        localStorage.setItem(
+          "logoCompressorTheme",
+          document.body.classList.contains("light") ? "light" : "dark",
+        );
+        updateThemeIcon();
+        // Re-render active file to update preview backgrounds
+        renderActiveFile();
+      });
+
+      // -------------------------------------------------------------
+      //  Init
+      // -------------------------------------------------------------
+      workspace.style.display = "none";
+      updateHistoryBar();
+      syncSettingsToUI();
+
+      // Tooltip (from BR.html) – optional but nice
+      (function () {
+        const tip = document.createElement("div");
+        tip.className = "tip-banner";
+        document.body.appendChild(tip);
+        let hideTimer = null;
+
+        function showTip(el, e) {
+          const text = el.getAttribute("data-tip");
+          if (!text) return;
+          tip.textContent = text;
+          tip.classList.add("show");
+          const rect = el.getBoundingClientRect();
+          const tipRect = tip.getBoundingClientRect();
+          let left = rect.left + rect.width / 2 - tipRect.width / 2;
+          let top = rect.bottom + 8;
+          if (left < 6) left = 6;
+          if (left + tipRect.width > window.innerWidth - 6)
+            left = window.innerWidth - tipRect.width - 6;
+          if (top + tipRect.height > window.innerHeight - 6)
+            top = rect.top - tipRect.height - 8;
+          tip.style.left = left + "px";
+          tip.style.top = top + "px";
+        }
+
+        function hideTip() {
+          tip.classList.remove("show");
+        }
+        document.addEventListener("mouseover", (e) => {
+          const el = e.target.closest("[data-tip]");
+          if (el) {
+            clearTimeout(hideTimer);
+            showTip(el, e);
+          }
+        });
+        document.addEventListener("mouseout", (e) => {
+          const el = e.target.closest("[data-tip]");
+          if (el) {
+            hideTimer = setTimeout(hideTip, 80);
+          }
+        });
+        document.addEventListener("scroll", hideTip, true);
+      })();
+    </script>
+  </body>
+</html>
