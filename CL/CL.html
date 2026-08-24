@@ -1,22 +1,12 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>פריסת קרטון</title>
-    <link rel="icon" href="CL.ico" type="image/x-icon">
+    <title>יוצר פריסת קרטונים פרו</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        @page {
-            size: A4 landscape;
-            margin: 0.5cm;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { size: A4 landscape; margin: 0.5cm; }
         body {
             background: #b3d4f0;
             display: flex;
@@ -27,514 +17,103 @@
             font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
             gap: 8px;
             padding: 6px 16px 16px 16px;
-            position: relative;
             overflow-x: hidden;
         }
-        
-        .main-header {
-            text-align: center;
-            position: relative;
-            z-index: 1;
-            margin-bottom: 0px;
-            margin-top: 0px;
-            padding-top: 0px;
-        }
-        
+        .main-header { text-align: center; z-index: 1; }
         .main-header h1 {
-            font-size: 2rem;
+            font-size: 1.85rem;
             font-weight: 700;
             color: #0c3861;
-            text-shadow: 0 2px 15px rgba(255,255,255,0.3);
-            letter-spacing: 1px;
-            background: transparent;
-            padding: 4px 24px;
-            border-radius: 0;
-            display: inline-block;
-            border: none;
-            box-shadow: none;
+            letter-spacing: 0.5px;
+            padding: 4px 20px;
         }
-        
-        .main-header h1 .highlight {
-            color: #000E5E;
-        }
-        
-        .controls {
+        .main-header h1 .highlight { color: #000E5E; }
+        .controls, .actions {
             display: flex;
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
             justify-content: center;
-            background: transparent;
-            padding: 8px 18px;
-            border-radius: 0;
-            box-shadow: none;
-            border: none;
-            position: relative;
             z-index: 1;
-            transition: all 0.3s ease;
+            direction: rtl;
         }
-        
-        .controls label {
+        .controls { direction: rtl; }
+        .controls label, .actions label {
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: #1e2b3c;
-            letter-spacing: 0.3px;
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
         }
-        
-        .controls label::before {
-            content: "▍";
-            color: #4a7bb5;
-            font-weight: 300;
-            font-size: 0.9rem;
-        }
-        
-        .controls input {
-            width: 70px;
+        .controls input[type="number"], .controls select, .note-row input {
+            width: 68px;
             padding: 6px 8px;
             font-size: 0.85rem;
             font-weight: 500;
-            border: 2px solid rgba(255,255,255,0.8);
+            border: 2px solid rgba(255,255,255,0.85);
             border-radius: 40px;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255,255,255,0.75);
             text-align: center;
             color: #0b1a2b;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s;
         }
-        
-        .controls input:focus {
+        .controls select { width: auto; min-width: 90px; padding: 6px 12px; }
+        .controls input:focus, .note-row input:focus {
             border-color: #4a7bb5;
-            box-shadow: 0 0 0 4px rgba(74, 123, 181, 0.15);
+            box-shadow: 0 0 0 4px rgba(74,123,181,0.15);
             outline: none;
-            transform: scale(1.02);
         }
-        
-        .controls input:hover {
-            border-color: #6b9bcb;
-        }
-        
-        .controls input.error {
-            border-color: #e74c3c;
-            background: rgba(231, 76, 60, 0.1);
-        }
-        
-        .controls .btn-update {
-            padding: 6px 22px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #1f6e43, #2d8a56);
-            color: white;
-            border: none;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 15px rgba(31, 110, 67, 0.3);
-            letter-spacing: 0.4px;
-            margin-left: 2px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .controls .btn-update::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .controls .btn-update:hover::before {
-            left: 100%;
-        }
-        
-        .controls .btn-update:hover {
-            background: linear-gradient(135deg, #135432, #1f6e43);
-            transform: scale(1.03) translateY(-2px);
-            box-shadow: 0 6px 20px rgba(31, 110, 67, 0.4);
-        }
-        
-        .controls .btn-update:active {
-            transform: scale(0.96);
-        }
-        
-        .controls .btn-reset {
+        .controls input.error { border-color: #e74c3c; background: rgba(231,76,60,0.1); }
+        .btn {
             padding: 6px 18px;
             font-size: 0.85rem;
             font-weight: 600;
-            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
             color: white;
             border: none;
             border-radius: 40px;
             cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 15px rgba(127, 140, 141, 0.3);
-            letter-spacing: 0.4px;
+            transition: all 0.25s;
+            letter-spacing: 0.3px;
         }
-        
-        .controls .btn-reset:hover {
-            background: linear-gradient(135deg, #636e72, #7f8c8d);
-            transform: scale(1.03) translateY(-2px);
-        }
-        
-        .actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            background: transparent;
-            padding: 8px 16px;
-            border-radius: 0;
-            border: none;
-            box-shadow: none;
-            position: relative;
-            z-index: 1;
-            transition: all 0.3s ease;
-        }
-        
-        .actions .checkbox-wrapper {
+        .btn:hover { transform: translateY(-2px) scale(1.02); }
+        .btn:active { transform: scale(0.96); }
+        .btn-update { background: linear-gradient(135deg, #1f6e43, #2d8a56); box-shadow: 0 4px 15px rgba(31,110,67,0.3); }
+        .btn-reset { background: linear-gradient(135deg, #7f8c8d, #95a5a6); }
+        .btn-pdf { background: linear-gradient(135deg, #1a4972, #2a6b9e); padding: 8px 22px; border-radius: 50px; }
+        .btn-svg { background: linear-gradient(135deg, #8e44ad, #9b59b6); padding: 8px 22px; border-radius: 50px; }
+        .btn-eps { background: linear-gradient(135deg, #6c3483, #8e44ad); padding: 8px 22px; border-radius: 50px; }
+        .btn-ai { background: linear-gradient(135deg, #f39c12, #e67e22); padding: 8px 22px; border-radius: 50px; }
+        .btn-dxf { background: linear-gradient(135deg, #1a5276, #2e86c1); padding: 8px 22px; border-radius: 50px; }
+        .checkbox-wrapper {
             display: flex;
             align-items: center;
             gap: 6px;
+            font-weight: 500;
+            font-size: 0.82rem;
+            color: #1e2b3c;
             cursor: pointer;
             user-select: none;
-            font-weight: 500;
-            font-size: 0.85rem;
-            color: #1e2b3c;
-            transition: all 0.2s ease;
         }
-        
-        .actions .checkbox-wrapper:hover {
-            color: #1a4972;
-        }
-        
-        .actions .checkbox-wrapper input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: #1a4972;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        
-        .actions .checkbox-wrapper input[type="checkbox"]:hover {
-            transform: scale(1.1);
-        }
-        
-        .actions .checkbox-wrapper input[type="checkbox"]:checked {
-            accent-color: #1f6e43;
-        }
-        
-        .btn-pdf {
-            padding: 8px 28px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #1a4972, #2a6b9e);
-            color: white;
-            border: none;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 8px 25px rgba(26, 73, 114, 0.35);
-            letter-spacing: 0.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-pdf::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .btn-pdf:hover::before {
-            left: 100%;
-        }
-        
-        .btn-pdf:hover {
-            background: linear-gradient(135deg, #0d3454, #1a4972);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(26, 73, 114, 0.45);
-        }
-        
-        .btn-pdf:active {
-            transform: scale(0.96);
-        }
-        
-        .btn-pdf::after {
-            content: "📄";
-            font-size: 1.1rem;
-            transition: transform 0.3s ease;
-        }
-        
-        .btn-pdf:hover::after {
-            transform: rotate(-10deg) scale(1.1);
-        }
-
-        .btn-svg {
-            padding: 8px 28px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-            color: white;
-            border: none;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 8px 25px rgba(142, 68, 173, 0.35);
-            letter-spacing: 0.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-svg::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        
-        .btn-svg:hover::before {
-            left: 100%;
-        }
-        
-        .btn-svg:hover {
-            background: linear-gradient(135deg, #6c3483, #8e44ad);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(142, 68, 173, 0.45);
-        }
-        
-        .btn-svg:active {
-            transform: scale(0.96);
-        }
-        
-        .btn-svg::after {
-            content: "🎨";
-            font-size: 1.1rem;
-            transition: transform 0.3s ease;
-        }
-        
-        .btn-svg:hover::after {
-            transform: rotate(-10deg) scale(1.1);
-        }
-        
-        /* כפתורי פורמטים חדשים */
-        .btn-eps {
-            padding: 8px 28px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #6c3483, #8e44ad);
-            color: white;
-            border: none;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 8px 25px rgba(108, 52, 131, 0.35);
-            letter-spacing: 0.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-eps::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        .btn-eps:hover::before {
-            left: 100%;
-        }
-        .btn-eps:hover {
-            background: linear-gradient(135deg, #4a235a, #6c3483);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(108, 52, 131, 0.45);
-        }
-        .btn-eps:active {
-            transform: scale(0.96);
-        }
-        .btn-eps::after {
-            content: "✨";
-            font-size: 1.1rem;
-            transition: transform 0.3s ease;
-        }
-        .btn-eps:hover::after {
-            transform: rotate(-10deg) scale(1.1);
-        }
-
-        .btn-ai {
-            padding: 8px 28px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-            border: none;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.35);
-            letter-spacing: 0.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-ai::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        .btn-ai:hover::before {
-            left: 100%;
-        }
-        .btn-ai:hover {
-            background: linear-gradient(135deg, #d35400, #f39c12);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(243, 156, 18, 0.45);
-        }
-        .btn-ai:active {
-            transform: scale(0.96);
-        }
-        .btn-ai::after {
-            content: "⭐";
-            font-size: 1.1rem;
-            transition: transform 0.3s ease;
-        }
-        .btn-ai:hover::after {
-            transform: rotate(-10deg) scale(1.1);
-        }
-
-        .btn-dxf {
-            padding: 8px 28px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #1a5276, #2e86c1);
-            color: white;
-            border: none;
-            border-radius: 60px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            box-shadow: 0 8px 25px rgba(26, 82, 118, 0.35);
-            letter-spacing: 0.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-dxf::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-        .btn-dxf:hover::before {
-            left: 100%;
-        }
-        .btn-dxf:hover {
-            background: linear-gradient(135deg, #0e3d5e, #1a5276);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(26, 82, 118, 0.45);
-        }
-        .btn-dxf:active {
-            transform: scale(0.96);
-        }
-        .btn-dxf::after {
-            content: "📐";
-            font-size: 1.1rem;
-            transition: transform 0.3s ease;
-        }
-        .btn-dxf:hover::after {
-            transform: rotate(-10deg) scale(1.1);
-        }
-        
+        .checkbox-wrapper input { width: 16px; height: 16px; accent-color: #1a4972; cursor: pointer; }
         .note-row {
             display: flex;
             align-items: center;
             gap: 6px;
             width: 100%;
-            max-width: 500px;
-            margin-top: 4px;
+            max-width: 420px;
             direction: ltr;
         }
-        
-        .note-row label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #1e2b3c;
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            white-space: nowrap;
-            order: 2;
-        }
-        
+        .note-row label { order: 2; white-space: nowrap; font-weight: 600; font-size: 0.82rem; color: #1e2b3c; }
         .note-row input {
             flex: 1;
-            padding: 5px 12px;
-            font-size: 0.85rem;
-            border: 2px solid rgba(255,255,255,0.8);
-            border-radius: 30px;
-            background: rgba(255, 255, 255, 0.7);
-            color: #0b1a2b;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            order: 1;
             text-align: right;
             direction: rtl;
-            order: 1;
+            width: auto;
+            border-radius: 30px;
+            padding: 5px 12px;
         }
-        
-        .note-row input:focus {
-            border-color: #4a7bb5;
-            box-shadow: 0 0 0 4px rgba(74, 123, 181, 0.15);
-            outline: none;
-        }
-        
-        .note-row input:hover {
-            border-color: #6b9bcb;
-        }
-        
-        .note-row input::placeholder {
-            color: #9aaec2;
-            font-weight: 400;
-        }
-        
         .net-wrapper {
             position: relative;
             width: 100%;
@@ -543,29 +122,19 @@
             justify-content: center;
             align-items: flex-start;
             padding: 10px 0;
-            min-height: 300px;
+            min-height: 280px;
         }
-        
         .net {
             position: relative;
             background: transparent;
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-            padding: 0;
-            transform-origin: top center;
             flex-shrink: 0;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.2s;
         }
-        
-        .net.fade {
-            opacity: 0.5;
-        }
-        
+        .net.fade { opacity: 0.45; }
         .panel {
             position: absolute;
-            border: 2px solid #1f2f3f;
-            border-radius: 8px;
+            border: 1.5px solid #1a1a1a;
+            border-radius: 4px;
             background: white;
             display: flex;
             justify-content: center;
@@ -574,523 +143,87 @@
             font-weight: 600;
             text-align: center;
             flex-direction: column;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
             color: #111e2c;
             padding: 2px;
             cursor: default;
+            /* prevent adjacent panels from looking double-thick where they meet */
+            background-clip: padding-box;
         }
-        
-        .panel:hover {
-            transform: scale(1.02);
-            z-index: 10;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        }
-        
-        .dim-label {
-            font-size: 14px;
-            font-weight: 700;
-            line-height: 1.3;
-            color: #0f1e2f;
-            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
-        }
-        
+        .panel:hover { transform: scale(1.015); z-index: 10; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+        .panel.glue { background: #fff3e0 !important; border-style: dashed; }
+        .dim-label { font-size: 13px; font-weight: 700; line-height: 1.25; color: #0f1e2f; }
         .dim-sub {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
             color: #2c4058;
-            background: rgba(255,255,255,0.4);
-            padding: 2px 8px;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.45);
+            padding: 1px 7px;
+            border-radius: 16px;
             margin-top: 2px;
-            backdrop-filter: blur(4px);
         }
-        
-        .mobile-menu-toggle {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: #1a4972;
-            color: white;
-            border: none;
-            border-radius: 60px;
-            padding: 14px 20px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            box-shadow: 0 8px 30px rgba(26, 73, 114, 0.5);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            gap: 8px;
-            align-items: center;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-        
-        .mobile-menu-toggle:hover {
-            transform: scale(1.05);
-            background: #0d3454;
-            box-shadow: 0 12px 40px rgba(26, 73, 114, 0.6);
-        }
-        
-        .mobile-menu-toggle:active {
-            transform: scale(0.95);
-        }
-        
-        .mobile-menu-toggle .badge {
-            background: #ff6b6b;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
+        .legend {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-        
-        .mobile-menu-panel {
-            display: none;
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            left: 20px;
-            z-index: 999;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-            border: 1px solid rgba(255,255,255,0.2);
-            animation: slideUp 0.3s ease;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-        
-        .mobile-menu-panel.open {
-            display: block;
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        
-        .mobile-menu-panel .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid rgba(0,0,0,0.06);
-        }
-        
-        .mobile-menu-panel .panel-header h3 {
-            font-size: 1.1rem;
-            color: #0c3861;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .mobile-menu-panel .panel-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
-            padding: 0 8px;
-            transition: transform 0.2s;
-        }
-        
-        .mobile-menu-panel .panel-close:hover {
-            transform: rotate(90deg);
-        }
-        
-        .mobile-menu-panel .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .mobile-menu-panel .control-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            gap: 14px;
             flex-wrap: wrap;
-        }
-        
-        .mobile-menu-panel .control-row label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #1e2b3c;
-            min-width: 30px;
-        }
-        
-        .mobile-menu-panel .control-row input[type="number"] {
-            flex: 1;
-            min-width: 60px;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 12px;
-            background: rgba(255,255,255,0.8);
-            text-align: center;
-            transition: border-color 0.2s;
-        }
-        
-        .mobile-menu-panel .control-row input[type="number"]:focus {
-            border-color: #4a7bb5;
-            outline: none;
-        }
-        
-        .mobile-menu-panel .control-row input.error {
-            border-color: #e74c3c;
-            background: rgba(231, 76, 60, 0.1);
-        }
-        
-        .mobile-menu-panel .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        
-        .mobile-menu-panel .action-buttons button {
-            padding: 12px;
-            border: none;
-            border-radius: 14px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 8px;
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-update-mobile {
-            background: linear-gradient(135deg, #1f6e43, #2d8a56);
-            color: white;
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-update-mobile:active {
-            transform: scale(0.97);
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-pdf-mobile {
-            background: linear-gradient(135deg, #1a4972, #2a6b9e);
-            color: white;
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-pdf-mobile:active {
-            transform: scale(0.97);
-        }
-
-        .mobile-menu-panel .action-buttons .btn-svg-mobile {
-            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-            color: white;
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-svg-mobile:active {
-            transform: scale(0.97);
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-eps-mobile {
-            background: linear-gradient(135deg, #6c3483, #8e44ad);
-            color: white;
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-eps-mobile:active {
-            transform: scale(0.97);
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-ai-mobile {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-ai-mobile:active {
-            transform: scale(0.97);
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-dxf-mobile {
-            background: linear-gradient(135deg, #1a5276, #2e86c1);
-            color: white;
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-dxf-mobile:active {
-            transform: scale(0.97);
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-reset-mobile {
-            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
-            color: white;
-        }
-        
-        .mobile-menu-panel .action-buttons .btn-reset-mobile:active {
-            transform: scale(0.97);
-        }
-        
-        .mobile-menu-panel .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px 0;
-        }
-        
-        .mobile-menu-panel .toggle-row label {
-            font-weight: 500;
+            font-size: 0.78rem;
             color: #1e2b3c;
+            margin-top: 2px;
         }
-        
-        .mobile-menu-panel .toggle-row input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: #1a4972;
-            cursor: pointer;
+        .legend span { display: flex; align-items: center; gap: 5px; }
+        .legend .swatch {
+            width: 18px; height: 12px;
+            border: 1.5px solid #333;
+            border-radius: 3px;
         }
-        
-        .mobile-menu-panel .note-row {
-            display: flex !important;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 8px;
-            width: 100%;
-            max-width: none;
-            direction: rtl;
-        }
-
-        .mobile-menu-panel .note-row label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #1e2b3c;
-            order: 0;
-        }
-        
-        .mobile-menu-panel .note-row input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 12px;
-            font-size: 0.9rem;
-            background: rgba(255,255,255,0.8);
-            text-align: right;
-            direction: rtl;
-            order: 1;
-        }
-        
-        .mobile-menu-panel .note-row input:focus {
-            border-color: #4a7bb5;
-            outline: none;
-        }
-        
-        .mobile-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.3);
-            z-index: 998;
-            backdrop-filter: blur(4px);
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .mobile-overlay.open {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @media print {
-            body { background: white; padding: 0; gap: 4px; }
-            .main-header { display: none; }
-            .controls { display: none; }
-            .actions { display: none; }
-            .note-row { display: none; }
-            .net-wrapper { overflow: visible; }
-            .net { transform: none !important; }
-            .panel { border: 2px solid black; border-radius: 0; }
-            .panel:hover { transform: none; box-shadow: none; }
-            .mobile-menu-toggle { display: none !important; }
-            .mobile-menu-panel { display: none !important; }
-            .mobile-overlay { display: none !important; }
-            .footer { display: none !important; }
-        }
-        
-        @media (max-width: 768px) {
-            body { padding: 4px 10px 80px 10px; gap: 6px; }
-            .main-header h1 {
-                font-size: 1.2rem;
-                padding: 4px 16px;
-            }
-            .controls { display: none; }
-            .actions { display: none; }
-            /* הסתרת שורת הערה בדסקטופ בלבד – לא בתפריט מובייל */
-            body > .note-row { display: none; }
-            
-            .mobile-menu-toggle {
-                display: flex;
-            }
-            
-            .net-wrapper {
-                overflow-x: auto;
-                overflow-y: visible;
-                padding: 5px 0;
-                min-height: 250px;
-                justify-content: center;
-                align-items: center;
-            }
-            
-            .net {
-                transform-origin: top center;
-            }
-            
-            .panel {
-                border-radius: 5px;
-                border-width: 1.5px;
-            }
-            
-            .dim-label {
-                font-size: 10px;
-            }
-            .dim-sub {
-                font-size: 8px;
-                padding: 1px 5px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .mobile-menu-panel {
-                bottom: 70px;
-                right: 10px;
-                left: 10px;
-                padding: 16px;
-                border-radius: 20px;
-                max-height: 70vh;
-            }
-            
-            .mobile-menu-panel .control-row input[type="number"] {
-                min-width: 50px;
-                padding: 6px 8px;
-                font-size: 0.85rem;
-            }
-            
-            .mobile-menu-toggle {
-                padding: 12px 16px;
-                font-size: 1rem;
-                bottom: 15px;
-                right: 15px;
-            }
-            
-            .net-wrapper {
-                min-height: 200px;
-            }
-        }
-        
-        .loading-indicator {
-            display: none;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            border: 3px solid #e2e8f0;
-            border-top: 3px solid #4a7bb5;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            z-index: 1000;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            opacity: 0.5;
-        }
-        
-        input[type="number"]:hover::-webkit-inner-spin-button,
-        input[type="number"]:hover::-webkit-outer-spin-button {
-            opacity: 1;
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(26, 73, 114, 0.9);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 999;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        .toast.error {
-            background: rgba(192, 57, 43, 0.95);
-        }
-        
-        .toast.success {
-            background: rgba(46, 125, 50, 0.95);
-        }
-        
-        .toast.info {
-            background: rgba(26, 73, 114, 0.95);
-        }
-
-        @media (max-width: 768px) {
-            .toast {
-                bottom: 80px;
-                right: 20px;
-                left: 20px;
-                text-align: center;
-                padding: 10px 16px;
-                font-size: 0.8rem;
-            }
-        }
-
         .footer {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1100px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 16px;
-            padding: 12px 24px 8px 24px;
-            margin-top: 12px;
+            gap: 12px;
+            padding: 10px 20px 6px;
+            margin-top: 8px;
             border-top: 1px solid rgba(0,0,0,0.08);
             direction: rtl;
             flex-wrap: wrap;
         }
-
-        .footer .copyright {
-            font-size: 0.9rem;
+        .footer .copyright { font-size: 0.85rem; font-weight: 500; color: #1f3347; }
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: rgba(26,73,114,0.92);
+            color: white;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-size: 0.88rem;
             font-weight: 500;
-            color: #1f3347;
-            letter-spacing: 0.3px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.45s cubic-bezier(0.68,-0.55,0.265,1.55);
+            z-index: 999;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.error { background: rgba(192,57,43,0.95); }
+        .toast.success { background: rgba(46,125,50,0.95); }
+        .toast.info { background: rgba(26,73,114,0.95); }
+        .loading-indicator {
+            display: none;
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            width: 36px;
+            height: 36px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4a7bb5;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            z-index: 1000;
         }
 
         .footer .logo {
@@ -1099,111 +232,236 @@
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
-
-        @media (max-width: 768px) {
-            .footer {
-                padding: 10px 12px 6px 12px;
-                gap: 10px;
-            }
-            .footer .copyright {
-                font-size: 0.75rem;
-            }
-            .footer .logo {
-                height: 26px;
-            }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            bottom: 18px;
+            right: 18px;
+            z-index: 1000;
+            background: #1a4972;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 18px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            box-shadow: 0 8px 28px rgba(26,73,114,0.5);
+            cursor: pointer;
+            gap: 6px;
+            align-items: center;
         }
-        
+        .mobile-menu-panel {
+            display: none;
+            position: fixed;
+            bottom: 72px;
+            right: 14px;
+            left: 14px;
+            z-index: 999;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(18px);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+            max-height: 72vh;
+            overflow-y: auto;
+        }
+        .mobile-menu-panel.open { display: block; }
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.28);
+            z-index: 998;
+        }
+        .mobile-overlay.open { display: block; }
+        .mobile-menu-panel .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0,0,0,0.06);
+        }
+        .mobile-menu-panel .panel-header h3 { font-size: 1.05rem; color: #0c3861; }
+        .mobile-menu-panel .panel-close {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #666;
+        }
+        .mobile-menu-panel .control-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .mobile-menu-panel .control-row label { font-weight: 600; font-size: 0.88rem; min-width: 28px; }
+        .mobile-menu-panel .control-row input[type="number"],
+        .mobile-menu-panel .control-row select {
+            flex: 1;
+            min-width: 56px;
+            padding: 8px 10px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .mobile-menu-panel .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-top: 8px;
+        }
+        .mobile-menu-panel .action-buttons button {
+            padding: 11px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+        }
+        .mobile-menu-panel .btn-update-m { background: linear-gradient(135deg,#1f6e43,#2d8a56); }
+        .mobile-menu-panel .btn-pdf-m { background: linear-gradient(135deg,#1a4972,#2a6b9e); }
+        .mobile-menu-panel .btn-svg-m { background: linear-gradient(135deg,#8e44ad,#9b59b6); }
+        .mobile-menu-panel .btn-eps-m { background: linear-gradient(135deg,#6c3483,#8e44ad); }
+        .mobile-menu-panel .btn-ai-m { background: linear-gradient(135deg,#f39c12,#e67e22); }
+        .mobile-menu-panel .btn-dxf-m { background: linear-gradient(135deg,#1a5276,#2e86c1); }
+        .mobile-menu-panel .btn-reset-m { background: linear-gradient(135deg,#7f8c8d,#95a5a6); }
+        .mobile-menu-panel .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            font-size: 0.88rem;
+        }
+        .mobile-menu-panel .note-row {
+            flex-direction: column;
+            max-width: none;
+            direction: rtl;
+            margin-top: 8px;
+        }
+        .mobile-menu-panel .note-row label { order: 0; }
+        .mobile-menu-panel .note-row input { order: 1; width: 100%; text-align: right; }
         @media print {
-            .footer {
-                display: none !important;
-            }
+            body { background: white; padding: 0; gap: 2px; }
+            .main-header, .controls, .actions, .note-row, .legend, .footer,
+            .mobile-menu-toggle, .mobile-menu-panel, .mobile-overlay, .toast, .loading-indicator { display: none !important; }
+            .net-wrapper { overflow: visible; }
+            .net { transform: none !important; }
+            .panel { border: 2px solid black; border-radius: 0; box-shadow: none; }
+            .panel:hover { transform: none; }
         }
+        @media (max-width: 768px) {
+            body { padding: 4px 8px 78px 8px; gap: 6px; }
+            .main-header h1 { font-size: 1.15rem; }
+            .controls, .actions, body > .note-row, .legend { display: none; }
+            .mobile-menu-toggle { display: flex; }
+            .net-wrapper { min-height: 220px; }
+            .dim-label { font-size: 10px; }
+            .dim-sub { font-size: 8px; padding: 1px 4px; }
+            .toast { bottom: 72px; right: 14px; left: 14px; text-align: center; }
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { opacity: 0.45; }
     </style>
 </head>
 <body>
-
     <div class="loading-indicator" id="loadingIndicator"></div>
-    <div class="toast" id="toast">✅ הפריסה עודכנה</div>
-
+    <div class="toast" id="toast"></div>
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
-    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="פתח תפריט שליטה">
-        📐 תפריט
-        <span class="badge" id="mobileBadge">⚡</span>
-    </button>
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="תפריט">📐 תפריט</button>
 
-    <div class="mobile-menu-panel" id="mobileMenuPanel" role="dialog" aria-label="תפריט שליטה בפריסה">
+    <div class="mobile-menu-panel" id="mobileMenuPanel" role="dialog">
         <div class="panel-header">
             <h3>📦 שליטה בפריסה</h3>
-            <button class="panel-close" id="mobileMenuClose" aria-label="סגור תפריט">✕</button>
+            <button class="panel-close" id="mobileMenuClose">✕</button>
         </div>
-        
-        <div class="control-group">
-            <div class="control-row">
-                <label for="mobileInputL">L</label>
-                <input type="number" id="mobileInputL" value="62" step="0.1" min="0.1" max="999" aria-label="אורך">
-                <label for="mobileInputW">W</label>
-                <input type="number" id="mobileInputW" value="46" step="0.1" min="0.1" max="999" aria-label="רוחב">
-                <label for="mobileInputH">H</label>
-                <input type="number" id="mobileInputH" value="88.5" step="0.1" min="0.1" max="999" aria-label="גובה">
-            </div>
-            
-            <div class="action-buttons">
-                <button class="btn-update-mobile" id="mobileUpdateBtn">🔄 עדכן פריסה</button>
-                <button class="btn-pdf-mobile" id="mobilePdfBtn">📄 PDF</button>
-                <button class="btn-svg-mobile" id="mobileSvgBtn">🎨 SVG</button>
-                <button class="btn-eps-mobile" id="mobileEpsBtn">✨ EPS</button>
-                <button class="btn-ai-mobile" id="mobileAiBtn">⭐ AI</button>
-                <button class="btn-dxf-mobile" id="mobileDxfBtn">📐 DXF</button>
-                <button class="btn-reset-mobile" id="mobileResetBtn">↺ איפוס</button>
-            </div>
-            
-            <div class="toggle-row">
-                <label for="mobileHideLabels">הסתר כותרות חלקים</label>
-                <input type="checkbox" id="mobileHideLabels">
-            </div>
-            
-            <div class="note-row">
-                <label for="mobileNoteInput">✏️ הערה</label>
-                <input type="text" id="mobileNoteInput" placeholder="הוסף הערה לפריסה..." maxlength="100" aria-label="הערה">
-            </div>
+        <div class="control-row">
+            <label>L</label><input type="number" id="mL" value="62" step="0.1" min="0.1" max="999">
+            <label>W</label><input type="number" id="mW" value="46" step="0.1" min="0.1" max="999">
+            <label>H</label><input type="number" id="mH" value="88.5" step="0.1" min="0.1" max="999">
+        </div>
+        <div class="control-row">
+            <label>Glue</label><input type="number" id="mGlue" value="3" step="0.1" min="0" max="50">
+            <label>יח׳</label>
+            <select id="mUnit">
+                <option value="cm" selected>ס״מ</option>
+                <option value="mm">מ״מ</option>
+                <option value="in">אינץ׳</option>
+            </select>
+        </div>
+        <div class="toggle-row"><label>הסתר כותרות</label><input type="checkbox" id="mHide"></div>
+        <div class="toggle-row"><label>הצג קווי קיפול</label><input type="checkbox" id="mCrease" checked></div>
+        <div class="toggle-row"><label>דשקי הדבקה</label><input type="checkbox" id="mGlueOn" checked></div>
+        <div class="note-row">
+            <label>✏️ הערה</label>
+            <input type="text" id="mNote" placeholder="הוסף הערה..." maxlength="100">
+        </div>
+        <div class="action-buttons">
+            <button class="btn-update-m" id="mUpdate">🔄 עדכן</button>
+            <button class="btn-pdf-m" id="mPdf">📄 PDF</button>
+            <button class="btn-svg-m" id="mSvg">🎨 SVG</button>
+            <button class="btn-eps-m" id="mEps">✨ EPS</button>
+            <button class="btn-ai-m" id="mAi">⭐ AI</button>
+            <button class="btn-dxf-m" id="mDxf">📐 DXF</button>
+            <button class="btn-reset-m" id="mReset">↺ איפוס</button>
         </div>
     </div>
 
     <div class="main-header">
-        <h1>📦 <span class="highlight">יוצר פריסת קרטונים</span></h1>
+        <h1>📦 <span class="highlight">יוצר פריסת קרטונים פרו</span></h1>
     </div>
 
     <div class="controls">
-        <label for="inputL">L (אורך)</label>
-        <input type="number" id="inputL" value="62" step="0.1" min="0.1" max="999" aria-label="אורך">
-        <label for="inputW">W (רוחב)</label>
-        <input type="number" id="inputW" value="46" step="0.1" min="0.1" max="999" aria-label="רוחב">
-        <label for="inputH">H (גובה)</label>
-        <input type="number" id="inputH" value="88.5" step="0.1" min="0.1" max="999" aria-label="גובה">
-        <button class="btn-reset" onclick="resetDimensions()">↺ איפוס</button>
-        <button class="btn-update" onclick="updateNet()">🔄 עדכן פריסה</button>
+        <label for="inputL">L</label>
+        <input type="number" id="inputL" value="62" step="0.1" min="0.1" max="999" title="אורך">
+        <label for="inputW">W</label>
+        <input type="number" id="inputW" value="46" step="0.1" min="0.1" max="999" title="רוחב">
+        <label for="inputH">H</label>
+        <input type="number" id="inputH" value="88.5" step="0.1" min="0.1" max="999" title="גובה">
+        <label for="inputGlue">Glue</label>
+        <input type="number" id="inputGlue" value="3" step="0.1" min="0" max="50" title="רוחב דשקי הדבקה">
+        <label for="unitSelect">יח׳</label>
+        <select id="unitSelect">
+            <option value="cm" selected>ס״מ</option>
+            <option value="mm">מ״מ</option>
+            <option value="in">אינץ׳</option>
+        </select>
+        <button class="btn btn-reset" onclick="resetAll()">↺ איפוס</button>
+        <button class="btn btn-update" onclick="updateFromDesktop()">🔄 עדכן</button>
     </div>
 
     <div class="actions">
-        <div class="checkbox-wrapper">
-            <input type="checkbox" id="hideLabels">
-            <label for="hideLabels">הסתר כותרות חלקים</label>
-        </div>
-        <button class="btn-pdf" onclick="downloadPDF()">📄 PDF</button>
-        <button class="btn-svg" onclick="downloadSVG()">🎨 SVG</button>
-        <button class="btn-eps" onclick="downloadEPS()">✨ EPS</button>
-        <button class="btn-ai" onclick="downloadAI()">⭐ AI</button>
-        <button class="btn-dxf" onclick="downloadDXF()">📐 DXF</button>
+        <label class="checkbox-wrapper"><input type="checkbox" id="hideLabels"> הסתר כותרות</label>
+        <label class="checkbox-wrapper"><input type="checkbox" id="showCrease" checked> קווי קיפול</label>
+        <label class="checkbox-wrapper"><input type="checkbox" id="glueOn" checked> דשקי הדבקה</label>
+        <button class="btn btn-pdf" onclick="downloadPDF()">📄 PDF</button>
+        <button class="btn btn-svg" onclick="downloadSVG()">🎨 SVG</button>
+        <button class="btn btn-eps" onclick="downloadEPS()">✨ EPS</button>
+        <button class="btn btn-ai" onclick="downloadAI()">⭐ AI</button>
+        <button class="btn btn-dxf" onclick="downloadDXF()">📐 DXF</button>
     </div>
 
-    <div class="note-row"> 
+    <div class="note-row">
         <label for="noteInput">✏️ הערה</label>
-        <input type="text" id="noteInput" placeholder="הוסף הערה לפריסה..." maxlength="100" aria-label="הערה">
+        <input type="text" id="noteInput" placeholder="הוסף הערה לפריסה..." maxlength="100">
     </div>
-    
+
+    <div class="legend" id="legend">
+        <span><span class="swatch" style="background:#ffe6f0"></span> מכסים</span>
+        <span><span class="swatch" style="background:#f9f9f9"></span> דפנות</span>
+        <span><span class="swatch" style="background:#e6f2ff"></span> תחתית</span>
+        <span><span class="swatch" style="background:#fff3e0;border-style:dashed"></span> דשקי הדבקה</span>
+        <span style="border-bottom:2px dashed #c0392b;width:22px;display:inline-block"></span> קיפול
+    </div>
+
     <div class="net-wrapper" id="netWrapper">
-        <div id="netContainer"></div>
+        <div id="netContainer" class="net"></div>
     </div>
 
     <div class="footer">
@@ -1211,1317 +469,659 @@
         <img src="OG_Blue_Logo2.png" alt="לוגו" class="logo">
     </div>
 
-    <script>
-        (function() {
-            // ===== קבועים =====
-            const BASE_SCALE = 3.78;
-            const DEFAULT_L = 62;
-            const DEFAULT_W = 46;
-            const DEFAULT_H = 88.5;
-            const STORAGE_KEY = 'netState';
-
-            // ===== מצב =====
-            let currentScale = 1;
-            let isMobile = window.innerWidth <= 768;
-            let animationFrameId = null;
-            let currentL = DEFAULT_L;
-            let currentW = DEFAULT_W;
-            let currentH = DEFAULT_H;
-
-            // ===== פונקציות עזר =====
-            function showToast(message, type = 'info') {
-                const toast = document.getElementById('toast');
-                toast.textContent = message;
-                toast.className = 'toast ' + type;
-                toast.classList.add('show');
-                clearTimeout(toast._timeout);
-                toast._timeout = setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 3000);
-            }
-
-            function validateDimensions(L, W, H) {
-                const errors = [];
-                if (isNaN(L) || L <= 0) errors.push('L חייב להיות מספר חיובי');
-                if (isNaN(W) || W <= 0) errors.push('W חייב להיות מספר חיובי');
-                if (isNaN(H) || H <= 0) errors.push('H חייב להיות מספר חיובי');
-                if (L > 999) errors.push('L לא יכול לעלות על 999');
-                if (W > 999) errors.push('W לא יכול לעלות על 999');
-                if (H > 999) errors.push('H לא יכול לעלות על 999');
-                return errors;
-            }
-
-            function setInputError(input, hasError) {
-                if (hasError) {
-                    input.classList.add('error');
-                    input.setAttribute('aria-invalid', 'true');
-                } else {
-                    input.classList.remove('error');
-                    input.removeAttribute('aria-invalid');
-                }
-            }
-
-            function validateAndHighlight(inputs) {
-                let hasError = false;
-                inputs.forEach(input => {
-                    const val = parseFloat(input.value);
-                    const isValid = !isNaN(val) && val > 0 && val <= 999;
-                    setInputError(input, !isValid);
-                    if (!isValid) hasError = true;
-                });
-                return !hasError;
-            }
-
-            function getDimensionsFromInputs() {
-                const L = parseFloat(document.getElementById('inputL').value);
-                const W = parseFloat(document.getElementById('inputW').value);
-                const H = parseFloat(document.getElementById('inputH').value);
-                return { L, W, H };
-            }
-
-            function getDimensionsFromMobile() {
-                const L = parseFloat(document.getElementById('mobileInputL').value);
-                const W = parseFloat(document.getElementById('mobileInputW').value);
-                const H = parseFloat(document.getElementById('mobileInputH').value);
-                return { L, W, H };
-            }
-
-            function getNote() {
-                return document.getElementById('noteInput').value.trim();
-            }
-
-            function getMobileNote() {
-                return document.getElementById('mobileNoteInput').value.trim();
-            }
-
-            function getHideLabels() {
-                return document.getElementById('hideLabels').checked;
-            }
-
-            function getMobileHideLabels() {
-                return document.getElementById('mobileHideLabels').checked;
-            }
-
-            function getCombinedNote() {
-                const desktopNote = getNote();
-                const mobileNote = getMobileNote();
-                return desktopNote || mobileNote;
-            }
-
-            function getCombinedHideLabels() {
-                return getHideLabels() || getMobileHideLabels();
-            }
-
-            function syncDesktopToMobile() {
-                const dims = getDimensionsFromInputs();
-                document.getElementById('mobileInputL').value = dims.L || DEFAULT_L;
-                document.getElementById('mobileInputW').value = dims.W || DEFAULT_W;
-                document.getElementById('mobileInputH').value = dims.H || DEFAULT_H;
-                document.getElementById('mobileHideLabels').checked = getHideLabels();
-                document.getElementById('mobileNoteInput').value = getNote();
-            }
-
-            function syncMobileToDesktop() {
-                const dims = getDimensionsFromMobile();
-                document.getElementById('inputL').value = dims.L || DEFAULT_L;
-                document.getElementById('inputW').value = dims.W || DEFAULT_W;
-                document.getElementById('inputH').value = dims.H || DEFAULT_H;
-                document.getElementById('hideLabels').checked = getMobileHideLabels();
-                document.getElementById('noteInput').value = getMobileNote();
-            }
-
-            function saveState(L, W, H, note, hideLabels) {
-                try {
-                    const state = { L, W, H, note, hideLabels, timestamp: Date.now() };
-                    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                } catch (e) {
-                    // ignore
-                }
-            }
-
-            function loadState() {
-                try {
-                    const data = sessionStorage.getItem(STORAGE_KEY);
-                    if (data) {
-                        const state = JSON.parse(data);
-                        if (state.timestamp && (Date.now() - state.timestamp) < 3600000) {
-                            return state;
-                        }
-                    }
-                } catch (e) {
-                    // ignore
-                }
-                return null;
-            }
-
-            function resetDimensions() {
-                document.getElementById('inputL').value = DEFAULT_L;
-                document.getElementById('inputW').value = DEFAULT_W;
-                document.getElementById('inputH').value = DEFAULT_H;
-                document.getElementById('mobileInputL').value = DEFAULT_L;
-                document.getElementById('mobileInputW').value = DEFAULT_W;
-                document.getElementById('mobileInputH').value = DEFAULT_H;
-                document.getElementById('noteInput').value = '';
-                document.getElementById('mobileNoteInput').value = '';
-                document.getElementById('hideLabels').checked = false;
-                document.getElementById('mobileHideLabels').checked = false;
-                
-                document.querySelectorAll('.controls input, .mobile-menu-panel input[type="number"]').forEach(el => {
-                    el.classList.remove('error');
-                    el.removeAttribute('aria-invalid');
-                });
-                
-                buildNet(DEFAULT_L, DEFAULT_W, DEFAULT_H);
-                showToast('↺ אופס לערכי ברירת מחדל', 'info');
-            }
-
-            // ===== פונקציות לבניית הפריסה =====
-            function calculateAutoScale() {
-                isMobile = window.innerWidth <= 768;
-                if (!isMobile) {
-                    currentScale = 1;
-                    return;
-                }
-
-                const dims = getDimensionsFromInputs();
-                const L = dims.L || DEFAULT_L;
-                const W = dims.W || DEFAULT_W;
-                const H = dims.H || DEFAULT_H;
-
-                const totalWidth = W + L + W + L;
-                const maxWidth = window.innerWidth - 40;
-                const maxHeight = window.innerHeight - 300;
-                const totalHeight = Math.max(L/2, W/2) + H + Math.max(L/2, W/2);
-                
-                const scaleByWidth = maxWidth / (totalWidth * BASE_SCALE);
-                const scaleByHeight = maxHeight / (totalHeight * BASE_SCALE);
-                
-                let autoScale = Math.min(scaleByWidth, scaleByHeight, 1);
-                autoScale = Math.max(autoScale, 0.2);
-                autoScale = Math.min(autoScale, 1.2);
-                
-                currentScale = autoScale;
-            }
-
-            function buildNetWithScale(L, W, H, scaleFactor) {
-                if (!L || !W || !H || L <= 0 || W <= 0 || H <= 0) {
-                    showToast('⚠️ מידות לא תקינות', 'error');
-                    return;
-                }
-
-                const totalWidth = W + L + W + L;
-                const maxTopHeight = Math.max(L/2, W/2);
-                const totalHeight = maxTopHeight + H + maxTopHeight;
-                
-                const effectiveScale = BASE_SCALE * scaleFactor;
-                
-                const totalW = totalWidth * effectiveScale;
-                const totalH = totalHeight * effectiveScale;
-
-                const container = document.getElementById('netContainer');
-                container.style.width = totalW + 'px';
-                container.style.height = totalH + 'px';
-                container.className = 'net';
-                container.innerHTML = '';
-
-                const hideLabels = getCombinedHideLabels();
-
-                function createPanel(name, left, top, w, h, color, sub) {
-                    const div = document.createElement('div');
-                    div.className = 'panel';
-                    div.style.left = (left * effectiveScale) + 'px';
-                    div.style.top = (top * effectiveScale) + 'px';
-                    div.style.width = (w * effectiveScale) + 'px';
-                    div.style.height = (h * effectiveScale) + 'px';
-                    div.style.background = color;
-                    div.setAttribute('role', 'img');
-                    div.setAttribute('aria-label', `${name}: ${sub} ס"מ`);
-                    
-                    const fontSize = Math.max(7, Math.min(16, 14 * scaleFactor));
-                    const subFontSize = Math.max(6, Math.min(12, 11 * scaleFactor));
-                    
-                    if (hideLabels) {
-                        div.innerHTML = `
-                            <span class="dim-label" style="font-size: ${fontSize + 2}px;">${sub}</span>
-                        `;
-                    } else {
-                        div.innerHTML = `
-                            <span class="dim-label" style="font-size: ${fontSize}px;">${name}<br><span class="dim-sub" style="font-size: ${subFontSize}px;">${sub}</span></span>
-                        `;
-                    }
-                    
-                    div.title = `${name}: ${sub} ס"מ`;
-                    container.appendChild(div);
-                }
-
-                const topColor = '#ffe6f0';
-                const wallColor = '#f9f9f9';
-                const bottomColor = '#e6f2ff';
-
-                const topData = [
-                    { name: 'מכסה עליון', w: W, h: L/2, sub: W + '×' + (L/2).toFixed(1) },
-                    { name: 'מכסה עליון', w: L, h: W/2, sub: L + '×' + (W/2).toFixed(1) },
-                    { name: 'מכסה עליון', w: W, h: L/2, sub: W + '×' + (L/2).toFixed(1) },
-                    { name: 'מכסה עליון', w: L, h: W/2, sub: L + '×' + (W/2).toFixed(1) },
-                ];
-
-                let x = 0;
-                topData.forEach(p => {
-                    const topPos = maxTopHeight - p.h;
-                    createPanel(p.name, x, topPos, p.w, p.h, topColor, p.sub);
-                    x += p.w;
-                });
-
-                const wallData = [
-                    { name: 'דופן 1', w: W, h: H, sub: W + '×' + H },
-                    { name: 'דופן 2', w: L, h: H, sub: L + '×' + H },
-                    { name: 'דופן 3', w: W, h: H, sub: W + '×' + H },
-                    { name: 'דופן 4', w: L, h: H, sub: L + '×' + H },
-                ];
-
-                x = 0;
-                wallData.forEach(p => {
-                    createPanel(p.name, x, maxTopHeight, p.w, p.h, wallColor, p.sub);
-                    x += p.w;
-                });
-
-                const bottomData = [
-                    { name: 'תחתית', w: W, h: L/2, sub: W + '×' + (L/2).toFixed(1) },
-                    { name: 'תחתית', w: L, h: W/2, sub: L + '×' + (W/2).toFixed(1) },
-                    { name: 'תחתית', w: W, h: L/2, sub: W + '×' + (L/2).toFixed(1) },
-                    { name: 'תחתית', w: L, h: W/2, sub: L + '×' + (W/2).toFixed(1) },
-                ];
-
-                x = 0;
-                bottomData.forEach(p => {
-                    createPanel(p.name, x, maxTopHeight + H, p.w, p.h, bottomColor, p.sub);
-                    x += p.w;
-                });
-
-                // שמירת מצב
-                const note = getCombinedNote();
-                const hideLabelsState = getCombinedHideLabels();
-                saveState(L, W, H, note, hideLabelsState);
-
-                currentL = L;
-                currentW = W;
-                currentH = H;
-            }
-
-            function buildNet(L, W, H) {
-                if (animationFrameId) {
-                    cancelAnimationFrame(animationFrameId);
-                    animationFrameId = null;
-                }
-
-                const errors = validateDimensions(L, W, H);
-                if (errors.length > 0) {
-                    showToast('⚠️ ' + errors.join('; '), 'error');
-                    const desktopInputs = [
-                        document.getElementById('inputL'),
-                        document.getElementById('inputW'),
-                        document.getElementById('inputH')
-                    ];
-                    const mobileInputs = [
-                        document.getElementById('mobileInputL'),
-                        document.getElementById('mobileInputW'),
-                        document.getElementById('mobileInputH')
-                    ];
-                    const allInputs = [...desktopInputs, ...mobileInputs];
-                    allInputs.forEach(input => {
-                        const val = parseFloat(input.value);
-                        const isValid = !isNaN(val) && val > 0 && val <= 999;
-                        setInputError(input, !isValid);
-                    });
-                    return;
-                }
-
-                document.querySelectorAll('.controls input, .mobile-menu-panel input[type="number"]').forEach(el => {
-                    el.classList.remove('error');
-                    el.removeAttribute('aria-invalid');
-                });
-
-                const indicator = document.getElementById('loadingIndicator');
-                indicator.style.display = 'block';
-
-                const container = document.getElementById('netContainer');
-                container.classList.add('fade');
-
-                calculateAutoScale();
-
-                animationFrameId = requestAnimationFrame(() => {
-                    buildNetWithScale(L, W, H, currentScale);
-                    setTimeout(() => {
-                        container.classList.remove('fade');
-                    }, 50);
-                    indicator.style.display = 'none';
-                    showToast('✅ פריסה עודכנה', 'success');
-                    animationFrameId = null;
-                });
-            }
-
-            // ===== פונקציות עדכון =====
-            window.updateNet = function() {
-                const dims = getDimensionsFromInputs();
-                const L = dims.L || DEFAULT_L;
-                const W = dims.W || DEFAULT_W;
-                const H = dims.H || DEFAULT_H;
-                syncDesktopToMobile();
-                buildNet(L, W, H);
-            };
-
-            window.updateNetMobile = function() {
-                const dims = getDimensionsFromMobile();
-                const L = dims.L || DEFAULT_L;
-                const W = dims.W || DEFAULT_W;
-                const H = dims.H || DEFAULT_H;
-                syncMobileToDesktop();
-                buildNet(L, W, H);
-                closeMobileMenu();
-            };
-
-            window.resetDimensions = resetDimensions;
-
-            // ===== יצוא SVG (משופר עם שכבות) =====
-            window.downloadSVG = function() {
-                const dims = getDimensionsFromInputs();
-                const L = dims.L || DEFAULT_L;
-                const W = dims.W || DEFAULT_W;
-                const H = dims.H || DEFAULT_H;
-
-                const errors = validateDimensions(L, W, H);
-                if (errors.length > 0) {
-                    showToast('⚠️ ' + errors.join('; '), 'error');
-                    return;
-                }
-
-                const totalWidth = W + L + W + L;
-                const maxTopHeight = Math.max(L/2, W/2);
-                const totalHeight = maxTopHeight + H + maxTopHeight;
-
-                const scale = BASE_SCALE;
-                const svgWidth = totalWidth * scale;
-                const svgHeight = totalHeight * scale;
-
-                const hideLabels = getCombinedHideLabels();
-                const note = getCombinedNote();
-
-                let svgContent = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-                svgContent += `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" `;
-                svgContent += `width="${svgWidth}" height="${svgHeight + 80}" viewBox="0 0 ${svgWidth} ${svgHeight + 80}" `;
-                svgContent += `xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" `;
-                svgContent += `ai:version="27.0" style="background:white;">\n`;
-                
-                // מטא-דאטה
-                svgContent += `<metadata>\n`;
-                svgContent += `  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n`;
-                svgContent += `    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">\n`;
-                svgContent += `      <dc:title>פריסת קרטון ${L}x${W}x${H}</dc:title>\n`;
-                svgContent += `    </rdf:Description>\n`;
-                svgContent += `  </rdf:RDF>\n`;
-                svgContent += `</metadata>\n\n`;
-
-                // CSS
-                svgContent += `<style>\n`;
-                svgContent += `  .panel { stroke: #1f2f3f; stroke-width: 2; rx: 4; }\n`;
-                svgContent += `  .top { fill: #ffe6f0; }\n`;
-                svgContent += `  .wall { fill: #f9f9f9; }\n`;
-                svgContent += `  .bottom { fill: #e6f2ff; }\n`;
-                svgContent += `  .label { font-family: 'Arial', 'Helvetica', sans-serif; font-weight: bold; text-anchor: middle; fill: #111e2c; }\n`;
-                svgContent += `  .sub { font-family: 'Arial', 'Helvetica', sans-serif; text-anchor: middle; fill: #2c4058; }\n`;
-                svgContent += `</style>\n\n`;
-
-                // Layer 1 - שרטוט
-                svgContent += `<g id="Layer_1" ai:layer="true" ai:name="שרטוט">\n`;
-
-                function addPanel(x, y, w, h, cls, label, sub) {
-                    const rx = x * scale;
-                    const ry = y * scale;
-                    const rw = w * scale;
-                    const rh = h * scale;
-                    svgContent += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" class="panel ${cls}" />\n`;
-                    
-                    const fontSize = Math.min(14, rw/10);
-                    const subFontSize = Math.min(11, rw/15);
-                    if (hideLabels) {
-                        svgContent += `<text x="${rx + rw/2}" y="${ry + rh/2 + 5}" class="label" font-size="${fontSize}">${sub}</text>\n`;
-                    } else {
-                        svgContent += `<text x="${rx + rw/2}" y="${ry + rh/2 - 6}" class="label" font-size="${fontSize}">${label}</text>\n`;
-                        svgContent += `<text x="${rx + rw/2}" y="${ry + rh/2 + 14}" class="sub" font-size="${subFontSize}">${sub}</text>\n`;
-                    }
-                }
-
-                let xPos = 0;
-                const topParts = [
-                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` },
-                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` }
-                ];
-                topParts.forEach(p => {
-                    const yPos = maxTopHeight - p.h;
-                    addPanel(xPos, yPos, p.w, p.h, 'top', p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                xPos = 0;
-                const wallParts = [
-                    { w: W, h: H, label: 'דופן 1', sub: `${W}×${H}` },
-                    { w: L, h: H, label: 'דופן 2', sub: `${L}×${H}` },
-                    { w: W, h: H, label: 'דופן 3', sub: `${W}×${H}` },
-                    { w: L, h: H, label: 'דופן 4', sub: `${L}×${H}` }
-                ];
-                wallParts.forEach(p => {
-                    addPanel(xPos, maxTopHeight, p.w, p.h, 'wall', p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                xPos = 0;
-                const bottomParts = [
-                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` },
-                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` }
-                ];
-                bottomParts.forEach(p => {
-                    addPanel(xPos, maxTopHeight + H, p.w, p.h, 'bottom', p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                svgContent += `</g>\n`;
-
-                // Layer 2 - קווי עזר
-                svgContent += `<g id="Layer_2" ai:layer="true" ai:name="קווי עזר" style="display:none;">\n`;
-                svgContent += `  <line x1="0" y1="${maxTopHeight * scale}" x2="${totalWidth * scale}" y2="${maxTopHeight * scale}" stroke="#999" stroke-width="0.5" stroke-dasharray="4,4" />\n`;
-                svgContent += `  <line x1="0" y1="${(maxTopHeight + H) * scale}" x2="${totalWidth * scale}" y2="${(maxTopHeight + H) * scale}" stroke="#999" stroke-width="0.5" stroke-dasharray="4,4" />\n`;
-                svgContent += `</g>\n`;
-
-                // Layer 3 - מידע
-                svgContent += `<g id="Layer_3" ai:layer="true" ai:name="מידע">\n`;
-                svgContent += `<text x="${svgWidth/2}" y="${svgHeight + 30}" class="label" font-size="11" fill="#555">L=${L}cm | W=${W}cm | H=${H}cm</text>\n`;
-                if (note) {
-                    svgContent += `<text x="${svgWidth/2}" y="${svgHeight + 50}" class="label" font-size="11" fill="#1a4972">📝 ${note}</text>\n`;
-                }
-                svgContent += `</g>\n`;
-
-                svgContent += `</svg>`;
-
-                try {
-                    const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `net-${L}x${W}x${H}.svg`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    showToast('🎨 SVG עם שכבות נוצר בהצלחה!', 'success');
-                } catch (e) {
-                    showToast('❌ שגיאה ביצירת SVG: ' + e.message, 'error');
-                }
-            };
-
-            // ===== 1. EPS - Encapsulated PostScript =====
-            window.downloadEPS = function() {
-                const dims = getDimensionsFromInputs();
-                const L = dims.L || DEFAULT_L;
-                const W = dims.W || DEFAULT_W;
-                const H = dims.H || DEFAULT_H;
-
-                const errors = validateDimensions(L, W, H);
-                if (errors.length > 0) {
-                    showToast('⚠️ ' + errors.join('; '), 'error');
-                    return;
-                }
-
-                const totalWidth = W + L + W + L;
-                const maxTopHeight = Math.max(L/2, W/2);
-                const totalHeight = maxTopHeight + H + maxTopHeight;
-                const scale = BASE_SCALE;
-                const svgW = totalWidth * scale;
-                const svgH = totalHeight * scale;
-                const note = getCombinedNote();
-                const hideLabels = getCombinedHideLabels();
-
-                let eps = `%!PS-Adobe-3.0 EPSF-3.0\n`;
-                eps += `%%BoundingBox: 0 0 ${Math.round(svgW)} ${Math.round(svgH + 80)}\n`;
-                eps += `%%Title: Carton Net ${L}x${W}x${H}\n`;
-                eps += `%%Creator: Carton Layout Generator\n`;
-                eps += `%%CreationDate: ${new Date().toISOString()}\n`;
-                eps += `%%LanguageLevel: 2\n`;
-                eps += `%%EndComments\n\n`;
-                
-                eps += `/cm { 1 index 1 index 3 -1 roll 4 2 roll 5 3 roll } def\n`;
-                eps += `/rect { 4 2 roll moveto 1 index 0 rlineto 0 exch rlineto neg 0 rlineto closepath } def\n`;
-                eps += `/color { setrgbcolor } def\n`;
-                eps += `/setgray { dup dup setrgbcolor } def\n`;
-                eps += `0.8 setgray 1 setlinewidth\n\n`;
-
-                const colors = {
-                    top: [1, 0.9, 0.94],
-                    wall: [0.976, 0.976, 0.976],
-                    bottom: [0.902, 0.949, 1]
-                };
-
-                function addPanel(x, y, w, h, color, label, sub) {
-                    const rx = x * scale;
-                    const ry = (totalHeight - y - h) * scale;
-                    const rw = w * scale;
-                    const rh = h * scale;
-                    
-                    eps += `gsave\n`;
-                    eps += `${color[0]} ${color[1]} ${color[2]} color\n`;
-                    eps += `${rx} ${ry} ${rw} ${rh} rect fill\n`;
-                    eps += `0 setgray 1.5 setlinewidth\n`;
-                    eps += `${rx} ${ry} ${rw} ${rh} rect stroke\n`;
-                    
-                    const fontSize = Math.min(12, rw/12);
-                    const subFontSize = Math.min(10, rw/16);
-                    const centerX = rx + rw/2;
-                    const centerY = ry + rh/2;
-                    
-                    if (!hideLabels) {
-                        eps += `/Helvetica findfont ${fontSize} scalefont setfont\n`;
-                        eps += `${centerX} ${centerY + 4} moveto\n`;
-                        eps += `(${label}) dup stringwidth pop -1 mul 0 rmoveto show\n`;
-                        eps += `/Helvetica findfont ${subFontSize} scalefont setfont\n`;
-                        eps += `${centerX} ${centerY - 12} moveto\n`;
-                        eps += `(${sub}) dup stringwidth pop -1 mul 0 rmoveto show\n`;
-                    } else {
-                        eps += `/Helvetica-Bold findfont ${fontSize + 2} scalefont setfont\n`;
-                        eps += `${centerX} ${centerY + 5} moveto\n`;
-                        eps += `(${sub}) dup stringwidth pop -1 mul 0 rmoveto show\n`;
-                    }
-                    eps += `grestore\n\n`;
-                }
-
-                // Top parts
-                let xPos = 0;
-                const topParts = [
-                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` },
-                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` }
-                ];
-                topParts.forEach(p => {
-                    const yPos = maxTopHeight - p.h;
-                    addPanel(xPos, yPos, p.w, p.h, colors.top, p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                // Wall parts
-                xPos = 0;
-                const wallParts = [
-                    { w: W, h: H, label: 'דופן 1', sub: `${W}×${H}` },
-                    { w: L, h: H, label: 'דופן 2', sub: `${L}×${H}` },
-                    { w: W, h: H, label: 'דופן 3', sub: `${W}×${H}` },
-                    { w: L, h: H, label: 'דופן 4', sub: `${L}×${H}` }
-                ];
-                wallParts.forEach(p => {
-                    addPanel(xPos, 0, p.w, p.h, colors.wall, p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                // Bottom parts
-                xPos = 0;
-                const bottomParts = [
-                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` },
-                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` }
-                ];
-                bottomParts.forEach(p => {
-                    const yPos = -(H + maxTopHeight);
-                    addPanel(xPos, yPos, p.w, p.h, colors.bottom, p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                // Footer
-                eps += `0 setgray /Helvetica findfont 10 scalefont setfont\n`;
-                eps += `${svgW/2} ${svgH + 30} moveto (L=${L}cm | W=${W}cm | H=${H}cm) dup stringwidth pop -1 mul 0 rmoveto show\n`;
-                if (note) {
-                    eps += `${svgW/2} ${svgH + 50} moveto (${note}) dup stringwidth pop -1 mul 0 rmoveto show\n`;
-                }
-                eps += `showpage\n`;
-
-                try {
-                    const blob = new Blob([eps], { type: 'application/postscript;charset=utf-8' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `net-${L}x${W}x${H}.eps`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    showToast('✨ EPS נוצר בהצלחה! (נפתח באילוסטרייטור)', 'success');
-                } catch (e) {
-                    showToast('❌ שגיאה ביצירת EPS: ' + e.message, 'error');
-                }
-            };
-
-            // ===== 2. AI - Adobe Illustrator =====
-            window.downloadAI = function() {
-                const dims = getDimensionsFromInputs();
-                const L = dims.L || DEFAULT_L;
-                const W = dims.W || DEFAULT_W;
-                const H = dims.H || DEFAULT_H;
-
-                const errors = validateDimensions(L, W, H);
-                if (errors.length > 0) {
-                    showToast('⚠️ ' + errors.join('; '), 'error');
-                    return;
-                }
-
-                const totalWidth = W + L + W + L;
-                const maxTopHeight = Math.max(L/2, W/2);
-                const totalHeight = maxTopHeight + H + maxTopHeight;
-                const scale = BASE_SCALE;
-                const svgW = totalWidth * scale;
-                const svgH = totalHeight * scale;
-                const note = getCombinedNote();
-                const hideLabels = getCombinedHideLabels();
-
-                let svg = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-                svg += `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n`;
-                svg += `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" `;
-                svg += `width="${svgW}" height="${svgH + 80}" viewBox="0 0 ${svgW} ${svgH + 80}" `;
-                svg += `xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" `;
-                svg += `ai:version="27.0" style="background:white;">\n`;
-                
-                svg += `<metadata>\n`;
-                svg += `  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n`;
-                svg += `    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">\n`;
-                svg += `      <dc:title>פריסת קרטון ${L}x${W}x${H}</dc:title>\n`;
-                svg += `      <dc:creator>Carton Layout Generator</dc:creator>\n`;
-                svg += `    </rdf:Description>\n`;
-                svg += `  </rdf:RDF>\n`;
-                svg += `</metadata>\n\n`;
-
-                svg += `<style>\n`;
-                svg += `  .panel { stroke: #1f2f3f; stroke-width: 2; rx: 4; }\n`;
-                svg += `  .top { fill: #ffe6f0; }\n`;
-                svg += `  .wall { fill: #f9f9f9; }\n`;
-                svg += `  .bottom { fill: #e6f2ff; }\n`;
-                svg += `  .label { font-family: 'Arial', 'Helvetica', sans-serif; font-weight: bold; text-anchor: middle; fill: #111e2c; }\n`;
-                svg += `  .sub { font-family: 'Arial', 'Helvetica', sans-serif; text-anchor: middle; fill: #2c4058; }\n`;
-                svg += `</style>\n\n`;
-
-                // Layer 1 - Main Drawing
-                svg += `<g id="Layer_1" ai:layer="true" ai:name="שרטוט">\n`;
-
-                function addPanel(x, y, w, h, cls, label, sub) {
-                    const rx = x * scale;
-                    const ry = y * scale;
-                    const rw = w * scale;
-                    const rh = h * scale;
-                    svg += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" class="panel ${cls}" />\n`;
-                    
-                    const fontSize = Math.min(14, rw/10);
-                    const subFontSize = Math.min(11, rw/15);
-                    if (hideLabels) {
-                        svg += `<text x="${rx + rw/2}" y="${ry + rh/2 + 5}" class="label" font-size="${fontSize}">${sub}</text>\n`;
-                    } else {
-                        svg += `<text x="${rx + rw/2}" y="${ry + rh/2 - 6}" class="label" font-size="${fontSize}">${label}</text>\n`;
-                        svg += `<text x="${rx + rw/2}" y="${ry + rh/2 + 14}" class="sub" font-size="${subFontSize}">${sub}</text>\n`;
-                    }
-                }
-
-                let xPos = 0;
-                const topParts = [
-                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` },
-                    { w: W, h: L/2, label: 'מכסה עליון', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'מכסה עליון', sub: `${L}×${(W/2).toFixed(1)}` }
-                ];
-                topParts.forEach(p => {
-                    const yPos = maxTopHeight - p.h;
-                    addPanel(xPos, yPos, p.w, p.h, 'top', p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                xPos = 0;
-                const wallParts = [
-                    { w: W, h: H, label: 'דופן 1', sub: `${W}×${H}` },
-                    { w: L, h: H, label: 'דופן 2', sub: `${L}×${H}` },
-                    { w: W, h: H, label: 'דופן 3', sub: `${W}×${H}` },
-                    { w: L, h: H, label: 'דופן 4', sub: `${L}×${H}` }
-                ];
-                wallParts.forEach(p => {
-                    addPanel(xPos, maxTopHeight, p.w, p.h, 'wall', p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                xPos = 0;
-                const bottomParts = [
-                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` },
-                    { w: W, h: L/2, label: 'תחתית', sub: `${W}×${(L/2).toFixed(1)}` },
-                    { w: L, h: W/2, label: 'תחתית', sub: `${L}×${(W/2).toFixed(1)}` }
-                ];
-                bottomParts.forEach(p => {
-                    addPanel(xPos, maxTopHeight + H, p.w, p.h, 'bottom', p.label, p.sub);
-                    xPos += p.w;
-                });
-
-                svg += `</g>\n`;
-
-                // Layer 2 - Guides
-                svg += `<g id="Layer_2" ai:layer="true" ai:name="קווי עזר" style="display:none;">\n`;
-                svg += `  <line x1="0" y1="${maxTopHeight * scale}" x2="${totalWidth * scale}" y2="${maxTopHeight * scale}" stroke="#999" stroke-width="0.5" stroke-dasharray="4,4" />\n`;
-                svg += `  <line x1="0" y1="${(maxTopHeight + H) * scale}" x2="${totalWidth * scale}" y2="${(maxTopHeight + H) * scale}" stroke="#999" stroke-width="0.5" stroke-dasharray="4,4" />\n`;
-                svg += `</g>\n`;
-
-                // Layer 3 - Info
-                svg += `<g id="Layer_3" ai:layer="true" ai:name="מידע">\n`;
-                svg += `<text x="${svgW/2}" y="${svgH + 30}" class="label" font-size="11" fill="#555">L=${L}cm | W=${W}cm | H=${H}cm</text>\n`;
-                if (note) {
-                    svg += `<text x="${svgW/2}" y="${svgH + 50}" class="label" font-size="11" fill="#1a4972">📝 ${note}</text>\n`;
-                }
-                svg += `</g>\n`;
-
-                svg += `</svg>`;
-
-                try {
-                    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `net-${L}x${W}x${H}.ai`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    showToast('⭐ AI נוצר בהצלחה! (נפתח באילוסטרייטור)', 'success');
-                } catch (e) {
-                    showToast('❌ שגיאה ביצירת AI: ' + e.message, 'error');
-                }
-            };
-
-            // ===== 3. DXF - AutoCAD Drawing Exchange =====
-            window.downloadDXF = function() {
-                const dims = getDimensionsFromInputs();
-                const L = dims.L || DEFAULT_L;
-                const W = dims.W || DEFAULT_W;
-                const H = dims.H || DEFAULT_H;
-
-                const errors = validateDimensions(L, W, H);
-                if (errors.length > 0) {
-                    showToast('⚠️ ' + errors.join('; '), 'error');
-                    return;
-                }
-
-                const totalWidth = W + L + W + L;
-                const maxTopHeight = Math.max(L/2, W/2);
-                const totalHeight = maxTopHeight + H + maxTopHeight;
-                const scale = BASE_SCALE;
-
-                let dxf = `0\nSECTION\n2\nHEADER\n0\nENDSEC\n`;
-                dxf += `0\nSECTION\n2\nENTITIES\n`;
-
-                function addDXFRect(x, y, w, h) {
-                    const rx = x * scale;
-                    const ry = y * scale;
-                    const rw = w * scale;
-                    const rh = h * scale;
-                    
-                    dxf += `0\nLWPOLYLINE\n8\n0\n90\n4\n70\n0\n43\n0.0\n`;
-                    dxf += `10\n${rx}\n20\n${ry}\n`;
-                    dxf += `10\n${rx + rw}\n20\n${ry}\n`;
-                    dxf += `10\n${rx + rw}\n20\n${ry + rh}\n`;
-                    dxf += `10\n${rx}\n20\n${ry + rh}\n`;
-                    dxf += `0\nSEQEND\n`;
-                }
-
-                // Top parts
-                let xPos = 0;
-                const topParts = [
-                    { w: W, h: L/2 },
-                    { w: L, h: W/2 },
-                    { w: W, h: L/2 },
-                    { w: L, h: W/2 }
-                ];
-                topParts.forEach(p => {
-                    const yPos = maxTopHeight - p.h;
-                    addDXFRect(xPos, yPos, p.w, p.h);
-                    xPos += p.w;
-                });
-
-                // Wall parts
-                xPos = 0;
-                const wallParts = [
-                    { w: W, h: H },
-                    { w: L, h: H },
-                    { w: W, h: H },
-                    { w: L, h: H }
-                ];
-                wallParts.forEach(p => {
-                    addDXFRect(xPos, maxTopHeight, p.w, p.h);
-                    xPos += p.w;
-                });
-
-                // Bottom parts
-                xPos = 0;
-                const bottomParts = [
-                    { w: W, h: L/2 },
-                    { w: L, h: W/2 },
-                    { w: W, h: L/2 },
-                    { w: L, h: W/2 }
-                ];
-                bottomParts.forEach(p => {
-                    addDXFRect(xPos, maxTopHeight + H, p.w, p.h);
-                    xPos += p.w;
-                });
-
-                dxf += `0\nENDSEC\n0\nEOF\n`;
-
-                try {
-                    const blob = new Blob([dxf], { type: 'application/dxf;charset=utf-8' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `net-${L}x${W}x${H}.dxf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    showToast('📐 DXF נוצר בהצלחה! (נפתח באילוסטרייטור/AutoCAD)', 'success');
-                } catch (e) {
-                    showToast('❌ שגיאה ביצירת DXF: ' + e.message, 'error');
-                }
-            };
-
-            // ===== PDF =====
-            window.downloadPDF = function() {
-                const dims = getDimensionsFromInputs();
-                const L = dims.L || DEFAULT_L;
-                const W = dims.W || DEFAULT_W;
-                const H = dims.H || DEFAULT_H;
-
-                const errors = validateDimensions(L, W, H);
-                if (errors.length > 0) {
-                    showToast('⚠️ ' + errors.join('; '), 'error');
-                    return;
-                }
-
-                const note = getCombinedNote();
-                const hideLabels = getCombinedHideLabels();
-
-                // מידות הפריסה בס"מ
-                const totalWidthCm = W + L + W + L;
-                const maxTopHeightCm = Math.max(L / 2, W / 2);
-                const totalHeightCm = maxTopHeightCm + H + maxTopHeightCm;
-
-                // שטח מודפס בדף A4 לרוחב (297×210 מ"מ) עם שוליים 0.5 ס"מ
-                // 1 ס"מ ≈ 37.8px ב־96dpi
-                const PAGE_W_PX = 287 * 3.78;   // ~1085px
-                const PAGE_H_PX = 200 * 3.78;   // ~756px
-                const FOOTER_RESERVE = 55;      // מקום לכותרת תחתונה
-
-                const availableW = PAGE_W_PX;
-                const availableH = PAGE_H_PX - FOOTER_RESERVE;
-
-                // קנה מידה כך שהפריסה תיכנס לדף בודד (לא גדול מ־1)
-                const scaleByW = availableW / (totalWidthCm * BASE_SCALE);
-                const scaleByH = availableH / (totalHeightCm * BASE_SCALE);
-                const fitScale = Math.min(scaleByW, scaleByH, 1);
-
-                const originalScale = currentScale;
-
-                // בונים את הפריסה בקנה המידה המתאים להדפסה
-                buildNetWithScale(L, W, H, fitScale);
-
-                const container = document.getElementById('netContainer');
-                const originalHTML = container.innerHTML;
-                const totalW = totalWidthCm * BASE_SCALE * fitScale;
-                const totalH = totalHeightCm * BASE_SCALE * fitScale;
-
-                // מחזירים את התצוגה על המסך לקנה המידה הקודם
-                currentScale = originalScale;
-                setTimeout(() => {
-                    buildNetWithScale(L, W, H, originalScale);
-                }, 100);
-
-                showToast('📄 מוריד PDF...', 'info');
-
-                try {
-                    const printWindow = window.open('', '_blank', 'width=1200,height=800');
-                    if (!printWindow) {
-                        showToast('❌ נא לאפשר חלונות קופצים', 'error');
-                        return;
-                    }
-
-                    printWindow.document.write(`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                          <meta charset="UTF-8">
-                          <title>פריסת קרטון - ${L}×${W}×${H}</title>
-                          <style>
-                            * { margin: 0; padding: 0; box-sizing: border-box; }
-                            @page {
-                              size: A4 landscape;
-                              margin: 0.5cm;
-                            }
-                            html, body {
-                              width: 100%;
-                              height: 100%;
-                              background: white;
-                              font-family: 'Segoe UI', Arial, sans-serif;
-                              overflow: hidden;
-                            }
-                            body {
-                              display: flex;
-                              flex-direction: column;
-                              justify-content: center;
-                              align-items: center;
-                              padding: 4px;
-                            }
-                            .print-wrap {
-                              display: flex;
-                              flex-direction: column;
-                              align-items: center;
-                              justify-content: center;
-                              max-width: 100%;
-                              max-height: 100%;
-                            }
-                            .net {
-                              position: relative;
-                              width: ${totalW}px;
-                              height: ${totalH}px;
-                              border: none;
-                              background: white;
-                              flex-shrink: 0;
-                            }
-                            .panel {
-                              position: absolute;
-                              border: 2px solid black;
-                              background: white;
-                              display: flex;
-                              justify-content: center;
-                              align-items: center;
-                              font-size: 13px;
-                              font-weight: bold;
-                              text-align: center;
-                              flex-direction: column;
-                            }
-                            .dim-label {
-                              font-size: 14px;
-                              font-weight: bold;
-                            }
-                            .dim-sub {
-                              font-size: 11px;
-                              font-weight: normal;
-                              color: #333;
-                            }
-                            .footer {
-                              width: 100%;
-                              max-width: ${Math.max(totalW, 400)}px;
-                              text-align: center;
-                              font-size: 12px;
-                              color: #555;
-                              font-family: 'Segoe UI', Arial, sans-serif;
-                              padding: 6px 12px 2px 12px;
-                              direction: rtl;
-                              display: flex;
-                              flex-direction: column;
-                              align-items: flex-end;
-                              flex-shrink: 0;
-                              margin-top: 4px;
-                            }
-                            .footer .dimensions {
-                              direction: rtl;
-                              text-align: right;
-                              width: 100%;
-                            }
-                            .footer .note {
-                              color: #1a4972;
-                              font-weight: 600;
-                              margin-top: 2px;
-                              font-size: 11px;
-                              text-align: right;
-                              direction: rtl;
-                              width: 100%;
-                            }
-                            @media print {
-                              html, body {
-                                width: 100%;
-                                height: 100%;
-                                overflow: hidden !important;
-                                margin: 0 !important;
-                                padding: 0 !important;
-                              }
-                              body {
-                                display: flex;
-                                flex-direction: column;
-                                justify-content: center;
-                                align-items: center;
-                              }
-                              .print-wrap {
-                                page-break-inside: avoid;
-                                break-inside: avoid;
-                                page-break-after: avoid;
-                                page-break-before: avoid;
-                              }
-                              .net {
-                                border: none;
-                                page-break-inside: avoid;
-                                break-inside: avoid;
-                              }
-                              .panel {
-                                border: 2px solid black;
-                                page-break-inside: avoid;
-                              }
-                              .footer {
-                                page-break-inside: avoid;
-                                break-inside: avoid;
-                              }
-                              .footer .note { color: #1a4972; }
-                            }
-                          </style>
-                        </head>
-                        <body>
-                          <div class="print-wrap">
-                            <div class="net">
-                              ${originalHTML}
-                            </div>
-                            <div class="footer">
-                              <div class="dimensions">L=${L} ס"מ | W=${W} ס"מ | H=${H} ס"מ</div>
-                              ${note ? `<div class="note">📝 ${note}</div>` : ''}
-                            </div>
-                          </div>
-                          <script>
-                            window.onload = function() {
-                              // וידוא שהתוכן לא חורג מדף אחד – התאמה נוספת אם צריך
-                              try {
-                                const wrap = document.querySelector('.print-wrap');
-                                const pageW = 287 * 3.78;
-                                const pageH = 200 * 3.78;
-                                const rect = wrap.getBoundingClientRect();
-                                if (rect.width > pageW || rect.height > pageH) {
-                                  const s = Math.min(pageW / rect.width, pageH / rect.height, 1);
-                                  wrap.style.transform = 'scale(' + s + ')';
-                                  wrap.style.transformOrigin = 'center center';
-                                }
-                              } catch (e) {}
-                              setTimeout(function() { window.print(); }, 50);
-                            };
-                          <\/script>
-                        </body>
-                        </html>
-                    `);
-                    printWindow.document.close();
-
-                    setTimeout(() => {
-                        showToast('✅ PDF נוצר בהצלחה (דף בודד)!', 'success');
-                    }, 1000);
-                } catch (e) {
-                    showToast('❌ שגיאה ביצירת PDF: ' + e.message, 'error');
-                }
-            };
-
-            // ===== תפריט נייד =====
-            function openMobileMenu() {
-                document.getElementById('mobileMenuPanel').classList.add('open');
-                document.getElementById('mobileOverlay').classList.add('open');
-                syncDesktopToMobile();
-            }
-
-            function closeMobileMenu() {
-                document.getElementById('mobileMenuPanel').classList.remove('open');
-                document.getElementById('mobileOverlay').classList.remove('open');
-            }
-
-            window.toggleMobileMenu = function() {
-                if (document.getElementById('mobileMenuPanel').classList.contains('open')) {
-                    closeMobileMenu();
-                } else {
-                    openMobileMenu();
-                }
-            };
-
-            // ===== אירועים =====
-            document.getElementById('mobileMenuToggle').addEventListener('click', window.toggleMobileMenu);
-            document.getElementById('mobileMenuClose').addEventListener('click', closeMobileMenu);
-            document.getElementById('mobileOverlay').addEventListener('click', closeMobileMenu);
-
-            document.querySelectorAll('.controls input[type="number"]').forEach(input => {
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const dims = getDimensionsFromInputs();
-                        if (validateAndHighlight([
-                            document.getElementById('inputL'),
-                            document.getElementById('inputW'),
-                            document.getElementById('inputH')
-                        ])) {
-                            updateNet();
-                        }
-                    }
-                });
-            });
-
-            document.querySelectorAll('#mobileInputL, #mobileInputW, #mobileInputH, #mobileNoteInput').forEach(input => {
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const dims = getDimensionsFromMobile();
-                        if (validateAndHighlight([
-                            document.getElementById('mobileInputL'),
-                            document.getElementById('mobileInputW'),
-                            document.getElementById('mobileInputH')
-                        ])) {
-                            window.updateNetMobile();
-                        }
-                    }
-                });
-            });
-
-            document.getElementById('inputL').addEventListener('change', syncDesktopToMobile);
-            document.getElementById('inputW').addEventListener('change', syncDesktopToMobile);
-            document.getElementById('inputH').addEventListener('change', syncDesktopToMobile);
-
-            document.getElementById('hideLabels').addEventListener('change', function() {
-                document.getElementById('mobileHideLabels').checked = this.checked;
-                const dims = getDimensionsFromInputs();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-            });
-
-            document.getElementById('noteInput').addEventListener('input', function() {
-                document.getElementById('mobileNoteInput').value = this.value;
-                const dims = getDimensionsFromInputs();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-            });
-
-            document.getElementById('mobileHideLabels').addEventListener('change', function() {
-                document.getElementById('hideLabels').checked = this.checked;
-                const dims = getDimensionsFromMobile();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-            });
-
-            document.getElementById('mobileNoteInput').addEventListener('input', function() {
-                document.getElementById('noteInput').value = this.value;
-                const dims = getDimensionsFromMobile();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-            });
-
-            document.getElementById('mobileUpdateBtn').addEventListener('click', window.updateNetMobile);
-            
-            document.getElementById('mobilePdfBtn').addEventListener('click', function() {
-                closeMobileMenu();
-                const dims = getDimensionsFromMobile();
-                document.getElementById('inputL').value = dims.L || DEFAULT_L;
-                document.getElementById('inputW').value = dims.W || DEFAULT_W;
-                document.getElementById('inputH').value = dims.H || DEFAULT_H;
-                document.getElementById('hideLabels').checked = getMobileHideLabels();
-                document.getElementById('noteInput').value = getMobileNote();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-                setTimeout(window.downloadPDF, 400);
-            });
-
-            document.getElementById('mobileSvgBtn').addEventListener('click', function() {
-                closeMobileMenu();
-                const dims = getDimensionsFromMobile();
-                document.getElementById('inputL').value = dims.L || DEFAULT_L;
-                document.getElementById('inputW').value = dims.W || DEFAULT_W;
-                document.getElementById('inputH').value = dims.H || DEFAULT_H;
-                document.getElementById('hideLabels').checked = getMobileHideLabels();
-                document.getElementById('noteInput').value = getMobileNote();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-                setTimeout(window.downloadSVG, 400);
-            });
-
-            document.getElementById('mobileEpsBtn').addEventListener('click', function() {
-                closeMobileMenu();
-                const dims = getDimensionsFromMobile();
-                document.getElementById('inputL').value = dims.L || DEFAULT_L;
-                document.getElementById('inputW').value = dims.W || DEFAULT_W;
-                document.getElementById('inputH').value = dims.H || DEFAULT_H;
-                document.getElementById('hideLabels').checked = getMobileHideLabels();
-                document.getElementById('noteInput').value = getMobileNote();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-                setTimeout(window.downloadEPS, 400);
-            });
-
-            document.getElementById('mobileAiBtn').addEventListener('click', function() {
-                closeMobileMenu();
-                const dims = getDimensionsFromMobile();
-                document.getElementById('inputL').value = dims.L || DEFAULT_L;
-                document.getElementById('inputW').value = dims.W || DEFAULT_W;
-                document.getElementById('inputH').value = dims.H || DEFAULT_H;
-                document.getElementById('hideLabels').checked = getMobileHideLabels();
-                document.getElementById('noteInput').value = getMobileNote();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-                setTimeout(window.downloadAI, 400);
-            });
-
-            document.getElementById('mobileDxfBtn').addEventListener('click', function() {
-                closeMobileMenu();
-                const dims = getDimensionsFromMobile();
-                document.getElementById('inputL').value = dims.L || DEFAULT_L;
-                document.getElementById('inputW').value = dims.W || DEFAULT_W;
-                document.getElementById('inputH').value = dims.H || DEFAULT_H;
-                document.getElementById('hideLabels').checked = getMobileHideLabels();
-                document.getElementById('noteInput').value = getMobileNote();
-                buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-                setTimeout(window.downloadDXF, 400);
-            });
-
-            document.getElementById('mobileResetBtn').addEventListener('click', function() {
-                closeMobileMenu();
-                resetDimensions();
-            });
-
-            document.querySelectorAll('.controls input[type="number"], #mobileInputL, #mobileInputW, #mobileInputH').forEach(input => {
-                input.addEventListener('input', function() {
-                    const val = parseFloat(this.value);
-                    const isValid = !isNaN(val) && val > 0 && val <= 999;
-                    setInputError(this, !isValid);
-                });
-            });
-
-            let resizeTimeout;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    const dims = getDimensionsFromInputs();
-                    buildNet(dims.L || DEFAULT_L, dims.W || DEFAULT_W, dims.H || DEFAULT_H);
-                }, 400);
-            });
-
-            // ===== אתחול =====
-            const savedState = loadState();
-            if (savedState) {
-                document.getElementById('inputL').value = savedState.L;
-                document.getElementById('inputW').value = savedState.W;
-                document.getElementById('inputH').value = savedState.H;
-                document.getElementById('mobileInputL').value = savedState.L;
-                document.getElementById('mobileInputW').value = savedState.W;
-                document.getElementById('mobileInputH').value = savedState.H;
-                if (savedState.note) {
-                    document.getElementById('noteInput').value = savedState.note;
-                    document.getElementById('mobileNoteInput').value = savedState.note;
-                }
-                if (savedState.hideLabels) {
-                    document.getElementById('hideLabels').checked = true;
-                    document.getElementById('mobileHideLabels').checked = true;
-                }
-                buildNet(savedState.L, savedState.W, savedState.H);
+<script>
+(function () {
+    const BASE_SCALE = 3.78;
+    const DEFAULTS = { L: 62, W: 46, H: 88.5, glue: 3 };
+    const STORAGE_KEY = 'cartonNetPro_v2';
+    let currentScale = 1;
+    let animId = null;
+    let state = { L: 62, W: 46, H: 88.5, glue: 3, unit: 'cm', hideLabels: false, showCrease: true, glueOn: true, note: '' };
+
+    // ---------- helpers ----------
+    function $(id) { return document.getElementById(id); }
+    function showToast(msg, type = 'info') {
+        const t = $('toast');
+        t.textContent = msg;
+        t.className = 'toast ' + type + ' show';
+        clearTimeout(t._to);
+        t._to = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+    function validate(L, W, H, glue) {
+        const e = [];
+        if (isNaN(L) || L <= 0) e.push('L חייב להיות חיובי');
+        if (isNaN(W) || W <= 0) e.push('W חייב להיות חיובי');
+        if (isNaN(H) || H <= 0) e.push('H חייב להיות חיובי');
+        if (isNaN(glue) || glue < 0) e.push('Glue ≥ 0');
+        if (L > 999 || W > 999 || H > 999) e.push('מקסימום 999');
+        return e;
+    }
+    function setErr(el, bad) {
+        if (bad) { el.classList.add('error'); el.setAttribute('aria-invalid', 'true'); }
+        else { el.classList.remove('error'); el.removeAttribute('aria-invalid'); }
+    }
+    function unitLabel() {
+        return state.unit === 'mm' ? 'מ״מ' : state.unit === 'in' ? 'אינץ׳' : 'ס״מ';
+    }
+    function fmt(n) {
+        return (Math.round(n * 100) / 100).toString();
+    }
+    /** Keep number×number in visual LTR order even inside RTL page */
+    function dim(a, b) {
+        return '\u2066' + fmt(a) + '\u00d7' + fmt(b) + '\u2069';
+    }
+
+    // ---------- geometry (single source of truth) ----------
+    function buildGeometry(L, W, H, glue, glueOn) {
+        const maxTop = Math.max(L / 2, W / 2);
+        const glueW = glueOn ? Math.max(0, glue) : 0;
+        // Sequence left→right: [Glue] | Side(W) | End(L) | Side(W) | End(L)
+        const panels = [];
+        let x = 0;
+        if (glueW > 0) {
+            panels.push({ name: 'דשקי', type: 'glue', x, y: maxTop, w: glueW, h: H, sub: dim(glueW, H) });
+            x += glueW;
+        }
+        // walls
+        const walls = [
+            { name: 'דופן 1', w: W },
+            { name: 'דופן 2', w: L },
+            { name: 'דופן 3', w: W },
+            { name: 'דופן 4', w: L }
+        ];
+        walls.forEach((p, i) => {
+            panels.push({ name: p.name, type: 'wall', x, y: maxTop, w: p.w, h: H, sub: dim(p.w, H) });
+            // top flaps – major/minor style
+            const th = (i % 2 === 0) ? L / 2 : W / 2; // W-panels get L/2 height flaps
+            panels.push({ name: 'מכסה עליון', type: 'top', x, y: maxTop - th, w: p.w, h: th, sub: dim(p.w, th) });
+            panels.push({ name: 'תחתית', type: 'bottom', x, y: maxTop + H, w: p.w, h: th, sub: dim(p.w, th) });
+            x += p.w;
+        });
+        const totalW = x;
+        const totalH = maxTop + H + maxTop;
+        // crease lines (vertical folds between panels + horizontal top/bottom of walls)
+        const creases = [];
+        // horizontal
+        creases.push({ x1: glueW, y1: maxTop, x2: totalW, y2: maxTop });
+        creases.push({ x1: glueW, y1: maxTop + H, x2: totalW, y2: maxTop + H });
+        // vertical
+        let vx = glueW;
+        walls.forEach((p, i) => {
+            if (i > 0 || glueW > 0) creases.push({ x1: vx, y1: 0, x2: vx, y2: totalH });
+            vx += p.w;
+        });
+        if (glueW > 0) {
+            // glue to first wall
+            creases.push({ x1: glueW, y1: maxTop, x2: glueW, y2: maxTop + H });
+        }
+        return { panels, creases, totalW, totalH, maxTop, glueW };
+    }
+
+    /** Unique edges: shared (count≥2) → crease, outer (count=1) → cut. Avoids double strokes. */
+    function buildStrokePlan(geo) {
+        const map = new Map();
+        function addEdge(x1, y1, x2, y2, isGlue) {
+            // normalize direction
+            let a = { x: +x1.toFixed(4), y: +y1.toFixed(4) };
+            let b = { x: +x2.toFixed(4), y: +y2.toFixed(4) };
+            if (a.x > b.x || (a.x === b.x && a.y > b.y)) { const t = a; a = b; b = t; }
+            const key = `${a.x},${a.y}|${b.x},${b.y}`;
+            const prev = map.get(key);
+            if (prev) {
+                prev.count += 1;
+                prev.isGlue = prev.isGlue || isGlue;
             } else {
-                document.getElementById('inputL').value = DEFAULT_L;
-                document.getElementById('inputW').value = DEFAULT_W;
-                document.getElementById('inputH').value = DEFAULT_H;
-                document.getElementById('mobileInputL').value = DEFAULT_L;
-                document.getElementById('mobileInputW').value = DEFAULT_W;
-                document.getElementById('mobileInputH').value = DEFAULT_H;
-                buildNet(DEFAULT_L, DEFAULT_W, DEFAULT_H);
+                map.set(key, { x1: a.x, y1: a.y, x2: b.x, y2: b.y, count: 1, isGlue: !!isGlue });
             }
+        }
+        geo.panels.forEach(p => {
+            const g = p.type === 'glue';
+            addEdge(p.x, p.y, p.x + p.w, p.y, g);
+            addEdge(p.x, p.y + p.h, p.x + p.w, p.y + p.h, g);
+            addEdge(p.x, p.y, p.x, p.y + p.h, g);
+            addEdge(p.x + p.w, p.y, p.x + p.w, p.y + p.h, g);
+        });
+        const cuts = [];
+        const creases = [];
+        map.forEach(e => {
+            if (e.count >= 2) creases.push(e);
+            else cuts.push(e);
+        });
+        return { cuts, creases };
+    }
 
-            console.log('✅ מוכן! פורמטים נתמכים: PDF, SVG (עם שכבות), EPS, AI, DXF');
-            console.log('📐 כל הפורמטים נפתחים ב-Adobe Illustrator');
-        })();
-    </script>
+    // ---------- render on screen ----------
+    function calculateAutoScale(totalW, totalH) {
+        const isMobile = window.innerWidth <= 768;
+        if (!isMobile) { currentScale = 1; return; }
+        const maxW = window.innerWidth - 36;
+        const maxH = window.innerHeight - 260;
+        let s = Math.min(maxW / (totalW * BASE_SCALE), maxH / (totalH * BASE_SCALE), 1.15);
+        currentScale = Math.max(0.18, Math.min(s, 1.2));
+    }
 
+    function renderNet() {
+        const { L, W, H, glue, glueOn, hideLabels, showCrease } = state;
+        const errs = validate(L, W, H, glue);
+        if (errs.length) {
+            showToast('⚠️ ' + errs.join('; '), 'error');
+            return;
+        }
+        const geo = buildGeometry(L, W, H, glue, glueOn);
+        calculateAutoScale(geo.totalW, geo.totalH);
+        const sc = BASE_SCALE * currentScale;
+        const container = $('netContainer');
+        container.style.width = (geo.totalW * sc) + 'px';
+        container.style.height = (geo.totalH * sc) + 'px';
+        container.innerHTML = '';
+        container.classList.add('fade');
+
+        const colors = { top: '#ffe6f0', wall: '#f9f9f9', bottom: '#e6f2ff', glue: '#fff3e0' };
+        const fsz = Math.max(7, Math.min(15, 13 * currentScale));
+        const sfsz = Math.max(6, Math.min(11, 10 * currentScale));
+
+        geo.panels.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'panel' + (p.type === 'glue' ? ' glue' : '');
+            div.style.left = (p.x * sc) + 'px';
+            div.style.top = (p.y * sc) + 'px';
+            div.style.width = (p.w * sc) + 'px';
+            div.style.height = (p.h * sc) + 'px';
+            div.style.background = colors[p.type] || '#fff';
+            div.title = `${p.name}: ${p.sub} ${unitLabel()}`;
+            const isNarrow = (p.w * sc) < 36;
+            if (isNarrow) {
+                // vertical text for glue / very narrow panels
+                div.innerHTML = `<span class="dim-label" style="font-size:${Math.max(8, fsz - 2)}px;writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:1px">${hideLabels ? p.sub : p.name}</span>`;
+            } else if (hideLabels) {
+                div.innerHTML = `<span class="dim-label" style="font-size:${fsz + 1}px;direction:ltr">${p.sub}</span>`;
+            } else {
+                div.innerHTML = `<span class="dim-label" style="font-size:${fsz}px">${p.name}<br><span class="dim-sub" style="font-size:${sfsz}px;direction:ltr">${p.sub}</span></span>`;
+            }
+            container.appendChild(div);
+        });
+
+        if (showCrease) {
+            geo.creases.forEach(c => {
+                const line = document.createElement('div');
+                line.style.cssText = `
+                    position:absolute; pointer-events:none; z-index:5;
+                    background: repeating-linear-gradient(90deg,#c0392b 0 4px, transparent 4px 8px);
+                    height:1.5px; left:${c.x1 * sc}px; top:${c.y1 * sc}px;
+                    width:${Math.max(1, (c.x2 - c.x1) * sc)}px;
+                `;
+                if (Math.abs(c.x2 - c.x1) < 0.01) {
+                    // vertical
+                    line.style.cssText = `
+                        position:absolute; pointer-events:none; z-index:5;
+                        background: repeating-linear-gradient(0deg,#c0392b 0 4px, transparent 4px 8px);
+                        width:1.5px; left:${c.x1 * sc}px; top:${c.y1 * sc}px;
+                        height:${Math.max(1, (c.y2 - c.y1) * sc)}px;
+                    `;
+                }
+                container.appendChild(line);
+            });
+        }
+
+        requestAnimationFrame(() => {
+            container.classList.remove('fade');
+            $('loadingIndicator').style.display = 'none';
+        });
+        saveState();
+        showToast('✅ פריסה עודכנה', 'success');
+    }
+
+    // ---------- state sync ----------
+    function readDesktop() {
+        state.L = parseFloat($('inputL').value) || DEFAULTS.L;
+        state.W = parseFloat($('inputW').value) || DEFAULTS.W;
+        state.H = parseFloat($('inputH').value) || DEFAULTS.H;
+        state.glue = parseFloat($('inputGlue').value) || 0;
+        state.unit = $('unitSelect').value;
+        state.hideLabels = $('hideLabels').checked;
+        state.showCrease = $('showCrease').checked;
+        state.glueOn = $('glueOn').checked;
+        state.note = $('noteInput').value.trim();
+    }
+    function readMobile() {
+        state.L = parseFloat($('mL').value) || DEFAULTS.L;
+        state.W = parseFloat($('mW').value) || DEFAULTS.W;
+        state.H = parseFloat($('mH').value) || DEFAULTS.H;
+        state.glue = parseFloat($('mGlue').value) || 0;
+        state.unit = $('mUnit').value;
+        state.hideLabels = $('mHide').checked;
+        state.showCrease = $('mCrease').checked;
+        state.glueOn = $('mGlueOn').checked;
+        state.note = $('mNote').value.trim();
+    }
+    function writeDesktop() {
+        $('inputL').value = state.L;
+        $('inputW').value = state.W;
+        $('inputH').value = state.H;
+        $('inputGlue').value = state.glue;
+        $('unitSelect').value = state.unit;
+        $('hideLabels').checked = state.hideLabels;
+        $('showCrease').checked = state.showCrease;
+        $('glueOn').checked = state.glueOn;
+        $('noteInput').value = state.note;
+    }
+    function writeMobile() {
+        $('mL').value = state.L;
+        $('mW').value = state.W;
+        $('mH').value = state.H;
+        $('mGlue').value = state.glue;
+        $('mUnit').value = state.unit;
+        $('mHide').checked = state.hideLabels;
+        $('mCrease').checked = state.showCrease;
+        $('mGlueOn').checked = state.glueOn;
+        $('mNote').value = state.note;
+    }
+    function saveState() {
+        try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, t: Date.now() })); } catch (e) {}
+    }
+    function loadState() {
+        try {
+            const d = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null');
+            if (d && d.t && Date.now() - d.t < 3600000) {
+                Object.assign(state, d);
+                return true;
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    window.updateFromDesktop = function () {
+        readDesktop();
+        writeMobile();
+        $('loadingIndicator').style.display = 'block';
+        renderNet();
+    };
+    window.updateFromMobile = function () {
+        readMobile();
+        writeDesktop();
+        closeMobile();
+        $('loadingIndicator').style.display = 'block';
+        renderNet();
+    };
+    window.resetAll = function () {
+        state = { L: DEFAULTS.L, W: DEFAULTS.W, H: DEFAULTS.H, glue: DEFAULTS.glue, unit: 'cm', hideLabels: false, showCrease: true, glueOn: true, note: '' };
+        writeDesktop();
+        writeMobile();
+        renderNet();
+        showToast('↺ אופס לברירת מחדל', 'info');
+    };
+
+    // ---------- shared export helpers ----------
+    function getGeo() {
+        return buildGeometry(state.L, state.W, state.H, state.glue, state.glueOn);
+    }
+    function downloadBlob(content, mime, filename) {
+        const blob = new Blob([content], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ---------- SVG ----------
+    window.downloadSVG = function () {
+        readDesktop();
+        const { L, W, H } = state;
+        if (validate(L, W, H, state.glue).length) { showToast('⚠️ מידות לא תקינות', 'error'); return; }
+        const geo = getGeo();
+        const strokes = buildStrokePlan(geo);
+        const scale = BASE_SCALE;
+        const margin = 8;
+        const sw = geo.totalW * scale + margin * 2;
+        const sh = geo.totalH * scale + margin * 2;
+        const pad = 70;
+        let svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${sw}" height="${sh + pad}" viewBox="0 0 ${sw} ${sh + pad}"
+ xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" ai:version="27.0" style="background:white">
+<title>פריסת קרטון ${L}x${W}x${H}</title>
+<style>
+.fill-top{fill:#ffe6f0}.fill-wall{fill:#f9f9f9}.fill-bottom{fill:#e6f2ff}.fill-glue{fill:#fff3e0}
+.label{font-family:Arial,Helvetica,sans-serif;font-weight:bold;text-anchor:middle;fill:#111}
+.sub{font-family:Arial,Helvetica,sans-serif;text-anchor:middle;fill:#333}
+.cut{stroke:#111;stroke-width:1.25;fill:none;stroke-linecap:square;stroke-linejoin:miter}
+.cut-glue{stroke:#111;stroke-width:1.25;fill:none;stroke-dasharray:5 3;stroke-linecap:square}
+.crease{stroke:#c0392b;stroke-width:1.25;stroke-dasharray:6 4;fill:none;stroke-linecap:square}
+</style>
+<g id="Fills" ai:layer="true" ai:name="Fills">
+`;
+        const fillClass = { top: 'fill-top', wall: 'fill-wall', bottom: 'fill-bottom', glue: 'fill-glue' };
+        geo.panels.forEach(p => {
+            const rx = p.x * scale + margin, ry = p.y * scale + margin, rw = p.w * scale, rh = p.h * scale;
+            svg += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" class="${fillClass[p.type] || 'fill-wall'}"/>\n`;
+            if (!state.hideLabels) {
+                const fs = Math.min(13, rw / 9);
+                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 - 5}" class="label" font-size="${fs}">${p.name}</text>\n`;
+                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 + 12}" class="sub" font-size="${Math.min(11, fs * 0.85)}">${p.sub}</text>\n`;
+            } else {
+                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 + 4}" class="label" font-size="${Math.min(14, rw / 8)}">${p.sub}</text>\n`;
+            }
+        });
+        svg += `</g>\n<g id="Cut" ai:layer="true" ai:name="Cut">\n`;
+        strokes.cuts.forEach(e => {
+            const cls = e.isGlue ? 'cut-glue' : 'cut';
+            svg += `<line x1="${e.x1 * scale + margin}" y1="${e.y1 * scale + margin}" x2="${e.x2 * scale + margin}" y2="${e.y2 * scale + margin}" class="${cls}"/>\n`;
+        });
+        svg += `</g>\n<g id="Crease" ai:layer="true" ai:name="Crease">\n`;
+        if (state.showCrease) {
+            strokes.creases.forEach(e => {
+                svg += `<line x1="${e.x1 * scale + margin}" y1="${e.y1 * scale + margin}" x2="${e.x2 * scale + margin}" y2="${e.y2 * scale + margin}" class="crease"/>\n`;
+            });
+        }
+        svg += `</g>\n<g id="Info" ai:layer="true" ai:name="Info">\n`;
+        svg += `<text x="${sw / 2}" y="${sh + 28}" class="label" font-size="12" fill="#444">L=${L} ${unitLabel()} | W=${W} ${unitLabel()} | H=${H} ${unitLabel()}${state.glueOn ? ` | Glue=${state.glue}` : ''}</text>\n`;
+        if (state.note) svg += `<text x="${sw / 2}" y="${sh + 48}" class="label" font-size="11" fill="#1a4972">📝 ${state.note}</text>\n`;
+        svg += `</g></svg>`;
+        downloadBlob(svg, 'image/svg+xml;charset=utf-8', `net-${L}x${W}x${H}.svg`);
+        showToast('🎨 SVG נוצר בהצלחה', 'success');
+    };
+
+    // ---------- AI (SVG with .ai) ----------
+    window.downloadAI = function () {
+        // identical stroke plan to SVG, different extension
+        readDesktop();
+        const { L, W, H } = state;
+        if (validate(L, W, H, state.glue).length) { showToast('⚠️ מידות לא תקינות', 'error'); return; }
+        const geo = getGeo();
+        const strokes = buildStrokePlan(geo);
+        const scale = BASE_SCALE;
+        const margin = 8;
+        const sw = geo.totalW * scale + margin * 2;
+        const sh = geo.totalH * scale + margin * 2;
+        const pad = 70;
+        let svg = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+ width="${sw}" height="${sh + pad}" viewBox="0 0 ${sw} ${sh + pad}"
+ xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" ai:version="27.0" style="background:white">
+<meta><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">Carton Net ${L}x${W}x${H}</dc:title></meta>
+<style>
+.fill-top{fill:#ffe6f0}.fill-wall{fill:#f9f9f9}.fill-bottom{fill:#e6f2ff}.fill-glue{fill:#fff3e0}
+.label{font-family:Arial,Helvetica,sans-serif;font-weight:bold;text-anchor:middle;fill:#111}
+.sub{font-family:Arial,Helvetica,sans-serif;text-anchor:middle;fill:#333}
+.cut{stroke:#111;stroke-width:1.25;fill:none;stroke-linecap:square;stroke-linejoin:miter}
+.cut-glue{stroke:#111;stroke-width:1.25;fill:none;stroke-dasharray:5 3;stroke-linecap:square}
+.crease{stroke:#c0392b;stroke-width:1.25;stroke-dasharray:6 4;fill:none;stroke-linecap:square}
+</style>
+<g id="Layer_Fills" ai:layer="true" ai:name="Fills">
+`;
+        const fillClass = { top: 'fill-top', wall: 'fill-wall', bottom: 'fill-bottom', glue: 'fill-glue' };
+        geo.panels.forEach(p => {
+            const rx = p.x * scale + margin, ry = p.y * scale + margin, rw = p.w * scale, rh = p.h * scale;
+            svg += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" class="${fillClass[p.type] || 'fill-wall'}"/>\n`;
+            if (!state.hideLabels) {
+                const fs = Math.min(13, rw / 9);
+                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 - 5}" class="label" font-size="${fs}">${p.name}</text>\n`;
+                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 + 12}" class="sub" font-size="${Math.min(11, fs * 0.85)}">${p.sub}</text>\n`;
+            } else {
+                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 + 4}" class="label" font-size="${Math.min(14, rw / 8)}">${p.sub}</text>\n`;
+            }
+        });
+        svg += `</g><g id="Layer_Cut" ai:layer="true" ai:name="Cut">\n`;
+        strokes.cuts.forEach(e => {
+            const cls = e.isGlue ? 'cut-glue' : 'cut';
+            svg += `<line x1="${e.x1 * scale + margin}" y1="${e.y1 * scale + margin}" x2="${e.x2 * scale + margin}" y2="${e.y2 * scale + margin}" class="${cls}"/>\n`;
+        });
+        svg += `</g><g id="Layer_Crease" ai:layer="true" ai:name="Crease">\n`;
+        if (state.showCrease) {
+            strokes.creases.forEach(e => {
+                svg += `<line x1="${e.x1 * scale + margin}" y1="${e.y1 * scale + margin}" x2="${e.x2 * scale + margin}" y2="${e.y2 * scale + margin}" class="crease"/>\n`;
+            });
+        }
+        svg += `</g><g id="Layer_Info" ai:layer="true" ai:name="Info">\n`;
+        svg += `<text x="${sw / 2}" y="${sh + 28}" class="label" font-size="12" fill="#444">L=${L} | W=${W} | H=${H}${state.glueOn ? ` | Glue=${state.glue}` : ''}</text>\n`;
+        if (state.note) svg += `<text x="${sw / 2}" y="${sh + 48}" class="label" font-size="11" fill="#1a4972">${state.note}</text>\n`;
+        svg += `</g></svg>`;
+        downloadBlob(svg, 'image/svg+xml;charset=utf-8', `net-${L}x${W}x${H}.ai`);
+        showToast('⭐ AI (SVG) נוצר – נפתח ב-Illustrator', 'success');
+    };
+
+    // ---------- EPS (fixed coordinates + unique strokes) ----------
+    window.downloadEPS = function () {
+        readDesktop();
+        const { L, W, H } = state;
+        if (validate(L, W, H, state.glue).length) { showToast('⚠️ מידות לא תקינות', 'error'); return; }
+        const geo = getGeo();
+        const strokes = buildStrokePlan(geo);
+        const scale = BASE_SCALE;
+        const margin = 8;
+        const sw = geo.totalW * scale + margin * 2;
+        const sh = geo.totalH * scale + margin * 2;
+        function py(y) { return (geo.totalH - y) * scale + margin; }
+        function px(x) { return x * scale + margin; }
+
+        let eps = `%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 ${Math.ceil(sw)} ${Math.ceil(sh + 60)}
+%%Title: Carton Net ${L}x${W}x${H}
+%%Creator: Carton Layout Generator Pro
+%%CreationDate: ${new Date().toISOString()}
+%%LanguageLevel: 2
+%%EndComments
+/rect { 4 2 roll moveto 1 index 0 rlineto 0 exch rlineto neg 0 rlineto closepath } def
+`;
+        const rgb = {
+            top: [1, 0.9, 0.94],
+            wall: [0.976, 0.976, 0.976],
+            bottom: [0.902, 0.949, 1],
+            glue: [1, 0.953, 0.878]
+        };
+        // fills only (no stroke on rects)
+        geo.panels.forEach(p => {
+            const rx = px(p.x);
+            const ry = py(p.y + p.h);
+            const rw = p.w * scale;
+            const rh = p.h * scale;
+            const c = rgb[p.type] || [1, 1, 1];
+            eps += `gsave ${c[0]} ${c[1]} ${c[2]} setrgbcolor ${rx} ${ry} ${rw} ${rh} rect fill grestore\n`;
+            const label = p.type === 'glue' ? 'GLUE' : p.type === 'top' ? 'TOP' : p.type === 'bottom' ? 'BOT' : 'WALL';
+            const fs = Math.min(11, rw / 10);
+            eps += `0 setgray /Helvetica findfont ${fs} scalefont setfont\n`;
+            eps += `${rx + rw / 2} ${ry + rh / 2 + 2} moveto (${label}) dup stringwidth pop -2 div 0 rmoveto show\n`;
+        });
+        // cut lines – uniform width
+        eps += `0 setgray 1.25 setlinewidth [] 0 setdash\n`;
+        strokes.cuts.forEach(e => {
+            if (e.isGlue) eps += `[5 3] 0 setdash\n`;
+            eps += `${px(e.x1)} ${py(e.y1)} moveto ${px(e.x2)} ${py(e.y2)} lineto stroke\n`;
+            if (e.isGlue) eps += `[] 0 setdash\n`;
+        });
+        if (state.showCrease) {
+            eps += `0.75 0.15 0.1 setrgbcolor 1.25 setlinewidth [6 4] 0 setdash\n`;
+            strokes.creases.forEach(e => {
+                eps += `${px(e.x1)} ${py(e.y1)} moveto ${px(e.x2)} ${py(e.y2)} lineto stroke\n`;
+            });
+            eps += `[] 0 setdash\n`;
+        }
+        eps += `0 setgray /Helvetica findfont 10 scalefont setfont\n`;
+        eps += `${sw / 2} ${sh + 25} moveto (L=${L} W=${W} H=${H}${state.glueOn ? ' Glue=' + state.glue : ''}) dup stringwidth pop -2 div 0 rmoveto show\n`;
+        if (state.note) {
+            const safe = state.note.replace(/[^\x20-\x7E]/g, '?');
+            eps += `${sw / 2} ${sh + 42} moveto (${safe}) dup stringwidth pop -2 div 0 rmoveto show\n`;
+        }
+        eps += `showpage\n`;
+        downloadBlob(eps, 'application/postscript;charset=utf-8', `net-${L}x${W}x${H}.eps`);
+        showToast('✨ EPS נוצר בהצלחה', 'success');
+    };
+
+    // ---------- DXF ----------
+    window.downloadDXF = function () {
+        readDesktop();
+        const { L, W, H } = state;
+        if (validate(L, W, H, state.glue).length) { showToast('⚠️ מידות לא תקינות', 'error'); return; }
+        const geo = getGeo();
+        // use mm for CAD (if unit is cm → *10, if in → *25.4)
+        let uScale = 1;
+        if (state.unit === 'cm') uScale = 10;
+        else if (state.unit === 'in') uScale = 25.4;
+        // else mm already
+
+        const strokes = buildStrokePlan(geo);
+        let dxf = `0\nSECTION\n2\nHEADER\n9\n$INSUNITS\n70\n4\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nTABLES\n0\nTABLE\n2\nLAYER\n0\nLAYER\n2\nCUT\n70\n0\n62\n7\n6\nCONTINUOUS\n0\nLAYER\n2\nCREASE\n70\n0\n62\n1\n6\nDASHED\n0\nENDTAB\n0\nENDSEC\n`;
+        dxf += `0\nSECTION\n2\nENTITIES\n`;
+        strokes.cuts.forEach(e => {
+            dxf += `0\nLINE\n8\nCUT\n10\n${e.x1 * uScale}\n20\n${e.y1 * uScale}\n11\n${e.x2 * uScale}\n21\n${e.y2 * uScale}\n`;
+        });
+        if (state.showCrease) {
+            strokes.creases.forEach(e => {
+                dxf += `0\nLINE\n8\nCREASE\n10\n${e.x1 * uScale}\n20\n${e.y1 * uScale}\n11\n${e.x2 * uScale}\n21\n${e.y2 * uScale}\n`;
+            });
+        }
+        dxf += `0\nENDSEC\n0\nEOF\n`;
+        downloadBlob(dxf, 'application/dxf;charset=utf-8', `net-${L}x${W}x${H}.dxf`);
+        showToast('📐 DXF נוצר (שכבות CUT + CREASE)', 'success');
+    };
+
+    // ---------- PDF (print window, single page fit, no clipping, unique strokes) ----------
+    window.downloadPDF = function () {
+        readDesktop();
+        const { L, W, H, note, hideLabels, showCrease } = state;
+        if (validate(L, W, H, state.glue).length) { showToast('⚠️ מידות לא תקינות', 'error'); return; }
+        const geo = getGeo();
+        const strokes = buildStrokePlan(geo);
+        // usable area A4 landscape with safe margins (avoid edge clipping)
+        const PAGE_W = 270 * 3.78;   // ~270mm usable
+        const PAGE_H = 185 * 3.78;
+        const FOOTER = 48;
+        const PAD = 6; // px padding so outer strokes aren't clipped
+        const fit = Math.min(
+            (PAGE_W - PAD * 2) / (geo.totalW * BASE_SCALE),
+            (PAGE_H - FOOTER - PAD * 2) / (geo.totalH * BASE_SCALE),
+            1
+        ) * 0.98; // slight safety factor
+        const sc = BASE_SCALE * fit;
+        const tw = geo.totalW * sc + PAD * 2;
+        const th = geo.totalH * sc + PAD * 2;
+
+        let panelsHtml = '';
+        const colors = { top: '#ffe6f0', wall: '#f9f9f9', bottom: '#e6f2ff', glue: '#fff3e0' };
+        geo.panels.forEach(p => {
+            // fills only – strokes drawn separately (no double borders)
+            const style = `left:${p.x * sc + PAD}px;top:${p.y * sc + PAD}px;width:${p.w * sc}px;height:${p.h * sc}px;background:${colors[p.type]};border:none;`;
+            const content = hideLabels
+                ? `<span style="font-size:11px;font-weight:bold;direction:ltr">${p.sub}</span>`
+                : `<span style="font-size:10px;font-weight:bold">${p.name}<br><span style="font-size:9px;font-weight:normal;direction:ltr">${p.sub}</span></span>`;
+            panelsHtml += `<div class="panel" style="${style}">${content}</div>`;
+        });
+
+        let linesHtml = '';
+        // CUT – uniform 1.25px black
+        strokes.cuts.forEach(e => {
+            const x1 = e.x1 * sc + PAD, y1 = e.y1 * sc + PAD, x2 = e.x2 * sc + PAD, y2 = e.y2 * sc + PAD;
+            const vert = Math.abs(x2 - x1) < 0.5;
+            const dash = e.isGlue ? 'stroke-dasharray:5 3;' : '';
+            if (vert) {
+                linesHtml += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111" stroke-width="1.25" ${dash}/>`;
+            } else {
+                linesHtml += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111" stroke-width="1.25" ${dash}/>`;
+            }
+        });
+        if (showCrease) {
+            strokes.creases.forEach(e => {
+                const x1 = e.x1 * sc + PAD, y1 = e.y1 * sc + PAD, x2 = e.x2 * sc + PAD, y2 = e.y2 * sc + PAD;
+                linesHtml += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#c0392b" stroke-width="1.25" stroke-dasharray="6 4"/>`;
+            });
+        }
+
+        const win = window.open('', '_blank', 'width=1100,height=800');
+        if (!win) { showToast('❌ אפשר חלונות קופצים', 'error'); return; }
+        win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>פריסת קרטון ${L}×${W}×${H}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@page{size:A4 landscape;margin:8mm}
+html,body{width:100%;height:100%;background:white;font-family:Segoe UI,Arial,sans-serif}
+body{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px}
+.wrap{display:flex;flex-direction:column;align-items:center;page-break-inside:avoid}
+.net{position:relative;width:${tw}px;height:${th}px;overflow:visible}
+.panel{position:absolute;display:flex;justify-content:center;align-items:center;text-align:center;flex-direction:column;overflow:hidden}
+.net svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.footer{margin-top:8px;font-size:11px;color:#333;text-align:center;direction:rtl;max-width:${Math.max(tw, 380)}px}
+@media print{
+  html,body{overflow:visible !important}
+  .wrap{page-break-inside:avoid;break-inside:avoid}
+}
+</style></head><body>
+<div class="wrap">
+<div class="net">
+${panelsHtml}
+<svg xmlns="http://www.w3.org/2000/svg" width="${tw}" height="${th}" viewBox="0 0 ${tw} ${th}" overflow="visible">${linesHtml}</svg>
+</div>
+<div class="footer">L=${L} ${unitLabel()} | W=${W} ${unitLabel()} | H=${H} ${unitLabel()}${state.glueOn ? ` | Glue=${state.glue}` : ''}${note ? `<br>📝 ${note}` : ''}</div>
+</div>
+<script>window.onload=function(){setTimeout(function(){window.print()},100)};<\/script>
+</body></html>`);
+        win.document.close();
+        showToast('📄 נפתח חלון הדפסה / שמירה ל-PDF', 'info');
+    };
+
+    // ---------- mobile menu ----------
+    function openMobile() { $('mobileMenuPanel').classList.add('open'); $('mobileOverlay').classList.add('open'); writeMobile(); }
+    function closeMobile() { $('mobileMenuPanel').classList.remove('open'); $('mobileOverlay').classList.remove('open'); }
+    $('mobileMenuToggle').addEventListener('click', () => {
+        if ($('mobileMenuPanel').classList.contains('open')) closeMobile(); else openMobile();
+    });
+    $('mobileMenuClose').addEventListener('click', closeMobile);
+    $('mobileOverlay').addEventListener('click', closeMobile);
+    $('mUpdate').addEventListener('click', window.updateFromMobile);
+    $('mPdf').addEventListener('click', () => { readMobile(); writeDesktop(); closeMobile(); setTimeout(downloadPDF, 200); });
+    $('mSvg').addEventListener('click', () => { readMobile(); writeDesktop(); closeMobile(); setTimeout(downloadSVG, 200); });
+    $('mEps').addEventListener('click', () => { readMobile(); writeDesktop(); closeMobile(); setTimeout(downloadEPS, 200); });
+    $('mAi').addEventListener('click', () => { readMobile(); writeDesktop(); closeMobile(); setTimeout(downloadAI, 200); });
+    $('mDxf').addEventListener('click', () => { readMobile(); writeDesktop(); closeMobile(); setTimeout(downloadDXF, 200); });
+    $('mReset').addEventListener('click', () => { closeMobile(); resetAll(); });
+
+    // live toggles
+    ['hideLabels', 'showCrease', 'glueOn'].forEach(id => {
+        $(id).addEventListener('change', () => { readDesktop(); writeMobile(); renderNet(); });
+    });
+    ['mHide', 'mCrease', 'mGlueOn'].forEach(id => {
+        $(id).addEventListener('change', () => { readMobile(); writeDesktop(); renderNet(); });
+    });
+    $('noteInput').addEventListener('input', () => { state.note = $('noteInput').value.trim(); $('mNote').value = state.note; });
+    $('mNote').addEventListener('input', () => { state.note = $('mNote').value.trim(); $('noteInput').value = state.note; });
+    $('unitSelect').addEventListener('change', () => { state.unit = $('unitSelect').value; $('mUnit').value = state.unit; });
+    $('mUnit').addEventListener('change', () => { state.unit = $('mUnit').value; $('unitSelect').value = state.unit; });
+
+    // Enter key
+    document.querySelectorAll('.controls input[type=number], #mL, #mW, #mH, #mGlue').forEach(el => {
+        el.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (el.id.startsWith('m')) window.updateFromMobile();
+                else window.updateFromDesktop();
+            }
+        });
+        el.addEventListener('input', function () {
+            const v = parseFloat(this.value);
+            setErr(this, isNaN(v) || v < 0 || v > 999);
+        });
+    });
+
+    let resizeTO;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTO);
+        resizeTO = setTimeout(() => renderNet(), 350);
+    });
+
+    // init
+    if (loadState()) {
+        writeDesktop();
+        writeMobile();
+    } else {
+        writeDesktop();
+        writeMobile();
+    }
+    renderNet();
+    console.log('Carton Net Pro ready – PDF / SVG / EPS / AI / DXF + glue flap + crease lines');
+})();
+</script>
 </body>
 </html>
