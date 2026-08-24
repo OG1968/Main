@@ -1552,7 +1552,8 @@
                                 const noteTd = tr.querySelector('td[data-field="note"]');
                                 if (noteTd) noteTd.textContent = rowData.note;
                             }
-                            saveAndUpdate();
+                            // מיון אוטומטי לפי סדר הסטטוסים אחרי שינוי
+                            sortData();
                         }
                     });
                     tdStatus.appendChild(statusSelect);
