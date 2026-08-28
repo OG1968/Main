@@ -882,6 +882,7 @@
         let items = [];
         let currentLanguage = "he";
         let customTitle = null;
+        let customTitleTranslations = {};
         const LANGUAGES = {
           he: {
             title: "צ'קליסט למטייל",
@@ -909,6 +910,12 @@
             pdfError: "❌ שגיאה ביצירת PDF",
             titlePlaceholder: "שם הרשימה...",
             editTitleHint: "לחץ פעמיים או על העיפרון לעריכת כותרת",
+            translating: "מתרגם את הרשימה...",
+            translateSuccess: "✅ הפריטים תורגמו לעברית",
+            translateError: "❌ לא ניתן לתרגם כרגע. הפריטים נשארו במקור.",
+            footer: "© 2026 כל הזכויות שמורות",
+            logoAlt: "לוגו",
+            editTitleBtn: "ערוך כותרת הרשימה",
           },
           en: {
             title: "Traveler Checklist",
@@ -936,6 +943,12 @@
             pdfError: "❌ Error creating PDF",
             titlePlaceholder: "List name...",
             editTitleHint: "Double-click or tap the pen to edit title",
+            translating: "Translating the list...",
+            translateSuccess: "✅ Items translated to English",
+            translateError: "❌ Translation unavailable. Items left as-is.",
+            footer: "© 2026 All rights reserved",
+            logoAlt: "Logo",
+            editTitleBtn: "Edit list title",
           },
         };
 
@@ -949,6 +962,7 @@
         const langIcon = $("lang-icon");
 
         let sortableInstance = null;
+        let isTranslating = false;
 
         function setTextContent(el, text) {
           if (el) el.textContent = text;
@@ -973,6 +987,32 @@
                   if (ids.has(item.id)) return false;
                   ids.add(item.id);
                   return true;
+                });
+                items.forEach((item) => {
+                  if (!item.translations || typeof item.translations !== "object") {
+                    item.translations = {};
+                  }
+                  // Assume existing text belongs to current stored language if known
+                  if (!item.translations.he && !item.translations.en) {
+                    const looksHebrew = /[\u0590-\u05FF]/.test(item.text);
+                    item.translations[looksHebrew ? "he" : "en"] = item.text;
+                  }
+                  if (item.translations.he && item.translations.en) {
+                    if (
+                      translationLostEmojis(
+                        item.translations.he,
+                        item.translations.en,
+                      )
+                    ) {
+                      item.translations.en = restoreEmojis(
+                        item.translations.he,
+                        item.translations.en,
+                      );
+                    }
+                    if (isLikelyTransliteration(item.translations.en)) {
+                      delete item.translations.en;
+                    }
+                  }
                 });
                 return;
               }
@@ -1008,8 +1048,36 @@
           try {
             const t = localStorage.getItem("checklistCustomTitle");
             customTitle = t && t.trim() ? t.trim() : null;
+            const storedTr = localStorage.getItem("checklistCustomTitleTr");
+            customTitleTranslations = storedTr ? JSON.parse(storedTr) : {};
+            if (
+              !customTitleTranslations ||
+              typeof customTitleTranslations !== "object"
+            ) {
+              customTitleTranslations = {};
+            }
+            if (customTitle && !customTitleTranslations.he && !customTitleTranslations.en) {
+              customTitleTranslations[detectItemLang(customTitle)] = customTitle;
+            }
+            if (
+              customTitleTranslations.he &&
+              customTitleTranslations.en &&
+              translationLostEmojis(
+                customTitleTranslations.he,
+                customTitleTranslations.en,
+              )
+            ) {
+              customTitleTranslations.en = restoreEmojis(
+                customTitleTranslations.he,
+                customTitleTranslations.en,
+              );
+            }
+            if (customTitleTranslations[currentLanguage]) {
+              customTitle = customTitleTranslations[currentLanguage];
+            }
           } catch (_) {
-            customTitle = null;
+            customTitle = customTitle || null;
+            customTitleTranslations = customTitleTranslations || {};
           }
         }
 
@@ -1019,6 +1087,17 @@
               localStorage.setItem("checklistCustomTitle", customTitle);
             } else {
               localStorage.removeItem("checklistCustomTitle");
+            }
+            if (
+              customTitleTranslations &&
+              (customTitleTranslations.he || customTitleTranslations.en)
+            ) {
+              localStorage.setItem(
+                "checklistCustomTitleTr",
+                JSON.stringify(customTitleTranslations),
+              );
+            } else {
+              localStorage.removeItem("checklistCustomTitleTr");
             }
           } catch (_) {
             /* ignore */
@@ -1066,17 +1145,1128 @@
           });
 
           langIcon.textContent = currentLanguage === "he" ? "🇮🇱" : "🇬🇧";
+
+          const footerEl = document.querySelector(".footer-text");
+          if (footerEl) footerEl.textContent = lang.footer;
+
+          const logoEl = document.querySelector(".footer-logo img");
+          if (logoEl) logoEl.alt = lang.logoAlt;
+
+          const titleEl = $("title");
+          if (titleEl) titleEl.title = lang.editTitleHint;
+
+          const editTitleBtn = $("edit-title-btn");
+          if (editTitleBtn) editTitleBtn.title = lang.editTitleBtn;
+
           updateProgress();
         }
 
-        function toggleLanguage() {
-          currentLanguage = currentLanguage === "he" ? "en" : "he";
-          localStorage.setItem("checklistLanguage", currentLanguage);
-          document.documentElement.lang =
-            currentLanguage === "he" ? "he" : "en";
-          document.dir = currentLanguage === "he" ? "rtl" : "ltr";
-          updateUI();
-          renderAllItems();
+        function detectItemLang(text) {
+          return /[\u0590-\u05FF]/.test(text || "") ? "he" : "en";
+        }
+
+        const EMOJI_SEQ_RE =
+          /(?:\p{Extended_Pictographic}|\p{Emoji_Presentation}|[\u2600-\u27BF]|[\u2300-\u23FF]|[\u2B00-\u2BFF])(?:\uFE0F|\u20E3)?(?:\u200D(?:\p{Extended_Pictographic}|\p{Emoji_Presentation})(?:\uFE0F|\u20E3)?)*/gu;
+
+        function extractEmojis(text) {
+          return String(text || "").match(EMOJI_SEQ_RE) || [];
+        }
+
+        function splitEmojiAffixes(text) {
+          const str = String(text || "");
+          const run =
+            /^(?:(?:(?:\p{Extended_Pictographic}|\p{Emoji_Presentation}|[\u2600-\u27BF]|[\u2300-\u23FF]|[\u2B00-\u2BFF])(?:\uFE0F|\u20E3)?(?:\u200D(?:\p{Extended_Pictographic}|\p{Emoji_Presentation})(?:\uFE0F|\u20E3)?)*)|\s)+/u;
+          const prefixMatch = str.match(run);
+          let prefix = "";
+          let rest = str;
+          if (prefixMatch && extractEmojis(prefixMatch[0]).length) {
+            prefix = prefixMatch[0];
+            rest = str.slice(prefix.length);
+          }
+          const suffixRun =
+            /(?:(?:(?:\p{Extended_Pictographic}|\p{Emoji_Presentation}|[\u2600-\u27BF]|[\u2300-\u23FF]|[\u2B00-\u2BFF])(?:\uFE0F|\u20E3)?(?:\u200D(?:\p{Extended_Pictographic}|\p{Emoji_Presentation})(?:\uFE0F|\u20E3)?)*)|\s)+$/u;
+          const suffixMatch = rest.match(suffixRun);
+          let suffix = "";
+          if (suffixMatch && extractEmojis(suffixMatch[0]).length) {
+            suffix = suffixMatch[0];
+            rest = rest.slice(0, rest.length - suffix.length);
+          }
+          return { prefix, core: rest, suffix };
+        }
+
+        function restoreEmojis(source, translated) {
+          const src = String(source || "");
+          let out = String(translated || "").trim();
+          if (!src) return out;
+          const { prefix, core, suffix } = splitEmojiAffixes(src);
+
+          const missing = (emoji) => emoji && !out.includes(emoji);
+          if (prefix && extractEmojis(prefix).some(missing)) {
+            const cleanPrefix = prefix.replace(/\s+$/, " ");
+            out = cleanPrefix + out.replace(/^\s+/, "");
+          }
+          if (suffix && extractEmojis(suffix).some(missing)) {
+            const cleanSuffix = suffix.replace(/^\s+/, " ");
+            out = out.replace(/\s+$/, "") + cleanSuffix;
+          }
+
+          const leftover = extractEmojis(core).filter(missing);
+          if (leftover.length) {
+            out = out.replace(/\s+$/, "") + " " + leftover.join(" ");
+          }
+          return out.replace(/[ \t]+/g, " ").trim();
+        }
+
+        function translationLostEmojis(source, translated) {
+          const needed = extractEmojis(source);
+          if (!needed.length) return false;
+          const got = extractEmojis(translated);
+          return needed.some((e) => !got.includes(e));
+        }
+
+        const GLOSSARY = [
+          { emoji: "🪥", he: ["מברשת שיניים"], en: ["toothbrush"] },
+          { emoji: "🪮", he: ["מברשת שיער", "מברשת לשיער"], en: ["hairbrush", "hair brush"] },
+          { emoji: "💇", he: ["מסרק"], en: ["comb"] },
+          { emoji: "🦷", he: ["משחת שיניים"], en: ["toothpaste"] },
+          { emoji: "☀️", he: ["שמש", "קרני שמש"], en: ["sun", "sunshine"] },
+          { emoji: "🕶️", he: ["משקפי שמש"], en: ["sunglasses"] },
+          { emoji: "☀️", he: ["קרם הגנה"], en: ["sunscreen", "spf"] },
+          { emoji: "👓", he: ["משקפיים", "משקפי ראייה"], en: ["glasses"] },
+          { emoji: "🪪", he: ["תעודת זהות"], en: ["id card", "identity card"] },
+          { emoji: "💳", he: ["כרטיס אשראי", "אשראי"], en: ["credit card"] },
+          { emoji: "🎫", he: ["כרטיס טיסה", "כרטיסים"], en: ["plane ticket", "tickets", "boarding pass"] },
+          { emoji: "🩹", he: ["עזרה ראשונה"], en: ["first aid"] },
+          { emoji: "🔋", he: ["סוללה ניידת", "פאוור בנק"], en: ["power bank"] },
+          {
+            emoji: "🔋",
+            he: ["בטריה נטענת", "בטרייה נטענת", "סוללה נטענת"],
+            en: ["rechargeable battery"],
+          },
+          { emoji: "🔋", he: ["בטריה", "בטרייה", "סוללה"], en: ["battery"] },
+          { emoji: "🔌", he: ["מטען"], en: ["charger"] },
+          { emoji: "🔌", he: ["מתאם"], en: ["adapter"] },
+          { emoji: "🎧", he: ["אוזניות"], en: ["headphones", "earphones"] },
+          { emoji: "👙", he: ["בגד ים", "בגדי ים"], en: ["swimsuit", "bikini", "swimwear"] },
+          { emoji: "👶", he: ["תינוק", "תינוקות"], en: ["baby"] },
+          { emoji: "🧷", he: ["חיתול", "חיתולים"], en: ["diaper", "nappy"] },
+          { emoji: "🧳", he: ["מזוודה", "טרולי"], en: ["suitcase", "luggage"] },
+          { emoji: "🎒", he: ["תיק גב"], en: ["backpack"] },
+          { emoji: "👜", he: ["תיק"], en: ["bag"] },
+          { emoji: "🛂", he: ["דרכון"], en: ["passport"] },
+          { emoji: "✈️", he: ["טיסה"], en: ["flight"] },
+          { emoji: "✈️", he: ["מטוס"], en: ["plane", "airplane"] },
+          { emoji: "✈️", he: ["שדה תעופה"], en: ["airport"] },
+          { emoji: "🏨", he: ["מלון", "לינה"], en: ["hotel", "hostel"] },
+          { emoji: "📅", he: ["הזמנה", "ריזרבציה"], en: ["reservation", "booking"] },
+          { emoji: "🗺️", he: ["מפה"], en: ["map"] },
+          { emoji: "📱", he: ["טלפון", "נייד", "סמארטפון"], en: ["phone", "mobile", "smartphone"] },
+          { emoji: "💻", he: ["מחשב נייד", "לפטופ"], en: ["laptop"] },
+          { emoji: "💻", he: ["מחשב"], en: ["computer"] },
+          { emoji: "📷", he: ["מצלמה"], en: ["camera"] },
+          { emoji: "🧴", he: ["שמפו"], en: ["shampoo"] },
+          { emoji: "🧴", he: ["מרכך"], en: ["conditioner"] },
+          { emoji: "🧴", he: ["קרם"], en: ["cream", "lotion"] },
+          { emoji: "🧴", he: ["דאודורנט"], en: ["deodorant"] },
+          { emoji: "🧼", he: ["סבון נוזלי"], en: ["liquid soap"] },
+          { emoji: "🧼", he: ["סבון"], en: ["soap"] },
+          { emoji: "🪒", he: ["סכין גילוח", "גילוח"], en: ["razor", "shave"] },
+          { emoji: "💨", he: ["מייבש שיער", "פן"], en: ["hair dryer", "hairdryer"] },
+          { emoji: "🌸", he: ["בושם"], en: ["perfume", "cologne"] },
+          { emoji: "💄", he: ["איפור"], en: ["makeup"] },
+          { emoji: "🩲", he: ["תחתונים"], en: ["underwear"] },
+          { emoji: "🧦", he: ["גרביים", "גרב"], en: ["socks"] },
+          { emoji: "👟", he: ["נעליים", "נעל"], en: ["shoes"] },
+          { emoji: "🧥", he: ["מעיל", "ז'קט", "גקט"], en: ["jacket", "coat"] },
+          { emoji: "👕", he: ["חולצה", "חולצות"], en: ["shirt"] },
+          { emoji: "👕", he: ["בגדים"], en: ["clothes"] },
+          { emoji: "👖", he: ["מכנסיים"], en: ["pants", "trousers"] },
+          { emoji: "🧢", he: ["כובע"], en: ["hat", "cap"] },
+          { emoji: "🧣", he: ["צעיף"], en: ["scarf"] },
+          { emoji: "🧤", he: ["כפפות"], en: ["gloves"] },
+          { emoji: "🩳", he: ["מכנס קצר", "שורט"], en: ["shorts"] },
+          { emoji: "👗", he: ["שמלה"], en: ["dress"] },
+          { emoji: "💊", he: ["תרופה", "תרופות", "כדורים"], en: ["medicine", "pills", "medication"] },
+          { emoji: "👛", he: ["ארנק"], en: ["wallet"] },
+          { emoji: "💵", he: ["מזומן", "כסף"], en: ["cash", "money"] },
+          { emoji: "🔑", he: ["מפתחות", "מפתח"], en: ["keys", "key"] },
+          { emoji: "☂️", he: ["מטריה"], en: ["umbrella"] },
+          { emoji: "💧", he: ["מים"], en: ["water"] },
+          { emoji: "💧", he: ["בקבוק"], en: ["bottle"] },
+          { emoji: "🍫", he: ["חטיף", "חטיפים"], en: ["snack", "snacks"] },
+          { emoji: "☕", he: ["קפה"], en: ["coffee"] },
+          { emoji: "🍵", he: ["תה"], en: ["tea"] },
+          { emoji: "📄", he: ["ביטוח"], en: ["insurance"] },
+          { emoji: "📄", he: ["מסמכים", "מסמך"], en: ["documents", "document"] },
+          { emoji: "📖", he: ["ספר"], en: ["book"] },
+          { emoji: "🛏️", he: ["כרית"], en: ["pillow"] },
+          { emoji: "🛏️", he: ["שמיכה"], en: ["blanket"] },
+          { emoji: "🏖️", he: ["מגבת"], en: ["towel"] },
+          { emoji: "⌚", he: ["שעון"], en: ["watch"] },
+          { emoji: "💍", he: ["תכשיטים", "תכשיט"], en: ["jewelry", "jewellery"] },
+          { emoji: "🧭", he: ["ניווט"], en: ["navigation", "gps"] },
+          { emoji: "🧻", he: ["נייר טואלט", "טישו"], en: ["toilet paper", "tissue"] },
+          { emoji: "🧺", he: ["כביסה"], en: ["laundry"] },
+          { emoji: "🔦", he: ["פנס"], en: ["flashlight", "torch"] },
+          { emoji: "🧘", he: ["יוגה"], en: ["yoga"] },
+          { emoji: "🏊", he: ["בריכה"], en: ["pool"] },
+          { emoji: "🏔️", he: ["טיול", "טרק"], en: ["hike", "trek", "hiking"] },
+          { emoji: "🏕️", he: ["אוהל", "קמפינג"], en: ["tent", "camping"] },
+          { emoji: "🌧️", he: ["גשם"], en: ["rain"] },
+          { emoji: "🌙", he: ["ירח"], en: ["moon"] },
+          { emoji: "🌊", he: ["ים", "ים התיכון"], en: ["sea", "beach"] },
+
+          { emoji: "🍉", he: ["אבטיח", "אבטיחים"], en: ["watermelon"] },
+          { emoji: "🍇", he: ["ענבים", "ענב"], en: ["grapes", "grape"] },
+          { emoji: "🍎", he: ["תפוח", "תפוחים"], en: ["apple", "apples"] },
+          { emoji: "🍏", he: ["תפוח ירוק"], en: ["green apple"] },
+          { emoji: "🍌", he: ["בננה", "בננות"], en: ["banana", "bananas"] },
+          { emoji: "🍓", he: ["תות", "תותים", "תות שדה"], en: ["strawberry", "strawberries"] },
+          { emoji: "🍋", he: ["לימון", "לימונים"], en: ["lemon", "lemons"] },
+          { emoji: "🍊", he: ["תפוז", "תפוזים"], en: ["orange", "oranges"] },
+          { emoji: "🍑", he: ["אפרסק", "אפרסקים"], en: ["peach", "peaches"] },
+          { emoji: "🍐", he: ["אגס", "אגסים"], en: ["pear", "pears"] },
+          { emoji: "🍒", he: ["דובדבן", "דובדבנים"], en: ["cherry", "cherries"] },
+          { emoji: "🍈", he: ["מלון", "מלונים"], en: ["melon"] },
+          { emoji: "🥥", he: ["קוקוס"], en: ["coconut"] },
+          { emoji: "🍍", he: ["אננס"], en: ["pineapple"] },
+          { emoji: "🥭", he: ["מנגו"], en: ["mango"] },
+          { emoji: "🥝", he: ["קיווי"], en: ["kiwi"] },
+          { emoji: "🫐", he: ["אוכמניות", "אוכמניה"], en: ["blueberry", "blueberries"] },
+          { emoji: "🫒", he: ["זית", "זיתים"], en: ["olive", "olives"] },
+          { emoji: "🍅", he: ["עגבנייה", "עגבניה", "עגבניות"], en: ["tomato", "tomatoes"] },
+          { emoji: "🥒", he: ["מלפפון", "מלפפונים"], en: ["cucumber"] },
+          { emoji: "🥕", he: ["גזר", "גזרים"], en: ["carrot", "carrots"] },
+          { emoji: "🌽", he: ["תירס"], en: ["corn"] },
+          { emoji: "🥦", he: ["ברוקולי"], en: ["broccoli"] },
+          { emoji: "🧄", he: ["שום"], en: ["garlic"] },
+          { emoji: "🧅", he: ["בצל"], en: ["onion"] },
+          { emoji: "🥔", he: ["תפוח אדמה", "תפוחי אדמה"], en: ["potato", "potatoes"] },
+          { emoji: "🍄", he: ["פטריה", "פטריות"], en: ["mushroom", "mushrooms"] },
+          { emoji: "🫑", he: ["פלפל", "פלפלים"], en: ["pepper"] },
+          { emoji: "🥬", he: ["חסה", "כרוב"], en: ["lettuce", "cabbage"] },
+          { emoji: "🥑", he: ["אבוקדו"], en: ["avocado"] },
+          { emoji: "🍆", he: ["חציל", "חצילים"], en: ["eggplant"] },
+          { emoji: "🥜", he: ["בוטן", "בוטנים"], en: ["peanut", "peanuts"] },
+          { emoji: "🌰", he: ["ערמון"], en: ["chestnut"] },
+
+          { emoji: "🐴", he: ["סוס", "סוסים"], en: ["horse", "horses"] },
+          { emoji: "🦄", he: ["חד קרן"], en: ["unicorn"] },
+          { emoji: "🐶", he: ["כלב", "כלבים"], en: ["dog", "dogs"] },
+          { emoji: "🐱", he: ["חתול", "חתולים"], en: ["cat", "cats"] },
+          { emoji: "🐭", he: ["עכבר", "עכברים"], en: ["mouse", "mice"] },
+          { emoji: "🐹", he: ["אוגר"], en: ["hamster"] },
+          { emoji: "🐰", he: ["ארנב", "ארנבת", "שפן"], en: ["rabbit", "bunny"] },
+          { emoji: "🦊", he: ["שועל"], en: ["fox"] },
+          { emoji: "🐻", he: ["דוב", "דובים"], en: ["bear"] },
+          { emoji: "🐼", he: ["פנדה"], en: ["panda"] },
+          { emoji: "🐨", he: ["קואלה"], en: ["koala"] },
+          { emoji: "🐯", he: ["נמר", "טיגריס"], en: ["tiger"] },
+          { emoji: "🦁", he: ["אריה", "אריות"], en: ["lion"] },
+          { emoji: "🐮", he: ["פרה", "פרות"], en: ["cow"] },
+          { emoji: "🐷", he: ["חזיר", "חזירים"], en: ["pig"] },
+          { emoji: "🐸", he: ["צפרדע", "צפרדעים"], en: ["frog"] },
+          { emoji: "🐵", he: ["קוף", "קופים"], en: ["monkey"] },
+          { emoji: "🐔", he: ["תרנגולת", "עוף"], en: ["chicken"] },
+          { emoji: "🐓", he: ["תרנגול"], en: ["rooster"] },
+          { emoji: "🐧", he: ["פינגווין"], en: ["penguin"] },
+          { emoji: "🐦", he: ["ציפור", "ציפורים"], en: ["bird"] },
+          { emoji: "🐤", he: ["אפרוח"], en: ["chick"] },
+          { emoji: "🦆", he: ["ברווז", "ברווזים"], en: ["duck"] },
+          { emoji: "🦅", he: ["נשר", "עיט"], en: ["eagle"] },
+          { emoji: "🦉", he: ["ינשוף"], en: ["owl"] },
+          { emoji: "🦇", he: ["עטלף"], en: ["bat"] },
+          { emoji: "🐺", he: ["זאב", "זאבים"], en: ["wolf"] },
+          { emoji: "🐗", he: ["חזיר בר"], en: ["boar"] },
+          { emoji: "🐴", he: ["פוני"], en: ["pony"] },
+          { emoji: "🦓", he: ["זברה"], en: ["zebra"] },
+          { emoji: "🦒", he: ["ג'ירפה", "גירפה"], en: ["giraffe"] },
+          { emoji: "🐘", he: ["פיל", "פילים"], en: ["elephant"] },
+          { emoji: "🦏", he: ["קרנף"], en: ["rhino", "rhinoceros"] },
+          { emoji: "🦛", he: ["היפופוטם"], en: ["hippo", "hippopotamus"] },
+          { emoji: "🐪", he: ["גמל"], en: ["camel"] },
+          { emoji: "🦘", he: ["קנגורו"], en: ["kangaroo"] },
+          { emoji: "🐄", he: ["בקר"], en: ["cattle"] },
+          { emoji: "🐑", he: ["כבשה", "כבשים"], en: ["sheep"] },
+          { emoji: "🐐", he: ["עז", "עיזים"], en: ["goat"] },
+          { emoji: "🦃", he: ["תרנגול הודו"], en: ["turkey"] },
+          { emoji: "🦚", he: ["טווס"], en: ["peacock"] },
+          { emoji: "🦜", he: ["תוכי"], en: ["parrot"] },
+          { emoji: "🦢", he: ["ברבור"], en: ["swan"] },
+          { emoji: "🦩", he: ["פלמינגו"], en: ["flamingo"] },
+          { emoji: "🕊️", he: ["יונה"], en: ["dove", "pigeon"] },
+          { emoji: "🐇", he: ["ארנבים"], en: ["rabbits"] },
+          { emoji: "🦝", he: ["רקון"], en: ["raccoon"] },
+          { emoji: "🦨", he: ["בואש"], en: ["skunk"] },
+          { emoji: "🦡", he: ["גירית"], en: ["badger"] },
+          { emoji: "🦦", he: ["לוטרה"], en: ["otter"] },
+          { emoji: "🦥", he: ["עצלן"], en: ["sloth"] },
+          { emoji: "🐁", he: ["עכברה"], en: ["rat"] },
+          { emoji: "🦔", he: ["קיפוד"], en: ["hedgehog"] },
+          { emoji: "🐾", he: ["חיה", "חיות", "בעלי חיים"], en: ["animal", "animals"] },
+          { emoji: "🐉", he: ["דרקון"], en: ["dragon"] },
+          { emoji: "🦕", he: ["דינוזאור"], en: ["dinosaur"] },
+          { emoji: "🦖", he: ["טי רקס", "טי- רקס"], en: ["t-rex"] },
+          { emoji: "🐳", he: ["לוויתן"], en: ["whale"] },
+          { emoji: "🐬", he: ["דולפין"], en: ["dolphin"] },
+          { emoji: "🐟", he: ["דג", "דגים"], en: ["fish"] },
+          { emoji: "🐠", he: ["דג טרופי"], en: ["tropical fish"] },
+          { emoji: "🐡", he: ["נפוחית"], en: ["blowfish"] },
+          { emoji: "🦈", he: ["כריש"], en: ["shark"] },
+          { emoji: "🐙", he: ["תמנון"], en: ["octopus"] },
+          { emoji: "🦑", he: ["דיונון"], en: ["squid"] },
+          { emoji: "🦐", he: ["חסילון", "שרימפס"], en: ["shrimp"] },
+          { emoji: "🦞", he: ["לובסטר"], en: ["lobster"] },
+          { emoji: "🦀", he: ["סרטן"], en: ["crab"] },
+          { emoji: "🐚", he: ["צדף", "קונכייה"], en: ["shell"] },
+          { emoji: "🪸", he: ["אלמוג"], en: ["coral"] },
+          { emoji: "🐌", he: ["חילזון"], en: ["snail"] },
+          { emoji: "🦋", he: ["פרפר", "פרפרים"], en: ["butterfly"] },
+          { emoji: "🐛", he: ["תולעת", "זחל"], en: ["worm", "bug"] },
+          { emoji: "🐜", he: ["נמלה", "נמלים"], en: ["ant"] },
+          { emoji: "🐝", he: ["דבורה", "דבורים"], en: ["bee"] },
+          { emoji: "🪲", he: ["חיפושית"], en: ["beetle"] },
+          { emoji: "🐞", he: ["פרת משה רבנו"], en: ["ladybug"] },
+          { emoji: "🦗", he: ["צרצר"], en: ["cricket"] },
+          { emoji: "🪳", he: ["תיקן"], en: ["cockroach"] },
+          { emoji: "🕷️", he: ["עכביש"], en: ["spider"] },
+          { emoji: "🦂", he: ["עקרב"], en: ["scorpion"] },
+          { emoji: "🦟", he: ["יתוש"], en: ["mosquito"] },
+          { emoji: "🪰", he: ["זבוב"], en: ["fly"] },
+          { emoji: "🪱", he: ["תולעת אדמה"], en: ["earthworm"] },
+          { emoji: "🦠", he: ["חיידק", "וירוס"], en: ["microbe", "virus"] },
+          { emoji: "🐢", he: ["צב", "צבים"], en: ["turtle"] },
+          { emoji: "🐍", he: ["נחש", "נחשים"], en: ["snake"] },
+          { emoji: "🦎", he: ["לטאה"], en: ["lizard"] },
+          { emoji: "🐊", he: ["תנין", "קרוקודיל"], en: ["crocodile", "alligator"] },
+
+          { emoji: "🍕", he: ["פיצה"], en: ["pizza"] },
+          { emoji: "🍔", he: ["המבורגר"], en: ["hamburger", "burger"] },
+          { emoji: "🌭", he: ["נקניקייה", "נקניקיה"], en: ["hot dog"] },
+          { emoji: "🍟", he: ["ציפס", "צ'יפס"], en: ["fries"] },
+          { emoji: "🥪", he: ["כריך", "סנדוויץ", "סנדוויץ'"], en: ["sandwich"] },
+          { emoji: "🌮", he: ["טאקו"], en: ["taco"] },
+          { emoji: "🌯", he: ["בוריטו"], en: ["burrito"] },
+          { emoji: "🥙", he: ["פיתה"], en: ["pita"] },
+          { emoji: "🧆", he: ["פלאפל", "falafel"], en: ["falafel"] },
+          { emoji: "🥚", he: ["ביצה", "ביצים"], en: ["egg", "eggs"] },
+          { emoji: "🍳", he: ["חביתה"], en: ["omelet", "fried egg"] },
+          { emoji: "🥞", he: ["פנקייק"], en: ["pancake"] },
+          { emoji: "🧇", he: ["וופל"], en: ["waffle"] },
+          { emoji: "🧀", he: ["גבינה"], en: ["cheese"] },
+          { emoji: "🥓", he: ["בייקון"], en: ["bacon"] },
+          { emoji: "🥩", he: ["בשר", "סטייק"], en: ["meat", "steak"] },
+          { emoji: "🍗", he: ["שוק עוף"], en: ["chicken leg"] },
+          { emoji: "🍖", he: ["צלע"], en: ["meat bone"] },
+          { emoji: "🌭", he: ["נקניק"], en: ["sausage"] },
+          { emoji: "🍞", he: ["לחם"], en: ["bread"] },
+          { emoji: "🥐", he: ["קרואסון"], en: ["croissant"] },
+          { emoji: "🥖", he: ["בגט"], en: ["baguette"] },
+          { emoji: "🥨", he: ["בייגלה"], en: ["pretzel"] },
+          { emoji: "🥯", he: ["בייגל"], en: ["bagel"] },
+          { emoji: "🥞", he: ["לטקס"], en: ["latkes"] },
+          { emoji: "🍚", he: ["אורז"], en: ["rice"] },
+          { emoji: "🍝", he: ["פסטה", "ספגטי"], en: ["pasta", "spaghetti"] },
+          { emoji: "🍜", he: ["מרק"], en: ["soup"] },
+          { emoji: "🍲", he: ["תבשיל"], en: ["stew"] },
+          { emoji: "🍣", he: ["סושי"], en: ["sushi"] },
+          { emoji: "🍱", he: ["בנטו"], en: ["bento"] },
+          { emoji: "🥗", he: ["סלט"], en: ["salad"] },
+          { emoji: "🍿", he: ["פופקורן"], en: ["popcorn"] },
+          { emoji: "🧂", he: ["מלח"], en: ["salt"] },
+          { emoji: "🧈", he: ["חמאה"], en: ["butter"] },
+          { emoji: "🍦", he: ["גלידה"], en: ["ice cream"] },
+          { emoji: "🍩", he: ["דונאט", "סופגנייה", "סופגניה"], en: ["donut", "doughnut"] },
+          { emoji: "🍪", he: ["עוגיה", "עוגיות"], en: ["cookie", "cookies"] },
+          { emoji: "🎂", he: ["עוגת יום הולדת"], en: ["birthday cake"] },
+          { emoji: "🍰", he: ["עוגה"], en: ["cake"] },
+          { emoji: "🧁", he: ["קאפקייק"], en: ["cupcake"] },
+          { emoji: "🍫", he: ["שוקולד"], en: ["chocolate"] },
+          { emoji: "🍬", he: ["ממתק", "סוכריה"], en: ["candy"] },
+          { emoji: "🍭", he: ["סוכריה על מקל"], en: ["lollipop"] },
+          { emoji: "🍮", he: ["פודינג"], en: ["pudding"] },
+          { emoji: "🍯", he: ["דבש"], en: ["honey"] },
+          { emoji: "🥛", he: ["חלב"], en: ["milk"] },
+          { emoji: "🍼", he: ["בקבוק תינוק"], en: ["baby bottle"] },
+          { emoji: "🍷", he: ["יין"], en: ["wine"] },
+          { emoji: "🍺", he: ["בירה"], en: ["beer"] },
+          { emoji: "🥂", he: ["שמפניה"], en: ["champagne"] },
+          { emoji: "🍸", he: ["קוקטייל"], en: ["cocktail"] },
+          { emoji: "🧃", he: ["מיץ"], en: ["juice"] },
+          { emoji: "🧊", he: ["קרח"], en: ["ice"] },
+
+          { emoji: "🌸", he: ["פרח", "פרחים"], en: ["flower", "flowers"] },
+          { emoji: "🌹", he: ["ורד", "ורדים"], en: ["rose"] },
+          { emoji: "🌻", he: ["חמנייה", "חמניה"], en: ["sunflower"] },
+          { emoji: "🌷", he: ["צבעוני"], en: ["tulip"] },
+          { emoji: "🌳", he: ["עץ", "עצים"], en: ["tree"] },
+          { emoji: "🌲", he: ["אורן"], en: ["pine"] },
+          { emoji: "🌴", he: ["דקל", "עץ דקל"], en: ["palm"] },
+          { emoji: "🌵", he: ["קקטוס"], en: ["cactus"] },
+          { emoji: "🍀", he: ["תלתן"], en: ["clover"] },
+          { emoji: "🍁", he: ["עלה"], en: ["leaf"] },
+          { emoji: "🔥", he: ["אש"], en: ["fire"] },
+          { emoji: "❄️", he: ["שלג"], en: ["snow"] },
+          { emoji: "⚡", he: ["ברק"], en: ["lightning"] },
+          { emoji: "🌈", he: ["קשת"], en: ["rainbow"] },
+          { emoji: "⭐", he: ["כוכב", "כוכבים"], en: ["star"] },
+          { emoji: "🌍", he: ["עולם", "כדור הארץ"], en: ["earth", "world"] },
+          { emoji: "⛰️", he: ["הר", "הרים"], en: ["mountain"] },
+          { emoji: "🌋", he: ["הר געש"], en: ["volcano"] },
+          { emoji: "🏜️", he: ["מדבר"], en: ["desert"] },
+          { emoji: "🏞️", he: ["פארק"], en: ["park"] },
+          { emoji: "🏠", he: ["בית"], en: ["house", "home"] },
+          { emoji: "🏢", he: ["משרד", "בניין"], en: ["office", "building"] },
+          { emoji: "🏫", he: ["בית ספר"], en: ["school"] },
+          { emoji: "🏥", he: ["בית חולים", "קופת חולים"], en: ["hospital"] },
+          { emoji: "⛪", he: ["כנסייה"], en: ["church"] },
+          { emoji: "🕌", he: ["מסגד"], en: ["mosque"] },
+          { emoji: "🕍", he: ["בית כנסת"], en: ["synagogue"] },
+          { emoji: "🏰", he: ["טירה"], en: ["castle"] },
+          { emoji: "🎢", he: ["לונה פארק"], en: ["amusement park"] },
+          { emoji: "🏟️", he: ["אצטדיון"], en: ["stadium"] },
+          { emoji: "⛽", he: ["דלק"], en: ["fuel", "gas"] },
+          { emoji: "🚗", he: ["רכב", "מכונית", "אוטו"], en: ["car"] },
+          { emoji: "🚕", he: ["מונית"], en: ["taxi"] },
+          { emoji: "🚌", he: ["אוטובוס"], en: ["bus"] },
+          { emoji: "🚎", he: ["טרוליבוס"], en: ["trolleybus"] },
+          { emoji: "🏎️", he: ["מכונית מרוץ"], en: ["race car"] },
+          { emoji: "🚓", he: ["משטרה"], en: ["police"] },
+          { emoji: "🚑", he: ["אמבולנס"], en: ["ambulance"] },
+          { emoji: "🚒", he: ["מכבי אש"], en: ["fire truck"] },
+          { emoji: "🚐", he: ["מיניבוס"], en: ["van"] },
+          { emoji: "🚚", he: ["משאית"], en: ["truck"] },
+          { emoji: "🚜", he: ["טרקטור"], en: ["tractor"] },
+          { emoji: "🛵", he: ["קטנוע"], en: ["scooter"] },
+          { emoji: "🏍️", he: ["אופנוע"], en: ["motorcycle"] },
+          { emoji: "🚲", he: ["אופניים"], en: ["bicycle", "bike"] },
+          { emoji: "🛴", he: ["קורקינט"], en: ["kick scooter"] },
+          { emoji: "🚁", he: ["מסוק"], en: ["helicopter"] },
+          { emoji: "🚀", he: ["טיל", "חללית"], en: ["rocket", "spaceship"] },
+          { emoji: "🚂", he: ["רכבת"], en: ["train"] },
+          { emoji: "🚢", he: ["ספינה", "אונייה", "אוניה"], en: ["ship"] },
+          { emoji: "⛵", he: ["מפרשית"], en: ["sailboat"] },
+          { emoji: "🚤", he: ["סירה"], en: ["boat"] },
+          { emoji: "⛽", he: ["תחנת דלק"], en: ["gas station"] },
+
+          { emoji: "⚽", he: ["כדורגל"], en: ["soccer", "football"] },
+          { emoji: "🏀", he: ["כדורסל"], en: ["basketball"] },
+          { emoji: "🏈", he: ["פוטבול"], en: ["american football"] },
+          { emoji: "⚾", he: ["בייסבול"], en: ["baseball"] },
+          { emoji: "🎾", he: ["טניס"], en: ["tennis"] },
+          { emoji: "🏐", he: ["כדורעף"], en: ["volleyball"] },
+          { emoji: "🏉", he: ["רוגבי"], en: ["rugby"] },
+          { emoji: "🎱", he: ["ביליארד"], en: ["billiards", "pool ball"] },
+          { emoji: "🏓", he: ["טניס שולחן", "פינג פונג"], en: ["ping pong"] },
+          { emoji: "🏸", he: ["בדמינטון"], en: ["badminton"] },
+          { emoji: "🥊", he: ["איגרוף"], en: ["boxing"] },
+          { emoji: "⛳", he: ["גולף"], en: ["golf"] },
+          { emoji: "⛸️", he: ["החלקה על הקרח"], en: ["ice skate"] },
+          { emoji: "🎿", he: ["סקי"], en: ["ski"] },
+          { emoji: "🏂", he: ["סנובורד"], en: ["snowboard"] },
+          { emoji: "🏄", he: ["גלישה"], en: ["surf"] },
+          { emoji: "🏊", he: ["שחייה"], en: ["swimming"] },
+          { emoji: "🚴", he: ["רכיבה"], en: ["cycling"] },
+          { emoji: "🏆", he: ["גביע", "פרס"], en: ["trophy", "prize"] },
+          { emoji: "🎯", he: ["מטרה", "קליעה"], en: ["target"] },
+          { emoji: "🎮", he: ["משחק", "משחקים"], en: ["game", "games"] },
+          { emoji: "🎲", he: ["קובייה"], en: ["dice"] },
+          { emoji: "♟️", he: ["שחמט"], en: ["chess"] },
+          { emoji: "🎸", he: ["גיטרה"], en: ["guitar"] },
+          { emoji: "🎹", he: ["פסנתר", "אורגן"], en: ["piano"] },
+          { emoji: "🥁", he: ["תופים"], en: ["drums"] },
+          { emoji: "🎺", he: ["חצוצרה"], en: ["trumpet"] },
+          { emoji: "🎻", he: ["כינור"], en: ["violin"] },
+          { emoji: "🎤", he: ["מיקרופון"], en: ["microphone"] },
+          { emoji: "🎧", he: ["מוזיקה"], en: ["music"] },
+          { emoji: "🎬", he: ["סרט", "קולנוע"], en: ["movie", "cinema"] },
+          { emoji: "🎨", he: ["ציור", "אומנות"], en: ["art", "painting"] },
+          { emoji: "📷", he: ["צילום"], en: ["photo", "photography"] },
+
+          { emoji: "💡", he: ["מנורה", "אור"], en: ["lamp", "light"] },
+          { emoji: "🕯️", he: ["נר"], en: ["candle"] },
+          { emoji: "🛏️", he: ["מיטה"], en: ["bed"] },
+          { emoji: "🛋️", he: ["ספה"], en: ["sofa", "couch"] },
+          { emoji: "🚽", he: ["שירותים"], en: ["toilet"] },
+          { emoji: "🚿", he: ["מקלחת"], en: ["shower"] },
+          { emoji: "🛁", he: ["אמבטיה"], en: ["bathtub"] },
+          { emoji: "🧹", he: ["מטאטא"], en: ["broom"] },
+          { emoji: "🧺", he: ["סל"], en: ["basket"] },
+          { emoji: "🧻", he: ["נייר"], en: ["paper"] },
+          { emoji: "🪞", he: ["מראה"], en: ["mirror"] },
+          { emoji: "🪟", he: ["חלון"], en: ["window"] },
+          { emoji: "🚪", he: ["דלת"], en: ["door"] },
+          { emoji: "🪑", he: ["כיסא"], en: ["chair"] },
+          { emoji: "🥄", he: ["כפית"], en: ["spoon"] },
+          { emoji: "🍴", he: ["מזלג", "סכין אוכל"], en: ["fork", "cutlery"] },
+          { emoji: "🔪", he: ["סכין"], en: ["knife"] },
+          { emoji: "🍽️", he: ["צלחת"], en: ["plate"] },
+          { emoji: "🧹", he: ["ניקיון"], en: ["cleaning"] },
+
+          { emoji: "🍽️", he: ["אוכל", "מזון", "ארוחה", "לאכול"], en: ["food", "meal", "eat", "eating"] },
+          { emoji: "🥐", he: ["ארוחת בוקר"], en: ["breakfast"] },
+          { emoji: "🍝", he: ["ארוחת צהריים"], en: ["lunch"] },
+          { emoji: "🍽️", he: ["ארוחת ערב"], en: ["dinner", "supper"] },
+          { emoji: "🍰", he: ["קינוח", "קינוחים"], en: ["dessert"] },
+          { emoji: "🥤", he: ["שתייה", "שתיה", "משקה", "לשתות"], en: ["drink", "drinks", "beverage"] },
+          { emoji: "🍎", he: ["פרי", "פירות"], en: ["fruit", "fruits"] },
+          { emoji: "🥗", he: ["ירק", "ירקות"], en: ["vegetable", "vegetables", "veggies"] },
+          { emoji: "🛒", he: ["מצרכים", "סופר"], en: ["groceries", "supermarket"] },
+          { emoji: "🧴", he: ["היגיינה", "טואלטיקה", "רחצה"], en: ["hygiene", "toiletries"] },
+          { emoji: "💄", he: ["קוסמטיקה"], en: ["cosmetics"] },
+          { emoji: "👕", he: ["ביגוד", "לבוש", "הלבשה"], en: ["clothing", "apparel"] },
+          { emoji: "👟", he: ["הנעלה"], en: ["footwear"] },
+          { emoji: "💍", he: ["אביזרים"], en: ["accessories"] },
+          { emoji: "💻", he: ["אלקטרוניקה", "מכשירים"], en: ["electronics", "gadgets"] },
+          { emoji: "🧰", he: ["ציוד"], en: ["equipment", "gear"] },
+          { emoji: "🔌", he: ["חשמל"], en: ["electricity", "electrical"] },
+          { emoji: "💡", he: ["תאורה"], en: ["lighting"] },
+          { emoji: "🛋️", he: ["ריהוט", "רהיטים"], en: ["furniture"] },
+          { emoji: "🍽️", he: ["מטבח"], en: ["kitchen"] },
+          { emoji: "🚿", he: ["חדר רחצה", "חדר אמבטיה"], en: ["bathroom"] },
+          { emoji: "🛏️", he: ["חדר שינה"], en: ["bedroom"] },
+          { emoji: "🧳", he: ["נסיעה", "לנסוע"], en: ["travel", "trip"] },
+          { emoji: "🏖️", he: ["חופשה", "נופש"], en: ["vacation", "holiday"] },
+          { emoji: "🌲", he: ["טבע"], en: ["nature"] },
+          { emoji: "🌤️", he: ["מזג אוויר"], en: ["weather"] },
+          { emoji: "🏋️", he: ["ספורט", "כושר", "חדר כושר"], en: ["sport", "sports", "fitness", "gym"] },
+          { emoji: "🩺", he: ["בריאות", "רפואה"], en: ["health", "medical"] },
+          { emoji: "🧸", he: ["צעצועים", "צעצוע"], en: ["toys", "toy"] },
+          { emoji: "👶", he: ["תינוקות"], en: ["babies"] },
+          { emoji: "🧒", he: ["ילדים"], en: ["kids", "children"] },
+          { emoji: "🐾", he: ["חיות מחמד", "חיית מחמד"], en: ["pet", "pets"] },
+          { emoji: "🌱", he: ["גינה", "צמחים", "צמח"], en: ["garden", "plants", "plant"] },
+          { emoji: "🎬", he: ["בידור"], en: ["entertainment"] },
+          { emoji: "📡", he: ["תקשורת", "אינטרנט", "ווייפיי"], en: ["internet", "wifi", "communication"] },
+          { emoji: "🏦", he: ["בנק"], en: ["bank"] },
+          { emoji: "🚌", he: ["תחבורה"], en: ["transport", "transportation"] },
+          { emoji: "💼", he: ["עבודה"], en: ["work", "job"] },
+          { emoji: "📚", he: ["לימודים"], en: ["study", "studies"] },
+          { emoji: "🎉", he: ["אירוע", "אירועים"], en: ["event", "events"] },
+          { emoji: "🛠️", he: ["תיקון", "תיקונים"], en: ["repair", "repairs"] },
+          { emoji: "📌", he: ["שונות", "כללי"], en: ["other", "misc", "general"] },
+
+          { emoji: "😀", he: ["חיוך", "מחייך", "שמח"], en: ["smile", "smiling", "happy"] },
+          { emoji: "😃", he: ["שמחה"], en: ["joy"] },
+          { emoji: "😄", he: ["צחוק"], en: ["laugh", "laughing"] },
+          { emoji: "😁", he: ["grin"], en: ["grin"] },
+          { emoji: "😆", he: ["צוחק"], en: ["lol"] },
+          { emoji: "😅", he: ["מבוכה"], en: ["sweat smile"] },
+          { emoji: "😂", he: ["בוכה מצחוק"], en: ["joy tears"] },
+          { emoji: "😉", he: ["קריצה"], en: ["wink"] },
+          { emoji: "😊", he: ["מבויש"], en: ["blush"] },
+          { emoji: "😍", he: ["מאוהב"], en: ["in love"] },
+          { emoji: "😘", he: ["נשיקה"], en: ["kiss"] },
+          { emoji: "😎", he: ["מגניב"], en: ["cool"] },
+          { emoji: "🤔", he: ["חושב"], en: ["thinking"] },
+          { emoji: "😴", he: ["ישן", "שינה", "עייף"], en: ["sleep", "sleepy", "tired"] },
+          { emoji: "😪", he: ["נמנום"], en: ["sleepy face"] },
+          { emoji: "😢", he: ["עצוב", "עצב"], en: ["sad"] },
+          { emoji: "😭", he: ["בוכה", "בכי"], en: ["crying"] },
+          { emoji: "😠", he: ["כועס", "כעס"], en: ["angry"] },
+          { emoji: "😡", he: ["זועם"], en: ["rage"] },
+          { emoji: "😱", he: ["צרחה", "מפוחד"], en: ["scream"] },
+          { emoji: "😨", he: ["פחד"], en: ["fear"] },
+          { emoji: "😮", he: ["מופתע", "הפתעה"], en: ["surprised", "surprise"] },
+          { emoji: "😇", he: ["מלאך"], en: ["angel"] },
+          { emoji: "😈", he: ["שטן"], en: ["devil"] },
+          { emoji: "💩", he: ["קקי", "חרא"], en: ["poop", "poo"] },
+          { emoji: "👻", he: ["רוח רפאים", "רפאים"], en: ["ghost"] },
+          { emoji: "💀", he: ["גולגולת"], en: ["skull"] },
+          { emoji: "☠️", he: ["גולגולת ועצמות"], en: ["skull and crossbones"] },
+          { emoji: "👽", he: ["חייזר"], en: ["alien"] },
+          { emoji: "👾", he: ["מפלצת"], en: ["monster"] },
+          { emoji: "🤖", he: ["רובוט"], en: ["robot"] },
+          { emoji: "🎃", he: ["דלעת"], en: ["pumpkin"] },
+          { emoji: "😺", he: ["חתול מחייך"], en: ["smiley cat"] },
+          { emoji: "💋", he: ["שפתיים"], en: ["lips"] },
+          { emoji: "👋", he: ["ביי", "שלום יד"], en: ["wave", "hello", "bye"] },
+          { emoji: "👍", he: ["לייק", "טוב", "אגודל"], en: ["like", "thumbs up", "ok"] },
+          { emoji: "👎", he: ["לא טוב", "אגודל למטה"], en: ["thumbs down", "dislike"] },
+          { emoji: "👏", he: ["מחיאות כפיים", "כפיים"], en: ["clap", "applause"] },
+          { emoji: "🙏", he: ["תודה", "בבקשה", "תפילה"], en: ["thanks", "please", "pray"] },
+          { emoji: "💪", he: ["שריר", "כוח"], en: ["muscle", "strong"] },
+          { emoji: "✌️", he: ["ניצחון", "שלום"], en: ["victory", "peace"] },
+          { emoji: "👌", he: ["סבבה"], en: ["okay"] },
+          { emoji: "✋", he: ["עצור", "יד"], en: ["stop", "hand"] },
+          { emoji: "👊", he: ["אגרוף"], en: ["fist"] },
+          { emoji: "👀", he: ["עיניים"], en: ["eyes"] },
+          { emoji: "👁️", he: ["עין"], en: ["eye"] },
+          { emoji: "👂", he: ["אוזן"], en: ["ear"] },
+          { emoji: "👃", he: ["אף"], en: ["nose"] },
+          { emoji: "👄", he: ["פה"], en: ["mouth"] },
+          { emoji: "👅", he: ["לשון"], en: ["tongue"] },
+          { emoji: "🦷", he: ["שן", "שיניים"], en: ["tooth", "teeth"] },
+          { emoji: "🦴", he: ["עצם"], en: ["bone"] },
+          { emoji: "🧠", he: ["מוח"], en: ["brain"] },
+          { emoji: "❤️", he: ["לב", "אהבה"], en: ["heart", "love"] },
+          { emoji: "💔", he: ["לב שבור"], en: ["broken heart"] },
+          { emoji: "💕", he: ["לבבות"], en: ["hearts"] },
+          { emoji: "💖", he: ["לב נוצץ"], en: ["sparkling heart"] },
+          { emoji: "💙", he: ["לב כחול"], en: ["blue heart"] },
+          { emoji: "💚", he: ["לב ירוק"], en: ["green heart"] },
+          { emoji: "💛", he: ["לב צהוב"], en: ["yellow heart"] },
+          { emoji: "💜", he: ["לב סגול"], en: ["purple heart"] },
+          { emoji: "🖤", he: ["לב שחור"], en: ["black heart"] },
+          { emoji: "🤍", he: ["לב לבן"], en: ["white heart"] },
+          { emoji: "💯", he: ["מאה", "פרפקט"], en: ["hundred", "perfect"] },
+          { emoji: "💥", he: ["פיצוץ", "בום"], en: ["boom", "explosion"] },
+          { emoji: "💫", he: ["נוצץ"], en: ["dizzy"] },
+          { emoji: "💨", he: ["רוח"], en: ["wind"] },
+          { emoji: "💦", he: ["טיפות"], en: ["droplets", "sweat"] },
+          { emoji: "💤", he: ["zzz"], en: ["zzz"] },
+
+          { emoji: "👤", he: ["אדם", "איש"], en: ["person", "man"] },
+          { emoji: "👩", he: ["אישה"], en: ["woman"] },
+          { emoji: "👦", he: ["ילד"], en: ["boy"] },
+          { emoji: "👧", he: ["ילדה"], en: ["girl"] },
+          { emoji: "👴", he: ["סבא", "זקן"], en: ["grandpa", "old man"] },
+          { emoji: "👵", he: ["סבתא"], en: ["grandma"] },
+          { emoji: "👮", he: ["שוטר"], en: ["policeman", "cop"] },
+          { emoji: "👷", he: ["פועל", "בנאי"], en: ["worker", "builder"] },
+          { emoji: "💂", he: ["שומר"], en: ["guard"] },
+          { emoji: "🕵️", he: ["בלש"], en: ["detective"] },
+          { emoji: "👩‍⚕️", he: ["רופאה", "רופא", "דוקטור"], en: ["doctor", "nurse"] },
+          { emoji: "👨‍🍳", he: ["טבח", "שף"], en: ["chef", "cook"] },
+          { emoji: "👨‍🌾", he: ["חקלאי"], en: ["farmer"] },
+          { emoji: "👨‍🎓", he: ["סטודנט", "תלמיד"], en: ["student"] },
+          { emoji: "👨‍🏫", he: ["מורה"], en: ["teacher"] },
+          { emoji: "👨‍💻", he: ["מתכנת", "הייטק"], en: ["programmer", "developer"] },
+          { emoji: "🧑‍🎤", he: ["זמר"], en: ["singer"] },
+          { emoji: "🧑‍🎨", he: ["אמן"], en: ["artist"] },
+          { emoji: "👨‍🚀", he: ["אסטרונאוט"], en: ["astronaut"] },
+          { emoji: "👨‍🚒", he: ["כבאי"], en: ["firefighter"] },
+          { emoji: "🤴", he: ["נסיך", "מלך"], en: ["prince", "king"] },
+          { emoji: "👸", he: ["נסיכה", "מלכה"], en: ["princess", "queen"] },
+          { emoji: "🎅", he: ["סנטה"], en: ["santa"] },
+          { emoji: "🧙", he: ["קוסם"], en: ["wizard", "mage"] },
+          { emoji: "🧚", he: ["פיה"], en: ["fairy"] },
+          { emoji: "🧛", he: ["ערפד"], en: ["vampire"] },
+          { emoji: "🧜", he: ["בת ים"], en: ["mermaid"] },
+          { emoji: "🧞", he: ["ג'יני", "גני"], en: ["genie"] },
+          { emoji: "🧟", he: ["זומבי"], en: ["zombie"] },
+          { emoji: "💃", he: ["ריקוד"], en: ["dance", "dancing"] },
+          { emoji: "🚶", he: ["הליכה"], en: ["walk", "walking"] },
+          { emoji: "🏃", he: ["ריצה"], en: ["run", "running"] },
+
+          { emoji: "☀️", he: ["שמשי", "שמשית"], en: ["sunny"] },
+          { emoji: "🌤️", he: ["מעונן חלקית"], en: ["partly cloudy"] },
+          { emoji: "☁️", he: ["ענן", "עננים", "מעונן"], en: ["cloud", "cloudy"] },
+          { emoji: "⛈️", he: ["סערה"], en: ["storm"] },
+          { emoji: "🌩️", he: ["רעם"], en: ["thunder"] },
+          { emoji: "🌪️", he: ["טורנדו"], en: ["tornado"] },
+          { emoji: "🌫️", he: ["ערפל"], en: ["fog"] },
+          { emoji: "🌬️", he: ["משב רוח"], en: ["breeze"] },
+          { emoji: "🌊", he: ["גל", "גלים"], en: ["wave", "waves"] },
+          { emoji: "☔", he: ["גשם עם מטריה"], en: ["rainy"] },
+          { emoji: "⛄", he: ["איש שלג"], en: ["snowman"] },
+          { emoji: "🌙", he: ["לילה"], en: ["night"] },
+          { emoji: "⭐", he: ["כוכב לכת"], en: ["planet"] },
+          { emoji: "☀️", he: ["זריחה"], en: ["sunrise"] },
+          { emoji: "🌅", he: ["שקיעה"], en: ["sunset"] },
+
+          { emoji: "🎁", he: ["מתנה", "שי"], en: ["gift", "present"] },
+          { emoji: "🎈", he: ["בלון", "בלונים"], en: ["balloon"] },
+          { emoji: "🎉", he: ["מסיבה", "חגיגה"], en: ["party", "celebration"] },
+          { emoji: "🎊", he: ["קונפטי"], en: ["confetti"] },
+          { emoji: "🎀", he: ["סרט"], en: ["ribbon"] },
+          { emoji: "🎂", he: ["יום הולדת"], en: ["birthday"] },
+          { emoji: "🎄", he: ["עץ חג המולד"], en: ["christmas tree"] },
+          { emoji: "🎃", he: ["האלואין"], en: ["halloween"] },
+          { emoji: "🎗️", he: ["סרט הנצחה"], en: ["reminder ribbon"] },
+          { emoji: "🏆", he: ["ניצחון גביע"], en: ["champion"] },
+          { emoji: "🥇", he: ["מדליה", "זהב"], en: ["medal", "gold"] },
+          { emoji: "🎖️", he: ["עיטור"], en: ["military medal"] },
+
+          { emoji: "📧", he: ["מייל", "אימייל", "דואר אלקטרוני"], en: ["email", "e-mail", "mail"] },
+          { emoji: "📩", he: ["מעטפה", "מכתב"], en: ["envelope", "letter"] },
+          { emoji: "📦", he: ["חבילה", "ארגז"], en: ["package", "box"] },
+          { emoji: "📌", he: ["סיכה"], en: ["pin"] },
+          { emoji: "📍", he: ["מיקום"], en: ["location", "pinpoint"] },
+          { emoji: "✏️", he: ["עיפרון"], en: ["pencil"] },
+          { emoji: "✒️", he: ["עט"], en: ["pen"] },
+          { emoji: "📝", he: ["פתק", "רשימה", "לכתוב"], en: ["note", "memo", "write"] },
+          { emoji: "📚", he: ["ספרים"], en: ["books"] },
+          { emoji: "📓", he: ["מחברת"], en: ["notebook"] },
+          { emoji: "📖", he: ["קריאה"], en: ["reading"] },
+          { emoji: "🔍", he: ["זכוכית מגדלת", "חיפוש"], en: ["search", "magnifier"] },
+          { emoji: "🔒", he: ["מנעול", "נעול"], en: ["lock", "locked"] },
+          { emoji: "🔓", he: ["פתוח"], en: ["unlock", "unlocked"] },
+          { emoji: "🔑", he: ["מפתח ראשי"], en: ["main key"] },
+          { emoji: "🔨", he: ["פטיש"], en: ["hammer"] },
+          { emoji: "🛠️", he: ["כלי עבודה", "כלים"], en: ["tools"] },
+          { emoji: "🔧", he: ["מפתח ברגים"], en: ["wrench"] },
+          { emoji: "🔩", he: ["בורג"], en: ["bolt", "nut"] },
+          { emoji: "⚙️", he: ["גלגל שיניים"], en: ["gear"] },
+          { emoji: "🧰", he: ["ארגז כלים"], en: ["toolbox"] },
+          { emoji: "⚖️", he: ["משקל", "מאזניים"], en: ["scale"] },
+          { emoji: "🔗", he: ["קישור", "לינק"], en: ["link"] },
+          { emoji: "💉", he: ["מזרק", "חיסון"], en: ["syringe", "vaccine"] },
+          { emoji: "💊", he: ["כדור"], en: ["pill"] },
+          { emoji: "🌡️", he: ["מדחום", "חום"], en: ["thermometer", "fever"] },
+          { emoji: "🩺", he: ["סטטוסקופ"], en: ["stethoscope"] },
+          { emoji: "🩹", he: ["פלסטר"], en: ["bandage"] },
+          { emoji: "🩸", he: ["דם"], en: ["blood"] },
+          { emoji: "🧪", he: ["מבחנה"], en: ["test tube"] },
+          { emoji: "🔬", he: ["מיקרוסקופ"], en: ["microscope"] },
+          { emoji: "🔭", he: ["טלסקופ"], en: ["telescope"] },
+          { emoji: "📡", he: ["אנטנה", "לווין"], en: ["antenna", "satellite"] },
+          { emoji: "💻", he: ["מחשב נייח"], en: ["pc"] },
+          { emoji: "🖥️", he: ["מסך"], en: ["monitor", "screen"] },
+          { emoji: "🖨️", he: ["מדפסת"], en: ["printer"] },
+          { emoji: "🖱️", he: ["עכבר מחשב"], en: ["mouse computer"] },
+          { emoji: "⌨️", he: ["מקלדת"], en: ["keyboard"] },
+          { emoji: "💾", he: ["דיסק"], en: ["disk"] },
+          { emoji: "💿", he: ["סידי", "דיסק און קי"], en: ["cd"] },
+          { emoji: "🎥", he: ["מצלמת וידאו"], en: ["video camera"] },
+          { emoji: "📹", he: ["וידאו"], en: ["video"] },
+          { emoji: "📺", he: ["טלוויזיה", "טלויזיה"], en: ["tv", "television"] },
+          { emoji: "📻", he: ["רדיו"], en: ["radio"] },
+          { emoji: "🔋", he: ["סוללות"], en: ["batteries"] },
+          { emoji: "🔌", he: ["שקע"], en: ["plug", "outlet"] },
+          { emoji: "💡", he: ["רעיון", "נורה"], en: ["idea", "bulb"] },
+          { emoji: "🔦", he: ["פנס כיס"], en: ["torch light"] },
+          { emoji: "🕯️", he: ["נרות"], en: ["candles"] },
+          { emoji: "🧯", he: ["מטף"], en: ["fire extinguisher"] },
+          { emoji: "🛢️", he: ["חבית"], en: ["oil drum"] },
+          { emoji: "💸", he: ["הוצאות"], en: ["spending"] },
+          { emoji: "💰", he: ["שק כסף"], en: ["money bag"] },
+          { emoji: "💵", he: ["דולר"], en: ["dollar"] },
+          { emoji: "💴", he: ["יין יפני"], en: ["yen"] },
+          { emoji: "💶", he: ["יורו"], en: ["euro"] },
+          { emoji: "💷", he: ["ליש\"ט", "פאונד"], en: ["pound"] },
+          { emoji: "💳", he: ["כרטיס"], en: ["card"] },
+          { emoji: "🧾", he: ["חשבונית", "קבלה"], en: ["receipt", "invoice"] },
+          { emoji: "💎", he: ["יהלום", "יהלומים"], en: ["diamond", "gem"] },
+          { emoji: "⚖️", he: ["משפט"], en: ["justice"] },
+          { emoji: "🧯", he: ["כיבוי אש"], en: ["extinguisher"] },
+          { emoji: "🛡️", he: ["מגן"], en: ["shield"] },
+          { emoji: "🗡️", he: ["חרב"], en: ["sword"] },
+          { emoji: "⚔️", he: ["חרבות"], en: ["swords"] },
+          { emoji: "🔫", he: ["אקדח מים", "אקדח"], en: ["water gun", "gun"] },
+          { emoji: "🏹", he: ["חץ וקשת"], en: ["bow", "arrow"] },
+          { emoji: "🧨", he: ["זיקוקין", "זיקוק"], en: ["firecracker", "firework"] },
+          { emoji: "💣", he: ["פצצה"], en: ["bomb"] },
+          { emoji: "🔮", he: ["כדור בדולח"], en: ["crystal ball"] },
+          { emoji: "🧿", he: ["חמסה", "נגד עין הרע"], en: ["evil eye"] },
+          { emoji: "🎮", he: ["קונסולה"], en: ["console"] },
+          { emoji: "🕹️", he: ["ג'ויסטיק"], en: ["joystick"] },
+          { emoji: "🎰", he: ["קזינו"], en: ["casino"] },
+          { emoji: "🧩", he: ["פאזל"], en: ["puzzle"] },
+          { emoji: "🧸", he: ["דובי"], en: ["teddy"] },
+          { emoji: "🪀", he: ["יויו"], en: ["yo-yo"] },
+          { emoji: "🪁", he: ["עפיפון"], en: ["kite"] },
+          { emoji: "🎱", he: ["כדור ביליארד"], en: ["8ball"] },
+          { emoji: "🔮", he: ["קסם"], en: ["magic"] },
+          { emoji: "🪄", he: ["שרביט"], en: ["wand"] },
+          { emoji: "🪅", he: ["פיניאטה"], en: ["pinata"] },
+          { emoji: "🪆", he: ["בבושקה"], en: ["nesting doll"] },
+          { emoji: "🖼️", he: ["תמונה", "מסגרת"], en: ["picture", "frame"] },
+          { emoji: "🧵", he: ["חוט"], en: ["thread"] },
+          { emoji: "🪡", he: ["מחט"], en: ["needle"] },
+          { emoji: "🧶", he: ["צמר"], en: ["yarn"] },
+          { emoji: "👓", he: ["משקף"], en: ["spectacles"] },
+          { emoji: "🥽", he: ["משקפי מגן"], en: ["goggles"] },
+          { emoji: "🥼", he: ["חלוק"], en: ["lab coat"] },
+          { emoji: "🦺", he: ["אפוד"], en: ["vest"] },
+          { emoji: "👔", he: ["עניבה"], en: ["tie"] },
+          { emoji: "👕", he: ["טי שירט"], en: ["tee"] },
+          { emoji: "👘", he: ["קימונו"], en: ["kimono"] },
+          { emoji: "🥻", he: ["סארי"], en: ["sari"] },
+          { emoji: "🩱", he: ["בגד ים שלם"], en: ["one-piece"] },
+          { emoji: "🩲", he: ["בגד ים גברי"], en: ["swim briefs"] },
+          { emoji: "🩳", he: ["שורטס"], en: ["shorts"] },
+          { emoji: "👙", he: ["ביקיני"], en: ["bikini"] },
+          { emoji: "👚", he: ["חולצת אישה"], en: ["blouse"] },
+          { emoji: "👛", he: ["ארנק קטן"], en: ["coin purse"] },
+          { emoji: "👜", he: ["תיק יד"], en: ["handbag"] },
+          { emoji: "👝", he: ["פאוץ"], en: ["pouch", "clutch"] },
+          { emoji: "🛍️", he: ["קניות", "שקיות"], en: ["shopping"] },
+          { emoji: "🎒", he: ["ילקוט"], en: ["school bag"] },
+          { emoji: "🩴", he: ["כפכפים", "כפכף"], en: ["flip-flops", "sandals"] },
+          { emoji: "👞", he: ["נעל רשמית"], en: ["dress shoe"] },
+          { emoji: "👟", he: ["סניקרס"], en: ["sneakers"] },
+          { emoji: "🥾", he: ["מגפיים", "מגף"], en: ["boots", "boot"] },
+          { emoji: "👠", he: ["עקב"], en: ["heels"] },
+          { emoji: "👡", he: ["סנדל"], en: ["sandal"] },
+          { emoji: "🩰", he: ["נעלי בלט"], en: ["ballet"] },
+          { emoji: "👑", he: ["כתר"], en: ["crown"] },
+          { emoji: "👒", he: ["כובע נשים"], en: ["woman hat"] },
+          { emoji: "🎩", he: ["כובע צילינדר"], en: ["top hat"] },
+          { emoji: "🎓", he: ["כובע בוגרים"], en: ["graduation"] },
+          { emoji: "🧢", he: ["כובע מצחייה"], en: ["baseball cap"] },
+          { emoji: "⛑️", he: ["קסדה"], en: ["helmet"] },
+          { emoji: "📿", he: ["מחרוזת"], en: ["beads"] },
+          { emoji: "💄", he: ["שפתון"], en: ["lipstick"] },
+          { emoji: "💍", he: ["טבעת"], en: ["ring"] },
+          { emoji: "💼", he: ["תיק עבודה"], en: ["briefcase"] },
+
+          { emoji: "⏰", he: ["שעון מעורר", "אלארם"], en: ["alarm", "alarm clock"] },
+          { emoji: "⏱️", he: ["שעון עצר"], en: ["stopwatch"] },
+          { emoji: "⏳", he: ["שעון חול"], en: ["hourglass"] },
+          { emoji: "🕰️", he: ["שעון קיר"], en: ["mantelpiece clock"] },
+          { emoji: "🕛", he: ["צהריים", "חצות"], en: ["noon", "midnight"] },
+          { emoji: "📅", he: ["יומן", "תאריך"], en: ["calendar", "date"] },
+          { emoji: "📆", he: ["לוח שנה"], en: ["calendar tear"] },
+
+          { emoji: "❗", he: ["חשוב", "זהירות"], en: ["important", "warning"] },
+          { emoji: "❓", he: ["שאלה"], en: ["question"] },
+          { emoji: "✅", he: ["וי", "סימון"], en: ["check", "done"] },
+          { emoji: "❌", he: ["איקס", "לא"], en: ["x", "no"] },
+          { emoji: "⚠️", he: ["אזהרה"], en: ["caution"] },
+          { emoji: "🚫", he: ["אסור"], en: ["forbidden", "prohibited"] },
+          { emoji: "♻️", he: ["מיחזור"], en: ["recycle"] },
+          { emoji: "✔️", he: ["אושר"], en: ["approved"] },
+          { emoji: "➕", he: ["פלוס"], en: ["plus"] },
+          { emoji: "➖", he: ["מינוס"], en: ["minus"] },
+          { emoji: "➗", he: ["חילוק"], en: ["divide"] },
+          { emoji: "✖️", he: ["כפל"], en: ["multiply"] },
+          { emoji: "💲", he: ["מחיר"], en: ["price"] },
+          { emoji: "🔝", he: ["למעלה"], en: ["top"] },
+          { emoji: "🔜", he: ["בקרוב"], en: ["soon"] },
+          { emoji: "🔙", he: ["חזור"], en: ["back"] },
+          { emoji: "🔛", he: ["פועל"], en: ["on"] },
+          { emoji: "🔜", he: ["הבא"], en: ["next"] },
+          { emoji: "♾️", he: ["אינסוף"], en: ["infinity"] },
+          { emoji: "🔴", he: ["אדום"], en: ["red"] },
+          { emoji: "🟠", he: ["כתום"], en: ["orange color"] },
+          { emoji: "🟡", he: ["צהוב"], en: ["yellow"] },
+          { emoji: "🟢", he: ["ירוק"], en: ["green"] },
+          { emoji: "🔵", he: ["כחול"], en: ["blue"] },
+          { emoji: "🟣", he: ["סגול"], en: ["purple"] },
+          { emoji: "⚫", he: ["שחור"], en: ["black"] },
+          { emoji: "⚪", he: ["לבן"], en: ["white"] },
+          { emoji: "🟤", he: ["חום צבע"], en: ["brown"] },
+          { emoji: "🏳️", he: ["דגל"], en: ["flag"] },
+          { emoji: "🇮🇱", he: ["ישראל"], en: ["israel"] },
+          { emoji: "🇺🇸", he: ["ארצות הברית", "אמריקה"], en: ["usa", "america"] },
+          { emoji: "🇬🇧", he: ["אנגליה", "בריטניה"], en: ["england", "uk", "britain"] },
+          { emoji: "🇫🇷", he: ["צרפת"], en: ["france"] },
+          { emoji: "🇮🇹", he: ["איטליה"], en: ["italy"] },
+          { emoji: "🇪🇸", he: ["ספרד"], en: ["spain"] },
+          { emoji: "🇩🇪", he: ["גרמניה"], en: ["germany"] },
+          { emoji: "🇬🇷", he: ["יוון"], en: ["greece"] },
+          { emoji: "🇹🇷", he: ["טורקיה"], en: ["turkey country"] },
+          { emoji: "🇪🇬", he: ["מצרים"], en: ["egypt"] },
+          { emoji: "🇯🇴", he: ["ירדן"], en: ["jordan"] },
+          { emoji: "🇲🇦", he: ["ערב הסעודית"], en: ["saudi"] },
+          { emoji: "🇦🇪", he: ["דובאי", "איחוד האמירויות"], en: ["dubai", "uae"] },
+          { emoji: "🇮🇳", he: ["הודו מדינה"], en: ["india"] },
+          { emoji: "🇨🇳", he: ["סין"], en: ["china"] },
+          { emoji: "🇯🇵", he: ["יפן"], en: ["japan"] },
+          { emoji: "🇹🇭", he: ["תאילנד"], en: ["thailand"] },
+          { emoji: "🇧🇷", he: ["ברזיל"], en: ["brazil"] },
+          { emoji: "🇦🇺", he: ["אוסטרליה"], en: ["australia"] },
+          { emoji: "🇨🇦", he: ["קנדה"], en: ["canada"] },
+        ];
+
+        const GLOSSARY_PHRASES = GLOSSARY.map((row) => {
+          const pairs = [];
+          row.he.forEach((he) => {
+            row.en.forEach((en) => {
+              pairs.push({
+                he: he,
+                en: en,
+                emoji: row.emoji,
+                len: he.length + en.length,
+              });
+            });
+          });
+          return pairs;
+        })
+          .reduce((acc, cur) => acc.concat(cur), [])
+          .sort((a, b) => b.he.length - a.he.length || b.en.length - a.en.length);
+
+        function escapeRegExp(str) {
+          return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        }
+
+        function tokenizeWords(text) {
+          return String(text || "")
+            .toLowerCase()
+            .split(/[^\p{L}\p{N}]+/u)
+            .filter(Boolean);
+        }
+
+        function wordVariants(word) {
+          const w = String(word || "").toLowerCase();
+          const vars = new Set([w]);
+          if (!w) return vars;
+          if (/^[הובלכמש]/.test(w) && w.length >= 4) vars.add(w.slice(1));
+          if (/^וה/.test(w) && w.length >= 5) vars.add(w.slice(2));
+          if (/^ל[הב]/.test(w) && w.length >= 5) vars.add(w.slice(2));
+          Array.from(vars).forEach((s) => {
+            if (/(ים|ות)$/.test(s) && s.length >= 5) vars.add(s.slice(0, -2));
+            if (/י$/.test(s) && s.length >= 4) vars.add(s.slice(0, -1));
+          });
+          return vars;
+        }
+
+        function includesTerm(haystack, term) {
+          const h = String(haystack || "").toLowerCase();
+          const t = String(term || "").toLowerCase();
+          if (!t) return false;
+          const re = new RegExp(
+            "(^|[^\\p{L}\\p{N}])" + escapeRegExp(t) + "($|[^\\p{L}\\p{N}])",
+            "u",
+          );
+          if (re.test(h)) return true;
+          if (/\s/.test(t)) return false;
+          const tokens = tokenizeWords(h);
+          for (let i = 0; i < tokens.length; i++) {
+            if (wordVariants(tokens[i]).has(t)) return true;
+          }
+          return false;
+        }
+
+        function replaceTerm(haystack, term, replacement) {
+          const re = new RegExp(
+            "(^|[^\\p{L}\\p{N}])(" + escapeRegExp(term) + ")($|[^\\p{L}\\p{N}])",
+            "gui",
+          );
+          return String(haystack).replace(re, "$1" + replacement + "$3");
+        }
+
+        function lookupEmoji(text) {
+          const haystack = String(text || "");
+          let bestEmoji = "";
+          let bestLen = -1;
+          for (let i = 0; i < GLOSSARY.length; i++) {
+            const row = GLOSSARY[i];
+            const keys = row.he.concat(row.en);
+            for (let j = 0; j < keys.length; j++) {
+              const key = keys[j];
+              if (includesTerm(haystack, key) && key.length > bestLen) {
+                bestEmoji = row.emoji;
+                bestLen = key.length;
+              }
+            }
+          }
+          return bestEmoji;
+        }
+
+        function withSuggestedEmoji(text) {
+          const trimmed = String(text || "").trim();
+          if (!trimmed) return trimmed;
+          if (extractEmojis(trimmed).length) return trimmed;
+          const emoji = lookupEmoji(trimmed);
+          return emoji ? trimmed + " " + emoji : trimmed;
+        }
+
+        function glossaryTranslate(text, from, to) {
+          const src = String(text || "").trim();
+          if (!src || from === to) return src;
+          const exact = GLOSSARY_PHRASES.find((p) => {
+            const key = from === "he" ? p.he : p.en;
+            return src.toLowerCase() === key.toLowerCase();
+          });
+          if (exact) return to === "he" ? exact.he : exact.en;
+
+          let out = src;
+          let replaced = false;
+          GLOSSARY_PHRASES.forEach((p) => {
+            const key = from === "he" ? p.he : p.en;
+            const val = to === "he" ? p.he : p.en;
+            if (includesTerm(out, key)) {
+              out = replaceTerm(out, key, val);
+              replaced = true;
+            }
+          });
+          return replaced ? out : "";
+        }
+
+        function stillHasSourceScript(text, from) {
+          if (from === "he") return /[\u0590-\u05FF]/.test(text);
+          return /[A-Za-z]/.test(text);
+        }
+
+        function isLikelyTransliteration(text) {
+          const plain = String(text || "")
+            .replace(EMOJI_SEQ_RE, "")
+            .trim();
+          return /^[A-Z][A-Z0-9'’.\-\s]{1,}$/.test(plain);
+        }
+
+        async function translateText(text, from, to) {
+          if (!text || from === to) return text;
+          const { core } = splitEmojiAffixes(text);
+          const payload = (core && core.trim()) || text;
+
+          const local = glossaryTranslate(payload, from, to);
+          if (local && !stillHasSourceScript(local, from)) {
+            return restoreEmojis(text, local);
+          }
+
+          const url =
+            "https://api.mymemory.translated.net/get?q=" +
+            encodeURIComponent(payload) +
+            "&langpair=" +
+            encodeURIComponent(from + "|" + to);
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("translate http " + res.status);
+          const data = await res.json();
+          let translated =
+            data &&
+            data.responseData &&
+            typeof data.responseData.translatedText === "string"
+              ? data.responseData.translatedText.trim()
+              : "";
+          if (!translated) throw new Error("empty translation");
+          if (/MYMEMORY WARNING/i.test(translated)) throw new Error(translated);
+
+          if (isLikelyTransliteration(translated) && local) {
+            translated = local;
+          } else if (isLikelyTransliteration(translated)) {
+            const exact = glossaryTranslate(payload, from, to);
+            if (exact) translated = exact;
+          }
+
+          return restoreEmojis(text, translated);
+        }
+
+        async function ensureItemTranslation(item, targetLang) {
+          if (!item.translations) item.translations = {};
+          if (item.translations[targetLang]) {
+            const sourceLangCached =
+              targetLang === "en" ? "he" : "en";
+            const sourceCached = item.translations[sourceLangCached];
+            if (
+              targetLang === "en" &&
+              isLikelyTransliteration(item.translations.en)
+            ) {
+              delete item.translations.en;
+            } else {
+              if (
+                sourceCached &&
+                translationLostEmojis(
+                  sourceCached,
+                  item.translations[targetLang],
+                )
+              ) {
+                item.translations[targetLang] = restoreEmojis(
+                  sourceCached,
+                  item.translations[targetLang],
+                );
+              }
+              item.text = item.translations[targetLang];
+              return item.text;
+            }
+          }
+          const sourceLang =
+            item.translations.he && targetLang !== "he"
+              ? "he"
+              : item.translations.en && targetLang !== "en"
+                ? "en"
+                : detectItemLang(item.text);
+          const sourceText =
+            item.translations[sourceLang] || item.text;
+          if (sourceLang === targetLang) {
+            item.translations[targetLang] = sourceText;
+            item.text = sourceText;
+            return sourceText;
+          }
+          const translated = await translateText(
+            sourceText,
+            sourceLang,
+            targetLang,
+          );
+          item.translations[targetLang] = translated;
+          item.text = translated;
+          return translated;
+        }
+
+        async function translateAllItems(targetLang) {
+          if (!items.length) return { ok: true, translated: 0 };
+          let translated = 0;
+          let failed = 0;
+          for (const item of items) {
+            try {
+              const before = item.text;
+              await ensureItemTranslation(item, targetLang);
+              if (item.text !== before) translated++;
+            } catch (_) {
+              failed++;
+            }
+          }
+          return { ok: failed === 0, translated, failed };
+        }
+
+        async function ensureCustomTitleTranslation(targetLang) {
+          if (!customTitle && !customTitleTranslations.he && !customTitleTranslations.en) {
+            return;
+          }
+          if (!customTitleTranslations) customTitleTranslations = {};
+          if (customTitleTranslations[targetLang]) {
+            customTitle = customTitleTranslations[targetLang];
+            return;
+          }
+          const sourceLang =
+            customTitleTranslations.he && targetLang !== "he"
+              ? "he"
+              : customTitleTranslations.en && targetLang !== "en"
+                ? "en"
+                : detectItemLang(customTitle || "");
+          const sourceText =
+            customTitleTranslations[sourceLang] || customTitle;
+          if (!sourceText) return;
+          if (sourceLang === targetLang) {
+            customTitleTranslations[targetLang] = sourceText;
+            customTitle = sourceText;
+            return;
+          }
+          try {
+            const translated = await translateText(
+              sourceText,
+              sourceLang,
+              targetLang,
+            );
+            customTitleTranslations[targetLang] = translated;
+            customTitle = translated;
+          } catch (_) {
+            customTitle = sourceText;
+          }
+        }
+
+        async function toggleLanguage() {
+          if (isTranslating) return;
+          const next = currentLanguage === "he" ? "en" : "he";
+          isTranslating = true;
+          const hasContent =
+            items.length > 0 ||
+            !!(customTitle || customTitleTranslations.he || customTitleTranslations.en);
+          if (hasContent) {
+            showToast(
+              next === "en"
+                ? "מתרגם את הרשימה..."
+                : "Translating the list...",
+            );
+          }
+          try {
+            const result = await translateAllItems(next);
+            await ensureCustomTitleTranslation(next);
+            currentLanguage = next;
+            try {
+              localStorage.setItem("checklistLanguage", currentLanguage);
+            } catch (_) {
+              /* ignore */
+            }
+            document.documentElement.lang =
+              currentLanguage === "he" ? "he" : "en";
+            document.dir = currentLanguage === "he" ? "rtl" : "ltr";
+            saveItems();
+            saveCustomTitle();
+            updateUI();
+            renderAllItems();
+            if (hasContent) {
+              if (result.failed && result.translated === 0 && items.length) {
+                showToast(getLang().translateError);
+              } else {
+                showToast(getLang().translateSuccess);
+              }
+            }
+          } finally {
+            isTranslating = false;
+          }
         }
 
         function loadTheme() {
@@ -1164,14 +2354,24 @@
             if (!editing) return;
             editing = false;
             li.classList.remove("editing");
-            if (save) {
-              const val = editInput.value.trim();
-              if (val) {
-                item.text = val;
-                textSpan.textContent = val;
-                saveItems();
+            if (!save) return;
+            const raw = editInput.value.trim();
+            if (!raw) return;
+            Promise.resolve(normalizeToCurrentLanguage(raw)).then((val) => {
+              if (!val) return;
+              item.text = val;
+              if (!item.translations) item.translations = {};
+              item.translations[currentLanguage] = val;
+              const other = currentLanguage === "he" ? "en" : "he";
+              const detected = detectItemLang(raw);
+              if (detected !== currentLanguage) {
+                item.translations[detected] = withSuggestedEmoji(raw);
+              } else {
+                delete item.translations[other];
               }
-            }
+              textSpan.textContent = val;
+              saveItems();
+            });
           };
 
           editInput.addEventListener("blur", () => finishEdit(true));
@@ -1209,18 +2409,42 @@
           }, 150);
         }
 
-        function addItem() {
-          const text = newItemInput.value.trim();
+        async function normalizeToCurrentLanguage(text) {
+          const trimmed = String(text || "").trim();
+          if (!trimmed) return "";
+          const detected = detectItemLang(trimmed);
+          let out = trimmed;
+          if (detected !== currentLanguage) {
+            try {
+              out = await translateText(trimmed, detected, currentLanguage);
+            } catch (_) {
+              out = trimmed;
+            }
+          }
+          return withSuggestedEmoji(out);
+        }
+
+        async function addItem() {
+          const raw = newItemInput.value.trim();
+          if (!raw) return;
+          newItemInput.value = "";
+          const text = await normalizeToCurrentLanguage(raw);
           if (!text) return;
           const newItem = {
             id: Date.now() + Math.random() * 1000,
             text: text,
             completed: false,
+            translations: {
+              [currentLanguage]: text,
+            },
           };
+          const detected = detectItemLang(raw);
+          if (detected !== currentLanguage) {
+            newItem.translations[detected] = withSuggestedEmoji(raw);
+          }
           items.push(newItem);
           addItemToList(newItem);
           saveItems();
-          newItemInput.value = "";
           newItemInput.focus();
         }
 
@@ -1333,6 +2557,13 @@
             const val = input.value.trim();
             if (save) {
               customTitle = val || null;
+              if (customTitle) {
+                customTitleTranslations[currentLanguage] = customTitle;
+                const other = currentLanguage === "he" ? "en" : "he";
+                delete customTitleTranslations[other];
+              } else {
+                customTitleTranslations = {};
+              }
               saveCustomTitle();
             }
             titleEl.classList.remove("editing-title");
@@ -1558,14 +2789,31 @@
             try {
               const data = JSON.parse(e.target.result);
               if (!Array.isArray(data)) throw new Error("Not an array");
-              const valid = data.filter(
-                (item) =>
-                  item &&
-                  typeof item === "object" &&
-                  typeof item.id === "number" &&
-                  typeof item.text === "string" &&
-                  typeof item.completed === "boolean",
-              );
+              const valid = data
+                .filter(
+                  (item) =>
+                    item &&
+                    typeof item === "object" &&
+                    typeof item.id === "number" &&
+                    typeof item.text === "string" &&
+                    typeof item.completed === "boolean",
+                )
+                .map((item) => {
+                  const translations =
+                    item.translations && typeof item.translations === "object"
+                      ? item.translations
+                      : {};
+                  if (!translations.he && !translations.en) {
+                    const looksHebrew = /[\u0590-\u05FF]/.test(item.text);
+                    translations[looksHebrew ? "he" : "en"] = item.text;
+                  }
+                  return {
+                    id: item.id,
+                    text: item.text,
+                    completed: item.completed,
+                    translations,
+                  };
+                });
               if (valid.length === 0) throw new Error("No valid items");
               if (items.length > 0) {
                 if (
