@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="images/finance.png" />
     <title>מחשבון פיננסי</title>
     <style>
       body {
@@ -666,6 +667,13 @@
         data.series.forEach((v, i) => rows.push([i, v.toFixed(2)]));
         downloadCsv("hisachon.csv", rows);
       }
+
+      fetch("footer.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.body.insertAdjacentHTML("beforeend", data);
+        })
+        .catch(() => {});
 
       function downloadLoanCsv() {
         const amort = window._lastAmort;
