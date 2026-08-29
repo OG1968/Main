@@ -3,52 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="images/finance.png" />
-
     <title>מחשבון פיננסי</title>
     <style>
       body {
         font-family: Arial, sans-serif;
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
         padding: 20px;
         background-color: #d4e2ff;
       }
-      h1 {
-        color: #005fbe;
-        text-align: center;
-      }
-      .tabs {
-        display: flex;
-        margin-bottom: 1px;
-      }
+      h1 { color: #005fbe; text-align: center; margin-bottom: 18px; }
+      .tabs { display: flex; margin-bottom: 1px; flex-wrap: wrap; }
       .tab {
-        font-size: 1.2rem;
-        padding: 10px 20px;
+        font-size: 1.15rem;
+        padding: 10px 18px;
         background-color: #ffffff;
         cursor: pointer;
         border-radius: 5px 5px 0 0;
         margin-left: 5px;
+        margin-bottom: 2px;
       }
-      .tab.active {
-        background-color: #3498db;
-        color: white;
-      }
+      .tab.active { background-color: #3498db; color: white; }
       .calculator {
         background-color: white;
         padding: 20px;
-        border-radius: 15px 0px 15px 15px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+        border-radius: 15px 0 15px 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
       }
-      .form-group {
-        margin-bottom: 15px;
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 16px;
       }
-      label {
-        display: block;
-        margin-bottom: 5px;
-      }
-      input,
-      select {
+      @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+      .form-group { margin-bottom: 14px; }
+      label { display: block; margin-bottom: 5px; font-size: 14px; }
+      input, select {
         width: 100%;
         padding: 8px;
         border: 1px solid #ddd;
@@ -63,42 +53,49 @@
         border-radius: 4px;
         cursor: pointer;
         width: 100%;
-        font-size: 1.4rem;
-        margin-top: 10px;
+        font-size: 1.25rem;
+        margin-top: 8px;
       }
-      button:hover {
-        background-color: #0063a5;
-        box-shadow: 0 0px 10px 2px rgba(0, 0, 0, 0.6);
-      }
+      button:hover { background-color: #0063a5; }
+      .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .btn-secondary { background-color: #5d6d7e; font-size: 1rem; }
+      .btn-secondary:hover { background-color: #3d4c5a; }
       .result {
-        margin-top: 20px;
+        margin-top: 18px;
         padding: 15px;
         background-color: #e8f4fc;
         border-radius: 4px;
         display: none;
       }
-      .error {
-        color: red;
-        font-size: 14px;
-        margin-top: 5px;
-      }
+      .result p { margin: 6px 0; }
+      .error { color: #c0392b; font-size: 14px; margin-top: 5px; }
+      .hint { color: #5d6d7e; font-size: 12px; margin-top: 4px; }
       .amortization-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
-        font-size: 14px;
+        margin-top: 12px;
+        font-size: 13px;
       }
-      .amortization-table th,
-      .amortization-table td {
+      .amortization-table th, .amortization-table td {
         border: 1px solid #ddd;
-        padding: 8px;
+        padding: 6px;
         text-align: center;
       }
-      .amortization-table th {
-        background-color: #f2f2f2;
+      .amortization-table th { background-color: #f2f2f2; }
+      .hidden { display: none; }
+      canvas {
+        width: 100%;
+        max-height: 260px;
+        background: #fff;
+        border: 1px solid #e3eaf2;
+        border-radius: 6px;
+        margin-top: 10px;
       }
-      .hidden {
-        display: none;
+      @media print {
+        .tabs, button, .btn-row { display: none !important; }
+        body { background: #fff; }
+        .calculator { box-shadow: none; }
+        .result { display: block !important; }
       }
     </style>
   </head>
@@ -110,150 +107,160 @@
       <div class="tab" onclick="switchTab('loan')">מחשבון הלוואה</div>
     </div>
 
-    <!-- מחשבון תשואה -->
     <div id="compound-calculator" class="calculator">
-      <div class="form-group">
-        <label for="initialAmount">סכום ראשוני (₪)</label>
-        <input
-          type="number"
-          id="initialAmount"
-          min="0"
-          step="100"
-          value="10000"
-        />
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="initialAmount">סכום ראשוני (₪)</label>
+          <input type="number" id="initialAmount" min="0" step="100" value="10000" />
+        </div>
+        <div class="form-group">
+          <label for="monthlyAddition">הפקדה חודשית (₪)</label>
+          <input type="number" id="monthlyAddition" min="0" step="100" value="1000" />
+        </div>
+        <div class="form-group">
+          <label for="depositTiming">מועד ההפקדה</label>
+          <select id="depositTiming">
+            <option value="end">סוף החודש</option>
+            <option value="start">תחילת החודש</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="interestType">סוג ריבית</label>
+          <select id="interestType">
+            <option value="annual">ריבית שנתית נומינלית (r/12 לחודש)</option>
+            <option value="monthly">ריבית חודשית</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="interestRate">שיעור הריבית (%)</label>
+          <input type="number" id="interestRate" min="0" step="0.01" value="5" />
+        </div>
+        <div class="form-group">
+          <label for="inflationRate">אינפלציה שנתית משוערת (%)</label>
+          <input type="number" id="inflationRate" min="0" step="0.01" value="2.5" />
+        </div>
+        <div class="form-group">
+          <label for="taxRate">מס על הרווח (%)</label>
+          <input type="number" id="taxRate" min="0" max="50" step="0.1" value="15" />
+          <div class="hint">בישראל לרוב 15% על ריבית / 25% על רווח הון. 0 = בלי מס.</div>
+        </div>
+        <div class="form-group">
+          <label for="targetAmount">יעד חיסכון (₪) — רשות</label>
+          <input type="number" id="targetAmount" min="0" step="1000" placeholder="למשל 200000" />
+          <div class="hint">אם ממלאים, יחושב כמה צריך להפקיד בחודש כדי להגיע ליעד.</div>
+        </div>
+        <div class="form-group">
+          <label for="startDate">תאריך התחלה</label>
+          <input type="date" id="startDate" />
+        </div>
+        <div class="form-group">
+          <label for="endDate">תאריך סיום</label>
+          <input type="date" id="endDate" />
+          <div id="dateError" class="error"></div>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="monthlyAddition">סכום הוספה כל חודש (₪)</label>
-        <input
-          type="number"
-          id="monthlyAddition"
-          min="0"
-          step="100"
-          value="1000"
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="interestType">סוג ריבית</label>
-        <select id="interestType">
-          <option value="annual">ריבית שנתית</option>
-          <option value="monthly">ריבית חודשית</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="interestRate">שיעור הריבית (%)</label>
-        <input type="number" id="interestRate" min="0" step="0.01" value="5" />
-      </div>
-
-      <div class="form-group">
-        <label for="startDate">תאריך התחלה</label>
-        <input type="date" id="startDate" />
-      </div>
-
-      <div class="form-group">
-        <label for="endDate">תאריך סיום</label>
-        <input type="date" id="endDate" />
-        <div id="dateError" class="error"></div>
-      </div>
-
       <button onclick="calculateCompound()">חשב</button>
-
       <div id="compound-result" class="result">
-        <h3>תוצאות החישוב:</h3>
-        <p>סכום סופי: <span id="finalAmount"></span> ₪</p>
+        <h3>תוצאות החישוב</h3>
+        <p>סכום סופי נומינלי: <span id="finalAmount"></span> ₪</p>
         <p>סכום הפקדות כולל: <span id="totalDeposits"></span> ₪</p>
-        <p>ריבית שנצברה: <span id="totalInterest"></span> ₪</p>
+        <p>ריבית שנצברה לפני מס: <span id="totalInterest"></span> ₪</p>
+        <p>מס משוער על הרווח: <span id="taxAmount"></span> ₪</p>
+        <p>סכום סופי אחרי מס: <span id="afterTaxAmount"></span> ₪</p>
+        <p>ערך ריאלי (מותאם לאינפלציה): <span id="realAmount"></span> ₪</p>
         <p>מספר חודשים: <span id="monthsCount"></span></p>
+        <p>ריבית חודשית בשימוש: <span id="usedMonthlyRate"></span>%</p>
+        <p>תשואה שנתית אפקטיבית: <span id="effectiveAnnual"></span>%</p>
+        <p id="neededDepositRow" class="hidden">הפקדה חודשית נדרשת ליעד: <span id="neededDeposit"></span> ₪</p>
+        <canvas id="compoundChart" width="840" height="240"></canvas>
+        <div class="btn-row">
+          <button class="btn-secondary" type="button" onclick="downloadCompoundCsv()">הורד CSV</button>
+          <button class="btn-secondary" type="button" onclick="window.print()">הדפסה</button>
+        </div>
       </div>
     </div>
 
-    <!-- מחשבון הלוואה -->
     <div id="loan-calculator" class="calculator hidden">
-      <div class="form-group">
-        <label for="calculationType">חשב לפי</label>
-        <select id="calculationType" onchange="toggleCalculationType()">
-          <option value="monthlyPayment">החזר חודשי (₪)</option>
-          <option value="loanAmount">סכום ההלוואה (₪)</option>
-        </select>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="calculationType">חשב לפי</label>
+          <select id="calculationType" onchange="toggleCalculationType()">
+            <option value="monthlyPayment">תשלום ייחוס (₪)</option>
+            <option value="loanAmount">סכום ההלוואה (₪)</option>
+          </select>
+        </div>
+        <div class="form-group" id="monthlyPaymentGroup">
+          <label for="monthlyPayment">תשלום ייחוס (₪)</label>
+          <input type="number" id="monthlyPayment" min="0" step="100" value="1000" />
+          <div class="hint">בשפיצר: תשלום קבוע. בקרן שווה: תשלום ראשון.</div>
+        </div>
+        <div class="form-group" id="loanAmountGroup" style="display:none">
+          <label for="loanAmountInput">סכום ההלוואה (₪)</label>
+          <input type="number" id="loanAmountInput" min="0" step="1000" value="100000" />
+        </div>
+        <div class="form-group">
+          <label for="repaymentMethod">שיטת החזר</label>
+          <select id="repaymentMethod">
+            <option value="spitzer">החזר קבוע (לוח שפיצר)</option>
+            <option value="equalPrincipal">קרן שווה</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="indexation">הצמדה למדד</label>
+          <select id="indexation">
+            <option value="none">ללא הצמדה</option>
+            <option value="indexed">עם הצמדה</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="loanTerm">תקופת ההלוואה (חודשים)</label>
+          <input type="number" id="loanTerm" min="1" max="360" value="60" />
+        </div>
+        <div class="form-group">
+          <label for="loanInterest">ריבית שנתית נומינלית (%)</label>
+          <input type="number" id="loanInterest" min="0" step="0.01" value="5" />
+        </div>
+        <div class="form-group" id="indexRateGroup" style="display:none">
+          <label for="indexRate">מדד שנתי צפוי (%)</label>
+          <input type="number" id="indexRate" min="0" step="0.01" value="2" />
+        </div>
+        <div class="form-group">
+          <label for="extraPayment">פרעון נוסף קבוע בחודש (₪)</label>
+          <input type="number" id="extraPayment" min="0" step="50" value="0" />
+        </div>
+        <div class="form-group">
+          <label for="incomeMonthly">הכנסה חודשית נטו (₪) — רשות</label>
+          <input type="number" id="incomeMonthly" min="0" step="100" placeholder="לבדיקת יחס החזר" />
+        </div>
       </div>
-
-      <div class="form-group" id="monthlyPaymentGroup">
-        <label for="monthlyPayment">החזר חודשי (₪)</label>
-        <input
-          type="number"
-          id="monthlyPayment"
-          min="0"
-          step="100"
-          value="1000"
-        />
-      </div>
-
-      <div class="form-group" id="loanAmountGroup">
-        <label for="loanAmountInput">סכום ההלוואה (₪)</label>
-        <input
-          type="number"
-          id="loanAmountInput"
-          min="0"
-          step="1000"
-          value="100000"
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="repaymentMethod">שיטת החזר</label>
-        <select id="repaymentMethod">
-          <option value="spitzer">החזר קבוע (לוח שפיצר)</option>
-          <option value="equalPrincipal">קרן שווה</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="indexation">הצמדה למדד</label>
-        <select id="indexation">
-          <option value="none">ללא הצמדה</option>
-          <option value="indexed">עם הצמדה</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="loanTerm">תקופת ההלוואה (חודשים)</label>
-        <input type="number" id="loanTerm" min="1" max="360" value="60" />
-      </div>
-
-      <div class="form-group">
-        <label for="loanInterest">ריבית (%)</label>
-        <input type="number" id="loanInterest" min="0" step="0.01" value="5" />
-      </div>
-
-      <div class="form-group" id="indexRateGroup">
-        <label for="indexRate">מדד (%)</label>
-        <input type="number" id="indexRate" min="0" step="0.01" value="0.2" />
-      </div>
-
       <button onclick="calculateLoan()">חשב הלוואה</button>
-
       <div id="loan-result" class="result">
-        <h3>תוצאות החישוב:</h3>
+        <h3>תוצאות החישוב</h3>
         <p>סכום ההלוואה: <span id="calculatedLoanAmount"></span> ₪</p>
-        <p>החזר חודשי: <span id="calculatedMonthlyPayment"></span> ₪</p>
+        <p>תשלום ראשון: <span id="calculatedMonthlyPayment"></span> ₪</p>
+        <p>תשלום אחרון: <span id="lastMonthlyPayment"></span> ₪</p>
+        <p>תשלום מקסימלי: <span id="maxMonthlyPayment"></span> ₪</p>
+        <p>מספר תשלומים בפועל: <span id="actualPaymentsCount"></span></p>
         <p>סה"כ תשלומים: <span id="totalPayments"></span> ₪</p>
         <p>סה"כ ריבית: <span id="totalLoanInterest"></span> ₪</p>
-
-        <button onclick="showAmortization()">הצג לוח סילוקין</button>
-
-        <div
-          id="amortization-container"
-          style="overflow-x: auto; margin-top: 20px; display: none"
-        >
+        <p>סה"כ הצמדה: <span id="totalIndexation"></span> ₪</p>
+        <p>יתרה אחרי התשלום האחרון: <span id="endingBalance"></span> ₪</p>
+        <p id="ptiRow" class="hidden">יחס החזר מההכנסה (תשלום ראשון): <span id="ptiRatio"></span>%</p>
+        <canvas id="loanChart" width="840" height="240"></canvas>
+        <div class="btn-row">
+          <button class="btn-secondary" type="button" onclick="showAmortization()">הצג לוח סילוקין</button>
+          <button class="btn-secondary" type="button" onclick="downloadLoanCsv()">הורד לוח CSV</button>
+        </div>
+        <div id="amortization-container" style="overflow-x:auto;margin-top:16px;display:none">
           <table class="amortization-table" id="amortization-table">
             <thead>
               <tr>
                 <th>חודש</th>
                 <th>תשלום</th>
+                <th>תוספת פרעון</th>
                 <th>קרן</th>
                 <th>ריבית</th>
+                <th>הצמדה</th>
                 <th>יתרת קרן</th>
               </tr>
             </thead>
@@ -262,51 +269,56 @@
         </div>
       </div>
     </div>
+
     <script>
-      fetch("footer.html")
-        .then((response) => response.text())
-        .then((data) => {
-          document.body.insertAdjacentHTML("beforeend", data);
-        });
-    </script>
-    <script>
-      // Set default dates
+      const STORAGE_KEY = "finance-calculator-v2";
+
       document.addEventListener("DOMContentLoaded", function () {
         const today = new Date();
         const nextYear = new Date();
         nextYear.setFullYear(today.getFullYear() + 1);
-
         document.getElementById("startDate").valueAsDate = today;
         document.getElementById("endDate").valueAsDate = nextYear;
-
-        // Hide index rate by default
-        document.getElementById("indexRateGroup").style.display = "none";
-
-        // Add event listener for indexation change
-        document
-          .getElementById("indexation")
-          .addEventListener("change", function () {
-            if (this.value === "indexed") {
-              document.getElementById("indexRateGroup").style.display = "block";
-            } else {
-              document.getElementById("indexRateGroup").style.display = "none";
-            }
-          });
+        document.getElementById("indexation").addEventListener("change", function () {
+          document.getElementById("indexRateGroup").style.display =
+            this.value === "indexed" ? "block" : "none";
+        });
+        restoreInputs();
+        document.querySelectorAll("input, select").forEach((el) => {
+          el.addEventListener("change", saveInputs);
+        });
       });
 
-      function switchTab(tabName) {
-        document.querySelectorAll(".tab").forEach((tab) => {
-          tab.classList.remove("active");
+      function saveInputs() {
+        const data = {};
+        document.querySelectorAll("input, select").forEach((el) => {
+          if (el.id) data[el.id] = el.value;
         });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+      }
 
+      function restoreInputs() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          Object.keys(data).forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.value = data[id];
+          });
+          toggleCalculationType();
+          document.getElementById("indexRateGroup").style.display =
+            document.getElementById("indexation").value === "indexed" ? "block" : "none";
+        } catch (e) {}
+      }
+
+      function switchTab(tabName) {
+        document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
         document.getElementById("compound-calculator").classList.add("hidden");
         document.getElementById("loan-calculator").classList.add("hidden");
-
         if (tabName === "compound") {
           document.querySelectorAll(".tab")[0].classList.add("active");
-          document
-            .getElementById("compound-calculator")
-            .classList.remove("hidden");
+          document.getElementById("compound-calculator").classList.remove("hidden");
         } else {
           document.querySelectorAll(".tab")[1].classList.add("active");
           document.getElementById("loan-calculator").classList.remove("hidden");
@@ -315,310 +327,362 @@
 
       function toggleCalculationType() {
         const calcType = document.getElementById("calculationType").value;
+        document.getElementById("monthlyPaymentGroup").style.display =
+          calcType === "monthlyPayment" ? "block" : "none";
+        document.getElementById("loanAmountGroup").style.display =
+          calcType === "loanAmount" ? "block" : "none";
+      }
 
-        if (calcType === "monthlyPayment") {
-          document.getElementById("monthlyPaymentGroup").style.display =
-            "block";
-          document.getElementById("loanAmountGroup").style.display = "none";
-        } else {
-          document.getElementById("monthlyPaymentGroup").style.display = "none";
-          document.getElementById("loanAmountGroup").style.display = "block";
+      function monthsBetween(startDate, endDate) {
+        const years = endDate.getFullYear() - startDate.getFullYear();
+        const months = endDate.getMonth() - startDate.getMonth();
+        let n = years * 12 + months;
+        if (endDate.getDate() < startDate.getDate()) n -= 1;
+        return Math.max(0, n);
+      }
+
+      function formatMoney(x) {
+        return Number(x).toLocaleString("he-IL", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+      }
+
+      function monthlyRateFromInputs() {
+        const interestType = document.getElementById("interestType").value;
+        const rawRate = parseFloat(document.getElementById("interestRate").value) || 0;
+        return interestType === "annual" ? rawRate / 100 / 12 : rawRate / 100;
+      }
+
+      function futureValueSeries(initial, monthly, monthlyRate, months, timing) {
+        const series = [initial];
+        let balance = initial;
+        let totalDeposits = initial;
+        for (let i = 0; i < months; i++) {
+          if (timing === "start") {
+            balance += monthly;
+            totalDeposits += monthly;
+            balance *= 1 + monthlyRate;
+          } else {
+            balance *= 1 + monthlyRate;
+            balance += monthly;
+            totalDeposits += monthly;
+          }
+          series.push(balance);
         }
+        return { balance, totalDeposits, series };
+      }
+
+      function requiredMonthlyDeposit(target, initial, monthlyRate, months, timing) {
+        if (months <= 0) return 0;
+        if (monthlyRate === 0) return Math.max(0, (target - initial) / months);
+        const growth = Math.pow(1 + monthlyRate, months);
+        const fvInitial = initial * growth;
+        let annuityFactor = (growth - 1) / monthlyRate;
+        if (timing === "start") annuityFactor *= 1 + monthlyRate;
+        return Math.max(0, (target - fvInitial) / annuityFactor);
       }
 
       function calculateCompound() {
-        // Get input values
-        const initialAmount =
-          parseFloat(document.getElementById("initialAmount").value) || 0;
-        const monthlyAddition =
-          parseFloat(document.getElementById("monthlyAddition").value) || 0;
-        const interestType = document.getElementById("interestType").value;
-        let interestRate =
-          parseFloat(document.getElementById("interestRate").value) || 0;
+        const initialAmount = parseFloat(document.getElementById("initialAmount").value) || 0;
+        const monthlyAddition = parseFloat(document.getElementById("monthlyAddition").value) || 0;
+        const timing = document.getElementById("depositTiming").value;
+        const inflation = (parseFloat(document.getElementById("inflationRate").value) || 0) / 100;
+        const taxRate = (parseFloat(document.getElementById("taxRate").value) || 0) / 100;
+        const targetAmount = parseFloat(document.getElementById("targetAmount").value) || 0;
         const startDate = new Date(document.getElementById("startDate").value);
         const endDate = new Date(document.getElementById("endDate").value);
 
-        // Validate dates
-        if (startDate >= endDate) {
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
           document.getElementById("dateError").textContent =
             "תאריך הסיום חייב להיות אחרי תאריך ההתחלה";
           document.getElementById("compound-result").style.display = "none";
           return;
-        } else {
-          document.getElementById("dateError").textContent = "";
         }
+        document.getElementById("dateError").textContent = "";
 
-        // Calculate number of months
-        const monthsDiff =
-          (endDate.getFullYear() - startDate.getFullYear()) * 12 +
-          (endDate.getMonth() - startDate.getMonth());
+        const monthsDiff = monthsBetween(startDate, endDate);
+        const monthlyRate = monthlyRateFromInputs();
+        const result = futureValueSeries(
+          initialAmount,
+          monthlyAddition,
+          monthlyRate,
+          monthsDiff,
+          timing
+        );
+        const interest = result.balance - result.totalDeposits;
+        const tax = Math.max(0, interest) * taxRate;
+        const afterTax = result.balance - tax;
+        const years = monthsDiff / 12;
+        const real = years > 0 ? afterTax / Math.pow(1 + inflation, years) : afterTax;
+        const effectiveAnnual = monthlyRate > -1 ? (Math.pow(1 + monthlyRate, 12) - 1) * 100 : 0;
 
-        // Convert annual rate to monthly if needed
-        if (interestType === "annual") {
-          interestRate = Math.pow(1 + interestRate / 100, 1 / 12) - 1;
-        } else {
-          interestRate = interestRate / 100;
-        }
-
-        // Calculate compound interest
-        let balance = initialAmount;
-        let totalDeposits = initialAmount;
-
-        for (let i = 0; i < monthsDiff; i++) {
-          balance *= 1 + interestRate; // Apply interest
-          balance += monthlyAddition; // Add monthly deposit
-          totalDeposits += monthlyAddition;
-        }
-
-        // Display results
-        document.getElementById("finalAmount").textContent = balance.toFixed(2);
-        document.getElementById("totalDeposits").textContent =
-          totalDeposits.toFixed(2);
-        document.getElementById("totalInterest").textContent = (
-          balance - totalDeposits
-        ).toFixed(2);
+        document.getElementById("finalAmount").textContent = formatMoney(result.balance);
+        document.getElementById("totalDeposits").textContent = formatMoney(result.totalDeposits);
+        document.getElementById("totalInterest").textContent = formatMoney(interest);
+        document.getElementById("taxAmount").textContent = formatMoney(tax);
+        document.getElementById("afterTaxAmount").textContent = formatMoney(afterTax);
+        document.getElementById("realAmount").textContent = formatMoney(real);
         document.getElementById("monthsCount").textContent = monthsDiff;
+        document.getElementById("usedMonthlyRate").textContent = (monthlyRate * 100).toFixed(6);
+        document.getElementById("effectiveAnnual").textContent = effectiveAnnual.toFixed(3);
+
+        const needRow = document.getElementById("neededDepositRow");
+        if (targetAmount > 0) {
+          const needed = requiredMonthlyDeposit(
+            targetAmount,
+            initialAmount,
+            monthlyRate,
+            monthsDiff,
+            timing
+          );
+          document.getElementById("neededDeposit").textContent = formatMoney(needed);
+          needRow.classList.remove("hidden");
+        } else {
+          needRow.classList.add("hidden");
+        }
+
+        window._lastCompound = {
+          series: result.series,
+          deposits: result.totalDeposits,
+          months: monthsDiff,
+        };
+        drawLineChart("compoundChart", result.series, "#1f6fb2");
         document.getElementById("compound-result").style.display = "block";
+        saveInputs();
       }
 
-      function calculateLoan() {
-        const calculationType =
-          document.getElementById("calculationType").value;
-        const repaymentMethod =
-          document.getElementById("repaymentMethod").value;
-        const indexation = document.getElementById("indexation").value;
-        const loanTerm = parseInt(document.getElementById("loanTerm").value);
-        const interestRate =
-          parseFloat(document.getElementById("loanInterest").value) / 100;
-        const indexRate =
-          indexation === "indexed"
-            ? parseFloat(document.getElementById("indexRate").value) / 100
-            : 0;
-
-        let loanAmount, monthlyPayment;
-
-        if (calculationType === "monthlyPayment") {
-          monthlyPayment = parseFloat(
-            document.getElementById("monthlyPayment").value
-          );
-          loanAmount = calculateLoanAmount(
-            monthlyPayment,
-            loanTerm,
-            interestRate,
-            indexation,
-            repaymentMethod
-          );
-        } else {
-          loanAmount = parseFloat(
-            document.getElementById("loanAmountInput").value
-          );
-          monthlyPayment = calculateMonthlyPayment(
-            loanAmount,
-            loanTerm,
-            interestRate,
-            indexation,
-            repaymentMethod
-          );
-        }
-
-        // Calculate total payments and interest
-        let totalPayments, totalInterest;
-
-        if (repaymentMethod === "spitzer") {
-          totalPayments = monthlyPayment * loanTerm;
-          totalInterest = totalPayments - loanAmount;
-        } else {
-          // For equal principal, we need to calculate all payments
-          const amortization = calculateAmortization(
-            loanAmount,
-            loanTerm,
-            interestRate,
-            indexRate,
-            repaymentMethod
-          );
-          totalPayments = amortization.totalPayments;
-          totalInterest = amortization.totalInterest;
-        }
-
-        // Display results
-        document.getElementById("calculatedLoanAmount").textContent =
-          loanAmount.toFixed(2);
-        document.getElementById("calculatedMonthlyPayment").textContent =
-          monthlyPayment.toFixed(2);
-        document.getElementById("totalPayments").textContent =
-          totalPayments.toFixed(2);
-        document.getElementById("totalLoanInterest").textContent =
-          totalInterest.toFixed(2);
-        document.getElementById("loan-result").style.display = "block";
-        document.getElementById("amortization-table").style.display = "none";
+      function spitzerPayment(principal, monthlyRate, n) {
+        if (n <= 0) return 0;
+        if (Math.abs(monthlyRate) < 1e-12) return principal / n;
+        const pow = Math.pow(1 + monthlyRate, n);
+        return (principal * monthlyRate * pow) / (pow - 1);
       }
 
-      function calculateLoanAmount(
-        monthlyPayment,
-        loanTerm,
-        interestRate,
-        indexation,
-        repaymentMethod
-      ) {
-        if (repaymentMethod === "spitzer") {
-          // Spitzer formula: P = M / [ (r*(1+r)^n) / ((1+r)^n - 1) ]
-          const monthlyRate = interestRate / 12;
-          const denominator =
-            (monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) /
-            (Math.pow(1 + monthlyRate, loanTerm) - 1);
-          return monthlyPayment / denominator;
-        } else {
-          // Equal principal - more complex to calculate backwards
-          // This is a simplified approximation
-          const avgInterest = ((interestRate / 12) * (loanTerm + 1)) / 2;
-          return (monthlyPayment * loanTerm) / (1 + avgInterest * loanTerm);
-        }
+      function spitzerPrincipal(payment, monthlyRate, n) {
+        if (n <= 0) return 0;
+        if (Math.abs(monthlyRate) < 1e-12) return payment * n;
+        const pow = Math.pow(1 + monthlyRate, n);
+        return (payment * (pow - 1)) / (monthlyRate * pow);
       }
 
-      function calculateMonthlyPayment(
-        loanAmount,
-        loanTerm,
-        interestRate,
-        indexation,
-        repaymentMethod
-      ) {
-        if (repaymentMethod === "spitzer") {
-          // Spitzer formula: M = P * [ (r*(1+r)^n) / ((1+r)^n - 1) ]
-          const monthlyRate = interestRate / 12;
-          const numerator = monthlyRate * Math.pow(1 + monthlyRate, loanTerm);
-          const denominator = Math.pow(1 + monthlyRate, loanTerm) - 1;
-          return loanAmount * (numerator / denominator);
-        } else {
-          // Equal principal payment
-          const principalPayment = loanAmount / loanTerm;
-          const firstInterestPayment = loanAmount * (interestRate / 12);
-          return principalPayment + firstInterestPayment;
-        }
-      }
-
-      function showAmortization() {
-        const loanAmount = parseFloat(
-          document.getElementById("calculatedLoanAmount").textContent
-        );
-        const loanTerm = parseInt(document.getElementById("loanTerm").value);
-        const interestRate =
-          parseFloat(document.getElementById("loanInterest").value) / 100;
-        const indexRate =
-          document.getElementById("indexation").value === "indexed"
-            ? parseFloat(document.getElementById("indexRate").value) / 100
-            : 0;
-        const repaymentMethod =
-          document.getElementById("repaymentMethod").value;
-
-        const amortization = calculateAmortization(
-          loanAmount,
-          loanTerm,
-          interestRate,
-          indexRate,
-          repaymentMethod
-        );
-
-        // Display amortization table
-        const tableBody = document.getElementById("amortization-body");
-        tableBody.innerHTML = "";
-
-        amortization.schedule.forEach((month, index) => {
-          const row = document.createElement("tr");
-
-          row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${month.payment.toFixed(2)}</td>
-                    <td>${month.principal.toFixed(2)}</td>
-                    <td>${month.interest.toFixed(2)}</td>
-                    <td>${month.balance.toFixed(2)}</td>
-                `;
-
-          tableBody.appendChild(row);
-        });
-
-        document.getElementById("amortization-table").style.display = "table";
-        document.getElementById("amortization-container").style.display =
-          "block";
-      }
-
-      function calculateAmortization(
-        loanAmount,
-        loanTerm,
-        interestRate,
-        indexRate,
-        repaymentMethod
-      ) {
+      function calculateAmortization(loanAmount, loanTerm, annualRate, annualIndex, repaymentMethod, extraPayment) {
+        const monthlyRate = annualRate / 12;
+        const monthlyIndex = annualIndex / 12;
         let balance = loanAmount;
         let totalPayments = 0;
         let totalInterest = 0;
+        let totalIndexation = 0;
         const schedule = [];
+        const maxMonths = loanTerm + 24;
 
-        const monthlyRate = interestRate / 12;
-        const monthlyIndexRate = indexRate / 12;
+        for (let i = 0; i < maxMonths && balance > 0.01; i++) {
+          const remaining = Math.max(1, loanTerm - i);
+          const indexAmount = balance * monthlyIndex;
+          balance += indexAmount;
+          totalIndexation += indexAmount;
 
-        if (repaymentMethod === "spitzer") {
-          // Calculate fixed monthly payment
-          const monthlyPayment = calculateMonthlyPayment(
-            loanAmount,
-            loanTerm,
-            interestRate,
-            "none",
-            "spitzer"
-          );
+          const interestPayment = balance * monthlyRate;
+          let principalPayment;
+          let basePayment;
 
-          for (let i = 0; i < loanTerm; i++) {
-            const interestPayment = balance * monthlyRate;
-            const principalPayment = monthlyPayment - interestPayment;
-
-            totalPayments += monthlyPayment;
-            totalInterest += interestPayment;
-
-            schedule.push({
-              payment: monthlyPayment,
-              principal: principalPayment,
-              interest: interestPayment,
-              balance: balance - principalPayment,
-            });
-
-            balance -= principalPayment;
-
-            // Apply indexation if needed
-            if (indexRate > 0) {
-              balance *= 1 + monthlyIndexRate;
-            }
+          if (repaymentMethod === "spitzer") {
+            basePayment = spitzerPayment(balance, monthlyRate, remaining);
+            principalPayment = basePayment - interestPayment;
+          } else {
+            principalPayment = balance / remaining;
+            basePayment = principalPayment + interestPayment;
           }
-        } else {
-          // Equal principal payments
-          const principalPayment = loanAmount / loanTerm;
 
-          for (let i = 0; i < loanTerm; i++) {
-            const interestPayment = balance * monthlyRate;
-            const monthlyPayment = principalPayment + interestPayment;
+          let extra = extraPayment;
+          if (principalPayment + extra > balance) extra = Math.max(0, balance - principalPayment);
+          principalPayment += extra;
+          if (principalPayment > balance) principalPayment = balance;
+          const monthlyPayment = principalPayment + interestPayment;
 
-            totalPayments += monthlyPayment;
-            totalInterest += interestPayment;
+          balance -= principalPayment;
+          if (balance < 0.005) balance = 0;
 
-            schedule.push({
-              payment: monthlyPayment,
-              principal: principalPayment,
-              interest: interestPayment,
-              balance: balance - principalPayment,
-            });
-
-            balance -= principalPayment;
-
-            // Apply indexation if needed
-            if (indexRate > 0) {
-              balance *= 1 + monthlyIndexRate;
-            }
-          }
+          totalPayments += monthlyPayment;
+          totalInterest += interestPayment;
+          schedule.push({
+            payment: monthlyPayment,
+            extra: extra,
+            principal: principalPayment,
+            interest: interestPayment,
+            indexation: indexAmount,
+            balance: balance,
+          });
+          if (i + 1 >= loanTerm && extraPayment <= 0) break;
         }
 
-        return {
-          schedule,
-          totalPayments,
-          totalInterest,
-        };
+        return { schedule, totalPayments, totalInterest, totalIndexation, endingBalance: balance };
+      }
+
+      function calculateLoan() {
+        const calculationType = document.getElementById("calculationType").value;
+        const repaymentMethod = document.getElementById("repaymentMethod").value;
+        const indexation = document.getElementById("indexation").value;
+        const loanTerm = parseInt(document.getElementById("loanTerm").value, 10);
+        const annualRate = (parseFloat(document.getElementById("loanInterest").value) || 0) / 100;
+        const annualIndex =
+          indexation === "indexed"
+            ? (parseFloat(document.getElementById("indexRate").value) || 0) / 100
+            : 0;
+        const extraPayment = parseFloat(document.getElementById("extraPayment").value) || 0;
+        const income = parseFloat(document.getElementById("incomeMonthly").value) || 0;
+
+        if (!loanTerm || loanTerm < 1) return;
+
+        const monthlyRate = annualRate / 12;
+        let loanAmount;
+
+        if (calculationType === "monthlyPayment") {
+          const referencePayment = parseFloat(document.getElementById("monthlyPayment").value) || 0;
+          if (repaymentMethod === "spitzer") {
+            loanAmount = spitzerPrincipal(referencePayment, monthlyRate, loanTerm);
+          } else {
+            loanAmount = referencePayment / (1 / loanTerm + monthlyRate);
+          }
+        } else {
+          loanAmount = parseFloat(document.getElementById("loanAmountInput").value) || 0;
+        }
+
+        const amort = calculateAmortization(
+          loanAmount,
+          loanTerm,
+          annualRate,
+          annualIndex,
+          repaymentMethod,
+          extraPayment
+        );
+
+        const payments = amort.schedule.map((m) => m.payment);
+        const first = payments[0] || 0;
+        const last = payments.length ? payments[payments.length - 1] : 0;
+        const maxP = payments.length ? Math.max.apply(null, payments) : 0;
+
+        document.getElementById("calculatedLoanAmount").textContent = formatMoney(loanAmount);
+        document.getElementById("calculatedMonthlyPayment").textContent = formatMoney(first);
+        document.getElementById("lastMonthlyPayment").textContent = formatMoney(last);
+        document.getElementById("maxMonthlyPayment").textContent = formatMoney(maxP);
+        document.getElementById("actualPaymentsCount").textContent = amort.schedule.length;
+        document.getElementById("totalPayments").textContent = formatMoney(amort.totalPayments);
+        document.getElementById("totalLoanInterest").textContent = formatMoney(amort.totalInterest);
+        document.getElementById("totalIndexation").textContent = formatMoney(amort.totalIndexation);
+        document.getElementById("endingBalance").textContent = formatMoney(amort.endingBalance);
+
+        const ptiRow = document.getElementById("ptiRow");
+        if (income > 0) {
+          document.getElementById("ptiRatio").textContent = ((first / income) * 100).toFixed(1);
+          ptiRow.classList.remove("hidden");
+        } else {
+          ptiRow.classList.add("hidden");
+        }
+
+        window._lastAmort = amort;
+        window._lastLoanAmount = loanAmount;
+        drawLineChart(
+          "loanChart",
+          amort.schedule.map((m) => m.balance),
+          "#c0392b"
+        );
+        document.getElementById("loan-result").style.display = "block";
+        document.getElementById("amortization-container").style.display = "none";
+        saveInputs();
+      }
+
+      function showAmortization() {
+        const amort = window._lastAmort;
+        if (!amort) return;
+        const tableBody = document.getElementById("amortization-body");
+        tableBody.innerHTML = "";
+        amort.schedule.forEach((month, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML =
+            "<td>" + (index + 1) + "</td>" +
+            "<td>" + formatMoney(month.payment) + "</td>" +
+            "<td>" + formatMoney(month.extra) + "</td>" +
+            "<td>" + formatMoney(month.principal) + "</td>" +
+            "<td>" + formatMoney(month.interest) + "</td>" +
+            "<td>" + formatMoney(month.indexation) + "</td>" +
+            "<td>" + formatMoney(month.balance) + "</td>";
+          tableBody.appendChild(row);
+        });
+        document.getElementById("amortization-container").style.display = "block";
+      }
+
+      function drawLineChart(canvasId, values, color) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !values || !values.length) return;
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width;
+        const h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        const min = 0;
+        const max = Math.max.apply(null, values) * 1.05 || 1;
+        ctx.strokeStyle = "#d0d7de";
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+          const y = 20 + ((h - 40) * i) / 4;
+          ctx.beginPath();
+          ctx.moveTo(40, y);
+          ctx.lineTo(w - 10, y);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        values.forEach((v, i) => {
+          const x = 40 + ((w - 50) * i) / Math.max(1, values.length - 1);
+          const y = h - 20 - ((h - 40) * (v - min)) / (max - min);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.fillStyle = "#334";
+        ctx.font = "12px Arial";
+        ctx.fillText(formatMoney(max), 2, 16);
+        ctx.fillText("0", 18, h - 8);
+      }
+
+      function downloadCsv(filename, rows) {
+        const csv = rows
+          .map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(","))
+          .join("\n");
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function downloadCompoundCsv() {
+        const data = window._lastCompound;
+        if (!data) return;
+        const rows = [["חודש", "יתרה"]];
+        data.series.forEach((v, i) => rows.push([i, v.toFixed(2)]));
+        downloadCsv("hisachon.csv", rows);
+      }
+
+      function downloadLoanCsv() {
+        const amort = window._lastAmort;
+        if (!amort) return;
+        const rows = [["חודש", "תשלום", "פרעון נוסף", "קרן", "ריבית", "הצמדה", "יתרה"]];
+        amort.schedule.forEach((m, i) => {
+          rows.push([
+            i + 1,
+            m.payment.toFixed(2),
+            m.extra.toFixed(2),
+            m.principal.toFixed(2),
+            m.interest.toFixed(2),
+            m.indexation.toFixed(2),
+            m.balance.toFixed(2),
+          ]);
+        });
+        downloadCsv("silukin.csv", rows);
       }
     </script>
   </body>
