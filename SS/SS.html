@@ -1303,10 +1303,12 @@
             ensureRowIds(toysData);
             ensureRowIds(electronicsData);
             ensureRowIds(archiveData);
-            // שמירה ראשונית אם נוספו מזהים
-            if (toysData.length) saveToysData(toysData);
-            if (electronicsData.length) saveElectronicsData(electronicsData);
-            if (archiveData.length) saveArchive(archiveData);
+            // שמירה ראשונית של מזהים (בלי לקרוא ל-updateStats כדי למנוע בעיות טעינה)
+            try {
+                if (toysData.length) localStorage.setItem(STORAGE_KEY_TOYS, JSON.stringify(toysData));
+                if (electronicsData.length) localStorage.setItem(STORAGE_KEY_ELECTRONICS, JSON.stringify(electronicsData));
+                if (archiveData.length) localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiveData));
+            } catch (e) { /* ignore */ }
 
             let showSelectedOnly = false;
             let selectedIdsSnapshot = [];
@@ -1664,28 +1666,31 @@
                 }
                 // גרירה מותרת רק כשאין סינון/חיפוש/הצגת מסומנים (כדי שהסדר יתאים לנתונים המלאים)
                 const canSort = filter === 'all' && !searchTerm && !showSelectedOnly && filtered.length > 1;
-                if (canSort) {
+                if (canSort && typeof Sortable !== 'undefined') {
                     tbody.classList.remove('no-sort');
-                    sortableInstance = new Sortable(tbody, {
-                        animation: 180,
-                        delay: 1000,
-                        delayOnTouchOnly: true,
-                        touchStartThreshold: 8,
-                        handle: '.drag-handle',   // גרירה רק מהידית (קצה/עמודת פעולות)
-                        ghostClass: 'sortable-ghost',
-                        chosenClass: 'sortable-chosen',
-                        dragClass: 'sortable-drag',
-                        filter: 'input, select, button, [contenteditable="true"]',
-                        preventOnFilter: true,
-                        onEnd: function(evt) {
-                            if (evt.oldIndex === evt.newIndex) return;
-                            const data = getActiveData();
-                            // כש-canSort=true הרשימה המוצגת = כל הנתונים לפי הסדר
-                            const moved = data.splice(evt.oldIndex, 1)[0];
-                            data.splice(evt.newIndex, 0, moved);
-                            saveActive();
-                        }
-                    });
+                    try {
+                        sortableInstance = new Sortable(tbody, {
+                            animation: 180,
+                            delay: 1000,
+                            delayOnTouchOnly: true,
+                            touchStartThreshold: 8,
+                            handle: '.drag-handle',   // גרירה רק מהידית – לא חוסם select / עריכה
+                            ghostClass: 'sortable-ghost',
+                            chosenClass: 'sortable-chosen',
+                            dragClass: 'sortable-drag',
+                            onEnd: function(evt) {
+                                if (evt.oldIndex === evt.newIndex) return;
+                                const data = getActiveData();
+                                // כש-canSort=true הרשימה המוצגת = כל הנתונים לפי הסדר
+                                const moved = data.splice(evt.oldIndex, 1)[0];
+                                data.splice(evt.newIndex, 0, moved);
+                                saveActive();
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Sortable init failed:', e);
+                        tbody.classList.add('no-sort');
+                    }
                 } else {
                     tbody.classList.add('no-sort');
                 }
