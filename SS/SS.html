@@ -7,6 +7,7 @@
     <!-- Favicon מקומי -->
     <link rel="icon" href="SS.png" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -548,6 +549,46 @@
             padding: 30px 0;
             color: #6a7c94;
         }
+        /* גרירת שורות */
+        .sortable-ghost {
+            opacity: 0.45;
+            background: #c8ebfb !important;
+        }
+        .sortable-ghost td:not(.row-actions) {
+            background: #c8ebfb !important;
+        }
+        .sortable-chosen {
+            box-shadow: 0 0 0 2px #1e3a5f;
+        }
+        .sortable-drag {
+            opacity: 0.95;
+            cursor: grabbing !important;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #64748b;
+            font-size: 1.05rem;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            padding: 2px 5px;
+            border-radius: 6px;
+            line-height: 1;
+        }
+        .drag-handle:hover {
+            background: #e2e8f0;
+            color: #1e3a5f;
+        }
+        .drag-handle:active,
+        .sortable-chosen .drag-handle {
+            cursor: grabbing;
+        }
+        /* כשאין אפשרות למיון – הידית לא פעילה */
+        #tableBody.no-sort .drag-handle {
+            opacity: 0.35;
+            cursor: default;
+            pointer-events: none;
+        }
         .row-actions {
             display: flex;
             gap: 3px;
@@ -573,14 +614,6 @@
         .row-actions .delete-btn:hover {
             background: #fecaca;
             color: #b91c1c;
-        }
-        .row-actions .move-up-btn:hover {
-            background: #dbeafe;
-            color: #1a3f6e;
-        }
-        .row-actions .move-down-btn:hover {
-            background: #dbeafe;
-            color: #1a3f6e;
         }
         .row-checkbox {
             width: 16px;
@@ -1259,10 +1292,27 @@
             let electronicsData = loadElectronicsData();
             let archiveData = loadArchive();
             let nextId = toysData.length + electronicsData.length + archiveData.length + 1000;
+            // וידוא שכל שורה מקבלת _id יציב (חשוב לגרירה ולזיהוי)
+            function ensureRowIds(arr) {
+                arr.forEach(r => {
+                    if (!r._id) {
+                        r._id = 'row-' + (nextId++);
+                    }
+                });
+            }
+            ensureRowIds(toysData);
+            ensureRowIds(electronicsData);
+            ensureRowIds(archiveData);
+            // שמירה ראשונית אם נוספו מזהים
+            if (toysData.length) saveToysData(toysData);
+            if (electronicsData.length) saveElectronicsData(electronicsData);
+            if (archiveData.length) saveArchive(archiveData);
+
             let showSelectedOnly = false;
             let selectedIdsSnapshot = [];
             let currentView = 'toys'; // 'toys' | 'electronics' | 'archive'
             let lastMainView = 'toys'; // לשחזור מארכיב – לאיזה טאב להחזיר
+            let sortableInstance = null; // מופע Sortable לגרירת שורות
 
 
             const tbody = document.getElementById('tableBody');
@@ -1307,20 +1357,6 @@
                     const orderB = sortOrder[b.status] || 8;
                     return orderA - orderB;
                 });
-                saveActive();
-                renderTable(filterSelect.value);
-                updateStats(getActiveData());
-            }
-
-            function moveRow(rowId, direction) {
-                const data = getActiveData();
-                const index = data.findIndex(r => (r._id || ('row-' + data.indexOf(r))) === rowId);
-                if (index === -1) return;
-                const newIndex = direction === 'up' ? index - 1 : index + 1;
-                if (newIndex < 0 || newIndex >= data.length) return;
-                const temp = data[index];
-                data[index] = data[newIndex];
-                data[newIndex] = temp;
                 saveActive();
                 renderTable(filterSelect.value);
                 updateStats(getActiveData());
@@ -1416,6 +1452,10 @@
                 });
 
                 tbody.innerHTML = '';
+                if (sortableInstance) {
+                    sortableInstance.destroy();
+                    sortableInstance = null;
+                }
                 if (filtered.length === 0) {
                     const tr = document.createElement('tr');
                     const td = document.createElement('td');
@@ -1425,6 +1465,7 @@
                     tr.appendChild(td);
                     tbody.appendChild(tr);
                     updateCounter(filtered.length);
+                    tbody.classList.add('no-sort');
                     return;
                 }
 
@@ -1582,23 +1623,13 @@
                     const tdActions = document.createElement('td');
                     tdActions.className = 'row-actions';
 
-                    const moveUpBtn = document.createElement('button');
-                    moveUpBtn.textContent = '⬆';
-                    moveUpBtn.title = 'הזז למעלה';
-                    moveUpBtn.className = 'move-up-btn';
-                    moveUpBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        moveRow(tr.dataset.rowId, 'up');
-                    });
-
-                    const moveDownBtn = document.createElement('button');
-                    moveDownBtn.textContent = '⬇';
-                    moveDownBtn.title = 'הזז למטה';
-                    moveDownBtn.className = 'move-down-btn';
-                    moveDownBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        moveRow(tr.dataset.rowId, 'down');
-                    });
+                    // ידית גרירה – רק מכאן אפשר להתחיל לגרור את השורה
+                    const dragHandle = document.createElement('span');
+                    dragHandle.className = 'drag-handle';
+                    dragHandle.textContent = '☰';
+                    dragHandle.title = 'גרור לשינוי סדר (בנייד: החזק שנייה)';
+                    dragHandle.setAttribute('aria-label', 'גרור שורה');
+                    tdActions.appendChild(dragHandle);
 
                     const delBtn = document.createElement('button');
                     delBtn.textContent = '🗑️';
@@ -1617,9 +1648,6 @@
                             }
                         }
                     });
-
-                    tdActions.appendChild(moveUpBtn);
-                    tdActions.appendChild(moveDownBtn);
                     tdActions.appendChild(delBtn);
                     tr.appendChild(tdActions);
 
@@ -1628,6 +1656,39 @@
 
                 updateCounter(filtered.length);
                 selectAllCheck.checked = false;
+
+                // אתחול / הרס גרירת שורות (Sortable)
+                if (sortableInstance) {
+                    sortableInstance.destroy();
+                    sortableInstance = null;
+                }
+                // גרירה מותרת רק כשאין סינון/חיפוש/הצגת מסומנים (כדי שהסדר יתאים לנתונים המלאים)
+                const canSort = filter === 'all' && !searchTerm && !showSelectedOnly && filtered.length > 1;
+                if (canSort) {
+                    tbody.classList.remove('no-sort');
+                    sortableInstance = new Sortable(tbody, {
+                        animation: 180,
+                        delay: 1000,
+                        delayOnTouchOnly: true,
+                        touchStartThreshold: 8,
+                        handle: '.drag-handle',   // גרירה רק מהידית (קצה/עמודת פעולות)
+                        ghostClass: 'sortable-ghost',
+                        chosenClass: 'sortable-chosen',
+                        dragClass: 'sortable-drag',
+                        filter: 'input, select, button, [contenteditable="true"]',
+                        preventOnFilter: true,
+                        onEnd: function(evt) {
+                            if (evt.oldIndex === evt.newIndex) return;
+                            const data = getActiveData();
+                            // כש-canSort=true הרשימה המוצגת = כל הנתונים לפי הסדר
+                            const moved = data.splice(evt.oldIndex, 1)[0];
+                            data.splice(evt.newIndex, 0, moved);
+                            saveActive();
+                        }
+                    });
+                } else {
+                    tbody.classList.add('no-sort');
+                }
             }
 
             function updateCounter(count) {
