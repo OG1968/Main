@@ -398,9 +398,86 @@
         }
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button { opacity: 0.45; }
+
+        /* Floating dark-mode button – top left only */
+        .dark-toggle {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 1001;
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.25s, transform 0.2s;
+        }
+        .dark-toggle:hover { transform: scale(1.08); }
+        .dark-toggle:active { transform: scale(0.95); }
+        body.dark { background: #1a2332; color: #e2e8f0; }
+        body.dark .dark-toggle {
+            background: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+        }
+        body.dark .main-header h1 { color: #93c5fd; }
+        body.dark .main-header h1 .highlight { color: #60a5fa; }
+        body.dark .controls label,
+        body.dark .actions label,
+        body.dark .checkbox-wrapper,
+        body.dark .legend,
+        body.dark .footer .copyright,
+        body.dark .note-row label,
+        body.dark .field-group label { color: #cbd5e1; }
+        body.dark .controls input[type="number"],
+        body.dark .controls select,
+        body.dark .note-row input,
+        body.dark .field-group input[type="number"],
+        body.dark .field-group select {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(100, 116, 139, 0.5);
+            color: #f1f5f9;
+        }
+        body.dark .controls input:focus,
+        body.dark .note-row input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+        }
+        body.dark .panel {
+            background: #1e293b !important;
+            border-color: #64748b;
+            color: #e2e8f0;
+        }
+        body.dark .panel.glue { background: #3d2e1a !important; }
+        body.dark .dim-label { color: #f1f5f9; }
+        body.dark .dim-sub { color: #94a3b8; background: rgba(15, 23, 42, 0.5); }
+        body.dark .legend .swatch { border-color: #94a3b8; }
+        body.dark .footer { border-top-color: rgba(255,255,255,0.1); }
+        body.dark .mobile-menu-panel { background: rgba(30, 41, 59, 0.97); color: #e2e8f0; }
+        body.dark .mobile-menu-panel .panel-header h3 { color: #93c5fd; }
+        body.dark .mobile-menu-panel .panel-close { color: #94a3b8; }
+        body.dark .mobile-menu-panel .field-group input,
+        body.dark .mobile-menu-panel .field-group select {
+            background: #0f172a;
+            border-color: #475569;
+            color: #f1f5f9;
+        }
+        body.dark .mobile-menu-panel .toggle-row,
+        body.dark .mobile-menu-panel .field-group label,
+        body.dark .mobile-menu-panel .note-row label { color: #cbd5e1; }
+        body.dark .mobile-menu-panel .panel-header { border-bottom-color: rgba(255,255,255,0.1); }
+        body.dark .toast { background: rgba(30, 58, 95, 0.95); }
+        body.dark .loading-indicator { border-color: #334155; border-top-color: #60a5fa; }
+        body.dark .mobile-menu-toggle { background: #1e3a5f; }
     </style>
 </head>
 <body>
+    <button class="dark-toggle" id="darkToggle" title="מצב כהה / בהיר" aria-label="מצב כהה">🌙</button>
     <div class="loading-indicator" id="loadingIndicator"></div>
     <div class="toast" id="toast"></div>
     <div class="mobile-overlay" id="mobileOverlay"></div>
@@ -1174,6 +1251,23 @@
     $('mDxf').addEventListener('click', () => { readMobile(); writeDesktop(); closeMobile(); setTimeout(downloadDXF, 200); });
     $('mReset').addEventListener('click', () => { closeMobile(); resetAll(); });
 
+    // dark mode floating button only
+    const DARK_KEY = 'cartonNetPro_dark';
+    function applyDark(on) {
+        document.body.classList.toggle('dark', !!on);
+        const btn = $('darkToggle');
+        if (btn) btn.textContent = on ? '☀️' : '🌙';
+        try { localStorage.setItem(DARK_KEY, on ? '1' : '0'); } catch (e) {}
+    }
+    function loadDark() {
+        try { return localStorage.getItem(DARK_KEY) === '1'; } catch (e) { return false; }
+    }
+    if ($('darkToggle')) {
+        $('darkToggle').addEventListener('click', () => {
+            applyDark(!document.body.classList.contains('dark'));
+        });
+    }
+
     // live toggles
     ['hideLabels', 'showCrease', 'glueOn'].forEach(id => {
         $(id).addEventListener('change', () => { readDesktop(); writeMobile(); renderNet(); });
@@ -1208,6 +1302,7 @@
     });
 
     // init
+    applyDark(loadDark());
     if (loadState()) {
         writeDesktop();
         writeMobile();
