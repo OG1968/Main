@@ -507,8 +507,12 @@
     function fmt(n) {
         return (Math.round(n * 100) / 100).toString();
     }
-    /** Keep number×number in visual LTR order even inside RTL page */
+    /** Dimension string: plain ASCII for clean exports (SVG/AI/PDF/EPS/DXF) */
     function dim(a, b) {
+        return fmt(a) + 'x' + fmt(b);
+    }
+    /** For on-screen RTL display only */
+    function dimScreen(a, b) {
         return '\u2066' + fmt(a) + '\u00d7' + fmt(b) + '\u2069';
     }
 
@@ -781,140 +785,181 @@
         URL.revokeObjectURL(url);
     }
 
-    // ---------- SVG ----------
+    // ---------- unit helper for true 1:1 exports ----------
+    function unitToMm() {
+        if (state.unit === 'cm') return 10;
+        if (state.unit === 'in') return 25.4;
+        return 1; // mm
+    }
+
+    // ---------- SVG (true 1:1 in mm) ----------
     window.downloadSVG = function () {
         readDesktop();
         const { L, W, H } = state;
         if (validate(L, W, H, state.glue).length) { showToast('⚠️ מידות לא תקינות', 'error'); return; }
         const geo = getGeo();
         const strokes = buildStrokePlan(geo);
-        const scale = BASE_SCALE;
-        const margin = 8;
-        const sw = geo.totalW * scale + margin * 2;
-        const sh = geo.totalH * scale + margin * 2;
-        const pad = 70;
+        const toMm = unitToMm();
+        const margin = 5; // mm
+        const footerH = 14; // mm
+        const sw = geo.totalW * toMm + margin * 2;
+        const sh = geo.totalH * toMm + margin * 2;
+        const strokeW = 0.35; // mm
+
         let svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${sw}" height="${sh + pad}" viewBox="0 0 ${sw} ${sh + pad}"
+<svg xmlns="http://www.w3.org/2000/svg" width="${sw.toFixed(3)}mm" height="${(sh + footerH).toFixed(3)}mm"
+ viewBox="0 0 ${sw.toFixed(3)} ${(sh + footerH).toFixed(3)}"
  xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" ai:version="27.0" style="background:white">
-<title>פריסת קרטון ${L}x${W}x${H}</title>
+<title>פריסת קרטון ${L}x${W}x${H} (1:1)</title>
 <style>
 .fill-top{fill:#ffe6f0}.fill-wall{fill:#f9f9f9}.fill-bottom{fill:#e6f2ff}.fill-glue{fill:#fff3e0}
 .label{font-family:Arial,Helvetica,sans-serif;font-weight:bold;text-anchor:middle;fill:#111}
 .sub{font-family:Arial,Helvetica,sans-serif;text-anchor:middle;fill:#333}
-.cut{stroke:#111;stroke-width:1.25;fill:none;stroke-linecap:square;stroke-linejoin:miter}
-.cut-glue{stroke:#111;stroke-width:1.25;fill:none;stroke-dasharray:5 3;stroke-linecap:square}
-.crease{stroke:#c0392b;stroke-width:1.25;stroke-dasharray:6 4;fill:none;stroke-linecap:square}
+.cut{stroke:#111;stroke-width:${strokeW};fill:none;stroke-linecap:square;stroke-linejoin:miter}
+.cut-glue{stroke:#111;stroke-width:${strokeW};fill:none;stroke-dasharray:1.5 1;stroke-linecap:square}
+.crease{stroke:#c0392b;stroke-width:${strokeW};stroke-dasharray:2 1.2;fill:none;stroke-linecap:square}
 </style>
 <g id="Fills" ai:layer="true" ai:name="Fills">
 `;
         const fillClass = { top: 'fill-top', wall: 'fill-wall', bottom: 'fill-bottom', glue: 'fill-glue' };
         geo.panels.forEach(p => {
-            const rx = p.x * scale + margin, ry = p.y * scale + margin, rw = p.w * scale, rh = p.h * scale;
-            svg += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" class="${fillClass[p.type] || 'fill-wall'}"/>\n`;
+            const rx = p.x * toMm + margin, ry = p.y * toMm + margin;
+            const rw = p.w * toMm, rh = p.h * toMm;
+            svg += `<rect x="${rx.toFixed(3)}" y="${ry.toFixed(3)}" width="${rw.toFixed(3)}" height="${rh.toFixed(3)}" class="${fillClass[p.type] || 'fill-wall'}"/>\n`;
             if (!state.hideLabels) {
-                const fs = Math.min(13, rw / 9);
-                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 - 5}" class="label" font-size="${fs}">${p.name}</text>\n`;
-                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 + 12}" class="sub" font-size="${Math.min(11, fs * 0.85)}">${p.sub}</text>\n`;
+                const fs = Math.min(3.5, Math.max(2.0, rw / 12));
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 - 1.2).toFixed(3)}" class="label" font-size="${fs.toFixed(2)}">${p.name}</text>\n`;
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 + 2.2).toFixed(3)}" class="sub" font-size="${(fs * 0.85).toFixed(2)}">${p.sub}</text>\n`;
             } else {
-                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 + 4}" class="label" font-size="${Math.min(14, rw / 8)}">${p.sub}</text>\n`;
+                const fs = Math.min(4, Math.max(2.2, rw / 10));
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 + 1).toFixed(3)}" class="label" font-size="${fs.toFixed(2)}">${p.sub}</text>\n`;
             }
         });
         svg += `</g>\n<g id="Cut" ai:layer="true" ai:name="Cut">\n`;
         strokes.cuts.forEach(e => {
             const cls = e.isGlue ? 'cut-glue' : 'cut';
-            svg += `<line x1="${e.x1 * scale + margin}" y1="${e.y1 * scale + margin}" x2="${e.x2 * scale + margin}" y2="${e.y2 * scale + margin}" class="${cls}"/>\n`;
+            svg += `<line x1="${(e.x1 * toMm + margin).toFixed(3)}" y1="${(e.y1 * toMm + margin).toFixed(3)}" x2="${(e.x2 * toMm + margin).toFixed(3)}" y2="${(e.y2 * toMm + margin).toFixed(3)}" class="${cls}"/>\n`;
         });
         svg += `</g>\n<g id="Crease" ai:layer="true" ai:name="Crease">\n`;
         if (state.showCrease) {
             strokes.creases.forEach(e => {
-                svg += `<line x1="${e.x1 * scale + margin}" y1="${e.y1 * scale + margin}" x2="${e.x2 * scale + margin}" y2="${e.y2 * scale + margin}" class="crease"/>\n`;
+                svg += `<line x1="${(e.x1 * toMm + margin).toFixed(3)}" y1="${(e.y1 * toMm + margin).toFixed(3)}" x2="${(e.x2 * toMm + margin).toFixed(3)}" y2="${(e.y2 * toMm + margin).toFixed(3)}" class="crease"/>\n`;
             });
         }
         svg += `</g>\n<g id="Info" ai:layer="true" ai:name="Info">\n`;
-        svg += `<text x="${sw / 2}" y="${sh + 28}" class="label" font-size="12" fill="#444">L=${L} ${unitLabel()} | W=${W} ${unitLabel()} | H=${H} ${unitLabel()}${state.glueOn ? ` | Glue=${state.glue}` : ''}</text>\n`;
-        if (state.note) svg += `<text x="${sw / 2}" y="${sh + 48}" class="label" font-size="11" fill="#1a4972">📝 ${state.note}</text>\n`;
+        svg += `<text x="${(sw / 2).toFixed(3)}" y="${(sh + 6).toFixed(3)}" class="label" font-size="3.2" fill="#444">1:1 | L=${L} ${unitLabel()} | W=${W} ${unitLabel()} | H=${H} ${unitLabel()}${state.glueOn ? ` | Glue=${state.glue}` : ''}</text>\n`;
+        if (state.note) svg += `<text x="${(sw / 2).toFixed(3)}" y="${(sh + 11).toFixed(3)}" class="label" font-size="2.8" fill="#1a4972">📝 ${state.note}</text>\n`;
         svg += `</g></svg>`;
         downloadBlob(svg, 'image/svg+xml;charset=utf-8', `net-${L}x${W}x${H}.svg`);
-        showToast('🎨 SVG נוצר בהצלחה', 'success');
+        showToast('🎨 SVG נוצר ב-1:1 (מ״מ)', 'success');
     };
 
-    // ---------- AI (SVG with .ai) ----------
+    // ---------- AI (SVG with .ai extension, true 1:1 in mm) ----------
     window.downloadAI = function () {
-        // identical stroke plan to SVG, different extension
         readDesktop();
         const { L, W, H } = state;
         if (validate(L, W, H, state.glue).length) { showToast('⚠️ מידות לא תקינות', 'error'); return; }
         const geo = getGeo();
         const strokes = buildStrokePlan(geo);
-        const scale = BASE_SCALE;
-        const margin = 8;
-        const sw = geo.totalW * scale + margin * 2;
-        const sh = geo.totalH * scale + margin * 2;
-        const pad = 70;
-        let svg = `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+        const toMm = unitToMm();
+        const margin = 5; // mm
+        const footerH = 14; // mm
+        const sw = geo.totalW * toMm + margin * 2;
+        const sh = geo.totalH * toMm + margin * 2;
+        const strokeW = 0.35; // mm
+        const fillColor = { top: '#ffe6f0', wall: '#f9f9f9', bottom: '#e6f2ff', glue: '#fff3e0' };
+
+        // Illustrator-friendly SVG: inline styles, no CSS classes, clean text, proper AI comments
+        let svg = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Carton Layout Generator Pro -->
+<!-- Adobe Illustrator compatible SVG 1:1 mm -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
- width="${sw}" height="${sh + pad}" viewBox="0 0 ${sw} ${sh + pad}"
- xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" ai:version="27.0" style="background:white">
-<meta><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">Carton Net ${L}x${W}x${H}</dc:title></meta>
-<style>
-.fill-top{fill:#ffe6f0}.fill-wall{fill:#f9f9f9}.fill-bottom{fill:#e6f2ff}.fill-glue{fill:#fff3e0}
-.label{font-family:Arial,Helvetica,sans-serif;font-weight:bold;text-anchor:middle;fill:#111}
-.sub{font-family:Arial,Helvetica,sans-serif;text-anchor:middle;fill:#333}
-.cut{stroke:#111;stroke-width:1.25;fill:none;stroke-linecap:square;stroke-linejoin:miter}
-.cut-glue{stroke:#111;stroke-width:1.25;fill:none;stroke-dasharray:5 3;stroke-linecap:square}
-.crease{stroke:#c0392b;stroke-width:1.25;stroke-dasharray:6 4;fill:none;stroke-linecap:square}
-</style>
-<g id="Layer_Fills" ai:layer="true" ai:name="Fills">
+ version="1.1" x="0px" y="0px"
+ width="${sw.toFixed(3)}mm" height="${(sh + footerH).toFixed(3)}mm"
+ viewBox="0 0 ${sw.toFixed(3)} ${(sh + footerH).toFixed(3)}"
+ xml:space="preserve">
+<title>Carton Net ${L}x${W}x${H} 1:1</title>
 `;
-        const fillClass = { top: 'fill-top', wall: 'fill-wall', bottom: 'fill-bottom', glue: 'fill-glue' };
+        // Fills + labels
+        svg += `<g id="Fills">\n`;
         geo.panels.forEach(p => {
-            const rx = p.x * scale + margin, ry = p.y * scale + margin, rw = p.w * scale, rh = p.h * scale;
-            svg += `<rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" class="${fillClass[p.type] || 'fill-wall'}"/>\n`;
+            const rx = p.x * toMm + margin, ry = p.y * toMm + margin;
+            const rw = p.w * toMm, rh = p.h * toMm;
+            const fc = fillColor[p.type] || '#f9f9f9';
+            svg += `<rect x="${rx.toFixed(3)}" y="${ry.toFixed(3)}" width="${rw.toFixed(3)}" height="${rh.toFixed(3)}" fill="${fc}" stroke="none"/>\n`;
             if (!state.hideLabels) {
-                const fs = Math.min(13, rw / 9);
-                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 - 5}" class="label" font-size="${fs}">${p.name}</text>\n`;
-                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 + 12}" class="sub" font-size="${Math.min(11, fs * 0.85)}">${p.sub}</text>\n`;
+                const fs = Math.min(3.5, Math.max(2.0, rw / 12));
+                // Hebrew name – Illustrator handles Unicode when opened as SVG
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 - 1.2).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="${fs.toFixed(2)}" fill="#111111">${p.name}</text>\n`;
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 + 2.2).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${(fs * 0.85).toFixed(2)}" fill="#333333">${p.sub}</text>\n`;
             } else {
-                svg += `<text x="${rx + rw / 2}" y="${ry + rh / 2 + 4}" class="label" font-size="${Math.min(14, rw / 8)}">${p.sub}</text>\n`;
+                const fs = Math.min(4, Math.max(2.2, rw / 10));
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 + 1).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="${fs.toFixed(2)}" fill="#111111">${p.sub}</text>\n`;
             }
         });
-        svg += `</g><g id="Layer_Cut" ai:layer="true" ai:name="Cut">\n`;
+        svg += `</g>\n`;
+
+        // Cut layer
+        svg += `<g id="Cut">\n`;
         strokes.cuts.forEach(e => {
-            const cls = e.isGlue ? 'cut-glue' : 'cut';
-            svg += `<line x1="${e.x1 * scale + margin}" y1="${e.y1 * scale + margin}" x2="${e.x2 * scale + margin}" y2="${e.y2 * scale + margin}" class="${cls}"/>\n`;
+            const x1 = (e.x1 * toMm + margin).toFixed(3);
+            const y1 = (e.y1 * toMm + margin).toFixed(3);
+            const x2 = (e.x2 * toMm + margin).toFixed(3);
+            const y2 = (e.y2 * toMm + margin).toFixed(3);
+            const dash = e.isGlue ? ` stroke-dasharray="1.5,1"` : '';
+            svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" fill="none" stroke="#111111" stroke-width="${strokeW}" stroke-linecap="square" stroke-linejoin="miter"${dash}/>\n`;
         });
-        svg += `</g><g id="Layer_Crease" ai:layer="true" ai:name="Crease">\n`;
+        svg += `</g>\n`;
+
+        // Crease layer
+        svg += `<g id="Crease">\n`;
         if (state.showCrease) {
             strokes.creases.forEach(e => {
-                svg += `<line x1="${e.x1 * scale + margin}" y1="${e.y1 * scale + margin}" x2="${e.x2 * scale + margin}" y2="${e.y2 * scale + margin}" class="crease"/>\n`;
+                const x1 = (e.x1 * toMm + margin).toFixed(3);
+                const y1 = (e.y1 * toMm + margin).toFixed(3);
+                const x2 = (e.x2 * toMm + margin).toFixed(3);
+                const y2 = (e.y2 * toMm + margin).toFixed(3);
+                svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" fill="none" stroke="#c0392b" stroke-width="${strokeW}" stroke-dasharray="2,1.2" stroke-linecap="square"/>\n`;
             });
         }
-        svg += `</g><g id="Layer_Info" ai:layer="true" ai:name="Info">\n`;
-        svg += `<text x="${sw / 2}" y="${sh + 28}" class="label" font-size="12" fill="#444">L=${L} | W=${W} | H=${H}${state.glueOn ? ` | Glue=${state.glue}` : ''}</text>\n`;
-        if (state.note) svg += `<text x="${sw / 2}" y="${sh + 48}" class="label" font-size="11" fill="#1a4972">${state.note}</text>\n`;
-        svg += `</g></svg>`;
+        svg += `</g>\n`;
+
+        // Info
+        svg += `<g id="Info">\n`;
+        svg += `<text x="${(sw / 2).toFixed(3)}" y="${(sh + 6).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="3.2" fill="#444444">1:1 | L=${L} | W=${W} | H=${H}${state.glueOn ? ` | Glue=${state.glue}` : ''}</text>\n`;
+        if (state.note) {
+            const safe = state.note.replace(/[<>&]/g, '');
+            svg += `<text x="${(sw / 2).toFixed(3)}" y="${(sh + 11).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="2.8" fill="#1a4972">${safe}</text>\n`;
+        }
+        svg += `</g>\n</svg>`;
+
+        // Save as .ai – Illustrator opens clean SVG files with this extension reliably
         downloadBlob(svg, 'image/svg+xml;charset=utf-8', `net-${L}x${W}x${H}.ai`);
-        showToast('⭐ AI (SVG) נוצר – נפתח ב-Illustrator', 'success');
+        showToast('⭐ AI נוצר ב-1:1 – נפתח ב-Illustrator כ-SVG', 'success');
     };
 
-    // ---------- EPS (fixed coordinates + unique strokes) ----------
+    // ---------- EPS (true 1:1 – PostScript points, 1 mm = 72/25.4 pt) ----------
     window.downloadEPS = function () {
         readDesktop();
         const { L, W, H } = state;
         if (validate(L, W, H, state.glue).length) { showToast('⚠️ מידות לא תקינות', 'error'); return; }
         const geo = getGeo();
         const strokes = buildStrokePlan(geo);
-        const scale = BASE_SCALE;
-        const margin = 8;
+        const toMm = unitToMm();
+        const mmToPt = 72 / 25.4; // ≈ 2.834645669
+        const scale = toMm * mmToPt; // user-unit → points
+        const margin = 5 * mmToPt; // 5 mm in points
+        const footerH = 14 * mmToPt;
         const sw = geo.totalW * scale + margin * 2;
         const sh = geo.totalH * scale + margin * 2;
         function py(y) { return (geo.totalH - y) * scale + margin; }
         function px(x) { return x * scale + margin; }
+        const strokeW = 0.35 * mmToPt; // 0.35 mm in points
 
         let eps = `%!PS-Adobe-3.0 EPSF-3.0
-%%BoundingBox: 0 0 ${Math.ceil(sw)} ${Math.ceil(sh + 60)}
-%%Title: Carton Net ${L}x${W}x${H}
+%%BoundingBox: 0 0 ${Math.ceil(sw)} ${Math.ceil(sh + footerH)}
+%%HiResBoundingBox: 0 0 ${sw.toFixed(3)} ${(sh + footerH).toFixed(3)}
+%%Title: Carton Net ${L}x${W}x${H} 1:1
 %%Creator: Carton Layout Generator Pro
 %%CreationDate: ${new Date().toISOString()}
 %%LanguageLevel: 2
@@ -927,42 +972,40 @@
             bottom: [0.902, 0.949, 1],
             glue: [1, 0.953, 0.878]
         };
-        // fills only (no stroke on rects)
         geo.panels.forEach(p => {
             const rx = px(p.x);
             const ry = py(p.y + p.h);
             const rw = p.w * scale;
             const rh = p.h * scale;
             const c = rgb[p.type] || [1, 1, 1];
-            eps += `gsave ${c[0]} ${c[1]} ${c[2]} setrgbcolor ${rx} ${ry} ${rw} ${rh} rect fill grestore\n`;
+            eps += `gsave ${c[0]} ${c[1]} ${c[2]} setrgbcolor ${rx.toFixed(3)} ${ry.toFixed(3)} ${rw.toFixed(3)} ${rh.toFixed(3)} rect fill grestore\n`;
             const label = p.type === 'glue' ? 'GLUE' : p.type === 'top' ? 'TOP' : p.type === 'bottom' ? 'BOT' : 'WALL';
-            const fs = Math.min(11, rw / 10);
-            eps += `0 setgray /Helvetica findfont ${fs} scalefont setfont\n`;
-            eps += `${rx + rw / 2} ${ry + rh / 2 + 2} moveto (${label}) dup stringwidth pop -2 div 0 rmoveto show\n`;
+            const fs = Math.min(9, Math.max(5, rw / 12));
+            eps += `0 setgray /Helvetica findfont ${fs.toFixed(2)} scalefont setfont\n`;
+            eps += `${(rx + rw / 2).toFixed(3)} ${(ry + rh / 2).toFixed(3)} moveto (${label}) dup stringwidth pop -2 div 0 rmoveto show\n`;
         });
-        // cut lines – uniform width
-        eps += `0 setgray 1.25 setlinewidth [] 0 setdash\n`;
+        eps += `0 setgray ${strokeW.toFixed(3)} setlinewidth [] 0 setdash\n`;
         strokes.cuts.forEach(e => {
-            if (e.isGlue) eps += `[5 3] 0 setdash\n`;
-            eps += `${px(e.x1)} ${py(e.y1)} moveto ${px(e.x2)} ${py(e.y2)} lineto stroke\n`;
+            if (e.isGlue) eps += `[1.5 1] 0 setdash\n`;
+            eps += `${px(e.x1).toFixed(3)} ${py(e.y1).toFixed(3)} moveto ${px(e.x2).toFixed(3)} ${py(e.y2).toFixed(3)} lineto stroke\n`;
             if (e.isGlue) eps += `[] 0 setdash\n`;
         });
         if (state.showCrease) {
-            eps += `0.75 0.15 0.1 setrgbcolor 1.25 setlinewidth [6 4] 0 setdash\n`;
+            eps += `0.75 0.15 0.1 setrgbcolor ${strokeW.toFixed(3)} setlinewidth [2 1.2] 0 setdash\n`;
             strokes.creases.forEach(e => {
-                eps += `${px(e.x1)} ${py(e.y1)} moveto ${px(e.x2)} ${py(e.y2)} lineto stroke\n`;
+                eps += `${px(e.x1).toFixed(3)} ${py(e.y1).toFixed(3)} moveto ${px(e.x2).toFixed(3)} ${py(e.y2).toFixed(3)} lineto stroke\n`;
             });
             eps += `[] 0 setdash\n`;
         }
-        eps += `0 setgray /Helvetica findfont 10 scalefont setfont\n`;
-        eps += `${sw / 2} ${sh + 25} moveto (L=${L} W=${W} H=${H}${state.glueOn ? ' Glue=' + state.glue : ''}) dup stringwidth pop -2 div 0 rmoveto show\n`;
+        eps += `0 setgray /Helvetica findfont 8 scalefont setfont\n`;
+        eps += `${(sw / 2).toFixed(3)} ${(sh + 8).toFixed(3)} moveto (1:1 | L=${L} W=${W} H=${H}${state.glueOn ? ' Glue=' + state.glue : ''}) dup stringwidth pop -2 div 0 rmoveto show\n`;
         if (state.note) {
             const safe = state.note.replace(/[^\x20-\x7E]/g, '?');
-            eps += `${sw / 2} ${sh + 42} moveto (${safe}) dup stringwidth pop -2 div 0 rmoveto show\n`;
+            eps += `${(sw / 2).toFixed(3)} ${(sh + 18).toFixed(3)} moveto (${safe}) dup stringwidth pop -2 div 0 rmoveto show\n`;
         }
         eps += `showpage\n`;
         downloadBlob(eps, 'application/postscript;charset=utf-8', `net-${L}x${W}x${H}.eps`);
-        showToast('✨ EPS נוצר בהצלחה', 'success');
+        showToast('✨ EPS נוצר ב-1:1', 'success');
     };
 
     // ---------- DXF ----------
