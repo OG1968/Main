@@ -35,9 +35,12 @@
             flex-wrap: wrap;
             justify-content: center;
             z-index: 1;
-            direction: rtl;
         }
-        .controls { direction: rtl; }
+        /* Labels L W H Glue to the LEFT of inputs; buttons on the left side */
+        .controls { direction: ltr; }
+        .actions { direction: rtl; }
+        .controls .btn-reset { order: -2; }
+        .controls .btn-update { order: -1; }
         .controls label, .actions label {
             font-weight: 600;
             font-size: 0.82rem;
@@ -46,6 +49,7 @@
             align-items: center;
             gap: 4px;
         }
+        .controls label { margin-inline-end: 2px; }
         .controls input[type="number"], .controls select, .note-row input {
             width: 68px;
             padding: 6px 8px;
@@ -298,6 +302,7 @@
             gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 10px;
+            direction: ltr;
         }
         .mobile-menu-panel .control-row label { font-weight: 600; font-size: 0.88rem; min-width: 28px; }
         .mobile-menu-panel .control-row input[type="number"],
@@ -507,12 +512,8 @@
     function fmt(n) {
         return (Math.round(n * 100) / 100).toString();
     }
-    /** Dimension string: plain ASCII for clean exports (SVG/AI/PDF/EPS/DXF) */
+    /** Keep number×number in visual LTR order even inside RTL page */
     function dim(a, b) {
-        return fmt(a) + 'x' + fmt(b);
-    }
-    /** For on-screen RTL display only */
-    function dimScreen(a, b) {
         return '\u2066' + fmt(a) + '\u00d7' + fmt(b) + '\u2069';
     }
 
@@ -867,75 +868,55 @@
         const sw = geo.totalW * toMm + margin * 2;
         const sh = geo.totalH * toMm + margin * 2;
         const strokeW = 0.35; // mm
-        const fillColor = { top: '#ffe6f0', wall: '#f9f9f9', bottom: '#e6f2ff', glue: '#fff3e0' };
 
-        // Illustrator-friendly SVG: inline styles, no CSS classes, clean text, proper AI comments
-        let svg = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Generator: Carton Layout Generator Pro -->
-<!-- Adobe Illustrator compatible SVG 1:1 mm -->
+        let svg = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
- version="1.1" x="0px" y="0px"
  width="${sw.toFixed(3)}mm" height="${(sh + footerH).toFixed(3)}mm"
  viewBox="0 0 ${sw.toFixed(3)} ${(sh + footerH).toFixed(3)}"
- xml:space="preserve">
-<title>Carton Net ${L}x${W}x${H} 1:1</title>
+ xmlns:ai="http://ns.adobe.com/AdobeIllustrator/10.0/" ai:version="27.0" style="background:white">
+<meta><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">Carton Net ${L}x${W}x${H} 1:1</dc:title></meta>
+<style>
+.fill-top{fill:#ffe6f0}.fill-wall{fill:#f9f9f9}.fill-bottom{fill:#e6f2ff}.fill-glue{fill:#fff3e0}
+.label{font-family:Arial,Helvetica,sans-serif;font-weight:bold;text-anchor:middle;fill:#111}
+.sub{font-family:Arial,Helvetica,sans-serif;text-anchor:middle;fill:#333}
+.cut{stroke:#111;stroke-width:${strokeW};fill:none;stroke-linecap:square;stroke-linejoin:miter}
+.cut-glue{stroke:#111;stroke-width:${strokeW};fill:none;stroke-dasharray:1.5 1;stroke-linecap:square}
+.crease{stroke:#c0392b;stroke-width:${strokeW};stroke-dasharray:2 1.2;fill:none;stroke-linecap:square}
+</style>
+<g id="Layer_Fills" ai:layer="true" ai:name="Fills">
 `;
-        // Fills + labels
-        svg += `<g id="Fills">\n`;
+        const fillClass = { top: 'fill-top', wall: 'fill-wall', bottom: 'fill-bottom', glue: 'fill-glue' };
         geo.panels.forEach(p => {
             const rx = p.x * toMm + margin, ry = p.y * toMm + margin;
             const rw = p.w * toMm, rh = p.h * toMm;
-            const fc = fillColor[p.type] || '#f9f9f9';
-            svg += `<rect x="${rx.toFixed(3)}" y="${ry.toFixed(3)}" width="${rw.toFixed(3)}" height="${rh.toFixed(3)}" fill="${fc}" stroke="none"/>\n`;
+            svg += `<rect x="${rx.toFixed(3)}" y="${ry.toFixed(3)}" width="${rw.toFixed(3)}" height="${rh.toFixed(3)}" class="${fillClass[p.type] || 'fill-wall'}"/>\n`;
             if (!state.hideLabels) {
                 const fs = Math.min(3.5, Math.max(2.0, rw / 12));
-                // Hebrew name – Illustrator handles Unicode when opened as SVG
-                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 - 1.2).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="${fs.toFixed(2)}" fill="#111111">${p.name}</text>\n`;
-                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 + 2.2).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${(fs * 0.85).toFixed(2)}" fill="#333333">${p.sub}</text>\n`;
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 - 1.2).toFixed(3)}" class="label" font-size="${fs.toFixed(2)}">${p.name}</text>\n`;
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 + 2.2).toFixed(3)}" class="sub" font-size="${(fs * 0.85).toFixed(2)}">${p.sub}</text>\n`;
             } else {
                 const fs = Math.min(4, Math.max(2.2, rw / 10));
-                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 + 1).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="${fs.toFixed(2)}" fill="#111111">${p.sub}</text>\n`;
+                svg += `<text x="${(rx + rw / 2).toFixed(3)}" y="${(ry + rh / 2 + 1).toFixed(3)}" class="label" font-size="${fs.toFixed(2)}">${p.sub}</text>\n`;
             }
         });
-        svg += `</g>\n`;
-
-        // Cut layer
-        svg += `<g id="Cut">\n`;
+        svg += `</g><g id="Layer_Cut" ai:layer="true" ai:name="Cut">\n`;
         strokes.cuts.forEach(e => {
-            const x1 = (e.x1 * toMm + margin).toFixed(3);
-            const y1 = (e.y1 * toMm + margin).toFixed(3);
-            const x2 = (e.x2 * toMm + margin).toFixed(3);
-            const y2 = (e.y2 * toMm + margin).toFixed(3);
-            const dash = e.isGlue ? ` stroke-dasharray="1.5,1"` : '';
-            svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" fill="none" stroke="#111111" stroke-width="${strokeW}" stroke-linecap="square" stroke-linejoin="miter"${dash}/>\n`;
+            const cls = e.isGlue ? 'cut-glue' : 'cut';
+            svg += `<line x1="${(e.x1 * toMm + margin).toFixed(3)}" y1="${(e.y1 * toMm + margin).toFixed(3)}" x2="${(e.x2 * toMm + margin).toFixed(3)}" y2="${(e.y2 * toMm + margin).toFixed(3)}" class="${cls}"/>\n`;
         });
-        svg += `</g>\n`;
-
-        // Crease layer
-        svg += `<g id="Crease">\n`;
+        svg += `</g><g id="Layer_Crease" ai:layer="true" ai:name="Crease">\n`;
         if (state.showCrease) {
             strokes.creases.forEach(e => {
-                const x1 = (e.x1 * toMm + margin).toFixed(3);
-                const y1 = (e.y1 * toMm + margin).toFixed(3);
-                const x2 = (e.x2 * toMm + margin).toFixed(3);
-                const y2 = (e.y2 * toMm + margin).toFixed(3);
-                svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" fill="none" stroke="#c0392b" stroke-width="${strokeW}" stroke-dasharray="2,1.2" stroke-linecap="square"/>\n`;
+                svg += `<line x1="${(e.x1 * toMm + margin).toFixed(3)}" y1="${(e.y1 * toMm + margin).toFixed(3)}" x2="${(e.x2 * toMm + margin).toFixed(3)}" y2="${(e.y2 * toMm + margin).toFixed(3)}" class="crease"/>\n`;
             });
         }
-        svg += `</g>\n`;
-
-        // Info
-        svg += `<g id="Info">\n`;
-        svg += `<text x="${(sw / 2).toFixed(3)}" y="${(sh + 6).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="bold" font-size="3.2" fill="#444444">1:1 | L=${L} | W=${W} | H=${H}${state.glueOn ? ` | Glue=${state.glue}` : ''}</text>\n`;
-        if (state.note) {
-            const safe = state.note.replace(/[<>&]/g, '');
-            svg += `<text x="${(sw / 2).toFixed(3)}" y="${(sh + 11).toFixed(3)}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="2.8" fill="#1a4972">${safe}</text>\n`;
-        }
-        svg += `</g>\n</svg>`;
-
-        // Save as .ai – Illustrator opens clean SVG files with this extension reliably
+        svg += `</g><g id="Layer_Info" ai:layer="true" ai:name="Info">\n`;
+        svg += `<text x="${(sw / 2).toFixed(3)}" y="${(sh + 6).toFixed(3)}" class="label" font-size="3.2" fill="#444">1:1 | L=${L} | W=${W} | H=${H}${state.glueOn ? ` | Glue=${state.glue}` : ''}</text>\n`;
+        if (state.note) svg += `<text x="${(sw / 2).toFixed(3)}" y="${(sh + 11).toFixed(3)}" class="label" font-size="2.8" fill="#1a4972">${state.note}</text>\n`;
+        svg += `</g></svg>`;
         downloadBlob(svg, 'image/svg+xml;charset=utf-8', `net-${L}x${W}x${H}.ai`);
-        showToast('⭐ AI נוצר ב-1:1 – נפתח ב-Illustrator כ-SVG', 'success');
+        showToast('⭐ AI נוצר ב-1:1 (מ״מ) – נפתח ב-Illustrator', 'success');
     };
 
     // ---------- EPS (true 1:1 – PostScript points, 1 mm = 72/25.4 pt) ----------
