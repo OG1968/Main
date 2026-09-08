@@ -35,9 +35,23 @@
             flex-wrap: wrap;
             justify-content: center;
             z-index: 1;
-            direction: rtl;
         }
-        .controls { direction: rtl; }
+        .controls { direction: ltr; }
+        .actions { direction: rtl; }
+        .field-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            direction: ltr;
+            flex-shrink: 0;
+        }
+        .field-group label {
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: #1e2b3c;
+            white-space: nowrap;
+            margin: 0;
+        }
         .controls label, .actions label {
             font-weight: 600;
             font-size: 0.82rem;
@@ -46,7 +60,8 @@
             align-items: center;
             gap: 4px;
         }
-        .controls input[type="number"], .controls select, .note-row input {
+        .controls input[type="number"], .controls select, .note-row input,
+        .field-group input[type="number"], .field-group select {
             width: 68px;
             padding: 6px 8px;
             font-size: 0.85rem;
@@ -58,7 +73,7 @@
             color: #0b1a2b;
             transition: all 0.2s;
         }
-        .controls select { width: auto; min-width: 90px; padding: 6px 12px; }
+        .controls select, .field-group select { width: auto; min-width: 90px; padding: 6px 12px; }
         .controls input:focus, .note-row input:focus {
             border-color: #4a7bb5;
             box-shadow: 0 0 0 4px rgba(74,123,181,0.15);
@@ -295,15 +310,30 @@
         .mobile-menu-panel .control-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
             margin-bottom: 10px;
+            direction: ltr;
         }
-        .mobile-menu-panel .control-row label { font-weight: 600; font-size: 0.88rem; min-width: 28px; }
-        .mobile-menu-panel .control-row input[type="number"],
-        .mobile-menu-panel .control-row select {
+        .mobile-menu-panel .field-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            direction: ltr;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .mobile-menu-panel .field-group label {
+            font-weight: 600;
+            font-size: 0.88rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .mobile-menu-panel .field-group input[type="number"],
+        .mobile-menu-panel .field-group select {
             flex: 1;
-            min-width: 56px;
+            min-width: 48px;
+            width: auto;
             padding: 8px 10px;
             border: 2px solid rgba(0,0,0,0.1);
             border-radius: 12px;
@@ -383,18 +413,19 @@
             <button class="panel-close" id="mobileMenuClose">✕</button>
         </div>
         <div class="control-row">
-            <label>L</label><input type="number" id="mL" value="62" step="0.1" min="0.1" max="999">
-            <label>W</label><input type="number" id="mW" value="46" step="0.1" min="0.1" max="999">
-            <label>H</label><input type="number" id="mH" value="88.5" step="0.1" min="0.1" max="999">
+            <div class="field-group"><label>L</label><input type="number" id="mL" value="62" step="0.1" min="0.1" max="999"></div>
+            <div class="field-group"><label>W</label><input type="number" id="mW" value="46" step="0.1" min="0.1" max="999"></div>
+            <div class="field-group"><label>H</label><input type="number" id="mH" value="88.5" step="0.1" min="0.1" max="999"></div>
         </div>
         <div class="control-row">
-            <label>Glue</label><input type="number" id="mGlue" value="3" step="0.1" min="0" max="50">
-            <label>יח׳</label>
-            <select id="mUnit">
-                <option value="cm" selected>ס״מ</option>
-                <option value="mm">מ״מ</option>
-                <option value="in">אינץ׳</option>
-            </select>
+            <div class="field-group"><label>Glue</label><input type="number" id="mGlue" value="3" step="0.1" min="0" max="50"></div>
+            <div class="field-group"><label>יח׳</label>
+                <select id="mUnit">
+                    <option value="cm" selected>ס״מ</option>
+                    <option value="mm">מ״מ</option>
+                    <option value="in">אינץ׳</option>
+                </select>
+            </div>
         </div>
         <div class="toggle-row"><label>הסתר כותרות</label><input type="checkbox" id="mHide"></div>
         <div class="toggle-row"><label>הצג קווי קיפול</label><input type="checkbox" id="mCrease" checked></div>
@@ -419,22 +450,19 @@
     </div>
 
     <div class="controls">
-        <label for="inputL">L</label>
-        <input type="number" id="inputL" value="62" step="0.1" min="0.1" max="999" title="אורך">
-        <label for="inputW">W</label>
-        <input type="number" id="inputW" value="46" step="0.1" min="0.1" max="999" title="רוחב">
-        <label for="inputH">H</label>
-        <input type="number" id="inputH" value="88.5" step="0.1" min="0.1" max="999" title="גובה">
-        <label for="inputGlue">Glue</label>
-        <input type="number" id="inputGlue" value="3" step="0.1" min="0" max="50" title="רוחב דשקי הדבקה">
-        <label for="unitSelect">יח׳</label>
-        <select id="unitSelect">
-            <option value="cm" selected>ס״מ</option>
-            <option value="mm">מ״מ</option>
-            <option value="in">אינץ׳</option>
-        </select>
         <button class="btn btn-reset" onclick="resetAll()">↺ איפוס</button>
         <button class="btn btn-update" onclick="updateFromDesktop()">🔄 עדכן</button>
+        <div class="field-group"><label for="inputL">L</label><input type="number" id="inputL" value="62" step="0.1" min="0.1" max="999" title="אורך"></div>
+        <div class="field-group"><label for="inputW">W</label><input type="number" id="inputW" value="46" step="0.1" min="0.1" max="999" title="רוחב"></div>
+        <div class="field-group"><label for="inputH">H</label><input type="number" id="inputH" value="88.5" step="0.1" min="0.1" max="999" title="גובה"></div>
+        <div class="field-group"><label for="inputGlue">Glue</label><input type="number" id="inputGlue" value="3" step="0.1" min="0" max="50" title="רוחב דשקי הדבקה"></div>
+        <div class="field-group"><label for="unitSelect">יח׳</label>
+            <select id="unitSelect">
+                <option value="cm" selected>ס״מ</option>
+                <option value="mm">מ״מ</option>
+                <option value="in">אינץ׳</option>
+            </select>
+        </div>
     </div>
 
     <div class="actions">
@@ -508,8 +536,9 @@
         return (Math.round(n * 100) / 100).toString();
     }
     /** Keep number×number in visual LTR order even inside RTL page */
+    /** Clean ASCII dimensions for screen + all exports (no Unicode marks) */
     function dim(a, b) {
-        return '\u2066' + fmt(a) + '\u00d7' + fmt(b) + '\u2069';
+        return fmt(a) + 'x' + fmt(b);
     }
 
     // ---------- geometry (single source of truth) ----------
