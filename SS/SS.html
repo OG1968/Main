@@ -1356,6 +1356,27 @@
                 return `status-${status}`;
             }
 
+            // הדבקה כטקסט נקי בלבד – מונע ירושת צבע רקע/סגנונות משורה צבעונית
+            function forcePlainTextPaste(e) {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                if (text == null) return;
+                const cleaned = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                // שמירה על מיקום הסמן והחלפת הבחירה בטקסט נקי
+                if (document.queryCommandSupported && document.queryCommandSupported('insertText')) {
+                    document.execCommand('insertText', false, cleaned);
+                } else {
+                    const sel = window.getSelection();
+                    if (!sel.rangeCount) return;
+                    const range = sel.getRangeAt(0);
+                    range.deleteContents();
+                    range.insertNode(document.createTextNode(cleaned));
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+
             function formatDateForDisplay(dateStr) {
                 if (!dateStr || dateStr === 'x' || dateStr === '') return '—';
                 const str = String(dateStr);
@@ -1595,6 +1616,8 @@
                                 this.blur();
                             }
                         });
+                        // הדבקה כטקסט נקי בלבד – בלי צבע רקע / HTML משורה אחרת
+                        td.addEventListener('paste', forcePlainTextPaste);
                         tr.appendChild(td);
                     });
 
@@ -1650,6 +1673,8 @@
                             this.blur();
                         }
                     });
+                    // הדבקה כטקסט נקי בלבד גם בעמודת הערה
+                    tdNote.addEventListener('paste', forcePlainTextPaste);
                     tr.appendChild(tdNote);
 
                     const tdActions = document.createElement('td');
