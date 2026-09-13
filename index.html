@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="images/logo_white.png" />
+    <meta
+      name="description"
+      content="Free online tools: recipe book, currency converter, file encryption, calorie calculator, clothing size converter, galleries, image editor, bulk rename, online games."
+    />
+    <title data-i18n="pageTitle">אפליקציות ווב</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@800&family=Varela+Round&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-color: #3b44dd;
+        --secondary-color: #418056;
+        --light-color: #ffd876;
+        --dark-color: #24282c;
+        --accent-color: #ff6b6b;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+        --page-bg: #ffeb92;
+        --card-bg: #ffffff;
+        --text-muted: #666666;
+        --subtitle-color: #333333;
+        --filter-bg: #eeeeee;
+        --filter-text: #24282c;
+        --modal-bg: #ffffff;
+      }
+
+      html[data-theme="dark"] {
+        --page-bg: #1a1d24;
+        --card-bg: #2a3038;
+        --dark-color: #f2f4f7;
+        --text-muted: #c5cad1;
+        --subtitle-color: #d7dbe1;
+        --filter-bg: #3a424c;
+        --filter-text: #f2f4f7;
+        --modal-bg: #2a3038;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--dark-color);
+        line-height: 1.2;
+        padding-bottom: 2rem;
+        overflow-x: hidden;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      header {
+        text-align: center;
+        animation: fadeIn 1s ease-in-out;
+        position: relative;
+        overflow: visible;
+        padding-top: 8px;
+      }
+
+      .top-controls {
+        position: absolute;
+        top: 8px;
+        left: 0;
+        right: auto;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.45rem;
+        z-index: 5;
+        direction: ltr;
+      }
+
+      .lang-btn,
+      .theme-btn {
+        border: 2px solid rgba(0, 0, 0, 0.08);
+        background: var(--card-bg);
+        color: var(--dark-color);
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.3rem;
+        line-height: 1;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .lang-btn:hover,
+      .theme-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .lang-btn svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        border-radius: 50%;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+        margin-top: 50px;
+        font-family: "Heebo", sans-serif;
+        text-shadow:
+          2px 2px 0px rgba(0, 0, 0, 0.1),
+          4px 4px 0px rgba(78, 84, 200, 0.2),
+          6px 6px 0px rgba(78, 84, 200, 0.1);
+        margin-bottom: 1.5rem;
+        position: relative;
+        display: inline-block;
+        letter-spacing: -1px;
+        line-height: 1.1;
+        text-transform: uppercase;
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        padding: 0 10px;
+        background-size: 200% auto;
+      }
+
+      h1::after {
+        content: "";
+        position: absolute;
+        width: 80%;
+        height: 6px;
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--accent-color),
+          var(--secondary-color)
+        );
+        bottom: -15px;
+        left: 10%;
+        border-radius: 5px;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+        transform: skewX(-15deg);
+        animation: pulse 2s ease infinite;
+      }
+
+      p.subtitle {
+        font-size: 1.1rem;
+        color: var(--subtitle-color);
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 0.01em;
+      }
+
+      .filters {
+        margin: 1.5rem 0;
+        text-align: center;
+      }
+
+      .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.2rem;
+        margin-top: 1rem;
+      }
+
+      .filter-btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        background: var(--filter-bg);
+        color: var(--filter-text);
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .filter-btn.active {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .filter-btn:hover {
+        background: #ff7575;
+        color: white;
+      }
+
+      .apps-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-top: 1rem;
+      }
+
+      .app-card {
+        cursor: pointer;
+        background: var(--card-bg);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      .app-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+      }
+
+      .app-icon {
+        width: 100%;
+        height: 160px;
+        background: linear-gradient(
+          to bottom right,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .app-icon::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0.3) 0%,
+          rgba(255, 255, 255, 0) 50%
+        );
+        transform: rotate(30deg);
+        transition: all 0.5s ease;
+        pointer-events: none;
+      }
+
+      .app-card:hover .app-icon::after {
+        left: 100%;
+      }
+
+      .app-info {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-info h3 {
+        margin-bottom: 0.5rem;
+        color: var(--dark-color);
+      }
+
+      .app-info p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        flex-grow: 1;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 0.6rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn:hover {
+        background: var(--accent-color);
+        transform: translateY(-2px);
+      }
+
+      .btn i {
+        margin-inline-start: 5px;
+      }
+
+      footer {
+        width: 100%;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        color: white;
+        margin-top: 1rem;
+        text-align: center;
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: var(--shadow);
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        inset-inline-end: 20px;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      .about-card {
+        margin-top: 2rem;
+      }
+
+      .about-card .app-info {
+        padding-bottom: 2rem;
+      }
+
+      .about-card .app-icon {
+        height: 120px;
+      }
+
+      .about-card .btn {
+        padding: 0.8rem 1.5rem;
+      }
+
+      .app-preview {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .preview-content {
+        background: var(--modal-bg);
+        padding: 2rem;
+        border-radius: 10px;
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+      }
+
+      .close-preview {
+        position: absolute;
+        top: 10px;
+        inset-inline-start: 10px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--primary-color);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 1rem;
+        }
+        header {
+          padding-top: 52px;
+        }
+        h1 {
+          margin-top: 0.4rem;
+          font-size: 1.55rem;
+        }
+        .top-controls {
+          top: 4px;
+        }
+        .lang-btn,
+        .theme-btn {
+          width: 38px;
+          height: 38px;
+          min-width: 38px;
+          font-size: 1.15rem;
+        }
+        .apps-grid {
+          gap: 1rem;
+        }
+        .app-icon {
+          height: 120px;
+          font-size: 2.5rem;
+        }
+        .app-info {
+          padding: 1rem;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .apps-grid {
+          gap: 0.5rem;
+        }
+        .app-icon {
+          height: 100px;
+        }
+      }
+
+      #exit-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        display: none;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #exit-modal-content {
+        background-color: var(--modal-bg);
+        color: var(--dark-color);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        max-width: 80%;
+        border: 1px solid var(--primary-color);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      #exit-modal h3 {
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+
+      #exit-modal button {
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin: 0 5px;
+        cursor: pointer;
+      }
+
+      #confirm-exit {
+        background-color: #ff4444;
+        color: white;
+      }
+
+      #cancel-exit {
+        background-color: var(--primary-color);
+        color: white;
+      }
+    </style>
+  </head>
+
+  <script
+    async
+    src="https://www.googletagmanager.com/gtag/js?id=G-WLGJD4BXBT"
+  ></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
+    gtag("config", "G-WLGJD4BXBT");
+  </script>
+
+  <body>
+    <div class="container">
+      <header>
+        <div class="top-controls">
+          <button type="button" class="lang-btn" id="langToggle" title="English" aria-label="English"></button>
+          <button type="button" class="theme-btn" id="themeToggle" title="Dark" aria-label="Dark">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+        </div>
+        <h1 data-i18n="mainTitle">מרכז ה WebApp שלנו</h1>
+        <p class="subtitle" data-i18n="subtitle">
+          גלה את הכלים המקוונים שלנו הזמינים ישירות מהדפדפן חינם וללא צורך
+          בהורדה !
+        </p>
+      </header>
+
+      <div class="filters">
+        <div class="category-filters">
+          <button class="filter-btn active" data-category="all" data-i18n="catAll">הצג הכל</button>
+          <button class="filter-btn" data-category="Lifestyle" data-i18n="catLifestyle">לייף סטייל</button>
+          <button class="filter-btn" data-category="finance" data-i18n="catFinance">פיננסי</button>
+          <button class="filter-btn" data-category="health" data-i18n="catHealth">בריאות</button>
+          <button class="filter-btn" data-category="Productive" data-i18n="catProductive">פרודוקטיביות</button>
+          <button class="filter-btn" data-category="free_time" data-i18n="catLeisure">פנאי</button>
+          <button class="filter-btn" data-category="private" data-i18n="catPrivate">פרטי</button>
+          <button class="filter-btn" data-category="about" data-i18n="catAbout">אודותנו</button>
+        </div>
+      </div>
+
+      <div class="apps-grid">
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon"><i class="fas fa-book"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app1Title">חוברת מתכונים</h3>
+            <p data-i18n="app1Desc">ארגן את המתכונים האהובים עליך בצורה יעילה ושתף אותם עם חברים.</p>
+            <a href="CB.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="finance">
+          <div class="app-icon"><i class="fa-solid fa-calculator"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app2Title">מחשבון המרות</h3>
+            <p data-i18n="app2Desc">המרת מטבעות בשער עדכני, מידות מרחקים, משקלים, טמפרטורה, נפח, שטח, מהירות.</p>
+            <a href="UC.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="health">
+          <div class="app-icon"><i class="fa-solid fa-utensils"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app3Title">מחשבון קלורי</h3>
+            <p data-i18n="app3Desc">עקוב אחר הערך הקלורי, הויטמינים, מינרלים ערך גלוקימי ומדד השובע של כל מה שבחרת לאכול לבחירות נבונות יותר.</p>
+            <a href="CC.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon"><i class="fas fa-shirt"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app4Title">ממיר המידות לביגוד והנעלה</h3>
+            <p data-i18n="app4Desc">ראית דיל מעולה ברשת, אבל המידה אמריקאית, בריטית אסייאתית ואתה לא בטוח? הממיר הזה עבורך.</p>
+            <a href="OC.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app5Title">הצ'קליסט האולטימטיבי</h3>
+            <p data-i18n="app5Desc">יוצאים לחו"ל או קמפינג בארץ, או סתם חוששים לשכוח לעשות משהו? הצ'קליסט הזה יעשה לכם סדר בראש.</p>
+            <a href="TC.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-pencil"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app6Title">עורך טקסטים מתקדם</h3>
+            <p data-i18n="app6Desc">אז העתקת והדבקת טקסט , אבל הוא מבולבל אותיות הפוכות ומילים בסדר הפוך , בקיצור לא קריא? אל דאגה אנחנו כאן לעזור...</p>
+            <a href="TE.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon"><i class="fa-regular fa-images"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app7Title">יוצר גלריית שקופיות</h3>
+            <p data-i18n="app7Desc">צור גלריית שיקופיות עם מיטב התמונות מוכנות לשליחה כקובץ דפדפן עצמאי רק לפתוח ולהנות...</p>
+            <a href="SG.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fa-regular fa-images"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon"><i class="fa-solid fa-camera"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app8Title">יוצר גלריית קרוסלה</h3>
+            <p data-i18n="app8Desc">צור קרוסלה מקסימה של 8 מתמונותיך, המשפחה תאהב את זה.</p>
+            <a href="CG.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon"><i class="fa-solid fa-image"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app9Title">יוצר גלריית אקורדיון</h3>
+            <p data-i18n="app9Desc">יש לך תמונות של ארוע שאתה רוצה לשלוח באופן מרשים לחברים או משפחה נסה את הכלי הזה.</p>
+            <a href="GC.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon"><i class="fa-solid fa-camera-retro"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app10Title">יוצר גלריית תיאור</h3>
+            <p data-i18n="app10Desc">אם יש לך תמונות שדורשות תיאור/הסבר/סיפור בגלריה זו תוכל להוסיף זאת.</p>
+            <a href="PS.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-lock"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app11Title">מצפין קבצים</h3>
+            <p data-i18n="app11Desc">יש לך כמה מסמכים שממש לא בא לך שיחשפו בפני מישהו שחיטט לך במחשב? הצפן קבצים בתוך תמונה של יקירך , רק אתה תדע שהקבצים שם וכיצד לחלצם.</p>
+            <a href="CF.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-eye-slash"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app12Title">מצפין טקסטים</h3>
+            <p data-i18n="app12Desc">כותב שירה בסתר ? סתם בא לך להצפין טקסטים שאף עין בלתי מורשית לא תראה? הישום הזה יעשה זאת בשבילך.</p>
+            <a href="CT.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app13Title">מה קרוב אלי</h3>
+            <p data-i18n="app13Desc">אז אתה בטיול בחו"ל ויש לא מעט מקומות שאתה רוצה לראות, מסעדות לבקר וכ"ו, ולא מתחשק לך ללכת במסלולים מעגליים או בזיג זג, הפתרון פה.</p>
+            <a href="TP.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-images"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app14Title">עיבוד תמונות</h3>
+            <p data-i18n="app14Desc">התמונה כבדה מדי בגודל ? לא בפרספקטיבה הרצויה או בזוית הלא נכונה, הכלי הזה יעשה את התיקונים עבורך.</p>
+            <a href="IE.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Lifestyle">
+          <div class="app-icon"><i class="fa-solid fa-film"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app15Title">יוצר מצגות</h3>
+            <p data-i18n="app15Desc">אתה רוצה להכין מצגת של תמונות ארועי אבל לא בטוח שלנמענים יש את פאוורפוינט של מיקרוסופט הכלי הזה בשבילך.</p>
+            <a href="SS.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-file-pen"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app16Title">שינוי שמות קבצים</h3>
+            <p data-i18n="app16Desc">יש לכם תיקיה מלאה בקבצים ודרוש לכם שינוי שם קבצים עם מאפיין מספרי רץ או תאריך ואפילו גם וגם, הכלי הזה עודה את העבודה .</p>
+            <a href="FR.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="health">
+          <div class="app-icon"><i class="fa-solid fa-person-walking"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app17Title">ספידומטר GPS</h3>
+            <p data-i18n="app17Desc">צא להליכה , ריצה או אופניים ועקוב אחר הנתונים , מרחק , מהירות ממוצעת ומהירות מירבית</p>
+            <a href="GP.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M7 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+              <path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+              <path d="M9.15 14.85l8.85 -10.85" />
+              <path d="M6 4l8.85 10.85" />
+            </svg>
+          </div>
+          <div class="app-info">
+            <h3 data-i18n="app18Title">אבן נייר ומספריים</h3>
+            <p data-i18n="app18Desc">משחק הילדות אבן נייר ומספריים במשחק מול המחשב.</p>
+            <a href="RPS/RPS.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon"><i class="fa-solid fa-xmark"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app19Title">איקס עיגול</h3>
+            <p data-i18n="app19Desc">משחק הילדות איקס עיגול בגירסת אונליין המשחק מול המחשב.</p>
+            <a href="TTT.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="80"
+              height="80"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-spade"
+              aria-hidden="true"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M12 3l4.919 4.5c.61 .587 1.177 1.177 1.703 1.771a5.527 5.527 0 0 1 .264 6.979c-1.18 1.56 -3.338 1.92 -4.886 .75v1l1 3h-6l1 -3v-1c-1.54 1.07 -3.735 .772 -4.886 -.75a5.527 5.527 0 0 1 .264 -6.979a30.883 30.883 0 0 1 1.703 -1.771a1541.72 1541.72 0 0 1 4.919 -4.5z"
+              />
+            </svg>
+          </div>
+          <div class="app-info">
+            <h3 data-i18n="app20Title">בלאק ג'ק</h3>
+            <p data-i18n="app20Desc">משחק בלאק ג'ק אונליין (Beta)</p>
+            <a href="BJ/BJ.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon"><i class="fa-solid fa-ship"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app21Title">צוללות</h3>
+            <p data-i18n="app21Desc">שחק את משחק הצוללות אונליין מול המחשב.</p>
+            <a href="BS/BS.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon"><i class="fa-solid fa-circle-down"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app22Title">ארבע בשורה אחת</h3>
+            <p data-i18n="app22Desc">המשחק האייקוני 4 בשורה אחת , עם עוד כמה חידושים ...</p>
+            <a href="CF/CF.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="free_time">
+          <div class="app-icon"><i class="fa-regular fa-comments"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app23Title">אליס משחק מילים חברתי</h3>
+            <p data-i18n="app23Desc">משחק הקבוצות החברתי ולהיט כובש בגירסת אונליין עם הפתעות מפתיעות ביותר.</p>
+            <a href="AS/AS.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="finance">
+          <div class="app-icon"><i class="fa-solid fa-square-root-variable"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app24Title">מחשבון פיננסי</h3>
+            <p data-i18n="app24Desc">חישוב ריביות עתידיות וריבית דהריבית בהלוואות בחסכונות והשקעות.</p>
+            <a href="FC.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="finance">
+          <div class="app-icon"><i class="fa-solid fa-car"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app25Title">מחשבון אחזקת רכב</h3>
+            <p data-i18n="app25Desc">חישוב הוצאות אחזקת רכב כתלות במספר השנים וסוג ההינע.</p>
+            <a href="CE/Car_Expenses.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-file-signature"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app26Title">החתמת מסמך PDF</h3>
+            <p data-i18n="app26Desc">קיבלתם מסמך PDF ויש צורך בהוספת חתימה סרוקה ושליחה חזרה , הכלי הזה יקצר את התהליך .</p>
+            <a href="SP/SP.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-crop-simple"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app27Title">עורך תמונות</h3>
+            <p data-i18n="app27Desc">צריכים את האפשרות להקטין להגדיל לשנות פורמט או להגדיר רוחב ואורך של תמונות? זה הכלי עבורכם.</p>
+            <a href="IR/IR.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-box-open"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app28Title">יוצר פריסת קרטון</h3>
+            <p data-i18n="app28Desc">כלי יצירת פריסת קרטון (LAYOUT) על פי מידות מוכנסות של אורך רוחב וגובה ויצואם למסמך PDF</p>
+            <a href="CL/CL.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-regular fa-file-excel"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app29Title">מחולל נוסחאות חיפוש באקסל</h3>
+            <p data-i18n="app29Desc">טבלה עצומה באקסל ונתונים שאתה מחפש , אפשר ליצר נוסחאות למצוא בדיוק מה שאתה מחפש עם מחולל הנוסחאות לחיפוש באקסל</p>
+            <a href="ESF/ESF.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="Productive">
+          <div class="app-icon"><i class="fa-solid fa-table-cells"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app30Title">מסיר רקעים לתמונות</h3>
+            <p data-i18n="app30Desc">הכלי הזה יסייע בהורדת רקעים לשקוף או החלפת צבע למוצרים עם דפנות , כמו כן להדגיש לחתוך ועוד...</p>
+            <a href="BR/BR.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+
+        <div class="app-card" data-category="private">
+          <div class="app-icon"><i class="fa-solid fa-hand"></i></div>
+          <div class="app-info">
+            <h3 data-i18n="app31Title">תיקיה פרטית</h3>
+            <p data-i18n="app31Desc">כניסה למורשים בלבד</p>
+            <a href="Pass.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- אודותנו -->
+      <div class="app-card about-card" data-category="about">
+        <div class="app-icon">
+          <img
+            src="data:image/png;base64,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"
+            alt="לוגו"
+            style="width: 80px; height: 80px"
+          />
+        </div>
+        <div class="app-info">
+          <h3 data-i18n="aboutTitle">אודותנו</h3>
+          <p data-i18n="aboutDesc">פרטים ליצירת קשר.</p>
+          <a href="AM.html" class="btn"><span data-i18n="enter">לכניסה</span> <i class="fas fa-external-link-alt"></i></a>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-content">
+          <p><strong data-i18n="footer">2025 כל הזכויות שמורות G©.</strong></p>
+        </div>
+      </footer>
+
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <div class="app-preview" id="appPreview"></div>
+
+    <div id="exit-modal">
+      <div id="exit-modal-content">
+        <h3 data-i18n="exitAsk">האם לצאת?</h3>
+        <button id="confirm-exit" data-i18n="exitYes">יציאה</button>
+        <button id="cancel-exit" data-i18n="exitNo">ביטול</button>
+      </div>
+    </div>
+
+    <script>
+      const I18N = {
+        he: {
+          pageTitle: "אפליקציות ווב",
+          mainTitle: "מרכז ה WebApp שלנו",
+          subtitle: "גלה את הכלים המקוונים שלנו הזמינים ישירות מהדפדפן חינם וללא צורך בהורדה !",
+          catAll: "הצג הכל",
+          catLifestyle: "לייף סטייל",
+          catFinance: "פיננסי",
+          catHealth: "בריאות",
+          catProductive: "פרודוקטיביות",
+          catLeisure: "פנאי",
+          catPrivate: "פרטי",
+          catAbout: "אודותנו",
+          enter: "לכניסה",
+          footer: "2025 כל הזכויות שמורות G©.",
+          exitAsk: "האם לצאת?",
+          exitYes: "יציאה",
+          exitNo: "ביטול",
+          aboutTitle: "אודותנו",
+          aboutDesc: "פרטים ליצירת קשר.",
+          app1Title: "חוברת מתכונים",
+          app1Desc: "ארגן את המתכונים האהובים עליך בצורה יעילה ושתף אותם עם חברים.",
+          app2Title: "מחשבון המרות",
+          app2Desc: "המרת מטבעות בשער עדכני, מידות מרחקים, משקלים, טמפרטורה, נפח, שטח, מהירות.",
+          app3Title: "מחשבון קלורי",
+          app3Desc: "עקוב אחר הערך הקלורי, הויטמינים, מינרלים ערך גלוקימי ומדד השובע של כל מה שבחרת לאכול לבחירות נבונות יותר.",
+          app4Title: "ממיר המידות לביגוד והנעלה",
+          app4Desc: "ראית דיל מעולה ברשת, אבל המידה אמריקאית, בריטית אסייאתית ואתה לא בטוח? הממיר הזה עבורך.",
+          app5Title: "הצ'קליסט האולטימטיבי",
+          app5Desc: "יוצאים לחו\"ל או קמפינג בארץ, או סתם חוששים לשכוח לעשות משהו? הצ'קליסט הזה יעשה לכם סדר בראש.",
+          app6Title: "עורך טקסטים מתקדם",
+          app6Desc: "אז העתקת והדבקת טקסט , אבל הוא מבולבל אותיות הפוכות ומילים בסדר הפוך , בקיצור לא קריא? אל דאגה אנחנו כאן לעזור...",
+          app7Title: "יוצר גלריית שקופיות",
+          app7Desc: "צור גלריית שיקופיות עם מיטב התמונות מוכנות לשליחה כקובץ דפדפן עצמאי רק לפתוח ולהנות...",
+          app8Title: "יוצר גלריית קרוסלה",
+          app8Desc: "צור קרוסלה מקסימה של 8 מתמונותיך, המשפחה תאהב את זה.",
+          app9Title: "יוצר גלריית אקורדיון",
+          app9Desc: "יש לך תמונות של ארוע שאתה רוצה לשלוח באופן מרשים לחברים או משפחה נסה את הכלי הזה.",
+          app10Title: "יוצר גלריית תיאור",
+          app10Desc: "אם יש לך תמונות שדורשות תיאור/הסבר/סיפור בגלריה זו תוכל להוסיף זאת.",
+          app11Title: "מצפין קבצים",
+          app11Desc: "יש לך כמה מסמכים שממש לא בא לך שיחשפו בפני מישהו שחיטט לך במחשב? הצפן קבצים בתוך תמונה של יקירך , רק אתה תדע שהקבצים שם וכיצד לחלצם.",
+          app12Title: "מצפין טקסטים",
+          app12Desc: "כותב שירה בסתר ? סתם בא לך להצפין טקסטים שאף עין בלתי מורשית לא תראה? הישום הזה יעשה זאת בשבילך.",
+          app13Title: "מה קרוב אלי",
+          app13Desc: "אז אתה בטיול בחו\"ל ויש לא מעט מקומות שאתה רוצה לראות, מסעדות לבקר וכ\"ו, ולא מתחשק לך ללכת במסלולים מעגליים או בזיג זג, הפתרון פה.",
+          app14Title: "עיבוד תמונות",
+          app14Desc: "התמונה כבדה מדי בגודל ? לא בפרספקטיבה הרצויה או בזוית הלא נכונה, הכלי הזה יעשה את התיקונים עבורך.",
+          app15Title: "יוצר מצגות",
+          app15Desc: "אתה רוצה להכין מצגת של תמונות ארועי אבל לא בטוח שלנמענים יש את פאוורפוינט של מיקרוסופט הכלי הזה בשבילך.",
+          app16Title: "שינוי שמות קבצים",
+          app16Desc: "יש לכם תיקיה מלאה בקבצים ודרוש לכם שינוי שם קבצים עם מאפיין מספרי רץ או תאריך ואפילו גם וגם, הכלי הזה עודה את העבודה .",
+          app17Title: "ספידומטר GPS",
+          app17Desc: "צא להליכה , ריצה או אופניים ועקוב אחר הנתונים , מרחק , מהירות ממוצעת ומהירות מירבית",
+          app18Title: "אבן נייר ומספריים",
+          app18Desc: "משחק הילדות אבן נייר ומספריים במשחק מול המחשב.",
+          app19Title: "איקס עיגול",
+          app19Desc: "משחק הילדות איקס עיגול בגירסת אונליין המשחק מול המחשב.",
+          app20Title: "בלאק ג'ק",
+          app20Desc: "משחק בלאק ג'ק אונליין (Beta)",
+          app21Title: "צוללות",
+          app21Desc: "שחק את משחק הצוללות אונליין מול המחשב.",
+          app22Title: "ארבע בשורה אחת",
+          app22Desc: "המשחק האייקוני 4 בשורה אחת , עם עוד כמה חידושים ...",
+          app23Title: "אליס משחק מילים חברתי",
+          app23Desc: "משחק הקבוצות החברתי ולהיט כובש בגירסת אונליין עם הפתעות מפתיעות ביותר.",
+          app24Title: "מחשבון פיננסי",
+          app24Desc: "חישוב ריביות עתידיות וריבית דהריבית בהלוואות בחסכונות והשקעות.",
+          app25Title: "מחשבון אחזקת רכב",
+          app25Desc: "חישוב הוצאות אחזקת רכב כתלות במספר השנים וסוג ההינע.",
+          app26Title: "החתמת מסמך PDF",
+          app26Desc: "קיבלתם מסמך PDF ויש צורך בהוספת חתימה סרוקה ושליחה חזרה , הכלי הזה יקצר את התהליך .",
+          app27Title: "עורך תמונות",
+          app27Desc: "צריכים את האפשרות להקטין להגדיל לשנות פורמט או להגדיר רוחב ואורך של תמונות? זה הכלי עבורכם.",
+          app28Title: "יוצר פריסת קרטון",
+          app28Desc: "כלי יצירת פריסת קרטון (LAYOUT) על פי מידות מוכנסות של אורך רוחב וגובה ויצואם למסמך PDF",
+          app29Title: "מחולל נוסחאות חיפוש באקסל",
+          app29Desc: "טבלה עצומה באקסל ונתונים שאתה מחפש , אפשר ליצר נוסחאות למצוא בדיוק מה שאתה מחפש עם מחולל הנוסחאות לחיפוש באקסל",
+          app30Title: "מסיר רקעים לתמונות",
+          app30Desc: "הכלי הזה יסייע בהורדת רקעים לשקוף או החלפת צבע למוצרים עם דפנות , כמו כן להדגיש לחתוך ועוד...",
+          app31Title: "תיקיה פרטית",
+          app31Desc: "כניסה למורשים בלבד"
+        },
+        en: {
+          pageTitle: "Web Apps",
+          mainTitle: "Our WebApp Hub",
+          subtitle: "Discover our online tools — available right in the browser, free, with no download required!",
+          catAll: "Show all",
+          catLifestyle: "Lifestyle",
+          catFinance: "Finance",
+          catHealth: "Health",
+          catProductive: "Productivity",
+          catLeisure: "Leisure",
+          catPrivate: "Private",
+          catAbout: "About us",
+          enter: "Open",
+          footer: "2025 All rights reserved G©.",
+          exitAsk: "Leave this page?",
+          exitYes: "Exit",
+          exitNo: "Cancel",
+          aboutTitle: "About us",
+          aboutDesc: "Contact details.",
+          app1Title: "Recipe book",
+          app1Desc: "Organize your favorite recipes efficiently and share them with friends.",
+          app2Title: "Unit converter",
+          app2Desc: "Live currency rates plus distance, weight, temperature, volume, area and speed conversions.",
+          app3Title: "Calorie calculator",
+          app3Desc: "Track calories, vitamins, minerals, glycemic value and satiety for smarter food choices.",
+          app4Title: "Clothing & shoe size converter",
+          app4Desc: "Saw a great online deal but the size is US, UK or Asian? This converter is for you.",
+          app5Title: "The ultimate checklist",
+          app5Desc: "Going abroad, camping, or just afraid you'll forget something? This checklist keeps you organized.",
+          app6Title: "Advanced text editor",
+          app6Desc: "Copied text that came out reversed, scrambled or unreadable? We'll help you fix it.",
+          app7Title: "Slideshow gallery maker",
+          app7Desc: "Create a slideshow gallery of your best photos as a standalone browser file — just open and enjoy.",
+          app8Title: "Carousel gallery maker",
+          app8Desc: "Create a lovely 8-photo carousel your family will love.",
+          app9Title: "Accordion gallery maker",
+          app9Desc: "Have event photos you want to send in a striking way? Try this tool.",
+          app10Title: "Captioned gallery maker",
+          app10Desc: "If your photos need a description, explanation or story, you can add it here.",
+          app11Title: "File encryptor",
+          app11Desc: "Hide documents inside a photo of a loved one so only you know they are there and how to extract them.",
+          app12Title: "Text encryptor",
+          app12Desc: "Writing poetry in secret, or just want to hide text from prying eyes? This app does it for you.",
+          app13Title: "What's nearby",
+          app13Desc: "Traveling and want to see places and restaurants without zigzagging? The solution is here.",
+          app14Title: "Image processing",
+          app14Desc: "File too large, wrong perspective or angle? This tool makes the corrections for you.",
+          app15Title: "Slideshow maker",
+          app15Desc: "Want a photo slideshow without requiring recipients to have Microsoft PowerPoint? This tool is for you.",
+          app16Title: "Bulk file rename",
+          app16Desc: "A folder full of files that need sequential numbers, dates, or both? This tool does the job.",
+          app17Title: "GPS speedometer",
+          app17Desc: "Go for a walk, run or bike ride and track distance, average speed and top speed.",
+          app18Title: "Rock Paper Scissors",
+          app18Desc: "The childhood classic — play against the computer.",
+          app19Title: "Tic Tac Toe",
+          app19Desc: "Classic tic-tac-toe online against the computer.",
+          app20Title: "Blackjack",
+          app20Desc: "Online blackjack (Beta)",
+          app21Title: "Battleship",
+          app21Desc: "Play Battleship online against the computer.",
+          app22Title: "Connect Four",
+          app22Desc: "The iconic Connect Four game, with a few extra twists...",
+          app23Title: "Alice — social word game",
+          app23Desc: "The popular group word game in an online version with surprising extras.",
+          app24Title: "Financial calculator",
+          app24Desc: "Future interest and compound interest for loans, savings and investments.",
+          app25Title: "Car ownership calculator",
+          app25Desc: "Estimate car running costs by years of ownership and powertrain type.",
+          app26Title: "Sign a PDF",
+          app26Desc: "Got a PDF that needs a scanned signature and a quick send-back? This tool shortens the process.",
+          app27Title: "Image editor",
+          app27Desc: "Resize, change format, or set exact width and height of images.",
+          app28Title: "Cardboard layout maker",
+          app28Desc: "Create a cardboard box LAYOUT from length, width and height and export it to PDF.",
+          app29Title: "Excel search formula generator",
+          app29Desc: "Huge Excel tables and data to find? Generate formulas that locate exactly what you need.",
+          app30Title: "Background remover",
+          app30Desc: "Remove backgrounds to transparent, swap colors on boxed products, highlight, crop and more.",
+          app31Title: "Private folder",
+          app31Desc: "Authorized access only"
+        }
+      };
+
+      function applyLang(lang) {
+        const dict = I18N[lang] || I18N.he;
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === "en" ? "ltr" : "rtl";
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          if (dict[key] != null) el.textContent = dict[key];
+        });
+        document.title = dict.pageTitle;
+        const langBtn = document.getElementById("langToggle");
+        const FLAG_IL =
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><mask id="ilround"><circle cx="256" cy="256" r="256" fill="#fff"/></mask><g mask="url(#ilround)"><path fill="#eee" d="M0 0h512v55.7l-25 32.7 25 34v267.2l-26 36 26 30.7V512H0v-55.7l24.8-34.1L0 389.6V122.4l27.2-33.2L0 55.7z"/><path fill="#0052b4" d="M0 55.7v66.7h512V55.7zm0 333.9v66.7h512v-66.7zm352.4-189.3H288l-32-55.6-32.1 55.6h-64.3l32.1 55.7-32 55.7h64.2l32.1 55.6 32.1-55.6h64.3L320.3 256l32-55.7zm-57 55.7-19.7 34.2h-39.4L216.5 256l19.8-34.2h39.4l19.8 34.2zM256 187.6l7.3 12.7h-14.6zm-59.2 34.2h14.7l-7.4 12.7zm0 68.4 7.3-12.7 7.4 12.7zm59.2 34.2-7.3-12.7h14.6zm59.2-34.2h-14.7l7.4-12.7zm-14.7-68.4h14.7l-7.3 12.7z"/></g></svg>';
+        const FLAG_GB =
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true"><mask id="gbround"><circle cx="256" cy="256" r="256" fill="#fff"/></mask><g mask="url(#gbround)"><path fill="#eee" d="m0 0 8 22-8 23v23l32 54-32 54v32l32 48-32 48v32l32 54-32 54v68l22-8 23 8h23l54-32 54 32h32l48-32 48 32h32l54-32 54 32h68l-8-22 8-23v-23l-32-54 32-54v-32l-32-48 32-48v-32l-32-54 32-54V0l-22 8-23-8h-23l-54 32-54-32h-32l-48 32-48-32h-32l-54 32L68 0H0z"/><path fill="#0052b4" d="M336 0v108L444 0Zm176 68L404 176h108zM0 176h108L0 68ZM68 0l108 108V0Zm108 512V404L68 512ZM0 444l108-108H0Zm512-108H404l108 108Zm-68 176L336 404v108z"/><path fill="#d80027" d="M0 0v45l131 131h45L0 0zm208 0v208H0v96h208v208h96V304h208v-96H304V0h-96zm259 0L336 131v45L512 0h-45zM176 336 0 512h45l131-131v-45zm160 0 176 176v-45L381 336h-45z"/></g></svg>';
+        if (langBtn) {
+          if (lang === "en") {
+            langBtn.innerHTML = FLAG_IL;
+            langBtn.title = "עברית";
+            langBtn.setAttribute("aria-label", "עברית");
+          } else {
+            langBtn.innerHTML = FLAG_GB;
+            langBtn.title = "English";
+            langBtn.setAttribute("aria-label", "English");
+          }
+        }
+        localStorage.setItem("siteLang", lang);
+      }
+
+      function applyTheme(theme) {
+        const mode = theme === "dark" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", mode);
+        const themeBtn = document.getElementById("themeToggle");
+        if (themeBtn) {
+          themeBtn.innerHTML =
+            mode === "dark"
+              ? '<i class="fa-solid fa-sun"></i>'
+              : '<i class="fa-solid fa-moon"></i>';
+          themeBtn.title = mode === "dark" ? "Light" : "Dark";
+          themeBtn.setAttribute(
+            "aria-label",
+            mode === "dark" ? "Light" : "Dark"
+          );
+        }
+        localStorage.setItem("siteTheme", mode);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const saved = localStorage.getItem("siteLang") || "he";
+        applyLang(saved);
+        applyTheme(localStorage.getItem("siteTheme") || "light");
+
+        document.getElementById("langToggle")?.addEventListener("click", () => {
+          const next = document.documentElement.lang === "en" ? "he" : "en";
+          applyLang(next);
+        });
+        document.getElementById("themeToggle")?.addEventListener("click", () => {
+          const next =
+            document.documentElement.getAttribute("data-theme") === "dark"
+              ? "light"
+              : "dark";
+          applyTheme(next);
+        });
+
+        const filterBtns = document.querySelectorAll(".filter-btn");
+        const appCards = document.querySelectorAll(".app-card");
+
+        function filterApps() {
+          const activeCategory = document.querySelector(".filter-btn.active").dataset.category;
+          appCards.forEach((card) => {
+            const category = card.dataset.category;
+            const matches = activeCategory === "all" || category === activeCategory;
+            card.style.display = matches ? "flex" : "none";
+          });
+        }
+
+        filterBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            filterBtns.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            filterApps();
+          });
+        });
+
+        function animateOnScroll() {
+          const elements = document.querySelectorAll(".app-card, header, .filters");
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.style.animation = `fadeInUp 0.2s ${
+                    entry.target.dataset.delay || "0s"
+                  } ease-out forwards`;
+                  observer.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.01 }
+          );
+          elements.forEach((el, i) => {
+            el.style.opacity = "0";
+            el.style.transform = "translateY(10px)";
+            el.dataset.delay = `${i * 0.03}s`;
+            observer.observe(el);
+          });
+        }
+        animateOnScroll();
+
+        document.querySelectorAll(".app-card").forEach((card) => {
+          const preview = document.createElement("div");
+          preview.className = "app-preview";
+          preview.innerHTML = `
+            <div class="preview-content">
+              <span class="close-preview">&times;</span>
+              <h3></h3>
+              <p></p>
+              <a href="${card.querySelector("a").getAttribute("href")}" class="btn">
+                <span data-i18n="enter"></span> <i class="fas fa-external-link-alt"></i>
+              </a>
+            </div>
+          `;
+          document.body.appendChild(preview);
+
+          card.addEventListener("click", (e) => {
+            if (!e.target.closest("a")) {
+              const lang = localStorage.getItem("siteLang") || "he";
+              preview.querySelector("h3").textContent = card.querySelector("h3").textContent;
+              preview.querySelector("p").textContent = card.querySelector("p").textContent;
+              preview.querySelector("[data-i18n='enter']").textContent = I18N[lang].enter;
+              preview.style.display = "flex";
+              document.body.style.overflow = "hidden";
+            }
+          });
+
+          preview.querySelector(".close-preview").addEventListener("click", () => {
+            preview.style.display = "none";
+            document.body.style.overflow = "auto";
+          });
+        });
+
+        history.pushState(null, null, window.location.pathname);
+        window.addEventListener("popstate", function () {
+          document.getElementById("exit-modal").style.display = "flex";
+          history.pushState(null, null, window.location.pathname);
+        });
+        document.getElementById("confirm-exit")?.addEventListener("click", () => {
+          window.location.href = "https://www.google.com";
+        });
+        document.getElementById("cancel-exit")?.addEventListener("click", () => {
+          document.getElementById("exit-modal").style.display = "none";
+        });
+      });
+    </script>
+  </body>
+</html>
