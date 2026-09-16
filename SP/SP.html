@@ -396,11 +396,11 @@
             cursor: grab;
             touch-action: none;
             user-select: none;
-            padding: 4px;
+            padding: 2px;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
             z-index: 10;
-            min-width: 16px;
-            min-height: 16px;
+            min-width: 12px;
+            min-height: 12px;
             display: block !important;
             direction: ltr; /* positioning context */
         }
@@ -415,10 +415,26 @@
         .field-overlay.checkbox-field {
             border-color: #198754;
             background: rgba(25, 135, 84, 0.06);
+            padding: 1px;
+            border-width: 1.5px;
+            border-radius: 3px;
+        }
+        /* Only selected field is interactive for drag/resize */
+        .field-overlay:not(.selected) {
+            cursor: pointer;
+        }
+        .field-overlay:not(.selected) .delete-handle,
+        .field-overlay:not(.selected) .resize-handle,
+        .field-overlay:not(.selected) .text-toolbar {
+            display: none !important;
+        }
+        .field-overlay.selected {
+            z-index: 20;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.35), 0 4px 14px rgba(0, 0, 0, 0.12);
         }
         .field-overlay textarea {
             width: 100%;
-            height: calc(100% - 28px);
+            height: 100%;
             border: none;
             background: transparent;
             font-family: inherit;
@@ -430,18 +446,30 @@
             color: #1a1a1a;
             direction: rtl;
             line-height: 1.35;
+            box-sizing: border-box;
         }
+        /* Toolbar floats ABOVE the field so it doesn't shift content vs PDF */
         .text-toolbar {
-            display: flex;
+            display: none;
+            position: absolute;
+            top: -32px;
+            left: 0;
+            right: auto;
             align-items: center;
             gap: 3px;
             padding: 2px 4px;
-            background: rgba(255,255,255,0.92);
-            border-bottom: 1px solid #dde3ea;
-            border-radius: 6px 6px 0 0;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid #dde3ea;
+            border-radius: 8px;
             direction: ltr;
             flex-shrink: 0;
             min-height: 26px;
+            z-index: 15;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            white-space: nowrap;
+        }
+        .field-overlay.selected .text-toolbar {
+            display: flex;
         }
         .text-toolbar .tt-btn {
             border: 1px solid #ccd;
@@ -760,7 +788,7 @@
             <button class="nav-btn" id="nextPage">›</button>
         </div>
 
-        <div class="info-text">💡 בחר כלי ← לחץ על הדף להוספה | גרור להזזה | גרור פינה לשינוי גודל</div>
+        <div class="info-text">💡 בחר כלי ← לחץ על הדף להוספה | לחץ על שדה לבחירה ועריכה | גרור להזזה | גרור פינה לשינוי גודל</div>
 
         <div class="pdf-container" id="pdfContainer">
             <div id="pagesContainer"></div>
@@ -794,7 +822,42 @@
             let fields = [];
             let fieldIdCounter = 0;
             let selectedTool = 'signature';
+            let selectedFieldId = null; // only selected field is editable/movable
             let signatureImageData = null;
+
+            // Detect if text is primarily Hebrew (for auto-align + font choice)
+            function isPrimarilyHebrew(text) {
+                if (!text || !text.trim()) return true; // default RTL for empty
+                const hebrew = (text.match(/[\u0590-\u05FF]/g) || []).join('').length;
+                const latin = (text.match(/[A-Za-z]/g) || []).join('').length;
+                if (hebrew === 0 && latin === 0) return true;
+                return hebrew >= latin;
+            }
+
+            // Split a string into runs of Hebrew vs Latin/other for dual-font drawing
+            function splitScriptRuns(text) {
+                const runs = [];
+                let current = '';
+                let currentIsHeb = null;
+                for (const ch of text) {
+                    const isHeb = /[\u0590-\u05FF]/.test(ch);
+                    const isLatin = /[A-Za-z0-9]/.test(ch);
+                    // Whitespace/punctuation inherits previous run type
+                    const kind = isHeb ? true : (isLatin ? false : currentIsHeb);
+                    if (currentIsHeb === null) {
+                        currentIsHeb = isHeb || !isLatin;
+                        current = ch;
+                    } else if (kind === currentIsHeb || (!isHeb && !isLatin)) {
+                        current += ch;
+                    } else {
+                        runs.push({ text: current, hebrew: currentIsHeb });
+                        current = ch;
+                        currentIsHeb = isHeb;
+                    }
+                }
+                if (current) runs.push({ text: current, hebrew: currentIsHeb !== false });
+                return runs;
+            }
 
             // Drag / Resize state
             let isDragging = false;
@@ -870,6 +933,7 @@
                         currentPage = 1;
                         fields = [];
                         fieldIdCounter = 0;
+                        selectedFieldId = null;
                         pageWidths = [];
                         pageHeights = [];
                         renderAllPages();
@@ -1065,18 +1129,19 @@
                     field.h = 60;
                     field.value = signatureImageData || '';
                 } else if (selectedTool === 'checkbox') {
-                    field.w = 22;
-                    field.h = 22;
+                    field.w = 14;
+                    field.h = 14;
                     field.value = false;
                 } else if (selectedTool === 'text') {
                     field.w = 200;
-                    field.h = 56;
+                    field.h = 55; // room for ~2 lines at default font size
                     field.value = '';
                     field.fontSize = 14;
                     field.color = '#1a1a1a';
                     field.bold = false;
                     field.underline = false;
                     field.align = 'right';
+                    field.alignLocked = false;
                 }
 
                 // Keep inside page bounds
@@ -1084,8 +1149,12 @@
                 field.y = Math.max(0, Math.min(field.y, pageHeights[pageIndex] - field.h));
 
                 fields.push(field);
+                selectedFieldId = field.id;
+                // One-shot placement: deselect tool so next empty click does not add another
+                selectedTool = null;
+                document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
                 renderFields();
-                showToast('✅ שדה נוסף');
+                showToast('✅ שדה נוסף – לחץ על הכלי שוב להוספה נוספת');
             }
 
             // ===== Render fields (full) =====
@@ -1110,6 +1179,7 @@
                     el.className = 'field-overlay';
                     if (f.type === 'text') el.classList.add('text-field');
                     if (f.type === 'checkbox') el.classList.add('checkbox-field');
+                    if (selectedFieldId === f.id) el.classList.add('selected');
                     el.dataset.fieldId = f.id;
                     el.style.left = relX + 'px';
                     el.style.top = relY + 'px';
@@ -1152,10 +1222,38 @@
                         ta.style.fontWeight = f.bold ? 'bold' : 'normal';
                         ta.style.textDecoration = f.underline ? 'underline' : 'none';
                         ta.style.textAlign = align;
-                        ta.addEventListener('input', (e) => { f.value = e.target.value; });
+                        // Direction follows content language
+                        const heb = isPrimarilyHebrew(f.value || '');
+                        ta.style.direction = heb ? 'rtl' : 'ltr';
+                        ta.addEventListener('input', (e) => {
+                            f.value = e.target.value;
+                            // Auto-align: Hebrew → right, English → left (unless user forced align via toolbar)
+                            if (!f.alignLocked) {
+                                const primarilyHeb = isPrimarilyHebrew(f.value);
+                                const newAlign = primarilyHeb ? 'right' : 'left';
+                                f.align = newAlign;
+                                ta.style.textAlign = newAlign;
+                                ta.style.direction = primarilyHeb ? 'rtl' : 'ltr';
+                                toolbar.querySelector('.tt-align-right').classList.toggle('active', newAlign === 'right');
+                                toolbar.querySelector('.tt-align-center').classList.toggle('active', false);
+                                toolbar.querySelector('.tt-align-left').classList.toggle('active', newAlign === 'left');
+                            } else {
+                                ta.style.direction = isPrimarilyHebrew(f.value) ? 'rtl' : 'ltr';
+                            }
+                            // Auto-grow height so multi-line text is not clipped in PDF
+                            const lineCount = Math.max(1, (f.value || '').split('\n').length);
+                            const neededH = Math.max(28, lineCount * (f.fontSize || 14) * 1.4 + 8);
+                            if (neededH > f.h) {
+                                const maxH = pageHeights[f.pageIndex] - f.y;
+                                f.h = Math.min(neededH, maxH);
+                                el.style.height = (f.h * scale) + 'px';
+                            }
+                        });
                         ta.addEventListener('mousedown', (e) => e.stopPropagation());
                         ta.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
                         ta.addEventListener('click', (e) => e.stopPropagation());
+                        // Only editable when selected
+                        ta.readOnly = selectedFieldId !== f.id;
 
                         // Toolbar actions
                         toolbar.querySelector('.tt-dec').addEventListener('click', (e) => {
@@ -1190,6 +1288,7 @@
 
                         function setAlign(newAlign) {
                             f.align = newAlign;
+                            f.alignLocked = true; // user overrode auto-align
                             ta.style.textAlign = newAlign;
                             toolbar.querySelector('.tt-align-right').classList.toggle('active', newAlign === 'right');
                             toolbar.querySelector('.tt-align-center').classList.toggle('active', newAlign === 'center');
@@ -1214,11 +1313,17 @@
                         const span = document.createElement('span');
                         span.className = 'checkbox-mark';
                         const size = Math.min(f.w, f.h);
-                        const fontSize = Math.max(10, Math.min(22, size * 0.85));
+                        const fontSize = Math.max(8, Math.min(18, size * 0.9));
                         span.style.fontSize = fontSize + 'px';
                         span.textContent = f.value ? '☑' : '☐';
                         span.addEventListener('click', (e) => {
                             e.stopPropagation();
+                            // Select first if not selected; toggle only when already selected
+                            if (selectedFieldId !== f.id) {
+                                selectedFieldId = f.id;
+                                renderFields();
+                                return;
+                            }
                             f.value = !f.value;
                             span.textContent = f.value ? '☑' : '☐';
                         });
@@ -1243,6 +1348,7 @@
                     delBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         fields = fields.filter(field => field.id !== f.id);
+                        if (selectedFieldId === f.id) selectedFieldId = null;
                         renderFields();
                         showToast('🗑️ שדה נמחק');
                     });
@@ -1254,23 +1360,38 @@
                     resizeHandle.addEventListener('mousedown', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        if (selectedFieldId !== f.id) return;
                         startResize(e, f);
                     });
                     resizeHandle.addEventListener('touchstart', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
+                        if (selectedFieldId !== f.id) return;
                         startResizeTouch(e, f);
                     }, { passive: false });
                     el.appendChild(resizeHandle);
 
-                    // Drag handlers
+                    // Click to select / drag only when selected
                     el.addEventListener('mousedown', (e) => {
                         if (e.target === delBtn || e.target === resizeHandle) return;
+                        if (f.type === 'text' && e.target.tagName === 'TEXTAREA' && selectedFieldId === f.id) return;
+                        // Select this field
+                        if (selectedFieldId !== f.id) {
+                            selectedFieldId = f.id;
+                            renderFields();
+                            return; // first click only selects
+                        }
                         if (f.type === 'text' && e.target.tagName === 'TEXTAREA') return;
                         startDrag(e, f);
                     });
                     el.addEventListener('touchstart', (e) => {
                         if (e.target === delBtn || e.target === resizeHandle) return;
+                        if (f.type === 'text' && e.target.tagName === 'TEXTAREA' && selectedFieldId === f.id) return;
+                        if (selectedFieldId !== f.id) {
+                            selectedFieldId = f.id;
+                            renderFields();
+                            return;
+                        }
                         if (f.type === 'text' && e.target.tagName === 'TEXTAREA') return;
                         startDragTouch(e, f);
                     }, { passive: false });
@@ -1471,10 +1592,18 @@
                 touchResizeData = null;
             });
 
-            // ===== Click on page to add field =====
+            // ===== Click on page: add field if tool armed, otherwise deselect =====
             pagesContainer.addEventListener('click', function(e) {
                 if (e.target.closest('.field-overlay')) return;
                 if (e.target.closest('textarea')) return;
+
+                // Click on empty area → deselect current field
+                if (selectedFieldId !== null) {
+                    selectedFieldId = null;
+                    renderFields();
+                }
+
+                // Only add a new field when a tool is actively selected
                 if (!selectedTool) return;
 
                 const wrapper = e.target.closest('.pdf-page-wrapper');
@@ -1528,6 +1657,7 @@
                 }
                 if (confirm('למחוק את כל השדות?')) {
                     fields = [];
+                    selectedFieldId = null;
                     renderFields();
                     showToast('🗑️ כל השדות נמחקו');
                 }
@@ -1543,6 +1673,7 @@
                 currentPage = 1;
                 fields = [];
                 fieldIdCounter = 0;
+                selectedFieldId = null;
                 pageWidths = [];
                 pageHeights = [];
                 updatePageNav();
@@ -1580,32 +1711,55 @@
                         newDoc.registerFontkit(fontkit);
                     }
 
-                    // Try to embed a Hebrew-supporting font
+                    // Embed Hebrew + Latin fonts so English is not shown as cubes
                     let hebrewFont = null;
+                    let latinFont = null;
                     try {
-                        // Noto Sans Hebrew (public CDN)
-                        const fontUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSansHebrew/NotoSansHebrew-Regular.ttf';
-                        const fontBytes = await fetch(fontUrl).then(r => {
-                            if (!r.ok) throw new Error('Font fetch failed');
+                        const hebUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSansHebrew/NotoSansHebrew-Regular.ttf';
+                        const fontBytes = await fetch(hebUrl).then(r => {
+                            if (!r.ok) throw new Error('Hebrew font fetch failed');
                             return r.arrayBuffer();
                         });
                         hebrewFont = await newDoc.embedFont(fontBytes, { subset: true });
                     } catch (fontErr) {
-                        console.warn('Could not load Hebrew font, falling back to Helvetica:', fontErr);
-                        hebrewFont = await newDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                        console.warn('Could not load Hebrew font:', fontErr);
+                    }
+                    try {
+                        // Noto Sans covers Latin (English) glyphs
+                        const latUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf';
+                        const fontBytes = await fetch(latUrl).then(r => {
+                            if (!r.ok) throw new Error('Latin font fetch failed');
+                            return r.arrayBuffer();
+                        });
+                        latinFont = await newDoc.embedFont(fontBytes, { subset: true });
+                    } catch (fontErr) {
+                        console.warn('Could not load Latin font, using Helvetica:', fontErr);
                     }
 
                     const fallbackFont = await newDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                    if (!hebrewFont) hebrewFont = fallbackFont;
+                    if (!latinFont) latinFont = fallbackFont;
+
+                    function measureRun(text, font, size) {
+                        try {
+                            return font.widthOfTextAtSize(text, size);
+                        } catch (_) {
+                            return text.length * size * 0.5;
+                        }
+                    }
 
                     for (const f of fields) {
                         const page = newDoc.getPage(f.pageIndex);
                         const { width, height } = page.getSize();
                         const x = f.x;
+                        // Bottom-left of field in PDF coords (Y grows upward)
                         const y = height - f.y - f.h;
 
                         if (f.type === 'text') {
                             const rawText = (f.value || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-                            const lines = rawText.split('\n').filter((ln, idx, arr) => ln.length > 0 || idx < arr.length - 1);
+                            // Keep all lines including empty ones in the middle; drop only a single trailing empty
+                            let lines = rawText.split('\n');
+                            if (lines.length > 1 && lines[lines.length - 1] === '') lines = lines.slice(0, -1);
                             if (lines.length && lines.some(l => l.trim())) {
                                 const fontSize = f.fontSize || 14;
                                 const lineHeight = fontSize * 1.35;
@@ -1617,78 +1771,80 @@
                                     b = parseInt(f.color.slice(5, 7), 16) / 255;
                                 }
                                 const textColor = PDFLib.rgb(r, g, b);
-                                const font = hebrewFont || fallbackFont;
-                                const align = f.align || 'right';
-                                // PDF Y grows upward. Field top in PDF coords:
+                                // Auto-align if not locked: Hebrew right, English left
+                                let align = f.align || (isPrimarilyHebrew(rawText) ? 'right' : 'left');
+                                // Field top in PDF coords – text starts near top
                                 const fieldTopPdf = height - f.y;
-                                // Start first line near the top of the field
-                                let textY = fieldTopPdf - fontSize - 3;
+                                let textY = fieldTopPdf - fontSize - 2;
                                 const maxW = Math.max(10, f.w - 6);
+                                // Allow drawing all lines that fit; baseline can go slightly below bottom
+                                const minBaseline = y - fontSize * 0.15;
 
                                 for (let i = 0; i < lines.length; i++) {
                                     const line = lines[i];
-                                    if (textY < (height - f.y - f.h) + 2) break; // don't draw below field
+                                    if (textY < minBaseline) break;
 
-                                    // Measure text width for alignment
-                                    let textWidth = 0;
-                                    try {
-                                        textWidth = Math.min(font.widthOfTextAtSize(line, fontSize), maxW);
-                                    } catch (_) {
-                                        textWidth = Math.min(line.length * fontSize * 0.5, maxW);
-                                    }
+                                    // Split line into Hebrew / Latin runs for correct glyphs
+                                    const runs = splitScriptRuns(line);
+                                    // Measure total width
+                                    let totalWidth = 0;
+                                    const measured = runs.map(run => {
+                                        const font = run.hebrew ? hebrewFont : latinFont;
+                                        const w = measureRun(run.text, font, fontSize);
+                                        totalWidth += w;
+                                        return { ...run, font, w };
+                                    });
+                                    totalWidth = Math.min(totalWidth, maxW);
 
-                                    let drawX = x + 3; // left
+                                    let cursorX = x + 3;
                                     if (align === 'right') {
-                                        drawX = x + f.w - textWidth - 3;
+                                        cursorX = x + f.w - totalWidth - 3;
                                     } else if (align === 'center') {
-                                        drawX = x + (f.w - textWidth) / 2;
+                                        cursorX = x + (f.w - totalWidth) / 2;
                                     }
-                                    drawX = Math.max(x + 1, drawX);
+                                    cursorX = Math.max(x + 1, cursorX);
+                                    const lineStartX = cursorX;
 
-                                    try {
-                                        page.drawText(line, {
-                                            x: drawX,
-                                            y: textY,
-                                            size: fontSize,
-                                            font: font,
-                                            color: textColor,
-                                            maxWidth: maxW
-                                        });
-                                    } catch (textErr) {
+                                    for (const run of measured) {
                                         try {
-                                            page.drawText(line, {
-                                                x: drawX,
+                                            page.drawText(run.text, {
+                                                x: cursorX,
                                                 y: textY,
                                                 size: fontSize,
-                                                font: fallbackFont,
-                                                color: textColor,
-                                                maxWidth: maxW
+                                                font: run.font,
+                                                color: textColor
                                             });
-                                        } catch (e2) { /* skip problematic line */ }
+                                            if (f.bold) {
+                                                page.drawText(run.text, {
+                                                    x: cursorX + 0.35,
+                                                    y: textY,
+                                                    size: fontSize,
+                                                    font: run.font,
+                                                    color: textColor
+                                                });
+                                            }
+                                        } catch (textErr) {
+                                            try {
+                                                page.drawText(run.text, {
+                                                    x: cursorX,
+                                                    y: textY,
+                                                    size: fontSize,
+                                                    font: fallbackFont,
+                                                    color: textColor
+                                                });
+                                            } catch (e2) { /* skip */ }
+                                        }
+                                        cursorX += run.w;
                                     }
 
                                     // Underline
                                     if (f.underline && line.trim()) {
                                         try {
                                             page.drawLine({
-                                                start: { x: drawX, y: textY - 1.5 },
-                                                end:   { x: drawX + textWidth, y: textY - 1.5 },
+                                                start: { x: lineStartX, y: textY - 1.5 },
+                                                end:   { x: lineStartX + totalWidth, y: textY - 1.5 },
                                                 thickness: Math.max(0.6, fontSize * 0.06),
                                                 color: textColor
-                                            });
-                                        } catch (_) {}
-                                    }
-
-                                    // Bold simulation: draw a second time slightly offset
-                                    if (f.bold) {
-                                        try {
-                                            page.drawText(line, {
-                                                x: drawX + 0.4,
-                                                y: textY,
-                                                size: fontSize,
-                                                font: font,
-                                                color: textColor,
-                                                maxWidth: maxW
                                             });
                                         } catch (_) {}
                                     }
@@ -1697,20 +1853,22 @@
                                 }
                             }
                         } else if (f.type === 'checkbox') {
-                            const size = Math.min(f.w, f.h);
+                            // Compact checkbox – use the smaller side, slightly inset
+                            const size = Math.max(8, Math.min(f.w, f.h));
+                            const borderW = Math.max(0.8, Math.min(1.2, size * 0.08));
                             page.drawRectangle({
                                 x: x,
                                 y: y,
                                 width: size,
                                 height: size,
                                 borderColor: PDFLib.rgb(0, 0, 0),
-                                borderWidth: 1.2,
+                                borderWidth: borderW,
                                 color: PDFLib.rgb(1, 1, 1)
                             });
                             if (f.value === true) {
                                 // Draw a proper checkmark
-                                const pad = size * 0.22;
-                                const thickness = Math.max(1.5, size * 0.12);
+                                const pad = size * 0.2;
+                                const thickness = Math.max(1.1, size * 0.12);
                                 // Short arm
                                 page.drawLine({
                                     start: { x: x + pad, y: y + size * 0.45 },
