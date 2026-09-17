@@ -11,6 +11,114 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
     <style>
+        :root {
+            --bg-color: #90dcfc;
+            --container-bg: #ffe699;
+            --text-color: #1a1a1a;
+            --toolbar-bg: #f1f3f5;
+            --info-bg: #faf9e6;
+            --info-border: #eee;
+            --pdf-container-bg: #e9ecef;
+            --border-color: #ddd;
+            --upload-card-bg: #f8f9fa;
+            --upload-card-border: #d0d0d0;
+            --upload-card-hover: #f0f4ff;
+            --upload-card-hover-border: #0d6efd;
+            --btn-primary: #0d6efd;
+            --btn-primary-hover: #0b5ed7;
+            --btn-success: #28a745;
+            --btn-success-hover: #218838;
+            --btn-danger: #dc3545;
+            --btn-danger-hover: #c82333;
+            --btn-signature: #703efa;
+            --btn-checkbox: #198754;
+            --field-label-sig: #703efa;
+            --field-label-text: #0d6efd;
+            --field-label-check: #198754;
+            --shadow-color: rgba(0, 0, 0, 0.12);
+            --page-shadow: rgba(0, 0, 0, 0.08);
+            --text-secondary: #444;
+            --text-muted: #6c757d;
+            --text-light: #94a3b8;
+            --bg-white: #ffffff;
+            --bg-hover-light: #e9ecef;
+            --border-light: #ccd;
+            --border-lighter: #dde3ea;
+            --footer-color: #2c3e50;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a2e;
+            --container-bg: #16213e;
+            --text-color: #e0e0e0;
+            --toolbar-bg: #0f3460;
+            --info-bg: #1a1a3e;
+            --info-border: #333;
+            --pdf-container-bg: #0a0a1a;
+            --border-color: #333;
+            --upload-card-bg: #1e2a4a;
+            --upload-card-border: #444;
+            --upload-card-hover: #1e3a6a;
+            --upload-card-hover-border: #4a90d9;
+            --btn-primary: #4a90d9;
+            --btn-primary-hover: #3a80c9;
+            --btn-success: #2ecc71;
+            --btn-success-hover: #27ae60;
+            --btn-danger: #e74c3c;
+            --btn-danger-hover: #c0392b;
+            --btn-signature: #9d6eff;
+            --btn-checkbox: #2ecc71;
+            --field-label-sig: #9d6eff;
+            --field-label-text: #4a90d9;
+            --field-label-check: #2ecc71;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --page-shadow: rgba(0, 0, 0, 0.3);
+            --text-secondary: #b0b0b0;
+            --text-muted: #888;
+            --text-light: #666;
+            --bg-white: #1e2a4a;
+            --bg-hover-light: #2a3a5a;
+            --border-light: #445;
+            --border-lighter: #345;
+            --footer-color: #a0a0c0;
+        }
+
+        [data-theme="modern"] {
+            --bg-color: #f0f4f8;
+            --container-bg: #ffffff;
+            --text-color: #1a1a2e;
+            --toolbar-bg: #f7f8fa;
+            --info-bg: #e8f4f8;
+            --info-border: #d0e0e8;
+            --pdf-container-bg: #e8eaed;
+            --border-color: #dde2e8;
+            --upload-card-bg: #f7f8fa;
+            --upload-card-border: #c5cdd6;
+            --upload-card-hover: #e8f0ff;
+            --upload-card-hover-border: #2563eb;
+            --btn-primary: #2563eb;
+            --btn-primary-hover: #1d4ed8;
+            --btn-success: #059669;
+            --btn-success-hover: #047857;
+            --btn-danger: #dc2626;
+            --btn-danger-hover: #b91c1c;
+            --btn-signature: #7c3aed;
+            --btn-checkbox: #059669;
+            --field-label-sig: #7c3aed;
+            --field-label-text: #2563eb;
+            --field-label-check: #059669;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --page-shadow: rgba(0, 0, 0, 0.06);
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --text-light: #94a3b8;
+            --bg-white: #ffffff;
+            --bg-hover-light: #f1f5f9;
+            --border-light: #cbd5e1;
+            --border-lighter: #e2e8f0;
+            --footer-color: #475569;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -23,26 +131,28 @@
 
         body {
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            background: #90dcfc;
+            background: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 12px;
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s ease;
         }
 
         .container {
             max-width: 1100px;
             width: 100%;
-            background: #ffe699;
+            background: var(--container-bg);
             padding: 20px 18px 18px;
             border-radius: 24px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 12px 40px var(--shadow-color);
             display: flex;
             flex-direction: column;
             height: 95vh;
             max-height: 95vh;
+            transition: background 0.3s ease;
         }
 
         .header {
@@ -57,7 +167,7 @@
         .header h1 {
             font-size: 24px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: var(--text-color);
             letter-spacing: -0.5px;
             display: flex;
             align-items: center;
@@ -67,6 +177,26 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .theme-select {
+            background: var(--bg-white);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .theme-select:hover {
+            border-color: var(--btn-primary);
+        }
+        .theme-select:focus {
+            border-color: var(--btn-primary);
         }
 
         .btn {
@@ -89,18 +219,47 @@
         }
 
         .btn-success {
-            background: #28a745;
+            background: var(--btn-success);
             color: white;
         }
         .btn-success:hover {
-            background: #218838;
+            background: var(--btn-success-hover);
             box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
         }
 
+        .btn-undo, .btn-redo {
+            background: var(--bg-white);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .btn-undo:hover:not(:disabled), .btn-redo:hover:not(:disabled) {
+            border-color: var(--btn-primary);
+            color: var(--btn-primary);
+        }
+        .btn-undo:disabled, .btn-redo:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .btn-undo:active, .btn-redo:active {
+            transform: scale(0.96);
+        }
+
         .btn-signature {
-            background: #ffffff;
-            border: 2px solid #703efa;
-            color: #703efa;
+            background: var(--bg-white);
+            border: 2px solid var(--btn-signature);
+            color: var(--btn-signature);
             padding: 8px 18px;
             border-radius: 40px;
             font-weight: 600;
@@ -115,9 +274,9 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
         .btn-signature:hover, .btn-signature.active {
-            background: #703efa;
-            color: #ffffff;
-            border-color: #703efa;
+            background: var(--btn-signature);
+            color: var(--bg-white);
+            border-color: var(--btn-signature);
             box-shadow: 0 4px 12px rgba(112, 62, 250, 0.3);
         }
         .btn-signature:active {
@@ -125,9 +284,9 @@
         }
 
         .btn-text {
-            background: #ffffff;
-            border: 2px solid #0d6efd;
-            color: #0d6efd;
+            background: var(--bg-white);
+            border: 2px solid var(--btn-primary);
+            color: var(--btn-primary);
             padding: 8px 18px;
             border-radius: 40px;
             font-weight: 600;
@@ -142,9 +301,9 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
         .btn-text:hover, .btn-text.active {
-            background: #0d6efd;
-            color: #ffffff;
-            border-color: #0d6efd;
+            background: var(--btn-primary);
+            color: var(--bg-white);
+            border-color: var(--btn-primary);
             box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
         }
         .btn-text:active {
@@ -152,9 +311,9 @@
         }
 
         .btn-checkbox {
-            background: #ffffff;
-            border: 2px solid #198754;
-            color: #198754;
+            background: var(--bg-white);
+            border: 2px solid var(--btn-checkbox);
+            color: var(--btn-checkbox);
             padding: 8px 18px;
             border-radius: 40px;
             font-weight: 600;
@@ -169,9 +328,9 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
         .btn-checkbox:hover, .btn-checkbox.active {
-            background: #198754;
-            color: #ffffff;
-            border-color: #198754;
+            background: var(--btn-checkbox);
+            color: var(--bg-white);
+            border-color: var(--btn-checkbox);
             box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
         }
         .btn-checkbox:active {
@@ -179,9 +338,9 @@
         }
 
         .btn-delete-all {
-            background: #ffffff;
-            border: 2px solid #dc3545;
-            color: #dc3545;
+            background: var(--bg-white);
+            border: 2px solid var(--btn-danger);
+            color: var(--btn-danger);
             padding: 8px 18px;
             border-radius: 40px;
             font-weight: 600;
@@ -196,12 +355,38 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
         .btn-delete-all:hover {
-            background: #dc3545;
-            color: #ffffff;
-            border-color: #dc3545;
+            background: var(--btn-danger);
+            color: var(--bg-white);
+            border-color: var(--btn-danger);
             box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
         }
         .btn-delete-all:active {
+            transform: scale(0.96);
+        }
+
+        .btn-draw-sig {
+            background: var(--bg-white);
+            border: 2px solid var(--btn-signature);
+            color: var(--btn-signature);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .btn-draw-sig:hover {
+            background: var(--btn-signature);
+            color: var(--bg-white);
+            border-color: var(--btn-signature);
+        }
+        .btn-draw-sig:active {
             transform: scale(0.96);
         }
 
@@ -213,22 +398,22 @@
             flex-shrink: 0;
         }
         .upload-card {
-            background: #f8f9fa;
+            background: var(--upload-card-bg);
             border-radius: 16px;
             padding: 8px 12px;
             display: flex;
             align-items: center;
             gap: 8px;
             flex-wrap: wrap;
-            border: 2px dashed #d0d0d0;
+            border: 2px dashed var(--upload-card-border);
             transition: all 0.2s;
         }
         .upload-card:hover {
-            border-color: #0d6efd;
-            background: #f0f4ff;
+            border-color: var(--upload-card-hover-border);
+            background: var(--upload-card-hover);
         }
         .upload-card label {
-            background: #0d6efd;
+            background: var(--btn-primary);
             color: white;
             padding: 5px 12px;
             border-radius: 40px;
@@ -242,7 +427,7 @@
             flex-shrink: 0;
         }
         .upload-card label:hover {
-            background: #0b5ed7;
+            background: var(--btn-primary-hover);
         }
         .upload-card input[type="file"] {
             display: none;
@@ -250,17 +435,17 @@
         .upload-card .file-status {
             flex: 1;
             font-size: 12px;
-            color: #222;
-            background: white;
+            color: var(--text-color);
+            background: var(--bg-white);
             padding: 4px 10px;
             border-radius: 30px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             min-width: 70px;
             word-break: break-word;
             text-align: center;
         }
         .upload-card .clear-btn {
-            background: #6c757d;
+            background: var(--text-muted);
             color: white;
             border: none;
             border-radius: 40px;
@@ -271,14 +456,14 @@
             transition: 0.2s;
         }
         .upload-card .clear-btn:hover {
-            background: #5a6268;
+            opacity: 0.85;
         }
 
         .upload-card.purple label {
-            background: #703efa;
+            background: var(--btn-signature);
         }
         .upload-card.purple label:hover {
-            background: #6026ff;
+            opacity: 0.9;
         }
 
         .toolbar {
@@ -287,7 +472,7 @@
             gap: 5px;
             margin: 4px 0 4px;
             justify-content: center;
-            background: #f1f3f5;
+            background: var(--toolbar-bg);
             padding: 6px 12px;
             border-radius: 50px;
             flex-shrink: 0;
@@ -300,7 +485,7 @@
             gap: 8px;
             margin: 3px 0 4px;
             padding: 4px 12px;
-            background: #f1f3f5;
+            background: var(--toolbar-bg);
             border-radius: 40px;
             flex-wrap: wrap;
             flex-shrink: 0;
@@ -308,10 +493,10 @@
         .page-nav span {
             font-weight: 700;
             font-size: 13px;
-            color: #1a1a1a;
+            color: var(--text-color);
         }
         .page-nav .nav-btn {
-            background: #0d6efd;
+            background: var(--btn-primary);
             color: white;
             border: none;
             border-radius: 30px;
@@ -324,7 +509,7 @@
             min-height: 32px;
         }
         .page-nav .nav-btn:hover {
-            background: #0b5ed7;
+            background: var(--btn-primary-hover);
         }
         .page-nav .nav-btn:disabled {
             opacity: 0.4;
@@ -335,30 +520,71 @@
             font-size: 13px;
             min-width: 40px;
             text-align: center;
-            background: white;
+            background: var(--bg-white);
             padding: 2px 8px;
             border-radius: 30px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .zoom-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin: 3px 0 4px;
+            padding: 4px 12px;
+            background: var(--toolbar-bg);
+            border-radius: 40px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .zoom-controls .zoom-btn {
+            background: var(--btn-primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 3px 12px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.15s;
+            min-width: 36px;
+            min-height: 30px;
+        }
+        .zoom-controls .zoom-btn:hover {
+            background: var(--btn-primary-hover);
+        }
+        .zoom-controls .zoom-level {
+            font-weight: 700;
+            font-size: 13px;
+            min-width: 50px;
+            text-align: center;
+            background: var(--bg-white);
+            padding: 3px 10px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
         }
 
         .info-text {
             font-size: 12px;
-            color: #444;
+            color: var(--text-secondary);
             margin: 2px 0 4px;
             text-align: center;
-            background: #faf9e6;
+            background: var(--info-bg);
             padding: 4px 12px;
             border-radius: 40px;
             font-weight: 600;
-            border: 1px solid #eee;
+            border: 1px solid var(--info-border);
             flex-shrink: 0;
         }
 
         .pdf-container {
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color);
             border-radius: 18px;
             overflow: auto;
-            background: #e9ecef;
+            background: var(--pdf-container-bg);
             padding: 10px 6px;
             touch-action: pan-y;
             flex: 1 1 auto;
@@ -371,11 +597,10 @@
             position: relative;
             margin: 0 auto 12px auto;
             background: white;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 16px var(--page-shadow);
             border-radius: 10px;
             display: block !important;
             max-width: 100%;
-            /* Critical: force LTR so PDF.js text metrics are not broken by page RTL */
             direction: ltr;
         }
         .pdf-page-wrapper canvas {
@@ -383,14 +608,25 @@
             width: 100% !important;
             height: auto !important;
             border-radius: 8px;
-            /* Prevent RTL inheritance from <html dir="rtl"> which causes
-               overlapping / compressed Hebrew glyphs in many PDFs */
             direction: ltr !important;
+        }
+        .pdf-page-wrapper.loading::after {
+            content: '⏳ טוען...';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            inset: 0;
+            background: #f8f8f8;
+            color: #888;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 8px;
         }
 
         .field-overlay {
             position: absolute;
-            border: 2.5px solid #703efa;
+            border: 2.5px solid var(--btn-signature);
             border-radius: 8px;
             background: rgba(112, 62, 250, 0.06);
             cursor: grab;
@@ -402,24 +638,23 @@
             min-width: 12px;
             min-height: 12px;
             display: block !important;
-            direction: ltr; /* positioning context */
+            direction: ltr;
         }
         .field-overlay.text-field {
-            direction: rtl; /* text input stays RTL */
-            border-color: #0d6efd;
+            direction: rtl;
+            border-color: var(--btn-primary);
             background: rgba(13, 110, 253, 0.06);
             display: flex !important;
             flex-direction: column;
             padding: 2px;
         }
         .field-overlay.checkbox-field {
-            border-color: #198754;
+            border-color: var(--btn-checkbox);
             background: rgba(25, 135, 84, 0.06);
             padding: 1px;
             border-width: 1.5px;
             border-radius: 3px;
         }
-        /* Only selected field is interactive for drag/resize */
         .field-overlay:not(.selected) {
             cursor: pointer;
         }
@@ -438,17 +673,16 @@
             border: none;
             background: transparent;
             font-family: inherit;
-            font-size: 16px; /* prevents iOS zoom */
+            font-size: 16px;
             resize: none;
             outline: none;
             padding: 2px 4px;
             cursor: text;
-            color: #1a1a1a;
+            color: var(--text-color);
             direction: rtl;
             line-height: 1.35;
             box-sizing: border-box;
         }
-        /* Toolbar floats ABOVE the field so it doesn't shift content vs PDF */
         .text-toolbar {
             display: none;
             position: absolute;
@@ -459,7 +693,7 @@
             gap: 3px;
             padding: 2px 4px;
             background: rgba(255,255,255,0.96);
-            border: 1px solid #dde3ea;
+            border: 1px solid var(--border-lighter);
             border-radius: 8px;
             direction: ltr;
             flex-shrink: 0;
@@ -472,8 +706,8 @@
             display: flex;
         }
         .text-toolbar .tt-btn {
-            border: 1px solid #ccd;
-            background: #f8f9fa;
+            border: 1px solid var(--border-light);
+            background: var(--bg-hover-light);
             border-radius: 5px;
             width: 26px;
             height: 22px;
@@ -488,24 +722,24 @@
             line-height: 1;
         }
         .text-toolbar .tt-btn:hover {
-            background: #e9ecef;
+            background: var(--bg-hover-light);
         }
         .text-toolbar .tt-btn.active {
-            background: #0d6efd;
+            background: var(--btn-primary);
             color: #fff;
-            border-color: #0d6efd;
+            border-color: var(--btn-primary);
         }
         .text-toolbar .tt-size {
             font-size: 11px;
             font-weight: 700;
             min-width: 18px;
             text-align: center;
-            color: #444;
+            color: var(--text-secondary);
         }
         .text-toolbar .tt-color {
             width: 22px;
             height: 20px;
-            border: 1px solid #ccd;
+            border: 1px solid var(--border-light);
             border-radius: 4px;
             padding: 0;
             cursor: pointer;
@@ -515,7 +749,7 @@
             position: absolute;
             top: -26px;
             right: 0;
-            background: #703efa;
+            background: var(--field-label-sig);
             color: white;
             padding: 3px 10px;
             border-radius: 30px;
@@ -528,16 +762,16 @@
             align-items: center;
         }
         .field-overlay.text-field .field-label {
-            background: #0d6efd;
+            background: var(--field-label-text);
         }
         .field-overlay.checkbox-field .field-label {
-            background: #198754;
+            background: var(--field-label-check);
         }
         .field-overlay .delete-handle {
             position: absolute;
             top: -26px;
             left: 0;
-            background: #dc3545;
+            background: var(--btn-danger);
             color: white;
             border: none;
             border-radius: 30px;
@@ -551,7 +785,7 @@
             min-width: 28px;
         }
         .field-overlay .delete-handle:hover {
-            background: #c82333;
+            background: var(--btn-danger-hover);
         }
         .field-overlay .resize-handle {
             position: absolute;
@@ -559,7 +793,7 @@
             right: -12px;
             width: 28px;
             height: 28px;
-            background: #703efa;
+            background: var(--btn-signature);
             border-radius: 50%;
             cursor: nwse-resize;
             border: 3px solid white;
@@ -567,10 +801,10 @@
             touch-action: none;
         }
         .field-overlay.text-field .resize-handle {
-            background: #0d6efd;
+            background: var(--btn-primary);
         }
         .field-overlay.checkbox-field .resize-handle {
-            background: #198754;
+            background: var(--btn-checkbox);
         }
         .field-overlay .checkbox-mark {
             font-size: 18px;
@@ -585,7 +819,7 @@
         }
         .field-overlay .signature-placeholder {
             font-size: 12px;
-            color: #94a3b8;
+            color: var(--text-light);
             font-style: italic;
         }
         .field-overlay img {
@@ -614,7 +848,7 @@
             gap: 8px;
             font-size: 18px;
             font-weight: 700;
-            color: #2c3e50;
+            color: var(--footer-color);
             letter-spacing: 0.3px;
             text-align: center;
         }
@@ -645,6 +879,102 @@
         .toast.show {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* ===== Signature Pad Modal ===== */
+        .sig-pad-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .sig-pad-modal.show {
+            display: flex;
+        }
+        .sig-pad-content {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .sig-pad-content h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .sig-pad-canvas-wrapper {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: white;
+            position: relative;
+            touch-action: none;
+            margin-bottom: 16px;
+        }
+        .sig-pad-canvas-wrapper canvas {
+            display: block;
+            width: 100%;
+            cursor: crosshair;
+            touch-action: none;
+            border-radius: 10px;
+        }
+        .sig-pad-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .sig-pad-actions button {
+            border: none;
+            border-radius: 40px;
+            padding: 10px 22px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sig-pad-actions .sp-clear {
+            background: var(--bg-hover-light);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+        }
+        .sig-pad-actions .sp-clear:hover {
+            border-color: var(--btn-danger);
+            color: var(--btn-danger);
+        }
+        .sig-pad-actions .sp-cancel {
+            background: var(--text-muted);
+            color: white;
+        }
+        .sig-pad-actions .sp-cancel:hover {
+            opacity: 0.85;
+        }
+        .sig-pad-actions .sp-save {
+            background: var(--btn-success);
+            color: white;
+        }
+        .sig-pad-actions .sp-save:hover {
+            background: var(--btn-success-hover);
+        }
+        .sig-pad-actions .sp-save:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .sig-pad-hint {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 12px;
         }
 
         /* ===== Mobile improvements ===== */
@@ -682,7 +1012,7 @@
                 gap: 6px;
                 margin: 0;
                 box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
-                background: #f1f3f5;
+                background: var(--toolbar-bg);
             }
             .toolbar .btn,
             .toolbar [class*="btn-"] {
@@ -703,13 +1033,16 @@
             .info-text {
                 font-size: 11px;
                 padding: 4px 10px;
-                display: none; /* save space on mobile */
+                display: none;
             }
             .field-overlay .resize-handle {
                 width: 32px;
                 height: 32px;
                 bottom: -14px;
                 right: -14px;
+            }
+            .sig-pad-content {
+                padding: 16px;
             }
         }
         @media (max-width: 480px) {
@@ -748,13 +1081,23 @@
             }
         }
     </style>
+  <meta property="og:image" content="https://bolt.new/static/og_default.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
 </head>
 <body>
 
     <div class="container">
         <div class="header">
-            <h1>✒️ עורך PDF מתקדם</h1>
+            <h1>עורך PDF מתקדם</h1>
             <div class="header-actions">
+                <button class="btn-undo" id="undoBtn" disabled title="בטל (Ctrl+Z)">↩️ בטל</button>
+                <button class="btn-redo" id="redoBtn" disabled title="חזור (Ctrl+Y)">↪️ חזור</button>
+                <select class="theme-select" id="themeSelect" title="ערכת נושא">
+                    <option value="default">🎨 כחול-צהוב</option>
+                    <option value="modern">🏢 מודרני</option>
+                    <option value="dark">🌙 כהה</option>
+                </select>
                 <button class="btn btn-success" id="downloadBtn">💾 הורד PDF</button>
             </div>
         </div>
@@ -778,6 +1121,7 @@
             <button class="btn-signature active" data-tool="signature">✍️ חתימה</button>
             <button class="btn-text" data-tool="text">📃 טקסט</button>
             <button class="btn-checkbox" data-tool="checkbox">❎ סימון</button>
+            <button class="btn-draw-sig" id="drawSigBtn">✏️ צייר חתימה</button>
             <button class="btn-delete-all" id="deleteAllBtn">🗑️ מחק הכל</button>
         </div>
 
@@ -788,7 +1132,14 @@
             <button class="nav-btn" id="nextPage">›</button>
         </div>
 
-        <div class="info-text">💡 בחר כלי ← לחץ על הדף להוספה | לחץ על שדה לבחירה ועריכה | גרור להזזה | גרור פינה לשינוי גודל</div>
+        <div class="zoom-controls">
+            <button class="zoom-btn" id="zoomOut" title="הקטן">−</button>
+            <span class="zoom-level" id="zoomLevel">100%</span>
+            <button class="zoom-btn" id="zoomIn" title="הגדל">+</button>
+            <button class="zoom-btn" id="zoomReset" title="איפוס" style="font-size:13px;min-width:auto;padding:3px 10px;">איפוס</button>
+        </div>
+
+        <div class="info-text">💡 בחר כלי ← לחץ על הדף להוספה | לחץ על שדה לבחירה ועריכה | גרור להזזה | גרור פינה לשינוי גודל | Delete למחיקה | חצים להזזה עדינה</div>
 
         <div class="pdf-container" id="pdfContainer">
             <div id="pagesContainer"></div>
@@ -802,39 +1153,124 @@
         </div>
     </div>
 
+    <!-- Signature Pad Modal -->
+    <div class="sig-pad-modal" id="sigPadModal">
+        <div class="sig-pad-content">
+            <h3>✏️ צייר את החתימה שלך</h3>
+            <div class="sig-pad-hint">צייר עם העכבר או האצבע באזור למטה</div>
+            <div class="sig-pad-canvas-wrapper" id="sigPadWrapper">
+                <canvas id="sigPadCanvas"></canvas>
+            </div>
+            <div class="sig-pad-actions">
+                <button class="sp-clear" id="sigPadClear">🧹 נקה</button>
+                <button class="sp-cancel" id="sigPadCancel">ביטול</button>
+                <button class="sp-save" id="sigPadSave" disabled>✔️ שמור חתימה</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script>
         (function() {
             'use strict';
 
-            // ===== PDF.js Worker (performance) =====
+            // ===== PDF.js Worker =====
             if (typeof pdfjsLib !== 'undefined') {
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             }
 
+            // ===== State =====
             let pdfDoc = null;
             let pdfDataArrayBuffer = null;
             let currentPage = 1;
             let totalPages = 0;
-            let scale = 1.5;
+            let baseScale = 1.5;
+            let zoomMultiplier = 1.0;
 
             let fields = [];
             let fieldIdCounter = 0;
             let selectedTool = 'signature';
-            let selectedFieldId = null; // only selected field is editable/movable
+            let selectedFieldId = null;
             let signatureImageData = null;
 
-            // Detect if text is primarily Hebrew (for auto-align + font choice)
+            // ===== Undo / Redo =====
+            let undoStack = [];
+            let redoStack = [];
+            const MAX_UNDO = 50;
+
+            function snapshotState() {
+                return JSON.stringify(fields);
+            }
+
+            function pushUndo() {
+                undoStack.push(snapshotState());
+                if (undoStack.length > MAX_UNDO) undoStack.shift();
+                redoStack = [];
+                updateUndoRedoButtons();
+            }
+
+            function restoreState(snap) {
+                fields = JSON.parse(snap);
+                if (fields.length > 0) {
+                    fieldIdCounter = Math.max(...fields.map(f => f.id)) + 1;
+                }
+                selectedFieldId = null;
+                renderFields();
+            }
+
+            function undo() {
+                if (undoStack.length === 0) return;
+                redoStack.push(snapshotState());
+                const snap = undoStack.pop();
+                restoreState(snap);
+                updateUndoRedoButtons();
+                showToast('↩️ בוטל');
+            }
+
+            function redo() {
+                if (redoStack.length === 0) return;
+                undoStack.push(snapshotState());
+                const snap = redoStack.pop();
+                restoreState(snap);
+                updateUndoRedoButtons();
+                showToast('↪️ חזר');
+            }
+
+            function updateUndoRedoButtons() {
+                document.getElementById('undoBtn').disabled = undoStack.length === 0;
+                document.getElementById('redoBtn').disabled = redoStack.length === 0;
+            }
+
+            // ===== Theme =====
+            const themeSelect = document.getElementById('themeSelect');
+            themeSelect.addEventListener('change', function() {
+                const val = this.value;
+                if (val === 'default') {
+                    document.documentElement.removeAttribute('data-theme');
+                } else {
+                    document.documentElement.setAttribute('data-theme', val);
+                }
+                try { localStorage.setItem('pdf-editor-theme', val); } catch(_) {}
+            });
+            try {
+                const savedTheme = localStorage.getItem('pdf-editor-theme');
+                if (savedTheme && savedTheme !== 'default') {
+                    themeSelect.value = savedTheme;
+                    document.documentElement.setAttribute('data-theme', savedTheme);
+                }
+            } catch(_) {}
+
+            // ===== Hebrew detection =====
             function isPrimarilyHebrew(text) {
-                if (!text || !text.trim()) return true; // default RTL for empty
+                if (!text || !text.trim()) return true;
                 const hebrew = (text.match(/[\u0590-\u05FF]/g) || []).join('').length;
                 const latin = (text.match(/[A-Za-z]/g) || []).join('').length;
                 if (hebrew === 0 && latin === 0) return true;
                 return hebrew >= latin;
             }
 
-            // Split a string into runs of Hebrew vs Latin/other for dual-font drawing
+            // ===== Split text into Hebrew / Latin runs for dual-font drawing =====
             function splitScriptRuns(text) {
                 const runs = [];
                 let current = '';
@@ -842,12 +1278,11 @@
                 for (const ch of text) {
                     const isHeb = /[\u0590-\u05FF]/.test(ch);
                     const isLatin = /[A-Za-z0-9]/.test(ch);
-                    // Whitespace/punctuation inherits previous run type
-                    const kind = isHeb ? true : (isLatin ? false : currentIsHeb);
+                    const kind = isHeb ? true : (isLatin ? false : null);
                     if (currentIsHeb === null) {
-                        currentIsHeb = isHeb || !isLatin;
+                        currentIsHeb = isHeb || (!isLatin ? true : false);
                         current = ch;
-                    } else if (kind === currentIsHeb || (!isHeb && !isLatin)) {
+                    } else if (kind === null || kind === currentIsHeb) {
                         current += ch;
                     } else {
                         runs.push({ text: current, hebrew: currentIsHeb });
@@ -859,7 +1294,7 @@
                 return runs;
             }
 
-            // Drag / Resize state
+            // ===== Drag / Resize state =====
             let isDragging = false;
             let dragTarget = null;
             let dragOffsetX = 0, dragOffsetY = 0;
@@ -871,8 +1306,9 @@
 
             let pageWidths = [];
             let pageHeights = [];
+            let renderedPages = new Set();
+            let pageRenderScale = [];
 
-            // Touch state
             let touchDragData = null;
             let touchResizeData = null;
 
@@ -890,6 +1326,12 @@
             const prevPage = document.getElementById('prevPage');
             const nextPage = document.getElementById('nextPage');
             const toastEl = document.getElementById('toast');
+            const undoBtn = document.getElementById('undoBtn');
+            const redoBtn = document.getElementById('redoBtn');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const zoomResetBtn = document.getElementById('zoomReset');
+            const zoomLevelEl = document.getElementById('zoomLevel');
 
             function showToast(msg, duration = 2800) {
                 toastEl.textContent = msg;
@@ -911,15 +1353,21 @@
                 return document.querySelector(`.field-overlay[data-field-id="${id}"]`);
             }
 
+            // ===== File size validation =====
+            const MAX_PDF_SIZE = 50 * 1024 * 1024; // 50 MB
+
             // ===== Load PDF =====
             function loadPdfFile(file) {
+                if (file.size > MAX_PDF_SIZE) {
+                    showToast('❌ הקובץ גדול מדי (מקסימום 50MB)');
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     pdfDataArrayBuffer = e.target.result;
                     const bufferForPdfjs = pdfDataArrayBuffer.slice(0);
                     pdfFileName.textContent = file.name;
 
-                    // cMap + standard fonts are required for many Hebrew / government PDFs
                     pdfjsLib.getDocument({
                         data: bufferForPdfjs,
                         cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
@@ -934,8 +1382,13 @@
                         fields = [];
                         fieldIdCounter = 0;
                         selectedFieldId = null;
+                        undoStack = [];
+                        redoStack = [];
+                        updateUndoRedoButtons();
                         pageWidths = [];
                         pageHeights = [];
+                        renderedPages = new Set();
+                        pageRenderScale = [];
                         renderAllPages();
                         showToast('✅ PDF נטען בהצלחה');
                     }).catch(err => {
@@ -946,14 +1399,13 @@
                 reader.readAsArrayBuffer(file);
             }
 
-            // ===== Convert any image (including SVG) to PNG data-URL =====
+            // ===== Convert any image to PNG data-URL =====
             function imageFileToPngDataUrl(file) {
                 return new Promise((resolve, reject) => {
                     const isSvg = file.type === 'image/svg+xml' ||
                                   file.name.toLowerCase().endsWith('.svg');
 
                     if (isSvg) {
-                        // SVG → Canvas → PNG
                         const reader = new FileReader();
                         reader.onload = function(e) {
                             const svgText = e.target.result;
@@ -962,11 +1414,9 @@
                             const img = new Image();
                             img.onload = function() {
                                 try {
-                                    // Use intrinsic size or fallback
                                     const w = img.naturalWidth || img.width || 400;
                                     const h = img.naturalHeight || img.height || 200;
                                     const canvas = document.createElement('canvas');
-                                    // Higher resolution for crisp signatures
                                     const scaleFactor = 2;
                                     canvas.width = w * scaleFactor;
                                     canvas.height = h * scaleFactor;
@@ -990,16 +1440,13 @@
                         reader.onerror = () => reject(new Error('Failed to read SVG file'));
                         reader.readAsText(file);
                     } else {
-                        // Regular raster images (PNG, JPG, WEBP, GIF, etc.)
                         const reader = new FileReader();
                         reader.onload = function(e) {
-                            // Optionally normalize everything to PNG for maximum compatibility
                             const dataUrl = e.target.result;
                             if (file.type === 'image/png' || dataUrl.startsWith('data:image/png')) {
                                 resolve(dataUrl);
                                 return;
                             }
-                            // Convert other formats to PNG via canvas for consistent embedding
                             const img = new Image();
                             img.onload = function() {
                                 try {
@@ -1010,7 +1457,6 @@
                                     ctx.drawImage(img, 0, 0);
                                     resolve(canvas.toDataURL('image/png'));
                                 } catch (err) {
-                                    // Fallback to original data URL
                                     resolve(dataUrl);
                                 }
                             };
@@ -1023,7 +1469,7 @@
                 });
             }
 
-            // ===== Load Signature (supports PNG, JPG, WEBP, GIF, SVG, ...) =====
+            // ===== Load Signature =====
             async function loadSignatureFile(file) {
                 try {
                     showToast('⏳ מעבד חתימה...');
@@ -1031,7 +1477,6 @@
                     signatureImageData = dataUrl;
                     sigStatus.textContent = '✅ חתימה נטענה';
                     showToast('✅ חתימה נטענה' + (file.name.toLowerCase().endsWith('.svg') ? ' (SVG→PNG)' : ''));
-                    // Update existing signature fields that have no image
                     fields.forEach(f => {
                         if (f.type === 'signature' && !f.value) {
                             f.value = signatureImageData;
@@ -1044,12 +1489,19 @@
                 }
             }
 
-            // ===== Render all pages =====
+            // ===== Get current effective scale =====
+            function getEffectiveScale() {
+                return baseScale * zoomMultiplier;
+            }
+
+            // ===== Render all pages (with lazy rendering) =====
             async function renderAllPages() {
                 if (!pdfDoc) return;
                 pagesContainer.innerHTML = '';
                 pageWidths = [];
                 pageHeights = [];
+                pageRenderScale = [];
+                renderedPages = new Set();
 
                 const containerWidth = Math.max(280, container.clientWidth - 24);
 
@@ -1063,18 +1515,21 @@
 
                     let idealScale = containerWidth / width;
                     idealScale = Math.min(2.2, Math.max(0.45, idealScale));
-                    scale = idealScale;
+                    baseScale = idealScale;
+                    pageRenderScale.push(idealScale);
 
-                    const scaledViewport = page.getViewport({ scale: scale });
+                    const effScale = idealScale * zoomMultiplier;
+                    const scaledViewport = page.getViewport({ scale: effScale });
                     const wrapper = document.createElement('div');
-                    wrapper.className = 'pdf-page-wrapper';
+                    wrapper.className = 'pdf-page-wrapper loading';
                     wrapper.dataset.page = i;
-                    wrapper.dir = 'ltr';                 // force LTR – critical for correct Hebrew glyph metrics
+                    wrapper.dir = 'ltr';
                     wrapper.style.position = 'relative';
                     wrapper.style.width = scaledViewport.width + 'px';
                     wrapper.style.margin = '0 auto 12px auto';
                     wrapper.style.maxWidth = '100%';
                     wrapper.style.direction = 'ltr';
+                    wrapper.style.minHeight = scaledViewport.height + 'px';
 
                     const canvas = document.createElement('canvas');
                     canvas.width = scaledViewport.width;
@@ -1087,17 +1542,91 @@
 
                     wrapper.appendChild(canvas);
                     pagesContainer.appendChild(wrapper);
+                }
 
+                // Lazy render: only visible pages first, then rest
+                renderVisiblePages();
+                // Render remaining pages after a short delay
+                setTimeout(() => renderRemainingPages(), 100);
+
+                renderFields();
+                updatePageNav();
+                updateZoomDisplay();
+            }
+
+            async function renderVisiblePages() {
+                const containerRect = container.getBoundingClientRect();
+                for (let i = 1; i <= totalPages; i++) {
+                    if (renderedPages.has(i)) continue;
+                    const wrapper = getPageWrapper(i);
+                    if (!wrapper) continue;
+                    const rect = wrapper.getBoundingClientRect();
+                    const isVisible = rect.bottom > containerRect.top - 200 && rect.top < containerRect.bottom + 200;
+                    if (isVisible) {
+                        await renderPage(i);
+                    }
+                }
+            }
+
+            async function renderRemainingPages() {
+                for (let i = 1; i <= totalPages; i++) {
+                    if (!renderedPages.has(i)) {
+                        await renderPage(i);
+                        renderFields();
+                    }
+                }
+            }
+
+            async function renderPage(pageNum) {
+                if (!pdfDoc || renderedPages.has(pageNum)) return;
+                const page = await pdfDoc.getPage(pageNum);
+                const effScale = pageRenderScale[pageNum - 1] * zoomMultiplier;
+                const scaledViewport = page.getViewport({ scale: effScale });
+                const wrapper = getPageWrapper(pageNum);
+                if (!wrapper) return;
+                const canvas = wrapper.querySelector('canvas');
+                if (!canvas) return;
+
+                canvas.width = scaledViewport.width;
+                canvas.height = scaledViewport.height;
+                wrapper.style.width = scaledViewport.width + 'px';
+                wrapper.style.minHeight = scaledViewport.height + 'px';
+
+                const renderContext = {
+                    canvasContext: canvas.getContext('2d'),
+                    viewport: scaledViewport
+                };
+                await page.render(renderContext).promise;
+                renderedPages.add(pageNum);
+                wrapper.classList.remove('loading');
+            }
+
+            // ===== Re-render pages on zoom change =====
+            async function reRenderPages() {
+                if (!pdfDoc) return;
+                renderedPages = new Set();
+                for (let i = 1; i <= totalPages; i++) {
+                    const wrapper = getPageWrapper(i);
+                    if (!wrapper) continue;
+                    const effScale = pageRenderScale[i - 1] * zoomMultiplier;
+                    const page = await pdfDoc.getPage(i);
+                    const scaledViewport = page.getViewport({ scale: effScale });
+                    const canvas = wrapper.querySelector('canvas');
+                    if (!canvas) continue;
+                    canvas.width = scaledViewport.width;
+                    canvas.height = scaledViewport.height;
+                    wrapper.style.width = scaledViewport.width + 'px';
+                    wrapper.style.minHeight = scaledViewport.height + 'px';
+                    wrapper.classList.add('loading');
                     const renderContext = {
                         canvasContext: canvas.getContext('2d'),
                         viewport: scaledViewport
                     };
                     await page.render(renderContext).promise;
+                    renderedPages.add(i);
+                    wrapper.classList.remove('loading');
                 }
-
                 renderFields();
-                updatePageNav();
-                showToast('✅ הדפים נטענו');
             }
 
             // ===== Add field =====
@@ -1106,6 +1635,8 @@
                     showToast('ℹ️ בחר כלי תחילה');
                     return;
                 }
+
+                pushUndo();
 
                 const pageIndex = pageNum - 1;
                 const field = {
@@ -1134,7 +1665,7 @@
                     field.value = false;
                 } else if (selectedTool === 'text') {
                     field.w = 200;
-                    field.h = 55; // room for ~2 lines at default font size
+                    field.h = 55;
                     field.value = '';
                     field.fontSize = 14;
                     field.color = '#1a1a1a';
@@ -1144,22 +1675,19 @@
                     field.alignLocked = false;
                 }
 
-                // Keep inside page bounds
                 field.x = Math.max(0, Math.min(field.x, pageWidths[pageIndex] - field.w));
                 field.y = Math.max(0, Math.min(field.y, pageHeights[pageIndex] - field.h));
 
                 fields.push(field);
                 selectedFieldId = field.id;
-                // One-shot placement: deselect tool so next empty click does not add another
                 selectedTool = null;
                 document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
                 renderFields();
                 showToast('✅ שדה נוסף – לחץ על הכלי שוב להוספה נוספת');
             }
 
-            // ===== Render fields (full) =====
+            // ===== Render fields =====
             function renderFields() {
-                // Remove existing overlays
                 document.querySelectorAll('.field-overlay').forEach(el => el.remove());
 
                 for (const f of fields) {
@@ -1169,11 +1697,11 @@
                     const canvas = wrapper.querySelector('canvas');
                     if (!canvas) continue;
 
-                    const scale = canvas.width / pageWidths[f.pageIndex];
-                    const relX = f.x * scale;
-                    const relY = f.y * scale;
-                    const relW = f.w * scale;
-                    const relH = f.h * scale;
+                    const s = canvas.width / pageWidths[f.pageIndex];
+                    const relX = f.x * s;
+                    const relY = f.y * s;
+                    const relW = f.w * s;
+                    const relH = f.h * s;
 
                     const el = document.createElement('div');
                     el.className = 'field-overlay';
@@ -1186,16 +1714,13 @@
                     el.style.width = relW + 'px';
                     el.style.height = relH + 'px';
 
-                    // Label
                     const label = document.createElement('div');
                     label.className = 'field-label';
                     const labels = { text: 'טקסט', signature: 'חתימה', checkbox: 'סימון' };
                     label.textContent = labels[f.type] || f.type;
                     el.appendChild(label);
 
-                    // Content
                     if (f.type === 'text') {
-                        // Mini toolbar for font controls
                         const align = f.align || 'right';
                         const toolbar = document.createElement('div');
                         toolbar.className = 'text-toolbar';
@@ -1222,12 +1747,10 @@
                         ta.style.fontWeight = f.bold ? 'bold' : 'normal';
                         ta.style.textDecoration = f.underline ? 'underline' : 'none';
                         ta.style.textAlign = align;
-                        // Direction follows content language
                         const heb = isPrimarilyHebrew(f.value || '');
                         ta.style.direction = heb ? 'rtl' : 'ltr';
                         ta.addEventListener('input', (e) => {
                             f.value = e.target.value;
-                            // Auto-align: Hebrew → right, English → left (unless user forced align via toolbar)
                             if (!f.alignLocked) {
                                 const primarilyHeb = isPrimarilyHebrew(f.value);
                                 const newAlign = primarilyHeb ? 'right' : 'left';
@@ -1240,22 +1763,22 @@
                             } else {
                                 ta.style.direction = isPrimarilyHebrew(f.value) ? 'rtl' : 'ltr';
                             }
-                            // Auto-grow height so multi-line text is not clipped in PDF
                             const lineCount = Math.max(1, (f.value || '').split('\n').length);
                             const neededH = Math.max(28, lineCount * (f.fontSize || 14) * 1.4 + 8);
                             if (neededH > f.h) {
                                 const maxH = pageHeights[f.pageIndex] - f.y;
                                 f.h = Math.min(neededH, maxH);
-                                el.style.height = (f.h * scale) + 'px';
+                                el.style.height = (f.h * s) + 'px';
                             }
+                        });
+                        ta.addEventListener('blur', () => {
+                            pushUndo();
                         });
                         ta.addEventListener('mousedown', (e) => e.stopPropagation());
                         ta.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
                         ta.addEventListener('click', (e) => e.stopPropagation());
-                        // Only editable when selected
                         ta.readOnly = selectedFieldId !== f.id;
 
-                        // Toolbar actions
                         toolbar.querySelector('.tt-dec').addEventListener('click', (e) => {
                             e.stopPropagation();
                             f.fontSize = Math.max(8, (f.fontSize || 14) - 1);
@@ -1288,7 +1811,7 @@
 
                         function setAlign(newAlign) {
                             f.align = newAlign;
-                            f.alignLocked = true; // user overrode auto-align
+                            f.alignLocked = true;
                             ta.style.textAlign = newAlign;
                             toolbar.querySelector('.tt-align-right').classList.toggle('active', newAlign === 'right');
                             toolbar.querySelector('.tt-align-center').classList.toggle('active', newAlign === 'center');
@@ -1318,12 +1841,12 @@
                         span.textContent = f.value ? '☑' : '☐';
                         span.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            // Select first if not selected; toggle only when already selected
                             if (selectedFieldId !== f.id) {
                                 selectedFieldId = f.id;
                                 renderFields();
                                 return;
                             }
+                            pushUndo();
                             f.value = !f.value;
                             span.textContent = f.value ? '☑' : '☐';
                         });
@@ -1341,12 +1864,12 @@
                         }
                     }
 
-                    // Delete button
                     const delBtn = document.createElement('button');
                     delBtn.className = 'delete-handle';
                     delBtn.textContent = '✕';
                     delBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        pushUndo();
                         fields = fields.filter(field => field.id !== f.id);
                         if (selectedFieldId === f.id) selectedFieldId = null;
                         renderFields();
@@ -1354,7 +1877,6 @@
                     });
                     el.appendChild(delBtn);
 
-                    // Resize handle
                     const resizeHandle = document.createElement('div');
                     resizeHandle.className = 'resize-handle';
                     resizeHandle.addEventListener('mousedown', (e) => {
@@ -1371,15 +1893,13 @@
                     }, { passive: false });
                     el.appendChild(resizeHandle);
 
-                    // Click to select / drag only when selected
                     el.addEventListener('mousedown', (e) => {
                         if (e.target === delBtn || e.target === resizeHandle) return;
                         if (f.type === 'text' && e.target.tagName === 'TEXTAREA' && selectedFieldId === f.id) return;
-                        // Select this field
                         if (selectedFieldId !== f.id) {
                             selectedFieldId = f.id;
                             renderFields();
-                            return; // first click only selects
+                            return;
                         }
                         if (f.type === 'text' && e.target.tagName === 'TEXTAREA') return;
                         startDrag(e, f);
@@ -1400,7 +1920,7 @@
                 }
             }
 
-            // ===== Drag (optimized - direct style update) =====
+            // ===== Drag =====
             function startDrag(e, field) {
                 isDragging = true;
                 dragTarget = field;
@@ -1428,7 +1948,6 @@
                 dragTarget.x = newX;
                 dragTarget.y = newY;
 
-                // Direct update - no full re-render
                 const el = getFieldElement(dragTarget.id);
                 if (el) {
                     el.style.left = (newX * s) + 'px';
@@ -1444,7 +1963,6 @@
                 }
             }
 
-            // Touch drag
             function startDragTouch(e, field) {
                 const touch = e.touches[0];
                 const el = e.target.closest('.field-overlay');
@@ -1457,7 +1975,7 @@
                 e.preventDefault();
             }
 
-            // ===== Resize (optimized + correct scale) =====
+            // ===== Resize =====
             function startResize(e, field) {
                 isResizing = true;
                 resizeTarget = field;
@@ -1478,18 +1996,15 @@
                 const newW = Math.max(minSize, resizeStartW + dx);
                 const newH = Math.max(minSize, resizeStartH + dy);
 
-                // Keep inside page
                 const maxW = pageWidths[resizeTarget.pageIndex] - resizeTarget.x;
                 const maxH = pageHeights[resizeTarget.pageIndex] - resizeTarget.y;
                 resizeTarget.w = Math.min(newW, maxW);
                 resizeTarget.h = Math.min(newH, maxH);
 
-                // Direct update
                 const el = getFieldElement(resizeTarget.id);
                 if (el) {
                     el.style.width  = (resizeTarget.w * resizeScale) + 'px';
                     el.style.height = (resizeTarget.h * resizeScale) + 'px';
-                    // Update checkbox font size if needed
                     if (resizeTarget.type === 'checkbox') {
                         const span = el.querySelector('.checkbox-mark');
                         if (span) {
@@ -1501,11 +2016,12 @@
             }
 
             function onResizeEnd() {
-                isResizing = false;
-                resizeTarget = null;
+                if (isResizing) {
+                    isResizing = false;
+                    resizeTarget = null;
+                }
             }
 
-            // Touch resize
             function startResizeTouch(e, field) {
                 const touch = e.touches[0];
                 const canvas = getPageCanvas(field.pageIndex + 1);
@@ -1592,18 +2108,16 @@
                 touchResizeData = null;
             });
 
-            // ===== Click on page: add field if tool armed, otherwise deselect =====
+            // ===== Click on page: add field or deselect =====
             pagesContainer.addEventListener('click', function(e) {
                 if (e.target.closest('.field-overlay')) return;
                 if (e.target.closest('textarea')) return;
 
-                // Click on empty area → deselect current field
                 if (selectedFieldId !== null) {
                     selectedFieldId = null;
                     renderFields();
                 }
 
-                // Only add a new field when a tool is actively selected
                 if (!selectedTool) return;
 
                 const wrapper = e.target.closest('.pdf-page-wrapper');
@@ -1649,6 +2163,27 @@
             prevPage.addEventListener('click', () => goToPage(currentPage - 1));
             nextPage.addEventListener('click', () => goToPage(currentPage + 1));
 
+            // ===== Zoom =====
+            function updateZoomDisplay() {
+                zoomLevelEl.textContent = Math.round(zoomMultiplier * 100) + '%';
+            }
+
+            zoomInBtn.addEventListener('click', () => {
+                zoomMultiplier = Math.min(3.0, zoomMultiplier + 0.25);
+                updateZoomDisplay();
+                reRenderPages();
+            });
+            zoomOutBtn.addEventListener('click', () => {
+                zoomMultiplier = Math.max(0.5, zoomMultiplier - 0.25);
+                updateZoomDisplay();
+                reRenderPages();
+            });
+            zoomResetBtn.addEventListener('click', () => {
+                zoomMultiplier = 1.0;
+                updateZoomDisplay();
+                reRenderPages();
+            });
+
             // ===== Delete all =====
             deleteAllBtn.addEventListener('click', () => {
                 if (fields.length === 0) {
@@ -1656,6 +2191,7 @@
                     return;
                 }
                 if (confirm('למחוק את כל השדות?')) {
+                    pushUndo();
                     fields = [];
                     selectedFieldId = null;
                     renderFields();
@@ -1674,8 +2210,13 @@
                 fields = [];
                 fieldIdCounter = 0;
                 selectedFieldId = null;
+                undoStack = [];
+                redoStack = [];
+                updateUndoRedoButtons();
                 pageWidths = [];
                 pageHeights = [];
+                renderedPages = new Set();
+                pageRenderScale = [];
                 updatePageNav();
                 pdfUpload.value = '';
                 showToast('🧹 PDF נוקה');
@@ -1686,7 +2227,6 @@
                 signatureImageData = null;
                 sigStatus.textContent = 'לא נטענה';
                 sigUpload.value = '';
-                // Clear value from existing signature fields
                 fields.forEach(f => {
                     if (f.type === 'signature') f.value = '';
                 });
@@ -1694,7 +2234,214 @@
                 showToast('✖️ חתימה הוסרה');
             });
 
-            // ===== Download PDF (with Hebrew font support) =====
+            // ===== Undo / Redo buttons =====
+            undoBtn.addEventListener('click', undo);
+            redoBtn.addEventListener('click', redo);
+
+            // ===== Keyboard shortcuts =====
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                    e.preventDefault();
+                    undo();
+                } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+                    e.preventDefault();
+                    redo();
+                } else if (e.key === 'Delete' || e.key === 'Backspace') {
+                    if (selectedFieldId !== null) {
+                        e.preventDefault();
+                        pushUndo();
+                        fields = fields.filter(f => f.id !== selectedFieldId);
+                        selectedFieldId = null;
+                        renderFields();
+                        showToast('🗑️ שדה נמחק');
+                    }
+                } else if (selectedFieldId !== null && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                    e.preventDefault();
+                    const f = fields.find(fi => fi.id === selectedFieldId);
+                    if (!f) return;
+                    const step = e.shiftKey ? 10 : 1;
+                    if (e.key === 'ArrowLeft') f.x = Math.max(0, f.x - step);
+                    else if (e.key === 'ArrowRight') f.x = Math.min(pageWidths[f.pageIndex] - f.w, f.x + step);
+                    else if (e.key === 'ArrowUp') f.y = Math.max(0, f.y - step);
+                    else if (e.key === 'ArrowDown') f.y = Math.min(pageHeights[f.pageIndex] - f.h, f.y + step);
+                    const el = getFieldElement(f.id);
+                    const canvas = getPageCanvas(f.pageIndex + 1);
+                    if (el && canvas) {
+                        const s = canvas.width / pageWidths[f.pageIndex];
+                        el.style.left = (f.x * s) + 'px';
+                        el.style.top = (f.y * s) + 'px';
+                    }
+                }
+            });
+
+            // ===== Signature Pad =====
+            const sigPadModal = document.getElementById('sigPadModal');
+            const sigPadCanvas = document.getElementById('sigPadCanvas');
+            const sigPadWrapper = document.getElementById('sigPadWrapper');
+            const sigPadClear = document.getElementById('sigPadClear');
+            const sigPadCancel = document.getElementById('sigPadCancel');
+            const sigPadSave = document.getElementById('sigPadSave');
+            const drawSigBtn = document.getElementById('drawSigBtn');
+
+            let sigPadCtx = null;
+            let sigPadDrawing = false;
+            let sigPadLastX = 0, sigPadLastY = 0;
+            let sigPadHasContent = false;
+            let sigPadDpr = 1;
+
+            function initSigPad() {
+                const wrapperRect = sigPadWrapper.getBoundingClientRect();
+                const w = Math.max(300, wrapperRect.width || 500);
+                const h = 200;
+                sigPadDpr = window.devicePixelRatio || 1;
+                sigPadCanvas.width = w * sigPadDpr;
+                sigPadCanvas.height = h * sigPadDpr;
+                sigPadCanvas.style.width = w + 'px';
+                sigPadCanvas.style.height = h + 'px';
+                sigPadCtx = sigPadCanvas.getContext('2d');
+                sigPadCtx.scale(sigPadDpr, sigPadDpr);
+                sigPadCtx.strokeStyle = '#1a1a1a';
+                sigPadCtx.lineWidth = 2.5;
+                sigPadCtx.lineCap = 'round';
+                sigPadCtx.lineJoin = 'round';
+                sigPadCtx.fillStyle = 'white';
+                sigPadCtx.fillRect(0, 0, w, h);
+                sigPadHasContent = false;
+                sigPadSave.disabled = true;
+            }
+
+            function getSigPadPos(e) {
+                const rect = sigPadCanvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function sigPadStart(e) {
+                e.preventDefault();
+                sigPadDrawing = true;
+                const pos = getSigPadPos(e);
+                sigPadLastX = pos.x;
+                sigPadLastY = pos.y;
+            }
+
+            function sigPadDraw(e) {
+                if (!sigPadDrawing) return;
+                e.preventDefault();
+                const pos = getSigPadPos(e);
+                sigPadCtx.beginPath();
+                sigPadCtx.moveTo(sigPadLastX, sigPadLastY);
+                sigPadCtx.lineTo(pos.x, pos.y);
+                sigPadCtx.stroke();
+                sigPadLastX = pos.x;
+                sigPadLastY = pos.y;
+                if (!sigPadHasContent) {
+                    sigPadHasContent = true;
+                    sigPadSave.disabled = false;
+                }
+            }
+
+            function sigPadStop() {
+                sigPadDrawing = false;
+            }
+
+            sigPadCanvas.addEventListener('mousedown', sigPadStart);
+            sigPadCanvas.addEventListener('mousemove', sigPadDraw);
+            sigPadCanvas.addEventListener('mouseup', sigPadStop);
+            sigPadCanvas.addEventListener('mouseleave', sigPadStop);
+            sigPadCanvas.addEventListener('touchstart', sigPadStart, { passive: false });
+            sigPadCanvas.addEventListener('touchmove', sigPadDraw, { passive: false });
+            sigPadCanvas.addEventListener('touchend', sigPadStop);
+
+            sigPadClear.addEventListener('click', () => {
+                const w = sigPadCanvas.width / sigPadDpr;
+                const h = sigPadCanvas.height / sigPadDpr;
+                sigPadCtx.fillStyle = 'white';
+                sigPadCtx.fillRect(0, 0, w, h);
+                sigPadHasContent = false;
+                sigPadSave.disabled = true;
+            });
+
+            sigPadCancel.addEventListener('click', () => {
+                sigPadModal.classList.remove('show');
+            });
+
+            sigPadSave.addEventListener('click', () => {
+                if (!sigPadHasContent) return;
+                // Trim white borders for a cleaner signature
+                const fullDataUrl = sigPadCanvas.toDataURL('image/png');
+                const trimImg = new Image();
+                trimImg.onload = function() {
+                    const tmpCanvas = document.createElement('canvas');
+                    const tw = trimImg.naturalWidth;
+                    const th = trimImg.naturalHeight;
+                    tmpCanvas.width = tw;
+                    tmpCanvas.height = th;
+                    const tmpCtx = tmpCanvas.getContext('2d');
+                    tmpCtx.drawImage(trimImg, 0, 0);
+                    const imgData = tmpCtx.getImageData(0, 0, tw, th);
+                    const data = imgData.data;
+                    let minX = tw, minY = th, maxX = 0, maxY = 0;
+                    for (let y = 0; y < th; y++) {
+                        for (let x = 0; x < tw; x++) {
+                            const idx = (y * tw + x) * 4;
+                            const r = data[idx], g = data[idx+1], b = data[idx+2];
+                            if (r < 240 || g < 240 || b < 240) {
+                                if (x < minX) minX = x;
+                                if (x > maxX) maxX = x;
+                                if (y < minY) minY = y;
+                                if (y > maxY) maxY = y;
+                            }
+                        }
+                    }
+                    if (maxX >= minX && maxY >= minY) {
+                        const pad = 10;
+                        minX = Math.max(0, minX - pad);
+                        minY = Math.max(0, minY - pad);
+                        maxX = Math.min(tw, maxX + pad);
+                        maxY = Math.min(th, maxY + pad);
+                        const cropW = maxX - minX;
+                        const cropH = maxY - minY;
+                        const cropCanvas = document.createElement('canvas');
+                        cropCanvas.width = cropW;
+                        cropCanvas.height = cropH;
+                        const cropCtx = cropCanvas.getContext('2d');
+                        cropCtx.drawImage(tmpCanvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+                        signatureImageData = cropCanvas.toDataURL('image/png');
+                    } else {
+                        signatureImageData = fullDataUrl;
+                    }
+                    sigStatus.textContent = '✅ חתימה צוירה';
+                    showToast('✅ חתימה נשמרה');
+                    fields.forEach(f => {
+                        if (f.type === 'signature' && !f.value) {
+                            f.value = signatureImageData;
+                        }
+                    });
+                    renderFields();
+                    sigPadModal.classList.remove('show');
+                };
+                trimImg.src = fullDataUrl;
+            });
+
+            drawSigBtn.addEventListener('click', () => {
+                sigPadModal.classList.add('show');
+                setTimeout(() => initSigPad(), 50);
+            });
+
+            // Close modal on backdrop click
+            sigPadModal.addEventListener('click', (e) => {
+                if (e.target === sigPadModal) {
+                    sigPadModal.classList.remove('show');
+                }
+            });
+
+            // ===== Download PDF =====
             downloadBtn.addEventListener('click', async function() {
                 if (!pdfDataArrayBuffer) {
                     showToast('❌ אין PDF');
@@ -1706,12 +2453,10 @@
                     const bufferCopy = pdfDataArrayBuffer.slice(0);
                     const newDoc = await PDFLib.PDFDocument.load(bufferCopy);
 
-                    // Register fontkit for custom fonts
                     if (typeof fontkit !== 'undefined') {
                         newDoc.registerFontkit(fontkit);
                     }
 
-                    // Embed Hebrew + Latin fonts so English is not shown as cubes
                     let hebrewFont = null;
                     let latinFont = null;
                     try {
@@ -1725,7 +2470,6 @@
                         console.warn('Could not load Hebrew font:', fontErr);
                     }
                     try {
-                        // Noto Sans covers Latin (English) glyphs
                         const latUrl = 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@main/hinted/ttf/NotoSans/NotoSans-Regular.ttf';
                         const fontBytes = await fetch(latUrl).then(r => {
                             if (!r.ok) throw new Error('Latin font fetch failed');
@@ -1752,18 +2496,15 @@
                         const page = newDoc.getPage(f.pageIndex);
                         const { width, height } = page.getSize();
                         const x = f.x;
-                        // Bottom-left of field in PDF coords (Y grows upward)
                         const y = height - f.y - f.h;
 
                         if (f.type === 'text') {
                             const rawText = (f.value || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-                            // Keep all lines including empty ones in the middle; drop only a single trailing empty
                             let lines = rawText.split('\n');
                             if (lines.length > 1 && lines[lines.length - 1] === '') lines = lines.slice(0, -1);
                             if (lines.length && lines.some(l => l.trim())) {
                                 const fontSize = f.fontSize || 14;
                                 const lineHeight = fontSize * 1.35;
-                                // Parse color (#rrggbb)
                                 let r = 0.1, g = 0.1, b = 0.1;
                                 if (f.color && /^#([0-9a-fA-F]{6})$/.test(f.color)) {
                                     r = parseInt(f.color.slice(1, 3), 16) / 255;
@@ -1771,22 +2512,17 @@
                                     b = parseInt(f.color.slice(5, 7), 16) / 255;
                                 }
                                 const textColor = PDFLib.rgb(r, g, b);
-                                // Auto-align if not locked: Hebrew right, English left
                                 let align = f.align || (isPrimarilyHebrew(rawText) ? 'right' : 'left');
-                                // Field top in PDF coords – text starts near top
                                 const fieldTopPdf = height - f.y;
                                 let textY = fieldTopPdf - fontSize - 2;
                                 const maxW = Math.max(10, f.w - 6);
-                                // Allow drawing all lines that fit; baseline can go slightly below bottom
                                 const minBaseline = y - fontSize * 0.15;
 
                                 for (let i = 0; i < lines.length; i++) {
                                     const line = lines[i];
                                     if (textY < minBaseline) break;
 
-                                    // Split line into Hebrew / Latin runs for correct glyphs
                                     const runs = splitScriptRuns(line);
-                                    // Measure total width
                                     let totalWidth = 0;
                                     const measured = runs.map(run => {
                                         const font = run.hebrew ? hebrewFont : latinFont;
@@ -1832,12 +2568,11 @@
                                                     font: fallbackFont,
                                                     color: textColor
                                                 });
-                                            } catch (e2) { /* skip */ }
+                                            } catch (e2) { }
                                         }
                                         cursorX += run.w;
                                     }
 
-                                    // Underline
                                     if (f.underline && line.trim()) {
                                         try {
                                             page.drawLine({
@@ -1853,7 +2588,6 @@
                                 }
                             }
                         } else if (f.type === 'checkbox') {
-                            // Compact checkbox – use the smaller side, slightly inset
                             const size = Math.max(8, Math.min(f.w, f.h));
                             const borderW = Math.max(0.8, Math.min(1.2, size * 0.08));
                             page.drawRectangle({
@@ -1866,17 +2600,14 @@
                                 color: PDFLib.rgb(1, 1, 1)
                             });
                             if (f.value === true) {
-                                // Draw a proper checkmark
                                 const pad = size * 0.2;
                                 const thickness = Math.max(1.1, size * 0.12);
-                                // Short arm
                                 page.drawLine({
                                     start: { x: x + pad, y: y + size * 0.45 },
                                     end:   { x: x + size * 0.42, y: y + pad },
                                     thickness: thickness,
                                     color: PDFLib.rgb(0, 0.45, 0.1)
                                 });
-                                // Long arm
                                 page.drawLine({
                                     start: { x: x + size * 0.40, y: y + pad },
                                     end:   { x: x + size - pad, y: y + size - pad },
@@ -1886,7 +2617,6 @@
                             }
                         } else if (f.type === 'signature' && f.value) {
                             try {
-                                // All signatures are normalized to PNG data-URLs
                                 const imgBytes = await fetch(f.value).then(res => res.arrayBuffer());
                                 const embeddedImage = await newDoc.embedPng(imgBytes);
                                 page.drawImage(embeddedImage, {
@@ -1897,7 +2627,6 @@
                                 });
                             } catch (err) {
                                 console.warn('Signature embed error:', err);
-                                // Last-resort: try JPG
                                 try {
                                     const imgBytes = await fetch(f.value).then(res => res.arrayBuffer());
                                     const embeddedImage = await newDoc.embedJpg(imgBytes);
@@ -1938,14 +2667,14 @@
             document.querySelectorAll('.upload-card').forEach(card => {
                 card.addEventListener('dragover', (e) => {
                     e.preventDefault();
-                    card.style.borderColor = '#0d6efd';
+                    card.style.borderColor = 'var(--btn-primary)';
                 });
                 card.addEventListener('dragleave', () => {
-                    card.style.borderColor = '#d0d0d0';
+                    card.style.borderColor = 'var(--upload-card-border)';
                 });
                 card.addEventListener('drop', (e) => {
                     e.preventDefault();
-                    card.style.borderColor = '#d0d0d0';
+                    card.style.borderColor = 'var(--upload-card-border)';
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
                         const f = files[0];
@@ -1960,13 +2689,22 @@
                 });
             });
 
-            // Handle window resize - re-render pages for better fit
+            // ===== Lazy scroll: render visible pages =====
+            let scrollTimeout;
+            container.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    renderVisiblePages();
+                    renderFields();
+                }, 150);
+            });
+
+            // ===== Window resize =====
             let resizeTimeout;
             window.addEventListener('resize', () => {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
                     if (pdfDoc) {
-                        // Keep fields, just re-render pages at new scale
                         renderAllPages();
                     }
                 }, 350);
@@ -1974,8 +2712,10 @@
 
             // Init
             updatePageNav();
+            updateUndoRedoButtons();
+            updateZoomDisplay();
             showToast('📄 העלה PDF והתחל', 3500);
-            console.log('✅ עורך PDF מתקדם (גרסה משופרת) טעון');
+            console.log('✅ עורך PDF מתקדם (גרסה משופרת 2.0) טעון');
         })();
     </script>
 </body>
