@@ -1008,18 +1008,26 @@
                 bottom: 0;
                 z-index: 30;
                 border-radius: 16px 16px 0 0;
-                padding: 10px 8px;
+                padding: 8px 6px;
                 gap: 6px;
                 margin: 0;
                 box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
                 background: var(--toolbar-bg);
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
             }
             .toolbar .btn,
             .toolbar [class*="btn-"] {
-                flex: 1;
-                min-height: 46px;
-                font-size: 13px;
-                padding: 8px 6px;
+                flex: 1 1 calc(33.333% - 6px);
+                min-width: 0;
+                max-width: calc(33.333% - 4px);
+                min-height: 42px;
+                font-size: 12px;
+                padding: 6px 4px;
+                white-space: normal;
+                line-height: 1.2;
+                gap: 4px;
             }
             .page-nav {
                 position: sticky;
@@ -1061,11 +1069,21 @@
             .header h1 {
                 font-size: 18px;
             }
+            .toolbar {
+                padding: 6px 4px;
+                gap: 5px;
+            }
             .toolbar .btn,
             .toolbar [class*="btn-"] {
-                font-size: 12px;
-                padding: 8px 4px;
+                flex: 1 1 calc(50% - 5px);
+                max-width: calc(50% - 4px);
+                font-size: 11px;
+                padding: 5px 3px;
+                min-height: 40px;
                 min-width: 0;
+                white-space: normal;
+                line-height: 1.15;
+                gap: 3px;
             }
             .field-overlay .checkbox-mark {
                 font-size: 16px;
