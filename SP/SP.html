@@ -913,10 +913,19 @@
         .sig-pad-canvas-wrapper {
             border: 2px solid var(--border-color);
             border-radius: 12px;
-            background: white;
+            /* לוח שחמט – מרמז על רקע שקוף */
+            background-color: #f0f0f0;
+            background-image:
+                linear-gradient(45deg, #d0d0d0 25%, transparent 25%),
+                linear-gradient(-45deg, #d0d0d0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #d0d0d0 75%),
+                linear-gradient(-45deg, transparent 75%, #d0d0d0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0;
             position: relative;
             touch-action: none;
             margin-bottom: 16px;
+            overflow: hidden;
         }
         .sig-pad-canvas-wrapper canvas {
             display: block;
@@ -924,6 +933,7 @@
             cursor: crosshair;
             touch-action: none;
             border-radius: 10px;
+            background: transparent;
         }
         .sig-pad-actions {
             display: flex;
@@ -1122,8 +1132,8 @@
 
         <div class="upload-grid">
             <div class="upload-card">
-                <label for="pdfUpload">📤 טען PDF</label>
-                <input type="file" id="pdfUpload" accept=".pdf">
+                <label for="pdfUpload">📤 טען PDF / תמונה</label>
+                <input type="file" id="pdfUpload" accept=".pdf,image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tif,.tiff,.svg,image/svg+xml">
                 <span class="file-status" id="pdfFileName">לא נבחר קובץ</span>
                 <button class="clear-btn" id="clearPdfBtn">🧹 נקה</button>
             </div>
@@ -1175,7 +1185,7 @@
     <div class="sig-pad-modal" id="sigPadModal">
         <div class="sig-pad-content">
             <h3>✏️ צייר את החתימה שלך</h3>
-            <div class="sig-pad-hint">צייר עם העכבר או האצבע באזור למטה</div>
+            <div class="sig-pad-hint">צייר עם העכבר או האצבע · הרקע שקוף ומתאים לכל מסמך</div>
             <div class="sig-pad-canvas-wrapper" id="sigPadWrapper">
                 <canvas id="sigPadCanvas"></canvas>
             </div>
@@ -1374,45 +1384,137 @@
             // ===== File size validation =====
             const MAX_PDF_SIZE = 50 * 1024 * 1024; // 50 MB
 
-            // ===== Load PDF =====
-            function loadPdfFile(file) {
+            // ===== Open PDF from ArrayBuffer (shared by PDF + image) =====
+            function openPdfFromArrayBuffer(arrayBuffer, displayName) {
+                pdfDataArrayBuffer = arrayBuffer;
+                const bufferForPdfjs = pdfDataArrayBuffer.slice(0);
+                pdfFileName.textContent = displayName || 'מסמך';
+
+                pdfjsLib.getDocument({
+                    data: bufferForPdfjs,
+                    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+                    cMapPacked: true,
+                    standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+                    useSystemFonts: true,
+                    disableFontFace: false
+                }).promise.then(doc => {
+                    pdfDoc = doc;
+                    totalPages = doc.numPages;
+                    currentPage = 1;
+                    fields = [];
+                    fieldIdCounter = 0;
+                    selectedFieldId = null;
+                    undoStack = [];
+                    redoStack = [];
+                    updateUndoRedoButtons();
+                    pageWidths = [];
+                    pageHeights = [];
+                    renderedPages = new Set();
+                    pageRenderScale = [];
+                    renderAllPages();
+                    showToast('✅ המסמך נטען בהצלחה');
+                }).catch(err => {
+                    showToast('❌ שגיאה: ' + err.message);
+                    console.error(err);
+                });
+            }
+
+            function isImageFile(file) {
+                if (!file) return false;
+                const name = (file.name || '').toLowerCase();
+                if (file.type && file.type.startsWith('image/')) return true;
+                return /\.(jpe?g|png|gif|webp|bmp|tiff?|svg)$/i.test(name);
+            }
+
+            function isPdfFile(file) {
+                if (!file) return false;
+                const name = (file.name || '').toLowerCase();
+                return file.type === 'application/pdf' || name.endsWith('.pdf');
+            }
+
+            // ===== Load image as single-page PDF =====
+            async function loadImageAsPdf(file) {
                 if (file.size > MAX_PDF_SIZE) {
                     showToast('❌ הקובץ גדול מדי (מקסימום 50MB)');
                     return;
                 }
+                try {
+                    showToast('⏳ ממיר תמונה ל-PDF...');
+                    const pngDataUrl = await imageFileToPngDataUrl(file);
+                    const img = await new Promise((resolve, reject) => {
+                        const i = new Image();
+                        i.onload = () => resolve(i);
+                        i.onerror = () => reject(new Error('טעינת התמונה נכשלה'));
+                        i.src = pngDataUrl;
+                    });
+
+                    const imgW = img.naturalWidth || img.width;
+                    const imgH = img.naturalHeight || img.height;
+                    if (!imgW || !imgH) throw new Error('מידות תמונה לא תקינות');
+
+                    // A4 at 72 dpi: 595.28 x 841.89 pt — fit image, keep aspect ratio
+                    const maxW = 595.28;
+                    const maxH = 841.89;
+                    let pageW = imgW;
+                    let pageH = imgH;
+                    // If huge, scale down so longest side fits A4-ish while preserving ratio
+                    const scale = Math.min(1, maxW / imgW, maxH / imgH);
+                    if (scale < 1) {
+                        pageW = imgW * scale;
+                        pageH = imgH * scale;
+                    }
+                    // Cap extremely small images with a minimum readable size
+                    const minSide = 200;
+                    if (pageW < minSide && pageH < minSide) {
+                        const up = minSide / Math.min(pageW, pageH);
+                        pageW *= up;
+                        pageH *= up;
+                    }
+
+                    const pngBytes = await fetch(pngDataUrl).then(r => r.arrayBuffer());
+                    const newDoc = await PDFLib.PDFDocument.create();
+                    const embedded = await newDoc.embedPng(pngBytes);
+                    const page = newDoc.addPage([pageW, pageH]);
+                    page.drawImage(embedded, {
+                        x: 0,
+                        y: 0,
+                        width: pageW,
+                        height: pageH
+                    });
+                    const pdfBytes = await newDoc.save();
+                    // Ensure ArrayBuffer (not SharedArrayBuffer)
+                    const ab = pdfBytes.buffer.slice(
+                        pdfBytes.byteOffset,
+                        pdfBytes.byteOffset + pdfBytes.byteLength
+                    );
+                    openPdfFromArrayBuffer(ab, file.name.replace(/\.[^.]+$/, '') + '.pdf');
+                } catch (err) {
+                    console.error(err);
+                    showToast('❌ שגיאה בהמרת תמונה: ' + (err.message || err));
+                }
+            }
+
+            // ===== Load PDF or image =====
+            function loadPdfFile(file) {
+                if (!file) return;
+                if (file.size > MAX_PDF_SIZE) {
+                    showToast('❌ הקובץ גדול מדי (מקסימום 50MB)');
+                    return;
+                }
+                if (isImageFile(file) && !isPdfFile(file)) {
+                    loadImageAsPdf(file);
+                    return;
+                }
+                if (!isPdfFile(file) && !isImageFile(file)) {
+                    showToast('❌ יש לבחור קובץ PDF או תמונה');
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    pdfDataArrayBuffer = e.target.result;
-                    const bufferForPdfjs = pdfDataArrayBuffer.slice(0);
-                    pdfFileName.textContent = file.name;
-
-                    pdfjsLib.getDocument({
-                        data: bufferForPdfjs,
-                        cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
-                        cMapPacked: true,
-                        standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
-                        useSystemFonts: true,
-                        disableFontFace: false
-                    }).promise.then(doc => {
-                        pdfDoc = doc;
-                        totalPages = doc.numPages;
-                        currentPage = 1;
-                        fields = [];
-                        fieldIdCounter = 0;
-                        selectedFieldId = null;
-                        undoStack = [];
-                        redoStack = [];
-                        updateUndoRedoButtons();
-                        pageWidths = [];
-                        pageHeights = [];
-                        renderedPages = new Set();
-                        pageRenderScale = [];
-                        renderAllPages();
-                        showToast('✅ PDF נטען בהצלחה');
-                    }).catch(err => {
-                        showToast('❌ שגיאה: ' + err.message);
-                        console.error(err);
-                    });
+                    openPdfFromArrayBuffer(e.target.result, file.name);
+                };
+                reader.onerror = function() {
+                    showToast('❌ שגיאה בקריאת הקובץ');
                 };
                 reader.readAsArrayBuffer(file);
             }
@@ -2318,14 +2420,15 @@
                 sigPadCanvas.height = h * sigPadDpr;
                 sigPadCanvas.style.width = w + 'px';
                 sigPadCanvas.style.height = h + 'px';
-                sigPadCtx = sigPadCanvas.getContext('2d');
+                // alpha: true – רקע שקוף לחתימה
+                sigPadCtx = sigPadCanvas.getContext('2d', { alpha: true });
+                sigPadCtx.setTransform(1, 0, 0, 1, 0, 0);
+                sigPadCtx.clearRect(0, 0, sigPadCanvas.width, sigPadCanvas.height);
                 sigPadCtx.scale(sigPadDpr, sigPadDpr);
                 sigPadCtx.strokeStyle = '#1a1a1a';
                 sigPadCtx.lineWidth = 2.5;
                 sigPadCtx.lineCap = 'round';
                 sigPadCtx.lineJoin = 'round';
-                sigPadCtx.fillStyle = 'white';
-                sigPadCtx.fillRect(0, 0, w, h);
                 sigPadHasContent = false;
                 sigPadSave.disabled = true;
             }
@@ -2377,10 +2480,10 @@
             sigPadCanvas.addEventListener('touchend', sigPadStop);
 
             sigPadClear.addEventListener('click', () => {
-                const w = sigPadCanvas.width / sigPadDpr;
-                const h = sigPadCanvas.height / sigPadDpr;
-                sigPadCtx.fillStyle = 'white';
-                sigPadCtx.fillRect(0, 0, w, h);
+                sigPadCtx.save();
+                sigPadCtx.setTransform(1, 0, 0, 1, 0, 0);
+                sigPadCtx.clearRect(0, 0, sigPadCanvas.width, sigPadCanvas.height);
+                sigPadCtx.restore();
                 sigPadHasContent = false;
                 sigPadSave.disabled = true;
             });
@@ -2391,7 +2494,7 @@
 
             sigPadSave.addEventListener('click', () => {
                 if (!sigPadHasContent) return;
-                // Trim white borders for a cleaner signature
+                // שמירה כ-PNG עם שקיפות + חיתוך לפי פיקסלים עם אלפא
                 const fullDataUrl = sigPadCanvas.toDataURL('image/png');
                 const trimImg = new Image();
                 trimImg.onload = function() {
@@ -2400,7 +2503,8 @@
                     const th = trimImg.naturalHeight;
                     tmpCanvas.width = tw;
                     tmpCanvas.height = th;
-                    const tmpCtx = tmpCanvas.getContext('2d');
+                    const tmpCtx = tmpCanvas.getContext('2d', { alpha: true });
+                    tmpCtx.clearRect(0, 0, tw, th);
                     tmpCtx.drawImage(trimImg, 0, 0);
                     const imgData = tmpCtx.getImageData(0, 0, tw, th);
                     const data = imgData.data;
@@ -2408,8 +2512,8 @@
                     for (let y = 0; y < th; y++) {
                         for (let x = 0; x < tw; x++) {
                             const idx = (y * tw + x) * 4;
-                            const r = data[idx], g = data[idx+1], b = data[idx+2];
-                            if (r < 240 || g < 240 || b < 240) {
+                            const a = data[idx + 3];
+                            if (a > 8) {
                                 if (x < minX) minX = x;
                                 if (x > maxX) maxX = x;
                                 if (y < minY) minY = y;
@@ -2421,21 +2525,22 @@
                         const pad = 10;
                         minX = Math.max(0, minX - pad);
                         minY = Math.max(0, minY - pad);
-                        maxX = Math.min(tw, maxX + pad);
-                        maxY = Math.min(th, maxY + pad);
-                        const cropW = maxX - minX;
-                        const cropH = maxY - minY;
+                        maxX = Math.min(tw - 1, maxX + pad);
+                        maxY = Math.min(th - 1, maxY + pad);
+                        const cropW = maxX - minX + 1;
+                        const cropH = maxY - minY + 1;
                         const cropCanvas = document.createElement('canvas');
                         cropCanvas.width = cropW;
                         cropCanvas.height = cropH;
-                        const cropCtx = cropCanvas.getContext('2d');
+                        const cropCtx = cropCanvas.getContext('2d', { alpha: true });
+                        cropCtx.clearRect(0, 0, cropW, cropH);
                         cropCtx.drawImage(tmpCanvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
                         signatureImageData = cropCanvas.toDataURL('image/png');
                     } else {
                         signatureImageData = fullDataUrl;
                     }
-                    sigStatus.textContent = '✅ חתימה צוירה';
-                    showToast('✅ חתימה נשמרה');
+                    sigStatus.textContent = '✅ חתימה צוירה (שקוף)';
+                    showToast('✅ חתימה נשמרה ברקע שקוף');
                     fields.forEach(f => {
                         if (f.type === 'signature' && !f.value) {
                             f.value = signatureImageData;
@@ -2696,12 +2801,21 @@
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
                         const f = files[0];
-                        const isSvg = f.type === 'image/svg+xml' || f.name.toLowerCase().endsWith('.svg');
-                        if (f.type === 'application/pdf') {
-                            loadPdfFile(f);
-                            pdfFileName.textContent = f.name;
-                        } else if (f.type.startsWith('image/') || isSvg) {
-                            loadSignatureFile(f);
+                        const isSigCard = card.classList.contains('purple') ||
+                            !!card.querySelector('#sigUpload');
+                        if (isSigCard) {
+                            if (isImageFile(f)) {
+                                loadSignatureFile(f);
+                            } else {
+                                showToast('❌ יש לגרור תמונת חתימה');
+                            }
+                        } else {
+                            // Document card: PDF or image → document
+                            if (isPdfFile(f) || isImageFile(f)) {
+                                loadPdfFile(f);
+                            } else {
+                                showToast('❌ יש לגרור PDF או תמונה');
+                            }
                         }
                     }
                 });
@@ -2732,7 +2846,7 @@
             updatePageNav();
             updateUndoRedoButtons();
             updateZoomDisplay();
-            showToast('📄 העלה PDF והתחל', 3500);
+            showToast('📄 העלה PDF או תמונה והתחל', 3500);
             console.log('✅ עורך PDF מתקדם (גרסה משופרת 2.0) טעון');
         })();
     </script>
