@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ספר מתכונים</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap');
+:root{
+  --primary:#16a34a; --primary-hover:#15803d;
+  --danger:#dc2626; --danger-hover:#b91c1c;
+  --warning:#f59e0b;
+  --bg:#0b1220; --surface:rgba(255,255,255,.055);
+  --input-bg:rgba(255,255,255,.08); --text:#f1f5f9;
+  --border:rgba(255,255,255,.12);
+  --shadow:0 10px 28px rgba(0,0,0,.35);
+}
+body[data-theme="light"]{
+  --bg:#fdf6ec; --surface:#ffffff; --input-bg:#ffffff;
+  --text:#1f2937; --border:#e7e1d3;
+  --shadow:0 10px 28px rgba(180,140,60,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Heebo","Segoe UI",Tahoma,sans-serif;
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(22,163,74,.22), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(59,130,246,.16), transparent 60%),
+    linear-gradient(160deg,#0b1220,#12203a 55%,#0d1a14);
+  background-attachment:fixed;
+  color:var(--text); min-height:100vh; padding:12px; line-height:1.5;
+  transition:background .3s,color .3s;
+}
+body[data-theme="light"]{
+  background:
+    radial-gradient(1100px 520px at 85% -10%, rgba(22,163,74,.14), transparent 60%),
+    linear-gradient(160deg,#fdf6ec,#f3ecdd);
+  background-attachment:fixed;
+}
+.container{max-width:720px;margin:0 auto}
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;padding:10px 14px;
+  position:sticky;top:8px;z-index:100;
+  background:rgba(11,18,32,.72);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+body[data-theme="light"] header{background:rgba(255,255,255,.85);border-color:#eee4cf}
+h1{
+  font-size:1.75rem;font-weight:800;text-align:center;flex:1;letter-spacing:.5px;
+  background:linear-gradient(90deg,#34d399,#60a5fa,#34d399);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.header-actions{display:flex;gap:8px}
+.icon-btn{
+  width:36px;height:36px;border:none;border-radius:50%;
+  background:var(--primary);color:#fff;font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s,background .2s;
+  box-shadow:0 4px 12px rgba(0,0,0,.25);
+}
+.icon-btn:hover{transform:scale(1.1);background:var(--primary-hover)}
+section{
+  border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
+  backdrop-filter:blur(6px);box-shadow:var(--shadow);
+}
+body[data-theme="light"] section{background:#fff}
+section h2{font-size:1.1rem;margin-bottom:12px;position:relative;padding-bottom:10px;font-weight:800}
+section h2::after{
+  content:"";position:absolute;bottom:0;right:0;width:56px;height:3px;
+  border-radius:3px;background:linear-gradient(90deg,#22c55e,#3b82f6);
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+@media (max-width:600px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-weight:600;font-size:.9rem}
+.field input,.field textarea,.field select{
+  width:100%;padding:10px;border:2px solid var(--border);border-radius:10px;
+  background:var(--input-bg);color:var(--text);font-size:1rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.field input:focus,.field textarea:focus,.field select:focus{
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(34,197,94,.25)
+}
+.field textarea{min-height:80px;resize:vertical}
+#title{min-height:42px;max-height:80px}
+.full-width{grid-column:1 / -1}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{
+  flex:1;min-width:120px;padding:12px 16px;border:none;border-radius:12px;
+  font-size:.95rem;font-weight:600;cursor:pointer;
+  transition:background .2s,transform .15s;text-align:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff}
+.btn-primary:hover{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+.btn-success{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-success:hover{background:linear-gradient(135deg,#16a34a,#15803d)}
+.btn-danger{background:linear-gradient(135deg,#f87171,#dc2626);color:#fff}
+.btn-danger:hover{background:linear-gradient(135deg,#dc2626,#b91c1c)}
+.btn-secondary{background:linear-gradient(135deg,#64748b,#475569);color:#fff}
+.btn-secondary:hover{background:linear-gradient(135deg,#475569,#334155)}
+.btn-web{background:linear-gradient(135deg,#a855f7,#7c3aed);color:#fff}
+.btn-web:hover{background:linear-gradient(135deg,#7c3aed,#6d28d9)}
+.file-label{display:flex;align-items:center;justify-content:center;cursor:pointer}
+.file-label input{display:none}
+.category-filters{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+@media (max-width:500px){.category-filters{grid-template-columns:1fr 1fr}}
+.cat-btn{
+  padding:10px 4px;border:none;border-radius:12px;font-weight:600;font-size:.85rem;
+  cursor:pointer;background:linear-gradient(135deg,#93c5fd,#60a5fa);
+  transition:transform .15s,box-shadow .15s,background .2s;
+}
+.cat-btn:hover{
+  transform:translateY(-2px);box-shadow:0 6px 14px rgba(59,130,246,.3);
+  background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff;
+}
+.cat-btn.active{
+  background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;
+  box-shadow:0 6px 14px rgba(22,163,74,.35);
+}
+.recipe-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:14px;margin-bottom:12px;position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+.recipe-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,.35);border-color:rgba(34,197,94,.5)}
+body[data-theme="light"] .recipe-card:hover{box-shadow:0 14px 30px rgba(180,140,60,.18)}
+.recipe-card.editing{border:2px solid #f59e0b}
+.recipe-card h3{text-align:center;margin-bottom:8px;font-size:1.15rem;padding:0 40px}
+.recipe-meta{font-size:.9rem;margin-bottom:6px}
+.recipe-meta strong{color:var(--primary)}
+.recipe-image{text-align:center;margin:10px 0}
+.recipe-image img{max-width:100%;max-height:180px;border-radius:8px;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.recipe-actions{position:absolute;left:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+.action-btn{
+  width:32px;height:32px;border:none;border-radius:50%;color:#fff;font-size:.9rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .15s;
+}
+.action-btn:active{transform:scale(.9)}
+.action-img{background:#0ea5e9}.action-img:hover{background:#0284c7}
+.action-delete{background:var(--danger)}.action-delete:hover{background:#dc2626}
+.action-share{background:var(--warning);color:#000}.action-share:hover{background:#d97706;color:#fff}
+.action-edit{background:var(--primary)}.action-edit:hover{background:#16a34a;color:#fff}
+.editable{display:block;min-height:1.2em;outline:none;white-space:pre-wrap}
+.editable[contenteditable="true"]{background:rgba(255,165,0,.15);border-radius:4px;padding:2px 4px}
+.toast{
+  position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:12px;
+  color:#fff;font-weight:600;z-index:2000;max-width:90%;
+  box-shadow:0 10px 24px rgba(0,0,0,.35);
+  animation:slideIn .3s ease,fadeOut .4s ease 2.6s forwards;
+}
+.toast.success{background:var(--primary)}
+.toast.error{background:var(--danger)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeOut{to{opacity:0}}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1500;align-items:center;justify-content:center;padding:16px}
+.modal.open{display:flex}
+.modal-content{
+  background:var(--surface);color:var(--text);border-radius:16px;border:1px solid var(--border);
+  padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;position:relative;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.modal-content h2{margin-bottom:12px;border-bottom:2px solid var(--primary);padding-bottom:6px}
+.modal-content .close{position:absolute;left:12px;top:10px;font-size:1.5rem;cursor:pointer;background:none;border:none;color:var(--text)}
+.modal-content ol{padding-right:20px;line-height:1.7}
+#scrollTop{position:fixed;bottom:20px;left:20px;display:none;z-index:100}
+#add-form{display:none}
+#add-form.open{display:block}
+.empty-msg{text-align:center;padding:24px;opacity:.7}
+.image-btns{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.image-btns button{padding:6px 12px;border:none;border-radius:6px;font-size:.85rem;cursor:pointer;color:#fff}
+.web-result{
+  border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:12px;
+  display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.03);
+  transition:transform .15s,border-color .15s;
+}
+body[data-theme="light"] .web-result{background:#faf7f0}
+.web-result:hover{transform:translateY(-2px);border-color:rgba(34,197,94,.5)}
+.web-result img{width:90px;height:90px;object-fit:cover;border-radius:8px;flex-shrink:0}
+.web-result-info{flex:1;min-width:0}
+.web-result-info h3{font-size:1rem;margin-bottom:4px}
+.web-result-info p{font-size:.85rem;opacity:.85;margin-bottom:8px}
+.web-result .btn{min-width:auto;padding:8px 12px;font-size:.85rem}
+.loading{text-align:center;padding:20px;opacity:.8}
+.search-type-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.search-type-row label{display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.95rem}
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;gap:8px}
+.collapsible-header h2{margin:0;border:none;padding:0;flex:1}
+.collapse-arrow{font-size:1.2rem;transition:transform .25s}
+.collapse-arrow.open{transform:rotate(180deg)}
+.collapsible-body{display:none;margin-top:12px;padding-top:8px;border-top:2px solid var(--primary)}
+.collapsible-body.open{display:block}
+.pagination{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:14px;padding-top:10px}
+.pagination button{
+  min-width:36px;padding:8px 10px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#93c5fd,#60a5fa);color:#000;font-weight:600;
+  cursor:pointer;font-size:.9rem;
+}
+.pagination button:hover:not(:disabled){background:linear-gradient(135deg,#60a5fa,#3b82f6);color:#fff}
+.pagination button.active{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.pagination button:disabled{opacity:.45;cursor:default}
+.page-info{font-size:.85rem;opacity:.8;width:100%;text-align:center;margin-bottom:4px}
+.search-progress{
+  display:flex;align-items:center;gap:12px;padding:14px;
+  background:rgba(76,175,80,.12);border:1px solid rgba(76,175,80,.4);
+  border-radius:10px;margin-bottom:12px;
+}
+.search-progress .spinner{
+  width:22px;height:22px;flex-shrink:0;
+  border:3px solid rgba(76,175,80,.3);border-top-color:var(--primary);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.search-progress .sp-text{flex:1;min-width:0;font-size:.9rem}
+.search-progress .sp-text strong{display:block;margin-bottom:2px}
+.search-progress .sp-time{font-size:.8rem;opacity:.7;font-variant-numeric:tabular-nums}
+.search-progress .sp-cancel{
+  padding:8px 14px;border:none;border-radius:8px;background:var(--danger);color:#fff;
+  font-weight:600;font-size:.85rem;cursor:pointer;transition:background .2s;
+}
+.search-progress .sp-cancel:hover{background:var(--danger-hover)}
+::selection{background:rgba(34,197,94,.4)}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" title="החלף ערכת נושא">🌙</button>
+      <button class="icon-btn" id="helpBtn" title="הדרכה">❓</button>
+    </div>
+    <h1>ספר מתכונים</h1>
+    <div style="width:80px"></div>
+  </header>
+
+  <div class="btn-row" style="margin-bottom:12px">
+    <button class="btn btn-primary" id="toggleAddBtn">➕ הוסף מתכון</button>
+  </div>
+
+  <section id="add-form">
+    <h2>הוספת / עריכת מתכון</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label for="title">כותרת *</label>
+        <textarea id="title" placeholder="שם המתכון" rows="1"></textarea>
+      </div>
+      <div class="field">
+        <label for="category">קטגוריה</label>
+        <select id="category">
+          <option value="ראשונות">ראשונות</option>
+          <option value="עיקריות">עיקריות</option>
+          <option value="תוספות">תוספות</option>
+          <option value="קינוחים">קינוחים</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="quantity">לכמות</label>
+        <input type="text" id="quantity" placeholder="למשל: 4 מנות" />
+      </div>
+      <div class="field full-width">
+        <label for="ingredients">רשימת מצרכים *</label>
+        <textarea id="ingredients" placeholder="כל מצרך בשורה חדשה"></textarea>
+      </div>
+      <div class="field full-width">
+        <label for="instructions">הוראות הכנה *</label>
+        <textarea id="instructions" placeholder="שלב אחר שלב"></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <label class="btn btn-primary file-label">
+        📷 העלה תמונה
+        <input type="file" id="recipe-image" accept="image/*" />
+      </label>
+      <button class="btn btn-success" id="saveRecipeBtn">💾 שמור מתכון</button>
+    </div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-primary" id="exportBtn">⬇️ יצא לקובץ</button>
+      <label class="btn btn-primary file-label">
+        ⬆️ יבא מקובץ
+        <input type="file" id="import-file" accept=".json" />
+      </label>
+      <button class="btn btn-danger" id="deleteAllBtn">🗑️ מחק הכל</button>
+    </div>
+  </section>
+
+  <section id="web-search-section">
+    <div class="collapsible-header" id="webSearchToggle" title="לחץ לפתיחה / סגירה">
+      <h2>🌐 חיפוש מתכונים ברשת</h2>
+      <span class="collapse-arrow" id="webSearchArrow">▼</span>
+    </div>
+    <div class="collapsible-body" id="webSearchBody">
+      <p style="font-size:.85rem;opacity:.8;margin-bottom:10px">
+        מקורות: TheMealDB + Spoonacular + Edamam + RecipeAPI.io + API Ninjas. עד 500 תוצאות.
+        החיפוש מרחיב מילים נרדפות אוטומטית (pizza → margherita, pepperoni, calzone...).
+      </p>
+      <div id="file-protocol-warning" style="display:none;background:#ff9800;color:#000;padding:10px;border-radius:8px;margin-bottom:12px;font-size:.9rem">
+        <strong>שימו לב:</strong> הקובץ נפתח כ־file:// — חלק מהמקורות עלולים להיחסם.<br>
+        <strong>פתרון:</strong> הרץ <code>python -m http.server 8080</code> ופתח <code>http://localhost:8080/recipe-book-fixed.html</code>
+      </div>
+      <details style="margin-bottom:12px;font-size:.9rem">
+        <summary style="cursor:pointer;font-weight:600">🔑 מפתחות API (אופציונלי אך מומלץ)</summary>
+        <div style="margin-top:10px;display:grid;gap:8px">
+          <div class="field">
+            <label for="api-spoonacular">Spoonacular API Key</label>
+            <input type="password" id="api-spoonacular" placeholder="הדבק מפתח מ-spoonacular.com" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="api-edamam-id">Edamam Application ID</label>
+            <input type="password" id="api-edamam-id" placeholder="App ID" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="api-edamam-key">Edamam Application Key</label>
+            <input type="password" id="api-edamam-key" placeholder="App Key" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="api-recipeapi">RecipeAPI.io Key</label>
+            <input type="password" id="api-recipeapi" placeholder="sk_live_..." autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="api-ninjas">API Ninjas Key</label>
+            <input type="password" id="api-ninjas" placeholder="API Ninjas key" autocomplete="off" />
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-primary" id="saveApiKeysBtn">💾 שמור מפתחות</button>
+            <button type="button" class="btn btn-secondary" id="clearApiKeysBtn">מחק מפתחות</button>
+          </div>
+          <p style="font-size:.8rem;opacity:.75;margin:0">
+            המפתחות נשמרים רק בדפדפן שלך (localStorage).
+            <a href="https://spoonacular.com/food-api" target="_blank" rel="noopener">Spoonacular</a> ·
+            <a href="https://developer.edamam.com/edamam-recipe-api" target="_blank" rel="noopener">Edamam</a> ·
+            <a href="https://recipeapi.io/docs/" target="_blank" rel="noopener">RecipeAPI.io</a> ·
+            <a href="https://api-ninjas.com/api/recipe" target="_blank" rel="noopener">API Ninjas</a>
+          </p>
+        </div>
+      </details>
+      <div class="search-type-row">
+        <label><input type="radio" name="searchType" value="name"> לפי כותרת / שם</label>
+        <label><input type="radio" name="searchType" value="ingredient"> לפי חומר גלם</label>
+        <label><input type="radio" name="searchType" value="deep" checked> חיפוש מעמיק (מומלץ)</label>
+      </div>
+      <div class="field">
+        <label for="web-query">מילת חיפוש (עברית או אנגלית)</label>
+        <input type="text" id="web-query" placeholder='לדוגמה: פיצה / עוגה בלי קמח / pizza' />
+      </div>
+      <div class="search-type-row" style="margin-top:8px">
+        <label><input type="checkbox" id="translateToHebrew" checked> תרגם לעברית לפני הוספה</label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-web" id="webSearchBtn">🔍 חפש ברשת</button>
+        <button class="btn btn-secondary" id="clearWebBtn">נקה תוצאות</button>
+      </div>
+      <div id="web-results" style="margin-top:14px"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>חיפוש וסינון מקומי</h2>
+    <div class="field">
+      <label for="search-word">מילת חיפוש</label>
+      <input type="text" id="search-word" placeholder="השאר ריק להצגת הכל" />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="searchBtn">🔍 הצג תוצאות</button>
+      <button class="btn btn-secondary" id="clearSearchBtn">הצג הכל</button>
+    </div>
+    <div class="category-filters">
+      <button class="cat-btn" data-cat="ראשונות">ראשונות</button>
+      <button class="cat-btn" data-cat="עיקריות">עיקריות</button>
+      <button class="cat-btn" data-cat="תוספות">תוספות</button>
+      <button class="cat-btn" data-cat="קינוחים">קינוחים</button>
+    </div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="cat-btn" id="imageFilterBtn">🖼️ רק עם תמונה</button>
+      <button class="cat-btn" id="imageFirstBtn">⭐ תמונות ראשונות</button>
+      <button class="cat-btn" id="findImagesBtn">🔎 השלם תמונות חסרות</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>המתכונים שלי <span id="recipe-count" style="font-weight:400;font-size:.9rem"></span></h2>
+    <div id="recipes"></div>
+  </section>
+</div>
+
+<button class="icon-btn" id="scrollTop" title="חזרה למעלה">⬆️</button>
+
+<div class="modal" id="helpModal">
+  <div class="modal-content">
+    <button class="close" id="closeHelp">&times;</button>
+    <h2>הדרכה מהירה</h2>
+    <ol>
+      <li><strong>הוספה ידנית:</strong> "הוסף מתכון" → מלא → "שמור".</li>
+      <li><strong>חיפוש ברשת:</strong> תומך בעברית ובאנגלית, עם הרחבת מילים נרדפות (pizza → margherita, pepperoni...). תומך ב־עם/בלי/ללא.</li>
+      <li><strong>חיפוש מקומי:</strong> לפי מילה או קטגוריה.</li>
+      <li><strong>עריכה:</strong> ✏️ → ערוך → לחץ שוב לנעילה.</li>
+      <li><strong>תמונות:</strong> 🖼️ למציאת תמונה אוטומטית, ⭐ למיון, 🖼️-פילטר לסינון.</li>
+      <li><strong>גיבוי:</strong> ייצא לקובץ JSON.</li>
+    </ol>
+    <p style="margin-top:12px;font-size:.9rem;opacity:.85">
+      הנתונים נשמרים ב-IndexedDB בדפדפן. מומלץ לייצא גיבוי מדי פעם.
+    </p>
+  </div>
+</div>
+
+<script>
+// ===== Constants =====
+const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect fill='%23444' width='200' height='150'/%3E%3Ctext fill='%23aaa' font-family='sans-serif' font-size='16' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3Eאין תמונה%3C/text%3E%3C/svg%3E";
+
+const MEALDB_BASE = "https://www.themealdb.com/api/json/v1/1";
+const SPOONACULAR_BASE = "https://api.spoonacular.com";
+const SPOONACULAR_DEFAULT_KEY = "3164b3e029e44c9abf468a921cc38f67";
+const EDAMAM_BASE = "https://api.edamam.com/api/recipes/v2";
+const RECIPEAPI_BASE = "https://recipeapi.io/api/v1";
+const RECIPEAPI_DEFAULT_KEY = "sk_live_PPLCagqAsGTu7a7WhNiycXyaYZlqAcxYEyIg201218088ff3";
+const NINJAS_BASE = "https://api.api-ninjas.com/v1/recipe";
+const NINJAS_DEFAULT_KEY = "k6uxP5lxsXUa8faKnKZKjjoIjQDglamjCVB4WsC6";
+
+// ===== מילים נרדפות למנות נפוצות =====
+const DISH_SYNONYMS = {
+  pizza:["pizza","margherita","pepperoni","napoletana","flatbread","calzone","focaccia"],
+  pasta:["pasta","spaghetti","penne","linguine","lasagna","fettuccine","macaroni","ravioli"],
+  cake:["cake","torte","gateau","sponge","brownie","loaf"],
+  cookie:["cookie","biscuit","shortbread","macaron"],
+  bread:["bread","loaf","baguette","focaccia","sourdough","brioche","roll","naan"],
+  soup:["soup","broth","chowder","bisque","minestrone","gazpacho"],
+  salad:["salad","slaw","tabbouleh","caprese"],
+  burger:["burger","cheeseburger","hamburger","slider"],
+  sandwich:["sandwich","sub","wrap","panini","bagel","toast"],
+  taco:["taco","burrito","quesadilla","enchilada","fajita"],
+  rice:["rice","risotto","pilaf","paella","biryani"],
+  chicken:["chicken","poultry","wing","drumstick","thigh","breast"],
+  fish:["fish","salmon","tuna","cod","sea bass","trout","halibut"],
+  beef:["beef","steak","brisket","roast","mince"],
+  egg:["egg","omelette","frittata","scrambled","poached"],
+  smoothie:["smoothie","shake","blend","juice"],
+  curry:["curry","masala","korma","tikka","vindaloo","dal"],
+  sushi:["sushi","maki","nigiri","sashimi","roll"],
+  pancake:["pancake","crepe","blini","hotcake"],
+  muffin:["muffin","cupcake","scone"],
+  pie:["pie","tart","quiche","galette"],
+  stew:["stew","casserole","ragout","goulash"],
+  grill:["grill","barbecue","bbq","roast"]
+};
+
+// ===== Progress + Cancel =====
+let currentSearch = null;
+
+function beginSearch(){
+  currentSearch = { cancelled:false, start:Date.now() };
+  return currentSearch;
+}
+function checkCancelled(){
+  if(currentSearch && currentSearch.cancelled){
+    const e = new Error("CANCELLED"); e.cancelled = true; throw e;
+  }
+}
+function endSearch(){ currentSearch = null; }
+
+function setSearchProgress(stage, detail){
+  const resultsDiv = document.getElementById("web-results");
+  if(!resultsDiv || !currentSearch) return;
+  const elapsed = Math.round((Date.now() - currentSearch.start) / 1000);
+  const cancelled = currentSearch.cancelled;
+  resultsDiv.innerHTML = `
+    <div class="search-progress">
+      <div class="spinner" ${cancelled ? 'style="animation:none;border-top-color:transparent;border-color:#999"' : ""}></div>
+      <div class="sp-text">
+        <strong>${stage}</strong>
+        <span>${detail || ""}</span>
+        <div class="sp-time">⏱️ עבר ${elapsed} שניות</div>
+      </div>
+      <button class="sp-cancel" id="cancelSearchBtn">✖️ בטל</button>
+    </div>`;
+  const btn = document.getElementById("cancelSearchBtn");
+  if(btn) btn.onclick = () => {
+    if(currentSearch && !currentSearch.cancelled){
+      currentSearch.cancelled = true;
+      setSearchProgress("מבטל...", "ממתין לסיום בקשות פעילות");
+    }
+  };
+}
+
+// ===== Fetch with timeout =====
+async function fetchWithTimeout(url, options = {}, timeoutMs = 15000){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try { return await fetch(url, { ...options, signal:ctrl.signal }); }
+  finally { clearTimeout(timer); }
+}
+
+function isFileProtocol(){ return location.protocol === "file:"; }
+
+async function fetchJson(url, options = {}){
+  try{
+    const res = await fetchWithTimeout(url, options, 12000);
+    if(res.ok) return { ok:true, status:res.status, data:await res.json() };
+    let data = null;
+    try { data = await res.json(); } catch(_) {}
+    if(!isFileProtocol() && res.status !== 0){
+      return { ok:false, status:res.status, data, error:"HTTP " + res.status };
+    }
+  }catch(err){
+    if(!isFileProtocol()) return { ok:false, status:0, data:null, error:String(err) };
+  }
+  const proxies = [
+    "https://corsproxy.io/?" + encodeURIComponent(url),
+    "https://api.allorigins.win/raw?url=" + encodeURIComponent(url)
+  ];
+  for(const proxyUrl of proxies){
+    try{
+      const res = await fetchWithTimeout(proxyUrl, options, 12000);
+      if(res.ok) return { ok:true, status:res.status, data:await res.json(), proxied:true };
+    }catch(_) {}
+  }
+  return { ok:false, status:0, data:null, error:"fetch failed (incl. proxy)" };
+}
+
+// ===== API keys =====
+function getApiKeys(){
+  return {
+    spoonacular: localStorage.getItem("api_spoonacular") || SPOONACULAR_DEFAULT_KEY,
+    edamamId: localStorage.getItem("api_edamam_id") || "",
+    edamamKey: localStorage.getItem("api_edamam_key") || "",
+    recipeapi: localStorage.getItem("api_recipeapi") || RECIPEAPI_DEFAULT_KEY,
+    ninjas: localStorage.getItem("api_ninjas") || NINJAS_DEFAULT_KEY
+  };
+}
+function saveApiKeysFromForm(){
+  const sp = document.getElementById("api-spoonacular").value.trim();
+  const eid = document.getElementById("api-edamam-id").value.trim();
+  const ekey = document.getElementById("api-edamam-key").value.trim();
+  const ra = document.getElementById("api-recipeapi").value.trim();
+  const nj = document.getElementById("api-ninjas").value.trim();
+  if(sp) localStorage.setItem("api_spoonacular", sp); else localStorage.removeItem("api_spoonacular");
+  if(eid) localStorage.setItem("api_edamam_id", eid); else localStorage.removeItem("api_edamam_id");
+  if(ekey) localStorage.setItem("api_edamam_key", ekey); else localStorage.removeItem("api_edamam_key");
+  if(ra) localStorage.setItem("api_recipeapi", ra); else localStorage.removeItem("api_recipeapi");
+  if(nj) localStorage.setItem("api_ninjas", nj); else localStorage.removeItem("api_ninjas");
+  showToast("מפתחות נשמרו");
+}
+function loadApiKeysToForm(){
+  const k = getApiKeys();
+  const sp = document.getElementById("api-spoonacular");
+  const eid = document.getElementById("api-edamam-id");
+  const ekey = document.getElementById("api-edamam-key");
+  const ra = document.getElementById("api-recipeapi");
+  const nj = document.getElementById("api-ninjas");
+  if(sp) sp.value = localStorage.getItem("api_spoonacular") || "";
+  if(eid) eid.value = k.edamamId;
+  if(ekey) ekey.value = k.edamamKey;
+  if(ra) ra.value = k.recipeapi;
+  if(nj) nj.value = k.ninjas;
+}
+function clearApiKeys(){
+  ["api_spoonacular","api_edamam_id","api_edamam_key","api_recipeapi","api_ninjas"]
+    .forEach(k => localStorage.removeItem(k));
+  loadApiKeysToForm();
+  showToast("מפתחות נמחקו");
+}
+
+// ===== Meal normalization helpers =====
+function setIngredientsOnMeal(meal, lines){
+  for(let i = 1; i <= 20; i++){ meal[`strIngredient${i}`] = ""; meal[`strMeasure${i}`] = ""; }
+  (lines || []).slice(0, 20).forEach((line, idx) => {
+    const s = String(line).trim();
+    if(!s) return;
+    const m = s.match(/^([\d./\s]+\s*(?:cups?|tbsp|tsp|g|kg|ml|l|oz|lb|cloves?|slices?)?)\s+(.+)$/i);
+    if(m){
+      meal[`strMeasure${idx + 1}`] = m[1].trim();
+      meal[`strIngredient${idx + 1}`] = m[2].trim();
+    } else {
+      meal[`strIngredient${idx + 1}`] = s;
+    }
+  });
+}
+
+function extractSpoonacularInstructions(r){
+  let text = (r.instructions || "").replace(/<[^>]+>/g, "\n").replace(/\n+/g, "\n").trim();
+  if(!text && r.analyzedInstructions && r.analyzedInstructions.length){
+    const steps = [];
+    r.analyzedInstructions.forEach(block => {
+      (block.steps || []).forEach(s => { if(s.step) steps.push(s.step.trim()); });
+    });
+    text = steps.map((s, i) => `${i + 1}. ${s}`).join("\n");
+  }
+  return text;
+}
+
+async function fetchSpoonacularInformation(id, key){
+  const url = `${SPOONACULAR_BASE}/recipes/${id}/information?includeNutrition=false&apiKey=${encodeURIComponent(key)}`;
+  try{
+    const res = await fetchWithTimeout(url, { headers:{ Accept:"application/json" } }, 10000);
+    if(!res.ok) return null;
+    return await res.json();
+  }catch(e){ return null; }
+}
+
+function normalizeSpoonacular(r){
+  const meal = {
+    idMeal:"sp_" + r.id,
+    strMeal:r.title || "Untitled",
+    strCategory:(r.dishTypes && r.dishTypes[0]) || (r.cuisines && r.cuisines[0]) || "Miscellaneous",
+    strArea:(r.cuisines && r.cuisines[0]) || "",
+    strMealThumb:r.image || "",
+    strInstructions:extractSpoonacularInstructions(r),
+    _source:"spoonacular",
+    _sourceUrl:r.sourceUrl || r.spoonacularSourceUrl || "",
+    _score:6
+  };
+  const lines = (r.extendedIngredients || []).map(ing =>
+    ing.original || [ing.amount, ing.unit, ing.name].filter(Boolean).join(" ")
+  );
+  setIngredientsOnMeal(meal, lines);
+  return meal;
+}
+
+function normalizeEdamam(hit){
+  const r = hit.recipe || hit;
+  const meal = {
+    idMeal:"ed_" + (r.uri || Math.random()).toString().replace(/\W/g, "").slice(-12),
+    strMeal:r.label || "Untitled",
+    strCategory:(r.dishType && r.dishType[0]) || (r.mealType && r.mealType[0]) || "Miscellaneous",
+    strArea:(r.cuisineType && r.cuisineType[0]) || "",
+    strMealThumb:r.image || "",
+    strInstructions:(r.url ? `ראה הוראות במקור: ${r.url}` : "") +
+      (r.ingredientLines ? "\n\n" + r.ingredientLines.join("\n") : ""),
+    _source:"edamam",
+    _sourceUrl:r.url || r.shareAs || "",
+    _score:6
+  };
+  if(r.ingredientLines && r.ingredientLines.length){
+    setIngredientsOnMeal(meal, r.ingredientLines);
+  }
+  return meal;
+}
+
+function normalizeRecipeApi(r){
+  const meal = {
+    idMeal:"ra_" + (r.id || Math.random().toString(36).slice(2)),
+    strMeal:r.name || "Untitled",
+    strCategory:r.meal_type || "Miscellaneous",
+    strArea:r.cuisine || "",
+    strMealThumb:r.image || r.image_url || defaultImage,
+    strInstructions:Array.isArray(r.instructions) ? r.instructions.join("\n") : (r.instructions || r.description || ""),
+    _source:"recipeapi",
+    _score:7
+  };
+  const lines = (r.ingredients || []).map(ing => {
+    if(typeof ing === "string") return ing;
+    const qty = ing.quantity != null ? ing.quantity : "";
+    const unit = ing.unit || "";
+    const name = ing.name || "";
+    return [qty, unit, name].filter(x => x !== "" && x != null).join(" ").trim();
+  });
+  setIngredientsOnMeal(meal, lines);
+  return meal;
+}
+
+function normalizeNinjas(r){
+  const meal = {
+    idMeal:"nj_" + (r.title || "").toLowerCase().replace(/\W+/g, "_").slice(0, 40) + "_" + Math.random().toString(36).slice(2, 6),
+    strMeal:r.title || "Untitled",
+    strCategory:"Miscellaneous",
+    strArea:"",
+    strMealThumb:defaultImage,
+    strInstructions:r.instructions || "",
+    _source:"ninjas",
+    _score:6
+  };
+  let lines = [];
+  if(typeof r.ingredients === "string"){
+    lines = r.ingredients.split(/\|/).map(s => s.trim()).filter(Boolean);
+    if(lines.length <= 1) lines = r.ingredients.split(/\n/).map(s => s.trim()).filter(Boolean);
+  } else if(Array.isArray(r.ingredients)) lines = r.ingredients;
+  setIngredientsOnMeal(meal, lines);
+  if(r.servings) meal.strCategory = String(r.servings);
+  return meal;
+}
+
+// ===== Image utilities =====
+async function fetchImageFromSourcePage(pageUrl){
+  if(!pageUrl || !/^https?:\/\//i.test(pageUrl)) return null;
+  const proxies = [
+    "https://api.allorigins.win/raw?url=" + encodeURIComponent(pageUrl),
+    "https://corsproxy.io/?" + encodeURIComponent(pageUrl)
+  ];
+  for(const proxy of proxies){
+    try{
+      const res = await fetchWithTimeout(proxy, {}, 8000);
+      if(!res.ok) continue;
+      const html = await res.text();
+      const patterns = [
+        /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+        /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+        /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+        /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i,
+        /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i
+      ];
+      for(const re of patterns){
+        const m = html.match(re);
+        if(m && m[1] && /^https?:\/\//i.test(m[1])) return m[1];
+      }
+    }catch(_) {}
+  }
+  return null;
+}
+
+function hasRealImage(meal){
+  const t = meal.strMealThumb || "";
+  return t && t !== defaultImage && !t.startsWith("data:image/svg");
+}
+
+async function findImageByTitle(title){
+  const q = (title || "").trim();
+  if(!q) return null;
+  try{
+    const res = await fetchJson(`${MEALDB_BASE}/search.php?s=${encodeURIComponent(q)}`);
+    if(res.ok && res.data.meals && res.data.meals.length){
+      const withImg = res.data.meals.find(m => hasRealImage(m));
+      if(withImg) return withImg.strMealThumb;
+    }
+  }catch(_) {}
+  const key = getApiKeys().spoonacular;
+  if(key){
+    try{
+      const res = await fetchJson(`${SPOONACULAR_BASE}/recipes/complexSearch?query=${encodeURIComponent(q)}&number=3&apiKey=${encodeURIComponent(key)}`);
+      if(res.ok && res.data.results && res.data.results.length){
+        const withImg = res.data.results.find(r => r.image);
+        if(withImg) return withImg.image;
+      }
+    }catch(_) {}
+  }
+  return null;
+}
+
+async function ensureMealImage(meal){
+  if(hasRealImage(meal)) return meal.strMealThumb;
+  if(meal._imageTried) return hasRealImage(meal) ? meal.strMealThumb : null;
+  meal._imageTried = true;
+  if(meal._sourceUrl){
+    try{
+      const img = await fetchImageFromSourcePage(meal._sourceUrl);
+      if(img){ meal.strMealThumb = img; meal._imageFromSourcePage = true; return img; }
+    }catch(_) {}
+  }
+  const img = await findImageByTitle(meal.strMeal);
+  if(img) meal.strMealThumb = img;
+  return img || null;
+}
+
+async function enrichMealImageFromSource(meal){
+  if(hasRealImage(meal)) return meal;
+  if(!meal._sourceUrl) return meal;
+  const img = await fetchImageFromSourcePage(meal._sourceUrl);
+  if(img){ meal.strMealThumb = img; meal._imageFromSourcePage = true; }
+  return meal;
+}
+
+// ===== External API searches =====
+async function searchSpoonacular(query, number = 30){
+  const key = getApiKeys().spoonacular;
+  if(!key) return [];
+  const url = `${SPOONACULAR_BASE}/recipes/complexSearch?query=${encodeURIComponent(query)}&number=${number}&addRecipeInformation=true&fillIngredients=true&apiKey=${encodeURIComponent(key)}`;
+  const result = await fetchJson(url);
+  if(!result.ok){
+    if(result.status === 401 || result.status === 402){
+      showToast("Spoonacular: מפתח לא תקין או מכסה נגמרה", true);
+    }
+    return [];
+  }
+  const raw = result.data.results || [];
+
+  const needIdx = [];
+  for(let i = 0; i < raw.length; i++){
+    const full = raw[i];
+    const hasInst = !!(full.instructions && String(full.instructions).trim()) ||
+      (full.analyzedInstructions && full.analyzedInstructions.some(b => (b.steps || []).length));
+    if(!hasInst && full.id) needIdx.push(i);
+  }
+
+  const BATCH = 6;
+  for(let i = 0; i < needIdx.length; i += BATCH){
+    checkCancelled();
+    setSearchProgress("Spoonacular: שולף פרטים",
+      `${Math.min(i + BATCH, needIdx.length)} / ${needIdx.length}`);
+    const slice = needIdx.slice(i, i + BATCH);
+    const infos = await Promise.all(slice.map(idx => fetchSpoonacularInformation(raw[idx].id, key)));
+    slice.forEach((idx, j) => {
+      if(infos[j]){
+        raw[idx] = Object.assign({}, raw[idx], infos[j]);
+        if(!raw[idx].extendedIngredients && infos[j].extendedIngredients){
+          raw[idx].extendedIngredients = infos[j].extendedIngredients;
+        }
+      }
+    });
+  }
+
+  return raw.map(normalizeSpoonacular).map(m => {
+    if(!m.strInstructions && m._sourceUrl){
+      m.strInstructions = "ראה הוראות הכנה בעמוד המקור:\n" + m._sourceUrl;
+    }
+    return m;
+  });
+}
+
+async function searchEdamam(query, from = 0, to = 40){
+  const { edamamId, edamamKey } = getApiKeys();
+  if(!edamamId || !edamamKey) return [];
+  const url = `${EDAMAM_BASE}?type=public&q=${encodeURIComponent(query)}&app_id=${encodeURIComponent(edamamId)}&app_key=${encodeURIComponent(edamamKey)}&from=${from}&to=${to}`;
+  const result = await fetchJson(url);
+  if(!result.ok){
+    if(result.status === 401 || result.status === 403){
+      showToast("Edamam: מפתח לא תקין או מכסה נגמרה", true);
+    }
+    return [];
+  }
+  return (result.data.hits || []).map(normalizeEdamam);
+}
+
+async function searchRecipeApi(query, maxPages = 5){
+  const key = getApiKeys().recipeapi;
+  if(!key) return [];
+  const all = [];
+  for(let page = 1; page <= maxPages && all.length < 60; page++){
+    checkCancelled();
+    const url = `${RECIPEAPI_BASE}/recipes?search=${encodeURIComponent(query)}&page=${page}`;
+    const result = await fetchJson(url, {
+      headers:{ Authorization:"Bearer " + key, Accept:"application/json" }
+    });
+    if(!result.ok){
+      if(result.status === 401 || result.status === 403){
+        showToast("RecipeAPI.io: מפתח לא תקין", true);
+      }
+      break;
+    }
+    const batch = (result.data.data || []).map(normalizeRecipeApi);
+    if(!batch.length) break;
+    all.push(...batch);
+    const lastPage = (result.data.meta && result.data.meta.last_page) || page;
+    if(page >= lastPage) break;
+  }
+  return all;
+}
+
+async function searchNinjas(query){
+  const key = getApiKeys().ninjas;
+  if(!key) return [];
+  const words = String(query).split(/\s+/).filter(w => w.length > 2);
+  const attempts = [...new Set([
+    query,
+    words.slice(0, 2).join(" "),
+    ...words.slice(0, 5)
+  ].filter(Boolean))];
+
+  const collected = [];
+  const seenTitles = new Set();
+
+  for(const q of attempts){
+    checkCancelled();
+    if(collected.length >= 12) break;
+    const url = `${NINJAS_BASE}?query=${encodeURIComponent(q)}&X-Api-Key=${encodeURIComponent(key)}`;
+    try{
+      const res = await fetchWithTimeout(url, { method:"GET", headers:{ Accept:"application/json" } }, 8000);
+      if(!res.ok){
+        if(res.status === 401 || res.status === 403){
+          showToast("API Ninjas: מפתח לא תקין", true);
+          break;
+        }
+        continue;
+      }
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      for(const item of list){
+        const title = (item.title || "").toLowerCase().trim();
+        if(!title || seenTitles.has(title)) continue;
+        seenTitles.add(title);
+        collected.push(normalizeNinjas(item));
+      }
+    }catch(e) {}
+  }
+  return collected;
+}
+
+// ===== IndexedDB =====
+let db = null;
+function initDB(){
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("RecipeDB", 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => { db = request.result; resolve(db); };
+    request.onupgradeneeded = (e) => {
+      const database = e.target.result;
+      if(!database.objectStoreNames.contains("recipes")){
+        database.createObjectStore("recipes", { keyPath:"id", autoIncrement:true });
+      }
+    };
+  });
+}
+function saveRecipeToDB(recipe){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(["recipes"], "readwrite");
+    const req = tx.objectStore("recipes").add(recipe);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function getAllRecipes(){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(["recipes"], "readonly");
+    const req = tx.objectStore("recipes").getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+function deleteRecipeById(id){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(["recipes"], "readwrite");
+    const req = tx.objectStore("recipes").delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+function updateRecipeInDB(id, updates){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(["recipes"], "readwrite");
+    const store = tx.objectStore("recipes");
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const recipe = getReq.result;
+      if(!recipe) return reject(new Error("not found"));
+      Object.assign(recipe, updates);
+      const putReq = store.put(recipe);
+      putReq.onsuccess = () => resolve(recipe);
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+function clearAllRecipes(){
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(["recipes"], "readwrite");
+    const req = tx.objectStore("recipes").clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ===== Helpers =====
+function setTheme(theme){
+  document.body.setAttribute("data-theme", theme);
+  localStorage.setItem("recipeTheme", theme);
+  document.getElementById("themeBtn").textContent = theme === "dark" ? "🌙" : "☀️";
+}
+function toggleTheme(){
+  const current = document.body.getAttribute("data-theme") || "dark";
+  setTheme(current === "dark" ? "light" : "dark");
+}
+function showToast(msg, isError = false){
+  const existing = document.querySelector(".toast");
+  if(existing) existing.remove();
+  const toast = document.createElement("div");
+  toast.className = "toast " + (isError ? "error" : "success");
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3200);
+}
+function replaceFractions(text){
+  if(!text) return "";
+  const map = { "1/2":"½", "1/4":"¼", "1/3":"⅓", "2/3":"⅔", "3/4":"¾" };
+  let result = String(text);
+  for(const [f, s] of Object.entries(map)) result = result.replace(new RegExp(f, "g"), s);
+  return result;
+}
+function mapCategory(mealCategory){
+  if(!mealCategory) return "עיקריות";
+  const c = mealCategory.toLowerCase();
+  if(c === "dessert") return "קינוחים";
+  if(c === "starter") return "ראשונות";
+  if(c === "side" || c === "miscellaneous") return "תוספות";
+  return "עיקריות";
+}
+function parseMealIngredients(meal){
+  const lines = [];
+  for(let i = 1; i <= 20; i++){
+    const ing = meal[`strIngredient${i}`];
+    const measure = meal[`strMeasure${i}`];
+    if(ing && ing.trim()){
+      const m = (measure || "").trim();
+      lines.push(m ? `${m} ${ing.trim()}` : ing.trim());
+    }
+  }
+  return lines.join("\n");
+}
+function containsHebrew(text){ return /[\u0590-\u05FF]/.test(text || ""); }
+function removeEmptyLines(text){
+  if(!text) return "";
+  return String(text).split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0).join("\n");
+}
+
+// ===== Translation =====
+async function translateText(text, targetLang = "he", sourceLang = "en"){
+  if(!text || !text.trim()) return text;
+  const chunks = [];
+  const maxLen = 450;
+  let remaining = text;
+  while(remaining.length > 0){
+    if(remaining.length <= maxLen){ chunks.push(remaining); break; }
+    let splitAt = remaining.lastIndexOf("\n", maxLen);
+    if(splitAt < maxLen * 0.5) splitAt = remaining.lastIndexOf(" ", maxLen);
+    if(splitAt < maxLen * 0.5) splitAt = maxLen;
+    chunks.push(remaining.slice(0, splitAt));
+    remaining = remaining.slice(splitAt).trimStart();
+  }
+  const translatedChunks = [];
+  for(const chunk of chunks){
+    try{
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(chunk)}`;
+      const res = await fetchWithTimeout(url, {}, 10000);
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      const part = (data[0] || []).map(item => item[0] || "").join("");
+      translatedChunks.push(part);
+    }catch(err){
+      translatedChunks.push(chunk);
+    }
+    await new Promise(r => setTimeout(r, 80));
+  }
+  return translatedChunks.join("\n");
+}
+
+async function translateRecipeFields(title, ingredients, instructions){
+  const [tTitle, tIng, tInst] = await Promise.all([
+    translateText(title, "he", "en"),
+    translateText(ingredients, "he", "en"),
+    translateText(instructions, "he", "en")
+  ]);
+  return {
+    title:removeEmptyLines(tTitle || title),
+    ingredients:removeEmptyLines(tIng || ingredients),
+    instructions:removeEmptyLines(tInst || instructions)
+  };
+}
+
+// ===== Query parsing =====
+function parseSearchQuery(rawQuery){
+  let q = rawQuery.trim().toLowerCase();
+  q = q.replace(/\s+ו\s*בלי\s+/g, " בלי ")
+       .replace(/\s+ו\s*ללא\s+/g, " ללא ")
+       .replace(/\s+and\s+without\s+/g, " without ")
+       .replace(/\s+and\s+no\s+/g, " without ")
+       .replace(/\s+&\s*/g, " ");
+
+  const inclusions = [];
+  const exclusions = [];
+  let m;
+
+  const withRe = /(?:^|\s)(?:עם|with)\s+([^\s,]+(?:\s+[^\s,]+)?)/gi;
+  while((m = withRe.exec(q)) !== null){
+    const term = m[1].trim().replace(/[.,]$/, "");
+    if(term) inclusions.push(term);
+  }
+  const withoutRe = /(?:^|\s)(?:בלי|ללא|without|no)\s+([^\s,]+(?:\s+[^\s,]+)?)/gi;
+  while((m = withoutRe.exec(q)) !== null){
+    const term = m[1].trim().replace(/[.,]$/, "");
+    if(term) exclusions.push(term);
+  }
+  let positive = q
+    .replace(/(?:^|\s)(?:עם|with)\s+[^\s,]+(?:\s+[^\s,]+)?/gi, " ")
+    .replace(/(?:^|\s)(?:בלי|ללא|without|no)\s+[^\s,]+(?:\s+[^\s,]+)?/gi, " ")
+    .replace(/\s+/g, " ").trim();
+  if(!positive) positive = inclusions[0] || q.split(/\s+/)[0] || q;
+
+  const uniq = arr => [...new Set(arr.map(t => t.toLowerCase()))];
+  return { positive, inclusions:uniq(inclusions), exclusions:uniq(exclusions) };
+}
+
+function mealContainsIngredient(meal, term){
+  if(!term) return false;
+  const t = String(term).toLowerCase().trim();
+  if(t.length < 2) return false;
+  const esc = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const wordRe = new RegExp("(^|[^a-z\\u0590-\\u05FF])" + esc + "([^a-z\\u0590-\\u05FF]|$)", "i");
+  for(let i = 1; i <= 20; i++){
+    const ing = (meal[`strIngredient${i}`] || "").toLowerCase();
+    if(ing && wordRe.test(ing)) return true;
+  }
+  return wordRe.test((meal.strMeal || "").toLowerCase());
+}
+
+function mealMatchesConditions(meal, inclusions, exclusions){
+  for(const inc of inclusions) if(!mealContainsIngredient(meal, inc)) return false;
+  for(const ex of exclusions) if(mealContainsIngredient(meal, ex)) return false;
+  return true;
+}
+
+// ===== Web search state =====
+const WEB_PAGE_SIZE = 10;
+const WEB_MAX_PAGES = 50;
+const WEB_MAX_RESULTS = 500;
+let webSearchState = { meals:[], page:1, positive:"", inclusions:[], exclusions:[] };
+
+// ===== MealDB fetches =====
+async function fetchMealDetails(idList){
+  const unique = [...new Set(idList)].slice(0, WEB_MAX_RESULTS);
+  const details = [];
+  const BATCH = 8;
+  for(let i = 0; i < unique.length; i += BATCH){
+    checkCancelled();
+    setSearchProgress("TheMealDB: שולף פרטים",
+      `${Math.min(i + BATCH, unique.length)} / ${unique.length}`);
+    const batch = unique.slice(i, i + BATCH);
+    const batchResults = await Promise.all(
+      batch.map(async id => {
+        try{
+          const r = await fetchWithTimeout(`${MEALDB_BASE}/lookup.php?i=${id}`, {}, 8000);
+          const d = await r.json();
+          return d.meals ? d.meals[0] : null;
+        }catch{ return null; }
+      })
+    );
+    details.push(...batchResults.filter(Boolean));
+  }
+  return details;
+}
+
+async function mergeSearchByName(terms){
+  const idMap = new Map();
+  for(const term of terms){
+    checkCancelled();
+    if(!term || term.length < 2) continue;
+    try{
+      const res = await fetchWithTimeout(`${MEALDB_BASE}/search.php?s=${encodeURIComponent(term)}`, {}, 8000);
+      const data = await res.json();
+      (data.meals || []).forEach(m => {
+        const prev = idMap.get(m.idMeal);
+        const score = (prev ? prev.score : 0) + 1;
+        idMap.set(m.idMeal, { meal:m, score });
+      });
+    }catch(e){}
+  }
+  return idMap;
+}
+
+async function mergeSearchByIngredient(terms){
+  const idMap = new Map();
+  for(const term of terms){
+    checkCancelled();
+    if(!term || term.length < 2) continue;
+    try{
+      const res = await fetchWithTimeout(`${MEALDB_BASE}/filter.php?i=${encodeURIComponent(term)}`, {}, 8000);
+      const data = await res.json();
+      (data.meals || []).forEach(m => {
+        const prev = idMap.get(m.idMeal);
+        const score = (prev ? prev.score : 0) + 2;
+        idMap.set(m.idMeal, { meal:m, score });
+      });
+    }catch(e){}
+  }
+  return idMap;
+}
+
+// ===== guessCategories (updated: pizza) =====
+function guessCategories(positive){
+  const p = positive.toLowerCase();
+  const cats = [];
+  if(/cake|cookie|brownie|dessert|sweet|pie|pudding|chocolate|עוג|קינוח|שוקולד/.test(p))
+    cats.push("Dessert");
+  if(/chicken|beef|pork|lamb|fish|salmon|shrimp|meat|עוף|בשר|דג/.test(p))
+    cats.push("Chicken","Beef","Seafood");
+  if(/pizza|lasagna|pasta|spaghetti|noodle|פסטה|פיצה|לזניה/.test(p))
+    cats.push("Pasta","Miscellaneous");
+  if(/salad|סלט/.test(p)) cats.push("Starter","Side");
+  if(/soup|מרק/.test(p)) cats.push("Side","Starter");
+  if(/vegan|vegetarian|טבעוני|צמחוני/.test(p)) cats.push("Vegetarian","Vegan");
+  if(/breakfast|בוקר/.test(p)) cats.push("Breakfast");
+  return [...new Set(cats)];
+}
+
+// ===== Keyword helpers with synonyms =====
+const GENERIC_WORDS = new Set([
+  "cake","cakes","dessert","desserts","sweet","sweets","pie","pies",
+  "cookie","cookies","pudding","food","recipe","recipes","meal","dish",
+  "with","and","the","a","an","of","for","in","on","to","home",
+  "עוגה","עוגות","קינוח","קינוחים","מתכון","מתכונים","מאכל","מנה"
+]);
+
+const STOPWORDS = new Set(["with","without","and","the","a","an","of","for","in","on","to","no","or",
+  "עם","בלי","ללא","ו","של","על","את","או","ה","ש"]);
+
+const EXCLUSION_ALIASES = {
+  flour:["flour","wheat flour","all-purpose flour","plain flour","bread flour","pastry flour","self-raising flour","spelt","semolina","קמח"],
+  gluten:["flour","wheat","gluten","bread","breadcrumbs","pasta","barley","rye","semolina","spelt"],
+  egg:["egg","eggs","egg white","egg yolk","mayonnaise"],
+  eggs:["egg","eggs","egg white","egg yolk","mayonnaise"],
+  sugar:["sugar","caster sugar","brown sugar","icing sugar","granulated sugar","syrup"],
+  nuts:["nut","nuts","walnut","walnuts","almond","almonds","peanut","peanuts","pecan","hazelnut","cashew","pistachio","macadamia","nutmeg"],
+  nut:["nut","nuts","walnut","walnuts","almond","almonds","peanut","peanuts","pecan","hazelnut","cashew","pistachio","macadamia"],
+  dairy:["milk","cheese","butter","cream","yogurt","yoghurt","dairy","whey"],
+  milk:["milk","dairy","cream"],
+  butter:["butter","margarine","ghee"],
+  oil:["oil","olive oil","vegetable oil","canola oil"],
+  meat:["beef","pork","lamb","chicken","meat","bacon","ham","sausage","mince"],
+  fish:["fish","salmon","tuna","cod","anchovy","sardine","seafood","shrimp"],
+  salt:["salt","soy sauce","stock cube"],
+  garlic:["garlic","garlic powder"],
+  onion:["onion","onions","shallot","spring onion","scallion"],
+  chocolate:["chocolate","cocoa","cacao"]
+};
+
+function expandExclusions(exs){
+  const out = [];
+  for(const e of exs || []){
+    const key = String(e).toLowerCase().trim();
+    if(EXCLUSION_ALIASES[key]) out.push(...EXCLUSION_ALIASES[key]);
+    else out.push(e);
+  }
+  return [...new Set(out)];
+}
+
+function expandIngredientTerms(terms){
+  const map = {
+    maple:["Maple Syrup","maple"], "maple syrup":["Maple Syrup"],
+    chocolate:["Chocolate","Dark Chocolate","Milk Chocolate","chocolate"],
+    cocoa:["Cocoa","chocolate"],
+    cheese:["Cheese","Cheddar Cheese","Parmesan Cheese","cheese"],
+    cottage:["Cottage Cheese","cheese"], "cottage cheese":["Cottage Cheese"],
+    flour:["Flour","Plain Flour","flour"], sugar:["Sugar","Caster Sugar","Brown Sugar","sugar"],
+    milk:["Milk","milk"], butter:["Butter","butter"],
+    egg:["Egg","Eggs","egg"], eggs:["Egg","Eggs","eggs"],
+    chicken:["Chicken","Chicken Breast","chicken"], beef:["Beef","beef"],
+    garlic:["Garlic","garlic"], tomato:["Tomato","Tomatoes","tomato"],
+    pasta:["Pasta","Spaghetti","pasta"], rice:["Rice","rice"],
+    potato:["Potato","Potatoes","potato"], lemon:["Lemon","lemon"],
+    banana:["Banana","banana"], apple:["Apple","apple"],
+    honey:["Honey","honey"], vanilla:["Vanilla","Vanilla Extract","vanilla"],
+    cinnamon:["Cinnamon","cinnamon"], coffee:["Coffee","Espresso","coffee"],
+    cream:["Cream","Double Cream","cream"],
+    nut:["Nuts","Walnut","Peanut","Almond","Hazelnut","Pecan"],
+    nuts:["Nuts","Walnut","Peanut","Almond","Hazelnut","Pecan"],
+    walnut:["Walnut","walnuts"], almond:["Almond","almonds"],
+    peanut:["Peanut","Peanuts"], pecan:["Pecan Nuts","Pecan"],
+    meat:["Beef","Pork","Lamb","Minced Beef","Chicken"],
+    pork:["Pork","pork"], fish:["Fish","Salmon","Tuna","Cod"],
+    salmon:["Salmon","salmon"], spinach:["Spinach","spinach"],
+    mushroom:["Mushrooms","Mushroom"], mushrooms:["Mushrooms","Mushroom"]
+  };
+  const out = [];
+  for(const t of terms){
+    const key = String(t).toLowerCase().trim();
+    if(map[key]) out.push(...map[key]);
+    else out.push(t);
+  }
+  return [...new Set(out)];
+}
+
+function getRequiredKeywords(positive, inclusions){
+  const raw = [...String(positive).split(/\s+/), ...inclusions]
+    .map(w => w.toLowerCase().replace(/[^\w\u0590-\u05FF-]/g, ""))
+    .filter(Boolean);
+  return [...new Set(raw.filter(w => w.length > 2 && !GENERIC_WORDS.has(w)))];
+}
+
+function buildKeywordGroups(requiredKeywords){
+  return requiredKeywords.map(kw => {
+    const syn = DISH_SYNONYMS[kw.toLowerCase()] || [];
+    return [...new Set([kw, ...syn].map(s => s.toLowerCase()))];
+  });
+}
+
+function mealMatchesKeywordGroups(meal, groups){
+  if(!groups.length) return true;
+  const title = (meal.strMeal || "").toLowerCase();
+  const ings = [];
+  for(let i = 1; i <= 20; i++){
+    const ing = (meal[`strIngredient${i}`] || "").toLowerCase();
+    if(ing) ings.push(ing);
+  }
+  const blob = title + " " + ings.join(" ");
+  return groups.every(group =>
+    group.some(kw => blob.includes(kw) || ings.some(ing => ing.includes(kw) || kw.includes(ing)))
+  );
+}
+
+// ===== Deep search =====
+async function deepSearchMeals(positive, inclusions, exclusions, type){
+  exclusions = expandExclusions(exclusions);
+  const words = positive.split(/\s+/).filter(w => w.length > 2);
+  const searchTerms = [positive, ...words].filter(Boolean);
+  const uniqueTerms = [...new Set(searchTerms.map(t => t.toLowerCase()))];
+
+  const requiredKeywords = getRequiredKeywords(positive, inclusions);
+  const hasSpecific = requiredKeywords.length > 0;
+
+  // Synonym expansion
+  const synonyms = [];
+  for(const kw of requiredKeywords){
+    const s = DISH_SYNONYMS[kw.toLowerCase()];
+    if(s) synonyms.push(...s);
+  }
+  const expandedTerms = [...new Set([...uniqueTerms, ...synonyms])];
+  const keywordGroups = buildKeywordGroups(requiredKeywords);
+
+  let idMap = new Map();
+
+  // 1) Name search (with synonyms)
+  checkCancelled();
+  setSearchProgress("TheMealDB: חיפוש לפי שם",
+    expandedTerms.slice(0, 6).join(", ").slice(0, 90));
+  const nameMap = await mergeSearchByName(expandedTerms);
+  nameMap.forEach((v, id) => {
+    v.meal._nameHit = true;
+    idMap.set(id, { meal:v.meal, score:v.score * 4 });
+  });
+
+  // 2) Ingredient search
+  checkCancelled();
+  const rawIng = [...inclusions, ...requiredKeywords, ...synonyms, ...words.slice(0, 4)].filter(Boolean);
+  const ingTerms = expandIngredientTerms([...new Set(rawIng)]);
+  if(type === "ingredient" || type === "deep" || hasSpecific){
+    setSearchProgress("TheMealDB: חיפוש לפי מצרך", ingTerms.slice(0, 5).join(", "));
+    const ingMap = await mergeSearchByIngredient(ingTerms);
+    ingMap.forEach((v, id) => {
+      const prev = idMap.get(id);
+      idMap.set(id, { meal:v.meal, score:(prev ? prev.score : 0) + v.score * 5 });
+    });
+  }
+
+  // 3) Category fill
+  if(!hasSpecific){
+    const cats = guessCategories(positive + " " + inclusions.join(" "));
+    for(const cat of cats){
+      checkCancelled();
+      try{
+        const res = await fetchWithTimeout(`${MEALDB_BASE}/filter.php?c=${encodeURIComponent(cat)}`, {}, 8000);
+        const data = await res.json();
+        (data.meals || []).forEach(m => {
+          const prev = idMap.get(m.idMeal);
+          const name = (m.strMeal || "").toLowerCase();
+          const related = words.some(w => name.includes(w));
+          if(!related) return;
+          idMap.set(m.idMeal, { meal:m, score:(prev ? prev.score : 0) + 3 });
+        });
+      }catch(e){}
+    }
+  } else {
+    const cats = guessCategories(positive);
+    for(const cat of cats.slice(0, 2)){
+      checkCancelled();
+      try{
+        const res = await fetchWithTimeout(`${MEALDB_BASE}/filter.php?c=${encodeURIComponent(cat)}`, {}, 8000);
+        const data = await res.json();
+        (data.meals || []).forEach(m => {
+          const name = (m.strMeal || "").toLowerCase();
+          const hitsRequired = keywordGroups.some(group => group.some(kw => name.includes(kw)));
+          if(!hitsRequired) return;
+          const prev = idMap.get(m.idMeal);
+          idMap.set(m.idMeal, { meal:m, score:(prev ? prev.score : 0) + 4 });
+        });
+      }catch(e){}
+    }
+  }
+
+  // 4) Letter index
+  if(type === "deep" || type === "name"){
+    const letters = [...new Set(
+      expandedTerms.map(t => (t[0] || "").toLowerCase()).filter(ch => /[a-z]/.test(ch))
+    )];
+    for(const letter of letters.slice(0, 4)){
+      checkCancelled();
+      try{
+        const res = await fetchWithTimeout(`${MEALDB_BASE}/search.php?f=${encodeURIComponent(letter)}`, {}, 8000);
+        const data = await res.json();
+        (data.meals || []).forEach(m => {
+          const name = (m.strMeal || "").toLowerCase();
+          if(hasSpecific){
+            const hitsRequired = keywordGroups.some(group => group.some(kw => name.includes(kw)));
+            if(!hitsRequired) return;
+          }
+          const prev = idMap.get(m.idMeal);
+          idMap.set(m.idMeal, { meal:m, score:(prev ? prev.score : 0) + 2 });
+        });
+      }catch(e){}
+    }
+  }
+
+  const ranked = [...idMap.entries()]
+    .sort((a, b) => b[1].score - a[1].score)
+    .slice(0, WEB_MAX_RESULTS);
+
+  checkCancelled();
+  setSearchProgress("TheMealDB: שולף פרטים", `${ranked.length} תוצאות`);
+  let meals = await fetchMealDetails(ranked.map(([id]) => id));
+
+  const scoreById = new Map(ranked.map(([id, v]) => [id, v.score]));
+  meals.forEach(m => {
+    m._score = scoreById.get(m.idMeal) || 0;
+    m._source = m._source || "themealdb";
+  });
+
+  // External APIs – parallel
+  checkCancelled();
+  setSearchProgress("API חיצוניים: Spoonacular, Edamam, RecipeAPI, Ninjas",
+    "פועל במקביל");
+  const externalQuery = [positive, ...requiredKeywords, ...inclusions].filter(Boolean).join(" ");
+  const q = externalQuery || positive;
+
+  const results = await Promise.allSettled([
+    searchSpoonacular(q, 30),
+    searchEdamam(q, 0, 40),
+    searchRecipeApi(q, 5),
+    searchNinjas(q)
+  ]);
+  const spMeals = results[0].status === "fulfilled" ? results[0].value : [];
+  const edMeals = results[1].status === "fulfilled" ? results[1].value : [];
+  const raMeals = results[2].status === "fulfilled" ? results[2].value : [];
+  const njMeals = results[3].status === "fulfilled" ? results[3].value : [];
+
+  const sourceStats = {
+    themealdb: meals.length,
+    spoonacular: spMeals.length,
+    edamam: edMeals.length,
+    recipeapi: raMeals.length,
+    ninjas: njMeals.length
+  };
+
+  const titleKeywords = type === "ingredient" ? [] : [...new Set(
+    String(positive).split(/\s+/)
+      .map(w => w.toLowerCase().replace(/[^\w\u0590-\u05FF-]/g, ""))
+      .filter(w => w.length > 2 && !STOPWORDS.has(w))
+  )];
+  const expandedTitleKeywords = [...new Set([
+    ...titleKeywords,
+    ...titleKeywords.flatMap(kw => DISH_SYNONYMS[kw] || [])
+  ])];
+
+  const applyFilters = list => {
+    let out = list;
+    if(keywordGroups.length){
+      out = out.filter(m => mealMatchesKeywordGroups(m, keywordGroups));
+    }
+    if(expandedTitleKeywords.length){
+      out = out.filter(m => {
+        const t = (m.strMeal || "").toLowerCase();
+        if(expandedTitleKeywords.some(kw => t.includes(kw))) return true;
+        if(m._nameHit) return true;
+        return inclusions.length > 0 && mealMatchesConditions(m, inclusions, []);
+      });
+    }
+    if(inclusions.length || exclusions.length){
+      out = out.filter(m => mealMatchesConditions(m, inclusions, exclusions));
+    }
+    return out;
+  };
+
+  const mealDbFiltered = applyFilters(meals);
+  let externalFiltered = applyFilters([...spMeals, ...edMeals, ...raMeals, ...njMeals]);
+
+  // Image enrichment from source
+  checkCancelled();
+  setSearchProgress("משלים תמונות מעמודי מקור", `${externalFiltered.length} מתכונים`);
+  const CONC_SRC = 6;
+  for(let i = 0; i < externalFiltered.length; i += CONC_SRC){
+    checkCancelled();
+    await Promise.all(
+      externalFiltered.slice(i, i + CONC_SRC).map(m => enrichMealImageFromSource(m).catch(() => m))
+    );
+  }
+
+  // Fallback image enrichment
+  const toEnrich = externalFiltered.filter(m => !hasRealImage(m)).slice(0, 60);
+  if(toEnrich.length){
+    setSearchProgress("מחפש תמונות חלופיות", `${toEnrich.length} מתכונים`);
+    const CONC = 6;
+    for(let i = 0; i < toEnrich.length; i += CONC){
+      checkCancelled();
+      setSearchProgress("מחפש תמונות חלופיות",
+        `${Math.min(i + CONC, toEnrich.length)} / ${toEnrich.length}`);
+      await Promise.all(toEnrich.slice(i, i + CONC).map(m => ensureMealImage(m).catch(() => {})));
+    }
+  }
+
+  sourceStats.themealdbAfterFilter = mealDbFiltered.length;
+  sourceStats.externalAfterFilter = externalFiltered.length;
+
+  const EXTERNAL_RESERVE = 150;
+  const externalTake = externalFiltered.slice(0, EXTERNAL_RESERVE);
+  const mealDbTake = mealDbFiltered.slice(0, Math.max(0, WEB_MAX_RESULTS - externalTake.length));
+
+  let merged = [...externalTake, ...mealDbTake];
+
+  const seenTitles = new Set();
+  merged = merged.filter(m => {
+    const t = (m.strMeal || "").toLowerCase().trim();
+    if(!t || seenTitles.has(t)) return false;
+    seenTitles.add(t);
+    return true;
+  });
+
+  const titleWords = positive.split(/\s+/).filter(w => w.length > 2);
+  merged.sort((a, b) => {
+    const titleScore = m => titleWords.reduce((s, w) =>
+      s + ((m.strMeal || "").toLowerCase().includes(w) ? 4 : 0), 0);
+    const srcBoost = m => (["spoonacular","edamam","recipeapi","ninjas"].includes(m._source) ? 3 : 0);
+    const imgBoost = m => (hasRealImage(m) ? 1000 : 0);
+    return (b._score + titleScore(b) + srcBoost(b) + imgBoost(b)) -
+           (a._score + titleScore(a) + srcBoost(a) + imgBoost(a));
+  });
+
+  merged._sourceStats = sourceStats;
+  return merged.slice(0, WEB_MAX_RESULTS);
+}
+
+// ===== Render results =====
+function renderWebPage(page){
+  const resultsDiv = document.getElementById("web-results");
+  const { meals, positive, inclusions, exclusions } = webSearchState;
+  const total = meals.length;
+  const totalPages = Math.min(WEB_MAX_PAGES, Math.max(1, Math.ceil(total / WEB_PAGE_SIZE)));
+  page = Math.max(1, Math.min(page, totalPages));
+  webSearchState.page = page;
+
+  const start = (page - 1) * WEB_PAGE_SIZE;
+  const pageMeals = meals.slice(start, start + WEB_PAGE_SIZE);
+
+  resultsDiv.innerHTML = "";
+
+  const info = document.createElement("p");
+  info.style.cssText = "font-size:.85rem;opacity:.75;margin-bottom:6px;";
+  const resultConds = [];
+  if(inclusions.length) resultConds.push("עם " + inclusions.join(", "));
+  if(exclusions.length) resultConds.push("ללא " + exclusions.join(", "));
+  info.textContent = `נמצאו ${total} מתכונים עבור: ${positive}${resultConds.length ? " (" + resultConds.join(" | ") + ")" : ""} · עמוד ${page}/${totalPages}`;
+  resultsDiv.appendChild(info);
+
+  const stats = webSearchState.sourceStats;
+  if(stats){
+    const counts = {};
+    meals.forEach(m => {
+      const s = m._source || "themealdb";
+      counts[s] = (counts[s] || 0) + 1;
+    });
+    const srcLine = document.createElement("p");
+    srcLine.style.cssText = "font-size:.8rem;opacity:.7;margin-bottom:10px;";
+    const parts = [
+      `TheMealDB: ${counts.themealdb || 0}`,
+      `RecipeAPI: ${counts.recipeapi || 0}`,
+      `Ninjas: ${counts.ninjas || 0}`,
+      `Spoonacular: ${counts.spoonacular || 0}`,
+      `Edamam: ${counts.edamam || 0}`
+    ];
+    srcLine.textContent = "מקורות בתוצאות: " + parts.join(" · ");
+    const raw = document.createElement("span");
+    raw.style.display = "block";
+    raw.textContent = `נטען מהשרת: MealDB ${stats.themealdb}, RecipeAPI ${stats.recipeapi}, Ninjas ${stats.ninjas}, Spoonacular ${stats.spoonacular}, Edamam ${stats.edamam}`;
+    srcLine.appendChild(raw);
+    resultsDiv.appendChild(srcLine);
+  }
+
+  pageMeals.forEach(meal => {
+    const card = document.createElement("div");
+    card.className = "web-result";
+    const img = meal.strMealThumb || defaultImage;
+    const cat = meal.strCategory || "";
+    const area = meal.strArea || "";
+    const src = meal._source || "themealdb";
+    const srcLabel =
+      src === "spoonacular" ? "Spoonacular" :
+      src === "edamam" ? "Edamam" :
+      src === "recipeapi" ? "RecipeAPI.io" :
+      src === "ninjas" ? "API Ninjas" : "TheMealDB";
+    card.innerHTML = `
+      <img class="web-thumb" src="${img}" alt="${meal.strMeal}" loading="lazy" />
+      <div class="web-result-info">
+        <h3>${meal.strMeal}</h3>
+        <p>${cat}${area ? " · " + area : ""} · <span style="opacity:.7">${srcLabel}</span></p>
+        <label class="btn btn-primary" style="min-width:auto;padding:8px 12px;font-size:.85rem;margin-bottom:6px;display:inline-flex;">
+          📷 בחר תמונה
+          <input type="file" accept="image/*" class="web-img-input" style="display:none" />
+        </label>
+        <button class="btn btn-success add-web-btn">➕ הוסף לספר</button>
+      </div>
+    `;
+    const thumb = card.querySelector(".web-thumb");
+    const imgInput = card.querySelector(".web-img-input");
+    let customImage = null;
+    imgInput.onchange = () => {
+      const file = imgInput.files && imgInput.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        customImage = ev.target.result;
+        thumb.src = customImage;
+        showToast("תמונה נבחרה – לחץ הוסף לספר");
+      };
+      reader.readAsDataURL(file);
+    };
+    const addBtn = card.querySelector(".add-web-btn");
+    addBtn.onclick = () => addMealToLocal(meal, addBtn, customImage);
+    resultsDiv.appendChild(card);
+    if(!hasRealImage(meal)){
+      ensureMealImage(meal).then(u => { if(u) thumb.src = u; }).catch(() => {});
+    }
+  });
+
+  if(totalPages > 1){
+    const pag = document.createElement("div");
+    pag.className = "pagination";
+    const pageInfo = document.createElement("div");
+    pageInfo.className = "page-info";
+    pageInfo.textContent = `עמוד ${page} מתוך ${totalPages} (עד ${WEB_PAGE_SIZE} בכל עמוד)`;
+    pag.appendChild(pageInfo);
+
+    const prev = document.createElement("button");
+    prev.textContent = "▶ הקודם";
+    prev.disabled = page <= 1;
+    prev.onclick = () => renderWebPage(page - 1);
+    pag.appendChild(prev);
+
+    for(let p = 1; p <= totalPages; p++){
+      const btn = document.createElement("button");
+      btn.textContent = p;
+      if(p === page) btn.classList.add("active");
+      btn.onclick = () => renderWebPage(p);
+      pag.appendChild(btn);
+    }
+
+    const next = document.createElement("button");
+    next.textContent = "הבא ◀";
+    next.disabled = page >= totalPages;
+    next.onclick = () => renderWebPage(page + 1);
+    pag.appendChild(next);
+
+    resultsDiv.appendChild(pag);
+  }
+}
+
+// ===== Search web =====
+async function searchWeb(){
+  let query = document.getElementById("web-query").value.trim();
+  if(!query){ showToast("הזן מילת חיפוש", true); return; }
+
+  const type = document.querySelector('input[name="searchType"]:checked').value;
+  const resultsDiv = document.getElementById("web-results");
+
+  beginSearch();
+
+  try{
+    if(containsHebrew(query)){
+      setSearchProgress("מתרגם את החיפוש לאנגלית", "Google Translate");
+      const translatedQuery = await translateText(query, "en", "he");
+      if(translatedQuery && translatedQuery.trim()) query = translatedQuery.trim();
+    }
+    checkCancelled();
+
+    const { positive, inclusions, exclusions } = parseSearchQuery(query);
+    const condParts = [];
+    if(inclusions.length) condParts.push("עם: " + inclusions.join(", "));
+    if(exclusions.length) condParts.push("ללא: " + exclusions.join(", "));
+    const condText = condParts.length ? " (" + condParts.join(" | ") + ")" : "";
+    setSearchProgress(`מתחיל חיפוש: ${positive}`, condText);
+
+    const meals = await deepSearchMeals(positive, inclusions, exclusions, type);
+    const sourceStats = meals._sourceStats || null;
+
+    if(meals.length === 0){
+      const stats = sourceStats || {};
+      const statsHtml = `
+        <div style="margin-top:10px;padding:12px;background:rgba(255,255,255,.05);border-radius:10px;font-size:.85rem;">
+          <strong>📊 מה נטען מכל מקור (לפני סינון):</strong><br style="margin-bottom:6px">
+          • TheMealDB: ${stats.themealdb || 0}<br>
+          • Spoonacular: ${stats.spoonacular || 0}<br>
+          • Edamam: ${stats.edamam || 0}<br>
+          • RecipeAPI.io: ${stats.recipeapi || 0}<br>
+          • API Ninjas: ${stats.ninjas || 0}
+        </div>`;
+      const tips = `
+        <div style="margin-top:12px;padding:12px;background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:10px;font-size:.85rem;">
+          <strong>💡 טיפים לשיפור התוצאות:</strong><br>
+          • נסה לחפש באנגלית (למשל <code>pizza</code> במקום <code>פיצה</code>) — רוב המקורות תומכים טוב יותר באנגלית.<br>
+          • הוסף מפתח <a href="https://spoonacular.com/food-api" target="_blank" rel="noopener">Spoonacular</a> אישי (חינם) לקבלת תוצאות עשירות יותר.<br>
+          • הוסף מפתח <a href="https://developer.edamam.com/edamam-recipe-api" target="_blank" rel="noopener">Edamam</a> — כולל מיליוני מתכונים.
+        </div>`;
+      resultsDiv.innerHTML = '<p class="empty-msg">לא נמצאו מתכונים תואמים.</p>' + statsHtml + tips;
+      webSearchState = { meals:[], page:1, positive:"", inclusions:[], exclusions:[] };
+      endSearch();
+      return;
+    }
+
+    webSearchState = { meals, page:1, positive, inclusions, exclusions, sourceStats };
+    endSearch();
+    renderWebPage(1);
+    showToast(`נמצאו ${meals.length} מתכונים 🎉`);
+  }catch(err){
+    if(err && err.cancelled){
+      resultsDiv.innerHTML = '<p class="empty-msg">החיפוש בוטל על ידך.</p>';
+      showToast("החיפוש בוטל");
+      endSearch();
+      return;
+    }
+    console.error(err);
+    resultsDiv.innerHTML = '<p class="empty-msg">שגיאה בחיבור לרשת. נסה שוב.</p>';
+    showToast("שגיאה בחיפוש ברשת", true);
+    endSearch();
+  }
+}
+
+// ===== Add meal to local =====
+async function addMealToLocal(meal, btnElement, customImageData = null){
+  let ingredients = removeEmptyLines(parseMealIngredients(meal));
+  let instructions = removeEmptyLines(meal.strInstructions || "");
+  let title = (meal.strMeal || "מתכון ללא שם").trim();
+  const category = mapCategory(meal.strCategory);
+  let imageData = customImageData || meal.strMealThumb || defaultImage;
+  if(!imageData || imageData === "null") imageData = defaultImage;
+  const quantity = "";
+
+  if(!customImageData && !hasRealImage(meal)){
+    if(btnElement) btnElement.textContent = "🖼️ מחפש תמונה...";
+    try{ await ensureMealImage(meal); }catch(_) {}
+    imageData = meal.strMealThumb || defaultImage;
+  }
+
+  const shouldTranslate = document.getElementById("translateToHebrew").checked;
+
+  if(btnElement){
+    btnElement.disabled = true;
+    btnElement.textContent = shouldTranslate ? "מתרגם..." : "מוסיף...";
+  }
+
+  try{
+    if(shouldTranslate){
+      const translated = await translateRecipeFields(title, ingredients, instructions);
+      title = translated.title;
+      ingredients = translated.ingredients;
+      instructions = translated.instructions;
+    } else {
+      ingredients = removeEmptyLines(ingredients);
+      instructions = removeEmptyLines(instructions);
+    }
+
+    const existing = await getAllRecipes();
+    const isDup = existing.some(ex => ex.title === title && ex.ingredients === ingredients);
+    if(isDup){
+      showToast("המתכון כבר קיים בספר", true);
+      return;
+    }
+
+    await saveRecipeToDB({ title, quantity, ingredients, instructions, imageData, category });
+    const noRealImg = !customImageData && !hasRealImage(meal);
+    showToast(noRealImg
+      ? `"${title}" נוסף. אפשר להוסיף תמונה בלחיצה על 🖼️`
+      : `"${title}" נוסף בהצלחה!`);
+    loadAndDisplay();
+  }catch(err){
+    showToast("שגיאה בהוספת המתכון", true);
+    console.error(err);
+  }finally{
+    if(btnElement){
+      btnElement.disabled = false;
+      btnElement.textContent = "➕ הוסף לספר";
+    }
+  }
+}
+
+// ===== Local images helpers =====
+function hasRealRecipeImage(recipe){
+  const d = recipe && recipe.imageData;
+  return !!(d && d.trim() && d !== defaultImage && !d.startsWith("data:image/svg") && d !== "null");
+}
+
+async function findImageForRecipeTitle(title){
+  let q = (title || "").trim();
+  if(!q) return null;
+  if(containsHebrew(q)){
+    try{
+      const t = await translateText(q, "en", "he");
+      if(t && t.trim()) q = t.trim();
+    }catch(_) {}
+  }
+  try{
+    const res = await fetchJson(`${MEALDB_BASE}/search.php?s=${encodeURIComponent(q)}`);
+    if(res.ok && res.data.meals && res.data.meals.length){
+      const withImg = res.data.meals.find(m => hasRealImage(m));
+      if(withImg) return withImg.strMealThumb;
+    }
+  }catch(_) {}
+  const key = getApiKeys().spoonacular;
+  if(key){
+    try{
+      const res = await fetchJson(`${SPOONACULAR_BASE}/recipes/complexSearch?query=${encodeURIComponent(q)}&number=3&apiKey=${encodeURIComponent(key)}`);
+      if(res.ok && res.data.results && res.data.results.length){
+        const withImg = res.data.results.find(r => r.image);
+        if(withImg) return withImg.image;
+      }
+    }catch(_) {}
+  }
+  return null;
+}
+
+async function searchImageForRecipe(recipe, btn){
+  if(btn){ btn.disabled = true; btn.textContent = "⏳"; }
+  try{
+    const url = await findImageForRecipeTitle(recipe.title);
+    if(url){
+      await updateRecipeInDB(recipe.id, { imageData:url });
+      showToast("תמונה נמצאה ונשמרה 🎉");
+      loadAndDisplay();
+    } else {
+      showToast("לא נמצאה תמונה מתאימה – אפשר להעלות ידנית ב✏️", true);
+    }
+  }catch(e){
+    showToast("שגיאה בחיפוש תמונה", true);
+  }finally{
+    if(btn && document.body.contains(btn)){ btn.disabled = false; btn.textContent = "🖼️"; }
+  }
+}
+
+async function findMissingImages(){
+  const recipes = await getAllRecipes();
+  const missing = recipes.filter(r => !hasRealRecipeImage(r));
+  if(!missing.length){ showToast("לכל המתכונים כבר יש תמונות 🎉"); return; }
+  let found = 0;
+  for(const r of missing){
+    showToast(`מחפש תמונה (${found + 1}/${missing.length})...`);
+    const url = await findImageForRecipeTitle(r.title);
+    if(url){ await updateRecipeInDB(r.id, { imageData:url }); found++; }
+    await new Promise(res => setTimeout(res, 250));
+  }
+  showToast(found ? `נמצאו ונשמרו ${found} תמונות 🎉` : "לא נמצאו תמונות מתאימות", !found);
+  loadAndDisplay();
+}
+
+// ===== Recipe card =====
+function createRecipeCard(recipe){
+  const card = document.createElement("div");
+  card.className = "recipe-card";
+  card.dataset.id = recipe.id;
+
+  const title = replaceFractions(recipe.title || "");
+  const quantity = replaceFractions(recipe.quantity || "");
+  const ingredients = replaceFractions(recipe.ingredients || "");
+  const instructions = replaceFractions(recipe.instructions || "");
+  const imgSrc = recipe.imageData && recipe.imageData.trim() ? recipe.imageData : defaultImage;
+
+  card.innerHTML = `
+    <div class="recipe-actions">
+      ${hasRealRecipeImage(recipe) ? "" : '<button class="action-btn action-img" title="חפש תמונה אוטומטית">🖼️</button>'}
+      <button class="action-btn action-delete" title="מחק">🗑️</button>
+      <button class="action-btn action-share" title="שתף">🚀</button>
+      <button class="action-btn action-edit" title="ערוך">✏️</button>
+    </div>
+    <h3 class="editable" data-field="title" contenteditable="false">${title.replace(/\n/g, "<br>")}</h3>
+    <p class="recipe-meta"><strong>קטגוריה:</strong> <span class="editable" data-field="category" contenteditable="false">${recipe.category || "ראשונות"}</span></p>
+    <p class="recipe-meta"><strong>כמות:</strong> <span class="editable" data-field="quantity" contenteditable="false">${quantity}</span></p>
+    <div class="recipe-image"><img src="${imgSrc}" alt="תמונת מתכון" /></div>
+    <p class="recipe-meta"><strong>מצרכים:</strong></p>
+    <div class="editable" data-field="ingredients" contenteditable="false">${ingredients.replace(/\n/g, "<br>")}</div>
+    <p class="recipe-meta" style="margin-top:8px"><strong>הוראות הכנה:</strong></p>
+    <div class="editable" data-field="instructions" contenteditable="false">${instructions.replace(/\n/g, "<br>")}</div>
+  `;
+
+  card.querySelector(".action-delete").onclick = () => {
+    if(confirm("למחוק את המתכון לצמיתות?")){
+      deleteRecipeById(recipe.id).then(() => {
+        showToast("המתכון נמחק");
+        loadAndDisplay();
+      }).catch(() => showToast("שגיאה במחיקה", true));
+    }
+  };
+  const imgActionBtn = card.querySelector(".action-img");
+  if(imgActionBtn) imgActionBtn.onclick = () => searchImageForRecipe(recipe, imgActionBtn);
+  card.querySelector(".action-share").onclick = () => shareRecipe(recipe);
+  card.querySelector(".action-edit").onclick = () => toggleEditMode(card, recipe.id);
+
+  return card;
+}
+
+function toggleEditMode(card, id){
+  const editables = card.querySelectorAll(".editable");
+  const isEditing = editables[0].contentEditable === "true";
+  const newState = !isEditing;
+  editables.forEach(el => {
+    el.contentEditable = newState ? "true" : "false";
+    if(newState){
+      el.oninput = () => updateRecipeInDB(id, { [el.dataset.field]:el.innerText })
+        .catch(() => showToast("שגיאה בעדכון", true));
+    } else el.oninput = null;
+  });
+  card.classList.toggle("editing", newState);
+
+  const imgContainer = card.querySelector(".recipe-image");
+  if(newState){
+    let btns = imgContainer.querySelector(".image-btns");
+    if(!btns){
+      btns = document.createElement("div");
+      btns.className = "image-btns";
+      const changeBtn = document.createElement("button");
+      changeBtn.textContent = "החלף תמונה";
+      changeBtn.style.background = "var(--primary)";
+      changeBtn.onclick = () => changeImage(id, imgContainer);
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "הסר תמונה";
+      removeBtn.style.background = "var(--danger)";
+      removeBtn.onclick = () => removeImage(id, imgContainer);
+      btns.append(changeBtn, removeBtn);
+      imgContainer.appendChild(btns);
+    }
+  } else {
+    const btns = imgContainer.querySelector(".image-btns");
+    if(btns) btns.remove();
+  }
+}
+
+function changeImage(id, container){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      updateRecipeInDB(id, { imageData:ev.target.result }).then(() => {
+        container.querySelector("img").src = ev.target.result;
+        showToast("תמונה עודכנה");
+      }).catch(() => showToast("שגיאה בעדכון תמונה", true));
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+function removeImage(id, container){
+  if(!confirm("להסיר את התמונה?")) return;
+  updateRecipeInDB(id, { imageData:null }).then(() => {
+    container.querySelector("img").src = defaultImage;
+    showToast("תמונה הוסרה");
+  }).catch(() => showToast("שגיאה", true));
+}
+
+function shareRecipe(recipe){
+  const text = `\u200F${recipe.title}\n\nכמות: ${recipe.quantity || ""}\n\nמצרכים:\n${recipe.ingredients}\n\nהוראות הכנה:\n${recipe.instructions}`;
+  if(navigator.share){
+    navigator.share({ title:recipe.title, text }).catch(() => showToast("שגיאה בשיתוף", true));
+  } else {
+    const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    const tg = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
+    const win = window.open("", "share", "width=400,height=300");
+    win.document.write(`
+      <html dir="rtl"><head><title>שתף</title></head>
+      <body style="font-family:sans-serif;padding:20px;text-align:center;">
+        <h3>שתף מתכון</h3>
+        <p><a href="${wa}" target="_blank">וואטסאפ</a></p>
+        <p><a href="${tg}" target="_blank">טלגרם</a></p>
+        <button onclick="window.close()">סגור</button>
+      </body></html>
+    `);
+  }
+}
+
+// ===== Display =====
+let imageOnlyFilter = false;
+let imagesFirstSort = true;
+
+async function loadAndDisplay(filterFn = null){
+  try{
+    let recipes = await getAllRecipes();
+    if(filterFn) recipes = recipes.filter(filterFn);
+    if(imageOnlyFilter) recipes = recipes.filter(r => hasRealRecipeImage(r));
+    if(imagesFirstSort){
+      recipes = [...recipes].sort((a, b) =>
+        (hasRealRecipeImage(b) ? 1 : 0) - (hasRealRecipeImage(a) ? 1 : 0));
+    }
+    const container = document.getElementById("recipes");
+    container.innerHTML = "";
+    document.getElementById("recipe-count").textContent = `(${recipes.length})`;
+    if(recipes.length === 0){
+      container.innerHTML = '<p class="empty-msg">לא נמצאו מתכונים.</p>';
+      return;
+    }
+    recipes.forEach(r => container.appendChild(createRecipeCard(r)));
+  }catch(err){
+    showToast("שגיאה בטעינת מתכונים", true);
+  }
+}
+
+// ===== Add / export / import =====
+function addRecipe(){
+  const title = document.getElementById("title").value.trim();
+  const quantity = document.getElementById("quantity").value.trim();
+  const ingredients = removeEmptyLines(document.getElementById("ingredients").value);
+  const instructions = removeEmptyLines(document.getElementById("instructions").value);
+  const category = document.getElementById("category").value;
+  const imageInput = document.getElementById("recipe-image");
+
+  if(!title || !ingredients || !instructions){
+    showToast("נא למלא כותרת, מצרכים והוראות הכנה", true);
+    return;
+  }
+
+  const doSave = imageData => {
+    saveRecipeToDB({ title, quantity, ingredients, instructions, imageData, category })
+      .then(() => {
+        showToast("המתכון נוסף בהצלחה!");
+        ["title","quantity","ingredients","instructions","recipe-image"].forEach(id => {
+          document.getElementById(id).value = "";
+        });
+        loadAndDisplay();
+      })
+      .catch(() => showToast("שגיאה בשמירה", true));
+  };
+
+  if(imageInput.files && imageInput.files[0]){
+    const reader = new FileReader();
+    reader.onload = e => doSave(e.target.result);
+    reader.readAsDataURL(imageInput.files[0]);
+  } else {
+    doSave(defaultImage);
+  }
+}
+
+async function exportRecipes(){
+  try{
+    const recipes = await getAllRecipes();
+    const dataStr = JSON.stringify(recipes, null, 2);
+    const blob = new Blob([dataStr], { type:"application/json" });
+    const defaultName = "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
+    const name = prompt("שם הקובץ:", defaultName) || defaultName;
+    const filename = name.endsWith(".json") ? name : name + ".json";
+
+    if(navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)){
+      const file = new File([blob], filename, { type:"application/json" });
+      await navigator.share({ files:[file], title:"ספר מתכונים" });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    showToast("הקובץ יוצא בהצלחה");
+  }catch(err){
+    showToast("שגיאה בייצוא", true);
+  }
+}
+
+function importRecipes(file){
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try{
+      const newRecipes = JSON.parse(e.target.result);
+      if(!Array.isArray(newRecipes)) throw new Error("פורמט לא תקין");
+      const existing = await getAllRecipes();
+      let added = 0;
+      for(const r of newRecipes){
+        const complete = {
+          title:r.title || "",
+          quantity:r.quantity || "",
+          ingredients:r.ingredients || "",
+          instructions:r.instructions || "",
+          imageData:r.imageData || defaultImage,
+          category:r.category || "ראשונות"
+        };
+        const isDup = existing.some(ex =>
+          ex.title === complete.title &&
+          ex.ingredients === complete.ingredients &&
+          ex.instructions === complete.instructions);
+        if(!isDup){ await saveRecipeToDB(complete); added++; }
+      }
+      showToast(`יובאו ${added} מתכונים חדשים`);
+      loadAndDisplay();
+    }catch(err){
+      showToast("שגיאה בקריאת הקובץ – ודא שזה JSON תקין", true);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ===== Local search =====
+function doSearch(){
+  const word = document.getElementById("search-word").value.trim().toLowerCase();
+  if(!word){ loadAndDisplay(); return; }
+  loadAndDisplay(r =>
+    (r.title || "").toLowerCase().includes(word) ||
+    (r.ingredients || "").toLowerCase().includes(word) ||
+    (r.instructions || "").toLowerCase().includes(word));
+}
+
+function filterByCategory(cat){
+  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+  const btn = document.querySelector(`.cat-btn[data-cat="${cat}"]`);
+  if(btn) btn.classList.add("active");
+  loadAndDisplay(r => r.category === cat);
+}
+
+// ===== Init =====
+document.addEventListener("DOMContentLoaded", async () => {
+  const savedTheme = localStorage.getItem("recipeTheme") || "dark";
+  setTheme(savedTheme);
+  loadApiKeysToForm();
+  document.getElementById("saveApiKeysBtn").onclick = saveApiKeysFromForm;
+  document.getElementById("clearApiKeysBtn").onclick = clearApiKeys;
+
+  if(isFileProtocol()){
+    const w = document.getElementById("file-protocol-warning");
+    if(w) w.style.display = "block";
+  }
+
+  try{
+    await initDB();
+    await loadAndDisplay();
+  }catch(err){
+    showToast("שגיאה באתחול מסד הנתונים", true);
+  }
+
+  document.getElementById("toggleAddBtn").onclick = () => {
+    const form = document.getElementById("add-form");
+    const isOpen = form.classList.toggle("open");
+    document.getElementById("toggleAddBtn").textContent = isOpen ? "✖️ סגור טופס" : "➕ הוסף מתכון";
+  };
+
+  document.getElementById("saveRecipeBtn").onclick = addRecipe;
+  document.getElementById("themeBtn").onclick = toggleTheme;
+  document.getElementById("helpBtn").onclick = () => document.getElementById("helpModal").classList.add("open");
+  document.getElementById("closeHelp").onclick = () => document.getElementById("helpModal").classList.remove("open");
+  document.getElementById("helpModal").onclick = e => {
+    if(e.target.id === "helpModal") e.target.classList.remove("open");
+  };
+
+  document.getElementById("exportBtn").onclick = exportRecipes;
+  document.getElementById("import-file").onchange = e => {
+    if(e.target.files[0]) importRecipes(e.target.files[0]);
+    e.target.value = "";
+  };
+  document.getElementById("deleteAllBtn").onclick = () => {
+    if(confirm("למחוק את כל המתכונים? פעולה זו אינה הפיכה!")){
+      clearAllRecipes().then(() => {
+        showToast("כל המתכונים נמחקו");
+        loadAndDisplay();
+      });
+    }
+  };
+
+  document.getElementById("searchBtn").onclick = doSearch;
+  document.getElementById("clearSearchBtn").onclick = () => {
+    document.getElementById("search-word").value = "";
+    document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+    loadAndDisplay();
+  };
+  document.getElementById("search-word").addEventListener("keydown", e => {
+    if(e.key === "Enter") doSearch();
+  });
+
+  document.querySelectorAll(".cat-btn[data-cat]").forEach(btn => {
+    btn.onclick = () => filterByCategory(btn.dataset.cat);
+  });
+
+  const imageFilterBtn = document.getElementById("imageFilterBtn");
+  const imageFirstBtn = document.getElementById("imageFirstBtn");
+  const findImagesBtn = document.getElementById("findImagesBtn");
+  imageFirstBtn.classList.add("active");
+  imageFilterBtn.onclick = () => {
+    imageOnlyFilter = !imageOnlyFilter;
+    imageFilterBtn.classList.toggle("active", imageOnlyFilter);
+    loadAndDisplay();
+  };
+  imageFirstBtn.onclick = () => {
+    imagesFirstSort = !imagesFirstSort;
+    imageFirstBtn.classList.toggle("active", imagesFirstSort);
+    loadAndDisplay();
+  };
+  findImagesBtn.onclick = () => findMissingImages();
+
+  document.getElementById("webSearchBtn").onclick = searchWeb;
+  document.getElementById("web-query").addEventListener("keydown", e => {
+    if(e.key === "Enter") searchWeb();
+  });
+  document.getElementById("clearWebBtn").onclick = () => {
+    if(currentSearch && !currentSearch.cancelled) currentSearch.cancelled = true;
+    document.getElementById("web-results").innerHTML = "";
+    document.getElementById("web-query").value = "";
+    webSearchState = { meals:[], page:1, positive:"", inclusions:[], exclusions:[] };
+    endSearch();
+  };
+
+  const webToggle = document.getElementById("webSearchToggle");
+  const webBody = document.getElementById("webSearchBody");
+  const webArrow = document.getElementById("webSearchArrow");
+  webToggle.onclick = () => {
+    const open = webBody.classList.toggle("open");
+    webArrow.classList.toggle("open", open);
+    webArrow.textContent = open ? "▲" : "▼";
+  };
+
+  const scrollBtn = document.getElementById("scrollTop");
+  window.addEventListener("scroll", () => {
+    scrollBtn.style.display = window.scrollY > 200 ? "flex" : "none";
+  });
+  scrollBtn.onclick = () => window.scrollTo({ top:0, behavior:"smooth" });
+});
+</script>
+</body>
+</html>
