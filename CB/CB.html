@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ספר מתכונים - פשוט</title>
+  <style>
+    :root {
+      --primary: #4caf50;
+      --primary-hover: #3e8e41;
+      --danger: #ff4444;
+      --danger-hover: #cc0000;
+      --warning: #ffc61b;
+      --bg: #1a1a1a;
+      --surface: #2d2d2d;
+      --input-bg: #333;
+      --text: #ffffff;
+      --border: #4caf50;
+      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    [data-theme="light"] {
+      --bg: #ffdfa8;
+      --surface: #ffffff;
+      --input-bg: #ffffff;
+      --text: #000000;
+      --border: #555;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 12px;
+      line-height: 1.5;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 8px 0;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      text-align: center;
+      flex: 1;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .icon-btn:hover {
+      transform: scale(1.1);
+      background: var(--primary-hover);
+    }
+
+    section {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    section h2 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 6px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.25);
+    }
+
+    .field textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    #title {
+      min-height: 42px;
+      max-height: 80px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      text-align: center;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: #74a5ff;
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #5a8de6;
+    }
+
+    .btn-success {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-hover);
+    }
+
+    .btn-secondary {
+      background: #666;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #555;
+    }
+
+    .btn-web {
+      background: #9c27b0;
+      color: white;
+    }
+
+    .btn-web:hover {
+      background: #7b1fa2;
+    }
+
+    .file-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .file-label input {
+      display: none;
+    }
+
+    .category-filters {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 500px) {
+      .category-filters {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .cat-btn {
+      padding: 10px 4px;
+      background: #74a5ff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .cat-btn:hover {
+      background: #5a8de6;
+    }
+
+    .cat-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .recipe-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .recipe-card.editing {
+      border: 2px solid #ffa500;
+    }
+
+    .recipe-card h3 {
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 1.15rem;
+      padding: 0 40px;
+    }
+
+    .recipe-meta {
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .recipe-meta strong {
+      color: var(--primary);
+    }
+
+    .recipe-image {
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .recipe-image img {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .recipe-actions {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .action-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s;
+    }
+
+    .action-btn:active {
+      transform: scale(0.9);
+    }
+
+    .action-delete { background: var(--danger); }
+    .action-delete:hover { background: #0088ff; }
+    .action-share { background: var(--warning); color: #000; }
+    .action-share:hover { background: #a371ff; color: white; }
+    .action-edit { background: var(--primary); }
+    .action-edit:hover { background: #daf81c; color: #000; }
+
+    .editable {
+      display: block;
+      min-height: 1.2em;
+      outline: none;
+      white-space: pre-wrap;
+    }
+
+    .editable[contenteditable="true"] {
+      background: rgba(255, 165, 0, 0.15);
+      border-radius: 4px;
+      padding: 2px 4px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 2000;
+      animation: slideIn 0.3s ease, fadeOut 0.4s ease 2.6s forwards;
+      max-width: 90%;
+    }
+
+    .toast.success { background: var(--primary); }
+    .toast.error { background: var(--danger); }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1500;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 480px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .modal-content h2 {
+      margin-bottom: 12px;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 6px;
+    }
+
+    .modal-content .close {
+      position: absolute;
+      left: 12px;
+      top: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text);
+    }
+
+    .modal-content ol {
+      padding-right: 20px;
+      line-height: 1.7;
+    }
+
+    #scrollTop {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      display: none;
+      z-index: 100;
+    }
+
+    #add-form {
+      display: none;
+    }
+
+    #add-form.open {
+      display: block;
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 24px;
+      opacity: 0.7;
+    }
+
+    .image-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .image-btns button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: white;
+    }
+
+    .image-drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s;
+      background: var(--input-bg);
+    }
+
+    .image-drop-zone.drag-over {
+      border-color: var(--primary);
+      background: rgba(76, 175, 80, 0.15);
+    }
+
+    .image-drop-zone .drop-hint {
+      font-size: 0.85rem;
+      opacity: 0.75;
+      margin-top: 6px;
+    }
+
+    .image-drop-zone img {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .recipe-image.drag-over {
+      outline: 3px dashed var(--primary);
+      outline-offset: 4px;
+      border-radius: 8px;
+    }
+
+    /* Web search results */
+    .web-result {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .web-result img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .web-result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .web-result-info h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .web-result-info p {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-bottom: 8px;
+    }
+
+    .web-result .btn {
+      min-width: auto;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      opacity: 0.8;
+    }
+
+    .search-type-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-type-row label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    /* Collapsible web search */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      gap: 8px;
+    }
+
+    .collapsible-header h2 {
+      margin: 0;
+      border: none;
+      padding: 0;
+      flex: 1;
+    }
+
+    .collapse-arrow {
+      font-size: 1.2rem;
+      transition: transform 0.25s;
+    }
+
+    .collapse-arrow.open {
+      transform: rotate(180deg);
+    }
+
+    .collapsible-body {
+      display: none;
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 2px solid var(--primary);
+    }
+
+    .collapsible-body.open {
+      display: block;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 10px;
+    }
+
+    .pagination button {
+      min-width: 36px;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 8px;
+      background: #74a5ff;
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: #5a8de6;
+    }
+
+    .pagination button.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .page-info {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeBtn" title="החלף ערכת נושא">🌙</button>
+        <button class="icon-btn" id="helpBtn" title="הדרכה">❓</button>
+      </div>
+      <h1>ספר מתכונים</h1>
+      <div style="width: 80px;"></div>
+    </header>
+
+    <!-- כפתור ראשי להוספה -->
+    <div class="btn-row" style="margin-bottom: 12px;">
+      <button class="btn btn-primary" id="toggleAddBtn">➕ הוסף מתכון</button>
+    </div>
+
+    <!-- טופס הוספת מתכון -->
+    <section id="add-form">
+      <h2>הוספת / עריכת מתכון</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label for="title">כותרת *</label>
+          <textarea id="title" placeholder="שם המתכון" rows="1"></textarea>
+        </div>
+        <div class="field">
+          <label for="category">קטגוריה</label>
+          <select id="category">
+            <option value="ראשונות">ראשונות</option>
+            <option value="עיקריות">עיקריות</option>
+            <option value="תוספות">תוספות</option>
+            <option value="קינוחים">קינוחים</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="quantity">לכמות</label>
+          <input type="text" id="quantity" placeholder="למשל: 4 מנות" />
+        </div>
+        <div class="field full-width">
+          <label for="ingredients">רשימת מצרכים *</label>
+          <textarea id="ingredients" placeholder="כל מצרך בשורה חדשה"></textarea>
+        </div>
+        <div class="field full-width">
+          <label for="instructions">הוראות הכנה *</label>
+          <textarea id="instructions" placeholder="שלב אחר שלב"></textarea>
+        </div>
+      </div>
+      <div class="field full-width" style="margin-top:8px;">
+        <label>תמונה</label>
+        <div class="image-drop-zone" id="add-image-drop">
+          <img id="add-image-preview" src="" alt="" style="display:none;margin-bottom:8px;" />
+          <p class="drop-hint">גרור לכאן תמונה מתיקייה או מאתר, או בחרו קובץ</p>
+          <label class="btn btn-primary file-label" style="margin-top:8px;display:inline-flex;">
+            📷 בחירת קובץ
+            <input type="file" id="recipe-image" accept="image/*" />
+          </label>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-success" id="saveRecipeBtn">💾 שמור מתכון</button>
+      </div>
+
+      <div class="btn-row" style="margin-top: 16px;">
+        <button class="btn btn-primary" id="exportBtn">⬇️ יצא לקובץ</button>
+        <label class="btn btn-primary file-label">
+          ⬆️ יבא מקובץ
+          <input type="file" id="import-file" accept=".json" />
+        </label>
+        <button class="btn btn-danger" id="deleteAllBtn">🗑️ מחק הכל</button>
+      </div>
+    </section>
+
+    <!-- ייבוא מתכון מ־HTML -->
+    <section id="html-import-section">
+      <div class="collapsible-header" id="htmlImportToggle" title="לחץ לפתיחה / סגירה">
+        <h2>📋 ייבוא מתכון מ־HTML</h2>
+        <span class="collapse-arrow" id="htmlImportArrow">▼</span>
+      </div>
+      <div class="collapsible-body" id="htmlImportBody">
+        <p style="font-size:0.85rem;opacity:0.8;margin-bottom:10px;">
+          בעמוד המתכון בדפדפן: לחץ ימני → <strong>הצג מקור העמוד</strong> (View Page Source) → העתק את כל הקוד והדבק כאן.
+          המערכת תחלץ כותרת, מצרכים, הוראות הכנה ותמונה (schema.org / JSON-LD).
+        </p>
+        <div class="field">
+          <label for="url-html-paste">HTML של העמוד</label>
+          <textarea id="url-html-paste" rows="6" placeholder="הדבק כאן את קוד המקור של העמוד..." dir="ltr" style="text-align:left;font-size:0.8rem;"></textarea>
+        </div>
+        <div class="search-type-row" style="margin-top:8px;">
+          <label>
+            <input type="checkbox" id="urlTranslateToHebrew" checked>
+            תרגם לעברית רק אם המתכון באנגלית
+          </label>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-web" id="urlParseHtmlBtn">🔍 חלץ מתכון מה־HTML</button>
+          <button type="button" class="btn btn-secondary" id="urlClearBtn">נקה</button>
+        </div>
+        <div id="url-import-preview" style="margin-top:14px;display:none;">
+          <h3 style="margin-bottom:10px;border-bottom:2px solid var(--primary);padding-bottom:6px;">תצוגה מקדימה</h3>
+          <div class="field">
+            <label>כותרת</label>
+            <textarea id="url-preview-title" rows="1"></textarea>
+          </div>
+          <div class="field" style="margin-top:8px;">
+            <label>קטגוריה</label>
+            <select id="url-preview-category">
+              <option value="ראשונות">ראשונות</option>
+              <option value="עיקריות" selected>עיקריות</option>
+              <option value="תוספות">תוספות</option>
+              <option value="קינוחים">קינוחים</option>
+            </select>
+          </div>
+          <div class="field" style="margin-top:8px;">
+            <label>מצרכים</label>
+            <textarea id="url-preview-ingredients" rows="6"></textarea>
+          </div>
+          <div class="field" style="margin-top:8px;">
+            <label>הוראות הכנה</label>
+            <textarea id="url-preview-instructions" rows="8"></textarea>
+          </div>
+          <div class="field" style="margin-top:8px;">
+            <label>תמונה</label>
+            <div class="image-drop-zone" id="url-preview-image-wrap">
+              <img id="url-preview-image" src="" alt="תמונת מתכון" style="display:none;margin-bottom:8px;" />
+              <p id="url-preview-no-image" style="opacity:0.7;display:none;">לא נמצאה תמונה – אפשר לגרור או לבחור</p>
+              <p class="drop-hint">גרור לכאן תמונה מתיקייה או מאתר, או בחרו קובץ</p>
+              <label class="btn btn-primary file-label" style="margin-top:6px;display:inline-flex;">
+                📷 החלף / העלה תמונה
+                <input type="file" id="url-preview-image-file" accept="image/*" />
+              </label>
+            </div>
+          </div>
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn btn-success" id="urlAddToBookBtn">💾 הוסף לספר המתכונים</button>
+          </div>
+        </div>
+        <div id="url-import-status" style="margin-top:10px;"></div>
+      </div>
+    </section>
+
+    <!-- חיפוש מקומי וסינון -->
+    <section>
+      <h2>חיפוש וסינון מקומי</h2>
+      <div class="field">
+        <label for="search-word">מילת חיפוש</label>
+        <input type="text" id="search-word" placeholder="השאר ריק להצגת הכל" />
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="searchBtn">🔍 הצג תוצאות</button>
+        <button class="btn btn-secondary" id="clearSearchBtn">הצג הכל</button>
+      </div>
+      <div class="category-filters">
+        <button class="cat-btn" data-cat="ראשונות">ראשונות</button>
+        <button class="cat-btn" data-cat="עיקריות">עיקריות</button>
+        <button class="cat-btn" data-cat="תוספות">תוספות</button>
+        <button class="cat-btn" data-cat="קינוחים">קינוחים</button>
+      </div>
+    </section>
+
+    <!-- רשימת מתכונים -->
+    <section>
+      <h2>המתכונים שלי <span id="recipe-count" style="font-weight:400;font-size:0.9rem;"></span></h2>
+      <div id="recipes"></div>
+    </section>
+  </div>
+
+  <button class="icon-btn" id="scrollTop" title="חזרה למעלה">⬆️</button>
+
+  <!-- מודל הדרכה -->
+  <div class="modal" id="helpModal">
+    <div class="modal-content">
+      <button class="close" id="closeHelp">&times;</button>
+      <h2>הדרכה מהירה</h2>
+      <ol>
+        <li><strong>הוספת מתכון ידנית:</strong> לחץ "הוסף מתכון", מלא שדות ולחץ "שמור".</li>
+        <li><strong>ייבוא מ־HTML:</strong> בעמוד המתכון → הצג מקור העמוד → העתק → הדבק בסעיף "ייבוא מ־HTML" → חלץ → ערוך והוסף לספר.</li>
+        <li><strong>חיפוש מקומי:</strong> חפש במילה או סנן לפי קטגוריה.</li>
+        <li><strong>עריכה:</strong> ✏️ במתכון – ערוך ישירות. לחץ שוב לנעילה.</li>
+        <li><strong>מחיקה / שיתוף:</strong> 🗑️ ו-🚀.</li>
+        <li><strong>ייצוא / ייבוא:</strong> גיבוי כקובץ JSON.</li>
+        <li><strong>ערכת נושא:</strong> 🌙 / ☀️.</li>
+      </ol>
+      <p style="margin-top:12px;font-size:0.9rem;opacity:0.85;">
+        המתכונים נשמרים מקומית בדפדפן. מומלץ לייצא גיבוי מדי פעם.<br>
+        תרגום (אופציונלי): Google Translate. איכות התרגום טובה אך לא מושלמת – אפשר לערוך אחרי ההוספה.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect fill='%23444' width='200' height='150'/%3E%3Ctext fill='%23aaa' font-family='sans-serif' font-size='16' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3Eאין תמונה%3C/text%3E%3C/svg%3E";
+
+    // ---------- IndexedDB ----------
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("RecipeDB", 1);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          db = request.result;
+          resolve(db);
+        };
+        request.onupgradeneeded = (e) => {
+          const database = e.target.result;
+          if (!database.objectStoreNames.contains("recipes")) {
+            database.createObjectStore("recipes", { keyPath: "id", autoIncrement: true });
+          }
+        };
+      });
+    }
+
+    // ---------- Theme ----------
+    function setTheme(theme) {
+      document.body.setAttribute("data-theme", theme);
+      localStorage.setItem("recipeTheme", theme);
+      document.getElementById("themeBtn").textContent = theme === "dark" ? "🌙" : "☀️";
+    }
+
+    function toggleTheme() {
+      const current = document.body.getAttribute("data-theme") || "dark";
+      setTheme(current === "dark" ? "light" : "dark");
+    }
+
+    // ---------- Toast ----------
+    function showToast(msg, isError = false) {
+      const existing = document.querySelector(".toast");
+      if (existing) existing.remove();
+      const toast = document.createElement("div");
+      toast.className = "toast " + (isError ? "error" : "success");
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3200);
+    }
+
+    // ---------- Fractions ----------
+    function replaceFractions(text) {
+      if (!text) return "";
+      const map = { "1/2": "½", "1/4": "¼", "1/3": "⅓", "2/3": "⅔", "3/4": "¾" };
+      let result = String(text);
+      for (const [f, s] of Object.entries(map)) {
+        result = result.replace(new RegExp(f, "g"), s);
+      }
+      return result;
+    }
+
+    // ---------- CRUD ----------
+    function saveRecipeToDB(recipe) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(["recipes"], "readwrite");
+        const store = tx.objectStore("recipes");
+        const req = store.add(recipe);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function getAllRecipes() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(["recipes"], "readonly");
+        const store = tx.objectStore("recipes");
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function deleteRecipeById(id) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(["recipes"], "readwrite");
+        const store = tx.objectStore("recipes");
+        const req = store.delete(id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function updateRecipeInDB(id, updates) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(["recipes"], "readwrite");
+        const store = tx.objectStore("recipes");
+        const getReq = store.get(id);
+        getReq.onsuccess = () => {
+          const recipe = getReq.result;
+          if (!recipe) return reject(new Error("not found"));
+          Object.assign(recipe, updates);
+          const putReq = store.put(recipe);
+          putReq.onsuccess = () => resolve(recipe);
+          putReq.onerror = () => reject(putReq.error);
+        };
+        getReq.onerror = () => reject(getReq.error);
+      });
+    }
+
+    function clearAllRecipes() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(["recipes"], "readwrite");
+        const store = tx.objectStore("recipes");
+        const req = store.clear();
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    // ---------- Map TheMealDB category to local ----------
+    function containsHebrew(text) {
+      return /[\u0590-\u05FF]/.test(text || "");
+    }
+
+    /** true when the recipe text is already primarily Hebrew (skip translation) */
+    function isPrimarilyHebrew(text) {
+      const s = String(text || "");
+      const hebrew = (s.match(/[\u0590-\u05FF]/g) || []).length;
+      const latin = (s.match(/[A-Za-z]/g) || []).length;
+      if (hebrew === 0) return false;
+      // Hebrew wins if there are at least a few letters and not dominated by English
+      return hebrew >= 8 && hebrew >= latin;
+    }
+
+    function removeEmptyLines(text) {
+      if (!text) return "";
+      return String(text)
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0)
+        .join("\n");
+    }
+
+    // ---------- Translation (Google free endpoint) ----------
+    async function translateText(text, targetLang = "he", sourceLang = "en") {
+      if (!text || !text.trim()) return text;
+
+      // Split long text into chunks (~450 chars) to avoid limits
+      const chunks = [];
+      const maxLen = 450;
+      let remaining = text;
+      while (remaining.length > 0) {
+        if (remaining.length <= maxLen) {
+          chunks.push(remaining);
+          break;
+        }
+        let splitAt = remaining.lastIndexOf("\n", maxLen);
+        if (splitAt < maxLen * 0.5) splitAt = remaining.lastIndexOf(" ", maxLen);
+        if (splitAt < maxLen * 0.5) splitAt = maxLen;
+        chunks.push(remaining.slice(0, splitAt));
+        remaining = remaining.slice(splitAt).trimStart();
+      }
+
+      const translatedChunks = [];
+      for (const chunk of chunks) {
+        try {
+          const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(chunk)}`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          const part = (data[0] || []).map((item) => item[0] || "").join("");
+          translatedChunks.push(part);
+        } catch (err) {
+          console.warn("Translation chunk failed, keeping original:", err);
+          translatedChunks.push(chunk);
+        }
+        await new Promise((r) => setTimeout(r, 120));
+      }
+      return translatedChunks.join("\n");
+    }
+
+    async function translateRecipeFields(title, ingredients, instructions) {
+      showToast("מתרגם לעברית...");
+      const [tTitle, tIng, tInst] = await Promise.all([
+        translateText(title, "he", "en"),
+        translateText(ingredients, "he", "en"),
+        translateText(instructions, "he", "en")
+      ]);
+      return {
+        title: removeEmptyLines(tTitle || title),
+        ingredients: removeEmptyLines(tIng || ingredients),
+        instructions: removeEmptyLines(tInst || instructions)
+      };
+    }
+
+    // ---------- URL Recipe Scraper ----------
+    let urlImportState = {
+      imageData: null,
+      sourceUrl: ""
+    };
+
+    function unwrapJsonLd(node) {
+      if (!node) return null;
+      if (Array.isArray(node)) {
+        for (const item of node) {
+          const found = unwrapJsonLd(item);
+          if (found) return found;
+        }
+        return null;
+      }
+      if (typeof node !== "object") return null;
+      const type = node["@type"];
+      const types = Array.isArray(type) ? type : (type ? [type] : []);
+      if (types.some(t => String(t).toLowerCase() === "recipe")) return node;
+      if (node["@graph"]) return unwrapJsonLd(node["@graph"]);
+      if (node.mainEntity) return unwrapJsonLd(node.mainEntity);
+      return null;
+    }
+
+    function extractJsonLdRecipes(html) {
+      const recipes = [];
+      const re = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+      let m;
+      while ((m = re.exec(html)) !== null) {
+        try {
+          // Sites like carine.co.il embed raw newlines inside JSON strings → invalid JSON
+          let raw = m[1].trim().replace(/^\uFEFF/, "");
+          raw = raw.replace(/[\u0000-\u001F\u007F]/g, " ");
+          const data = JSON.parse(raw);
+          const recipe = unwrapJsonLd(data);
+          if (recipe) recipes.push(recipe);
+        } catch (_) { /* invalid json */ }
+      }
+      return recipes;
+    }
+
+    function normalizeIngredientList(val) {
+      if (!val) return [];
+      const expandLine = (s) =>
+        decodeHtmlEntities(String(s))
+          .split(/\r?\n|<br\s*\/?>/i)
+          .map(x => x.replace(/<[^>]+>/g, "").trim())
+          .filter(Boolean);
+
+      if (Array.isArray(val)) {
+        const out = [];
+        for (const item of val) {
+          if (typeof item === "string") {
+            out.push(...expandLine(item));
+          } else if (item && typeof item === "object") {
+            if (item.text) out.push(...expandLine(item.text));
+            else if (item.name) {
+              const amount = item.amount != null ? item.amount : "";
+              const unit = item.unit || "";
+              const line = [amount, unit, item.name].filter(Boolean).join(" ").trim();
+              if (line) out.push(line);
+            } else {
+              out.push(...expandLine(String(item)));
+            }
+          } else if (item != null) {
+            out.push(...expandLine(String(item)));
+          }
+        }
+        return out;
+      }
+      if (typeof val === "string") {
+        return expandLine(val);
+      }
+      return [];
+    }
+
+    /** הסרת shortcodes של WordPress (caption וכו') וזבל שלא שייך להוראות */
+    function cleanRecipeNoise(text) {
+      if (!text) return "";
+      let t = decodeHtmlEntities(String(text));
+      // Hebrew/fancy quotes variants of [caption ...]
+      t = t.replace(/\[caption[^\]]*\][\s\S]*?\[\/caption\]/gi, " ");
+      t = t.replace(/\[caption[^\]]*\]/gi, " ");
+      t = t.replace(/\[\/caption\]/gi, " ");
+      // curly/Hebrew quotation marks sometimes used instead of "
+      t = t.replace(/\[caption[^\]]{0,200}/gi, " ");
+      t = t.replace(/\[\/?(?:gallery|embed|audio|video|playlist)[^\]]*\]/gi, " ");
+      t = t.replace(/<\/?(?:figure|figcaption)[^>]*>/gi, " ");
+      // lines that are only caption / attachment noise
+      t = t.split(/\r?\n/).filter(line => {
+        const s = line.trim();
+        if (!s) return false;
+        if (/caption\s+id=/i.test(s)) return false;
+        if (/attachment_\d+/i.test(s) && /align/i.test(s)) return false;
+        if (/^id=["'״«»]?attachment/i.test(s)) return false;
+        if (/align(?:center|left|right)/i.test(s) && /width\s*=/i.test(s)) return false;
+        // ".[caption id=..." leftover
+        if (/^\.?\s*\[?\s*caption\b/i.test(s)) return false;
+        if (/^[.\s]+$/.test(s)) return false;
+        return true;
+      }).join("\n");
+      // inline leftovers mid-sentence
+      t = t.replace(/\.?\s*\[caption[^\]]*/gi, "");
+      t = t.replace(/caption\s+id\s*=\s*["'״«»][^"'״«»]*["'״«»][^.\n]*/gi, "");
+      t = t.replace(/^\.\s*$/gm, "");
+      t = t.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+      return t;
+    }
+
+    function normalizeInstructions(val) {
+      if (!val) return "";
+      if (typeof val === "string") {
+        let t = val
+          .replace(/<br\s*\/?>/gi, "\n")
+          .replace(/<\/p>/gi, "\n")
+          .replace(/<[^>]+>/g, "")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+        t = cleanRecipeNoise(t);
+        // Foody/carine often prefix with "אופן הכנה" in one long paragraph
+        t = t.replace(/^\s*אופן\s*הכנה\s*/i, "").trim();
+        // Try to split run-on Hebrew steps into numbered lines when no newlines
+        if (t && !/\n/.test(t) && t.length > 80) {
+          const parts = t.split(/(?<=[.!?。])\s+(?=[א-תA-Z])/);
+          if (parts.length >= 3) {
+            t = parts.map((p, i) => `${i + 1}. ${p.trim()}`).join("\n");
+          }
+        }
+        return cleanRecipeNoise(t);
+      }
+      if (Array.isArray(val)) {
+        const steps = [];
+        val.forEach((item, idx) => {
+          if (typeof item === "string") {
+            const s = cleanRecipeNoise(item.trim());
+            if (s) steps.push(`${idx + 1}. ${s}`);
+          } else if (item && typeof item === "object") {
+            if (item["@type"] === "HowToSection" && Array.isArray(item.itemListElement)) {
+              item.itemListElement.forEach((sub) => {
+                const text = cleanRecipeNoise((sub.text || sub.name || "").toString().trim());
+                if (text) steps.push(`${steps.length + 1}. ${text}`);
+              });
+            } else {
+              const text = cleanRecipeNoise((item.text || item.name || "").toString().trim());
+              if (text) steps.push(`${steps.length + 1}. ${text}`);
+            }
+          }
+        });
+        return steps.join("\n");
+      }
+      if (val && typeof val === "object") {
+        if (val.text) return cleanRecipeNoise(String(val.text).trim());
+        if (Array.isArray(val.itemListElement)) return normalizeInstructions(val.itemListElement);
+      }
+      return "";
+    }
+
+    function pickImage(val) {
+      if (!val) return "";
+      if (typeof val === "string") return val.trim();
+      if (Array.isArray(val)) {
+        for (const v of val) {
+          const u = pickImage(v);
+          if (u) return u;
+        }
+        return "";
+      }
+      if (val && typeof val === "object") {
+        return (val.url || val.contentUrl || val["@id"] || "").toString().trim();
+      }
+      return "";
+    }
+
+    function absoluteUrl(maybeRelative, baseUrl) {
+      if (!maybeRelative) return "";
+      try {
+        return new URL(maybeRelative, baseUrl).href;
+      } catch {
+        return maybeRelative;
+      }
+    }
+
+    function extractMetaImage(html, baseUrl) {
+      const patterns = [
+        /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+        /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+        /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+        /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i,
+        /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i
+      ];
+      for (const re of patterns) {
+        const m = html.match(re);
+        if (m && m[1]) return absoluteUrl(m[1], baseUrl);
+      }
+      return "";
+    }
+
+    /** הסרת קידומות כמו "מתכון:" / "Recipe:" – נשאר רק שם המתכון */
+    function cleanRecipeTitle(raw) {
+      if (!raw) return "";
+      let t = decodeHtmlEntities(String(raw)).trim();
+      // "מתכון: שם" / "מתכון - שם" / "מתכון שם"
+      t = t.replace(/^\s*מתכון\s*[:\-–—|]\s*/i, "");
+      t = t.replace(/^\s*מתכון\s+/i, "");
+      // English
+      t = t.replace(/^\s*recipes?\s*[:\-–—|]\s*/i, "");
+      t = t.replace(/^\s*recipes?\s+/i, "");
+      // Site suffixes often left in <title> (קרין גורן, שני סנדרס, …)
+      t = t.replace(/\s*[|\-–—]\s*.+$/u, "");
+      return t.trim();
+    }
+
+    function extractTitleFallback(html) {
+      const og = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i)
+        || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["']/i);
+      if (og && og[1]) return cleanRecipeTitle(og[1]);
+      const t = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      return t ? cleanRecipeTitle(t[1].replace(/\s*[|\-–].*$/, "")) : "";
+    }
+
+    function parseTextFallbackRecipe(text, pageUrl) {
+      // jina.ai / plain-text style content
+      const lines = String(text).split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      let title = "";
+      const titleMatch = text.match(/^Title:\s*(.+)$/im) || text.match(/^#\s+(.+)$/m);
+      if (titleMatch) title = cleanRecipeTitle(titleMatch[1].replace(/[*_]/g, ""));
+      if (!title && lines[0] && lines[0].length < 120) title = cleanRecipeTitle(lines[0].replace(/^#+\s*/, ""));
+
+      const imageMatch = text.match(/!\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/) ||
+        text.match(/https?:\/\/[^\s)"']+\.(?:jpg|jpeg|png|webp|gif)/i);
+      const image = imageMatch ? (imageMatch[1] || imageMatch[0]) : "";
+
+      // Try Hebrew/English section headers
+      let ingredients = [];
+      let instructions = "";
+      const ingHeaders = /(?:מצרכים|מרכיבים|ingredients?)\s*:?\s*$/i;
+      const instHeaders = /(?:אופן ההכנה|הוראות(?:\s+הכנה)?|הכנה|instructions?|directions?|method|steps?)\s*:?\s*$/i;
+
+      let mode = null;
+      const ingLines = [];
+      const instLines = [];
+      for (const line of lines) {
+        if (ingHeaders.test(line)) { mode = "ing"; continue; }
+        if (instHeaders.test(line)) { mode = "inst"; continue; }
+        if (mode === "ing") {
+          if (/^#{1,3}\s/.test(line) || instHeaders.test(line)) { mode = null; continue; }
+          const cleaned = line.replace(/^[-*•\d.)\s]+/, "").trim();
+          if (cleaned) ingLines.push(cleaned);
+        } else if (mode === "inst") {
+          if (/^#{1,3}\s/.test(line) && !/הכנה|instruction/i.test(line)) { mode = null; continue; }
+          const cleaned = line.replace(/^[-*•]+/, "").trim();
+          if (cleaned) instLines.push(cleaned);
+        }
+      }
+      ingredients = ingLines;
+      if (instLines.length) {
+        instructions = instLines.map((l, i) => {
+          if (/^\d+[\.)]/.test(l)) return l;
+          return `${i + 1}. ${l}`;
+        }).join("\n");
+      }
+
+      return {
+        title: title || "מתכון ללא שם",
+        ingredients: cleanRecipeNoise(ingredients.join("\n")),
+        instructions: cleanRecipeNoise(instructions || ""),
+        image: image || "",
+        categoryHint: "",
+        sourceUrl: pageUrl
+      };
+    }
+
+    function decodeHtmlEntities(str) {
+      let s = String(str || "");
+      // numeric entities: &#8217; &#x2019;
+      s = s.replace(/&#x([0-9a-f]+);/gi, (_, h) => {
+        try { return String.fromCodePoint(parseInt(h, 16)); } catch { return ""; }
+      });
+      s = s.replace(/&#(\d+);/g, (_, n) => {
+        try { return String.fromCodePoint(parseInt(n, 10)); } catch { return ""; }
+      });
+      // common named entities (including curly quotes used in food names e.g. צ'ילי)
+      const named = {
+        nbsp: " ", quot: '"', amp: "&", lt: "<", gt: ">",
+        apos: "'", "#39": "'",
+        lsquo: "\u2018", rsquo: "\u2019",
+        ldquo: "\u201C", rdquo: "\u201D",
+        ndash: "\u2013", mdash: "\u2014",
+        hellip: "\u2026", times: "\u00D7", deg: "\u00B0",
+        frac12: "\u00BD", frac14: "\u00BC", frac34: "\u00BE"
+      };
+      s = s.replace(/&([a-z0-9#]+);/gi, (m, name) => {
+        const key = name.toLowerCase();
+        if (named[key] != null) return named[key];
+        return m;
+      });
+      return s;
+    }
+
+    function stripHtmlToText(chunk) {
+      return cleanRecipeNoise(decodeHtmlEntities(String(chunk || "")
+        .replace(/\[caption[^\]]*\][\s\S]*?\[\/caption\]/gi, " ")
+        .replace(/\[caption[^\]]*\]/gi, " ")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<\/li>/gi, "\n")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/[ \t]+\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/[ \t]{2,}/g, " ")
+        .trim()));
+    }
+
+    function listItemsFromHtml(chunk) {
+      const lis = [...String(chunk).matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)];
+      return lis
+        .map(m => stripHtmlToText(m[1]))
+        .filter(s => s.length > 0);
+    }
+
+    /** Extract <ul>/<ol> items near a class/id match (ingredients blocks) */
+    function extractListAfterMarker(html, { idOrClass, preferUl = false }) {
+      const re = new RegExp(idOrClass.source + "[^>]*>([\\s\\S]{0,12000}?)</(?:div|section|article)", idOrClass.flags);
+      const m = html.match(re);
+      if (!m) return [];
+      const chunk = m[1];
+      let items = listItemsFromHtml(chunk);
+      if (!items.length) {
+        const listMatch = chunk.match(preferUl
+          ? /<ul[^>]*>([\s\S]*?)<\/ul>/i
+          : /<(?:ol|ul)[^>]*>([\s\S]*?)<\/(?:ol|ul)>/i);
+        if (listMatch) items = listItemsFromHtml(listMatch[1]);
+      }
+      return items;
+    }
+
+    /**
+     * Extract preparation steps from HTML body.
+     * Supports:
+     * - class with instruction/direction/method/steps
+     * - Hebrew headings: ההכנה / אופן ההכנה / הוראות הכנה (Elementor, WP, etc.)
+     * - ordered lists after those headings
+     */
+    function extractInstructionsFromHtml(html) {
+      // Decode entities so Hebrew headings match (Foody uses &#1488; for א)
+      const decoded = decodeHtmlEntities(html);
+
+      // 0) Foody recipe-content block
+      const foodyContent = decoded.match(/class=["'][^"']*recipe-content[^"']*["'][^>]*>([\s\S]{0,20000}?)<\/div>/i)
+        || html.match(/class=["'][^"']*recipe-content[^"']*["'][^>]*>([\s\S]{0,20000}?)<\/div>/i);
+      if (foodyContent) {
+        const chunk = decodeHtmlEntities(foodyContent[1]);
+        const items = listItemsFromHtml(chunk);
+        if (items.length >= 2) {
+          return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
+        }
+      }
+
+      // 1) English class names
+      const classRe = /class=["'][^"']*(?:instruction|direction|method|steps?|preparation)[^"']*["'][^>]*>([\s\S]{0,15000}?)<\/(?:div|section|article|ol|ul)/i;
+      let m = html.match(classRe);
+      if (m) {
+        const items = listItemsFromHtml(m[1]);
+        if (items.length) {
+          return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
+        }
+        const text = stripHtmlToText(m[1]);
+        if (text.length > 40) return text;
+      }
+
+      // 2) Hebrew heading then following list / paragraphs
+      // e.g. <h2>ההכנה</h2> ... <ol><li>...</li>
+      const headingRe = /<(h[1-6]|p|div|span)[^>]*>\s*(?:אופן\s*ההכנה|הוראות(?:\s*הכנה)?|אופן\s*הכנה|ההכנה|הכנה)\s*:?\s*<\/\1>/gi;
+      let hm;
+      const candidates = [];
+      while ((hm = headingRe.exec(decoded)) !== null) {
+        const afterStart = hm.index + hm[0].length;
+        const after = decoded.slice(afterStart, afterStart + 12000);
+        // prefer next <ol> then <ul>
+        const ol = after.match(/<ol[^>]*>([\s\S]*?)<\/ol>/i);
+        if (ol) {
+          const items = listItemsFromHtml(ol[1]);
+          if (items.length >= 1) {
+            candidates.push(items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n"));
+            continue;
+          }
+        }
+        const ul = after.match(/<ul[^>]*>([\s\S]*?)<\/ul>/i);
+        if (ul) {
+          const items = listItemsFromHtml(ul[1]);
+          if (items.length >= 1) {
+            candidates.push(items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n"));
+            continue;
+          }
+        }
+        // Elementor: heading widget then next text-editor widget with list
+        const nextWidget = after.match(/elementor-widget-text-editor[^>]*>([\s\S]{0,10000}?)<\/div>\s*<\/div>/i);
+        if (nextWidget) {
+          const items = listItemsFromHtml(nextWidget[1]);
+          if (items.length >= 1) {
+            candidates.push(items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n"));
+            continue;
+          }
+          const text = stripHtmlToText(nextWidget[1]);
+          if (text.length > 40) candidates.push(text);
+        }
+      }
+      if (candidates.length) {
+        // pick longest (usually the real steps, not a short nav snippet)
+        candidates.sort((a, b) => b.length - a.length);
+        return candidates[0];
+      }
+
+      // 3) Fallback: first <ol> that looks like cooking steps (contains verbs)
+      const olBlocks = [...html.matchAll(/<ol[^>]*>([\s\S]*?)<\/ol>/gi)];
+      for (const block of olBlocks) {
+        const items = listItemsFromHtml(block[1]);
+        if (items.length < 2) continue;
+        const blob = items.join(" ");
+        if (/(מחממים|מערבבים|מוסיפים|אופים|יוצקים|שמים|לשים|לחתוך|לבשל|mix|bake|preheat|stir|add|pour)/i.test(blob)) {
+          return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
+        }
+      }
+
+      return "";
+    }
+
+    function parseRecipeFromHtml(html, pageUrl, opts = {}) {
+      if (opts.textFallback) {
+        return parseTextFallbackRecipe(html, pageUrl);
+      }
+
+      const ldRecipes = extractJsonLdRecipes(html);
+      let title = "";
+      let ingredients = [];
+      let instructions = "";
+      let image = "";
+      let categoryHint = "";
+
+      if (ldRecipes.length) {
+        const r = ldRecipes[0];
+        title = cleanRecipeTitle((r.name || "").toString());
+        ingredients = normalizeIngredientList(r.recipeIngredient || r.ingredients);
+        instructions = normalizeInstructions(r.recipeInstructions || r.instructions);
+        image = pickImage(r.image) || pickImage(r.thumbnailUrl);
+        if (r.recipeCategory) {
+          categoryHint = Array.isArray(r.recipeCategory) ? r.recipeCategory[0] : String(r.recipeCategory);
+        }
+      }
+
+      if (!title) title = extractTitleFallback(html);
+      else title = cleanRecipeTitle(title);
+      if (!image) image = extractMetaImage(html, pageUrl);
+      image = absoluteUrl(image, pageUrl);
+
+      // Heuristic: ingredients from HTML (id / class)
+      if (!ingredients.length) {
+        ingredients = extractListAfterMarker(html, {
+          idOrClass: /(?:id|class)=["'][^"']*\bingredients?\b[^"']*["']/i,
+          preferUl: true
+        });
+        // Foody / carine.co.il: amount + name + unit spans
+        if (!ingredients.length) {
+          const foodyItems = [];
+          const reFoody = /class=["'][^"']*ingredient-container[^"']*["'][^>]*>([\s\S]*?)<\/span>\s*<\/div>/gi;
+          let fm;
+          while ((fm = reFoody.exec(html)) !== null) {
+            const line = stripHtmlToText(fm[1]);
+            if (line && line.length > 1) foodyItems.push(line);
+          }
+          if (foodyItems.length) ingredients = foodyItems;
+        }
+      }
+
+      // Heuristic: instructions – always try HTML when JSON-LD has none
+      // Many Hebrew sites (Elementor etc.) put steps under heading "ההכנה" without recipeInstructions
+      if (!instructions) {
+        instructions = extractInstructionsFromHtml(html);
+      }
+
+      // If still empty and content looks like plain text – try text parser
+      if (!ingredients.length && !instructions && html.length > 100 && !/<html[\s>]/i.test(html)) {
+        return parseTextFallbackRecipe(html, pageUrl);
+      }
+
+      return {
+        title: title || "מתכון ללא שם",
+        ingredients: cleanRecipeNoise(ingredients.join("\n")),
+        instructions: cleanRecipeNoise(instructions || ""),
+        image: image || "",
+        categoryHint: categoryHint || "",
+        sourceUrl: pageUrl
+      };
+    }
+
+    function mapScrapedCategory(hint) {
+      if (!hint) return "עיקריות";
+      const c = String(hint).toLowerCase();
+      if (/dessert|cake|sweet|קינוח|עוג/.test(c)) return "קינוחים";
+      if (/starter|appetizer|soup|salad|ראשונ|סלט|מרק/.test(c)) return "ראשונות";
+      if (/side|תוספ/.test(c)) return "תוספות";
+      return "עיקריות";
+    }
+
+    function applyParsedToPreview(parsed, statusMsg) {
+      const status = document.getElementById("url-import-status");
+      const preview = document.getElementById("url-import-preview");
+      if (!parsed.ingredients && !parsed.instructions) {
+        status.innerHTML = '<p class="empty-msg">לא נמצאו מצרכים או הוראות ב־HTML. ודא שהעתקת את מקור העמוד המלא (View Page Source).</p>';
+        showToast("לא נמצא מבנה מתכון", true);
+        return false;
+      }
+      document.getElementById("url-preview-title").value = cleanRecipeTitle(parsed.title) || parsed.title;
+      document.getElementById("url-preview-ingredients").value = parsed.ingredients;
+      document.getElementById("url-preview-instructions").value = parsed.instructions;
+      document.getElementById("url-preview-category").value = mapScrapedCategory(parsed.categoryHint);
+
+      const imgEl = document.getElementById("url-preview-image");
+      const noImg = document.getElementById("url-preview-no-image");
+      if (parsed.image) {
+        urlImportState.imageData = parsed.image;
+        imgEl.src = parsed.image;
+        imgEl.style.display = "inline-block";
+        noImg.style.display = "none";
+      } else {
+        urlImportState.imageData = null;
+        imgEl.style.display = "none";
+        noImg.style.display = "block";
+      }
+      urlImportState.sourceUrl = parsed.sourceUrl || urlImportState.sourceUrl || "";
+      preview.style.display = "block";
+      if (statusMsg) status.innerHTML = `<p style="font-size:0.85rem;opacity:0.8;">${statusMsg}</p>`;
+      showToast("המתכון חולץ – בדוק וערוך לפני הוספה");
+      return true;
+    }
+
+    function parseFromPastedHtml() {
+      const html = (document.getElementById("url-html-paste").value || "").trim();
+      if (!html || html.length < 50) {
+        showToast("הדבק את קוד המקור של העמוד", true);
+        return;
+      }
+      const baseUrl = "https://example.com/";
+      urlImportState = { imageData: null, sourceUrl: baseUrl };
+      const parsed = parseRecipeFromHtml(html, baseUrl);
+      applyParsedToPreview(parsed, "חולץ מ־HTML שהודבק ידנית");
+    }
+
+    async function addScrapedRecipeToBook() {
+      let title = document.getElementById("url-preview-title").value.trim();
+      let ingredients = removeEmptyLines(document.getElementById("url-preview-ingredients").value);
+      let instructions = removeEmptyLines(document.getElementById("url-preview-instructions").value);
+      const category = document.getElementById("url-preview-category").value;
+      let imageData = urlImportState.imageData || defaultImage;
+
+      if (!title || !ingredients || !instructions) {
+        showToast("נא למלא כותרת, מצרכים והוראות", true);
+        return;
+      }
+
+      const wantTranslate = document.getElementById("urlTranslateToHebrew").checked;
+      const fullText = title + "\n" + ingredients + "\n" + instructions;
+      const alreadyHebrew = isPrimarilyHebrew(fullText);
+      // Translate only English recipes; never re-translate Hebrew content
+      const doTranslate = wantTranslate && !alreadyHebrew;
+      const btn = document.getElementById("urlAddToBookBtn");
+      btn.disabled = true;
+      btn.textContent = doTranslate ? "מתרגם..." : "מוסיף...";
+
+      try {
+        if (doTranslate) {
+          const translated = await translateRecipeFields(title, ingredients, instructions);
+          title = translated.title;
+          ingredients = translated.ingredients;
+          instructions = translated.instructions;
+        } else if (wantTranslate && alreadyHebrew) {
+          // silent skip – recipe already in Hebrew
+        }
+
+        // If image is remote URL, try to embed as data URL for offline use (best-effort)
+        if (imageData && /^https?:\/\//i.test(imageData)) {
+          try {
+            const proxies = [
+              imageData,
+              "https://corsproxy.io/?" + encodeURIComponent(imageData),
+              "https://api.allorigins.win/raw?url=" + encodeURIComponent(imageData)
+            ];
+            for (const src of proxies) {
+              try {
+                const res = await fetch(src);
+                if (!res.ok) continue;
+                const blob = await res.blob();
+                if (blob.type && blob.type.startsWith("image/")) {
+                  imageData = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                  });
+                  break;
+                }
+              } catch (_) { /* next */ }
+            }
+          } catch (_) { /* keep remote URL */ }
+        }
+
+        const existing = await getAllRecipes();
+        const isDup = existing.some(
+          (ex) => ex.title === title && ex.ingredients === ingredients
+        );
+        if (isDup) {
+          showToast("המתכון כבר קיים בספר", true);
+          return;
+        }
+
+        await saveRecipeToDB({
+          title,
+          quantity: "",
+          ingredients,
+          instructions,
+          imageData,
+          category,
+          sourceUrl: urlImportState.sourceUrl || ""
+        });
+        showToast(`"${title}" נוסף בהצלחה!`);
+        loadAndDisplay();
+        document.getElementById("url-import-preview").style.display = "none";
+        document.getElementById("url-import-status").innerHTML = "";
+        const pasteEl = document.getElementById("url-html-paste");
+        if (pasteEl) pasteEl.value = "";
+      } catch (err) {
+        console.error(err);
+        showToast("שגיאה בהוספת המתכון", true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "💾 הוסף לספר המתכונים";
+      }
+    }
+
+    function clearUrlImport() {
+      const paste = document.getElementById("url-html-paste");
+      if (paste) paste.value = "";
+      document.getElementById("url-import-preview").style.display = "none";
+      document.getElementById("url-import-status").innerHTML = "";
+      document.getElementById("url-preview-title").value = "";
+      document.getElementById("url-preview-ingredients").value = "";
+      document.getElementById("url-preview-instructions").value = "";
+      document.getElementById("url-preview-image").style.display = "none";
+      document.getElementById("url-preview-no-image").style.display = "none";
+      urlImportState = { imageData: null, sourceUrl: "" };
+    }
+
+    // ---------- Display ----------
+    function createRecipeCard(recipe) {
+      const card = document.createElement("div");
+      card.className = "recipe-card";
+      card.dataset.id = recipe.id;
+
+      const title = replaceFractions(recipe.title || "");
+      const quantity = replaceFractions(recipe.quantity || "");
+      const ingredients = replaceFractions(recipe.ingredients || "");
+      const instructions = replaceFractions(recipe.instructions || "");
+      const imgSrc = recipe.imageData && recipe.imageData.trim() ? recipe.imageData : defaultImage;
+
+      card.innerHTML = `
+        <div class="recipe-actions">
+          <button class="action-btn action-delete" title="מחק">🗑️</button>
+          <button class="action-btn action-share" title="שתף">🚀</button>
+          <button class="action-btn action-edit" title="ערוך">✏️</button>
+        </div>
+        <h3 class="editable" data-field="title" contenteditable="false">${title.replace(/\n/g, "<br>")}</h3>
+        <p class="recipe-meta"><strong>קטגוריה:</strong> <span class="editable" data-field="category" contenteditable="false">${recipe.category || "ראשונות"}</span></p>
+        <p class="recipe-meta"><strong>כמות:</strong> <span class="editable" data-field="quantity" contenteditable="false">${quantity}</span></p>
+        <div class="recipe-image">
+          <img src="${imgSrc}" alt="תמונת מתכון" />
+        </div>
+        <p class="recipe-meta"><strong>מצרכים:</strong></p>
+        <div class="editable" data-field="ingredients" contenteditable="false">${ingredients.replace(/\n/g, "<br>")}</div>
+        <p class="recipe-meta" style="margin-top:8px;"><strong>הוראות הכנה:</strong></p>
+        <div class="editable" data-field="instructions" contenteditable="false">${instructions.replace(/\n/g, "<br>")}</div>
+      `;
+
+      card.querySelector(".action-delete").onclick = () => {
+        if (confirm("למחוק את המתכון לצמיתות?")) {
+          deleteRecipeById(recipe.id).then(() => {
+            showToast("המתכון נמחק");
+            loadAndDisplay();
+          }).catch(() => showToast("שגיאה במחיקה", true));
+        }
+      };
+
+      card.querySelector(".action-share").onclick = () => shareRecipe(recipe);
+      card.querySelector(".action-edit").onclick = () => toggleEditMode(card, recipe.id);
+
+      return card;
+    }
+
+    function toggleEditMode(card, id) {
+      const editables = card.querySelectorAll(".editable");
+      const isEditing = editables[0].contentEditable === "true";
+      const newState = !isEditing;
+
+      editables.forEach(el => {
+        el.contentEditable = newState ? "true" : "false";
+        if (newState) {
+          el.oninput = () => {
+            const field = el.dataset.field;
+            const value = el.innerText;
+            updateRecipeInDB(id, { [field]: value }).catch(() => showToast("שגיאה בעדכון", true));
+          };
+        } else {
+          el.oninput = null;
+        }
+      });
+
+      card.classList.toggle("editing", newState);
+
+      const imgContainer = card.querySelector(".recipe-image");
+      if (newState) {
+        let btns = imgContainer.querySelector(".image-btns");
+        if (!btns) {
+          btns = document.createElement("div");
+          btns.className = "image-btns";
+          const changeBtn = document.createElement("button");
+          changeBtn.textContent = "החלף תמונה";
+          changeBtn.style.background = "var(--primary)";
+          changeBtn.onclick = () => changeImage(id, imgContainer);
+          const removeBtn = document.createElement("button");
+          removeBtn.textContent = "הסר תמונה";
+          removeBtn.style.background = "var(--danger)";
+          removeBtn.onclick = () => removeImage(id, imgContainer);
+          btns.append(changeBtn, removeBtn);
+          imgContainer.appendChild(btns);
+        }
+        const hint = imgContainer.querySelector(".drop-hint-edit");
+        if (!hint) {
+          const h = document.createElement("p");
+          h.className = "drop-hint-edit";
+          h.style.cssText = "font-size:0.8rem;opacity:0.75;text-align:center;margin-top:6px;";
+          h.textContent = "אפשר גם לגרור תמונה לכאן (מתיקייה או מאתר)";
+          imgContainer.appendChild(h);
+        }
+        setupImageDropZone(imgContainer, (data) => {
+          updateRecipeInDB(id, { imageData: data }).then(() => {
+            imgContainer.querySelector("img").src = data;
+            showToast("תמונה עודכנה");
+          }).catch(() => showToast("שגיאה בעדכון תמונה", true));
+        });
+      } else {
+        const btns = imgContainer.querySelector(".image-btns");
+        if (btns) btns.remove();
+        const hint = imgContainer.querySelector(".drop-hint-edit");
+        if (hint) hint.remove();
+      }
+    }
+
+    // ---------- Image drag & drop / file helpers ----------
+    let addFormImageData = null;
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function urlToDataUrl(url) {
+      if (!url || !/^https?:\/\//i.test(url)) return url;
+      const attempts = [
+        url,
+        "https://corsproxy.io/?" + encodeURIComponent(url),
+        "https://api.allorigins.win/raw?url=" + encodeURIComponent(url)
+      ];
+      for (const src of attempts) {
+        try {
+          const res = await fetch(src);
+          if (!res.ok) continue;
+          const blob = await res.blob();
+          if (!blob.type || !blob.type.startsWith("image/")) {
+            // some proxies return octet-stream
+            if (!blob.type.startsWith("image/") && blob.size < 100) continue;
+          }
+          return await fileToDataUrl(blob);
+        } catch (_) { /* next */ }
+      }
+      // fallback: keep remote URL (may work for display)
+      return url;
+    }
+
+    function extractImageUrlFromDrop(dt) {
+      if (!dt) return null;
+      // Direct URI list (dragging image from browser)
+      const uriList = dt.getData("text/uri-list") || "";
+      const uriLine = uriList.split(/\r?\n/).find(l => l && !l.startsWith("#"));
+      if (uriLine && /^https?:\/\//i.test(uriLine.trim())) return uriLine.trim();
+
+      const html = dt.getData("text/html") || "";
+      const imgSrc = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (imgSrc && /^https?:\/\//i.test(imgSrc[1])) return imgSrc[1];
+
+      const plain = (dt.getData("text/plain") || "").trim();
+      if (/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|avif|bmp)(\?|$)/i.test(plain)) return plain;
+      if (/^https?:\/\/.+/i.test(plain) && /\.(jpg|jpeg|png|gif|webp)/i.test(plain)) return plain;
+      // any http URL as last resort when dragging from web
+      if (/^https?:\/\/.+/i.test(plain)) return plain;
+      return null;
+    }
+
+    async function resolveDroppedImage(dt) {
+      const files = dt && dt.files ? [...dt.files] : [];
+      const imageFile = files.find(f => f.type.startsWith("image/"));
+      if (imageFile) return await fileToDataUrl(imageFile);
+      const url = extractImageUrlFromDrop(dt);
+      if (url) return await urlToDataUrl(url);
+      return null;
+    }
+
+    function setupImageDropZone(zoneEl, onImage) {
+      if (!zoneEl || zoneEl.dataset.dropReady) return;
+      zoneEl.dataset.dropReady = "1";
+      zoneEl.addEventListener("dragenter", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zoneEl.classList.add("drag-over");
+      });
+      zoneEl.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zoneEl.classList.add("drag-over");
+      });
+      zoneEl.addEventListener("dragleave", (e) => {
+        if (!zoneEl.contains(e.relatedTarget)) zoneEl.classList.remove("drag-over");
+      });
+      zoneEl.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zoneEl.classList.remove("drag-over");
+        try {
+          const data = await resolveDroppedImage(e.dataTransfer);
+          if (!data) {
+            showToast("לא זוהתה תמונה – גרור קובץ תמונה או תמונה מאתר", true);
+            return;
+          }
+          onImage(data);
+          showToast("תמונה נוספה");
+        } catch (err) {
+          console.error(err);
+          showToast("שגיאה בטעינת התמונה", true);
+        }
+      });
+    }
+
+    function changeImage(id, container) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        fileToDataUrl(file).then((data) => {
+          updateRecipeInDB(id, { imageData: data }).then(() => {
+            container.querySelector("img").src = data;
+            showToast("תמונה עודכנה");
+          }).catch(() => showToast("שגיאה בעדכון תמונה", true));
+        });
+      };
+      input.click();
+    }
+
+    function removeImage(id, container) {
+      if (!confirm("להסיר את התמונה?")) return;
+      updateRecipeInDB(id, { imageData: null }).then(() => {
+        container.querySelector("img").src = defaultImage;
+        showToast("תמונה הוסרה");
+      }).catch(() => showToast("שגיאה", true));
+    }
+
+    function shareRecipe(recipe) {
+      const text = `\u200F${recipe.title}\n\nכמות: ${recipe.quantity || ""}\n\nמצרכים:\n${recipe.ingredients}\n\nהוראות הכנה:\n${recipe.instructions}`;
+      if (navigator.share) {
+        navigator.share({ title: recipe.title, text }).catch(() => showToast("שגיאה בשיתוף", true));
+      } else {
+        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
+        const tg = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
+        const win = window.open("", "share", "width=400,height=300");
+        win.document.write(`
+          <html dir="rtl"><head><title>שתף</title></head>
+          <body style="font-family:sans-serif;padding:20px;text-align:center;">
+            <h3>שתף מתכון</h3>
+            <p><a href="${wa}" target="_blank">וואטסאפ</a></p>
+            <p><a href="${tg}" target="_blank">טלגרם</a></p>
+            <button onclick="window.close()">סגור</button>
+          </body></html>
+        `);
+      }
+    }
+
+    async function loadAndDisplay(filterFn = null) {
+      try {
+        let recipes = await getAllRecipes();
+        if (filterFn) recipes = recipes.filter(filterFn);
+        const container = document.getElementById("recipes");
+        container.innerHTML = "";
+        document.getElementById("recipe-count").textContent = `(${recipes.length})`;
+
+        if (recipes.length === 0) {
+          container.innerHTML = '<p class="empty-msg">לא נמצאו מתכונים.</p>';
+          return;
+        }
+        recipes.forEach(r => container.appendChild(createRecipeCard(r)));
+      } catch (err) {
+        showToast("שגיאה בטעינת מתכונים", true);
+        console.error(err);
+      }
+    }
+
+    // ---------- Add Recipe ----------
+    function addRecipe() {
+      const title = document.getElementById("title").value.trim();
+      const quantity = document.getElementById("quantity").value.trim();
+      const ingredients = removeEmptyLines(document.getElementById("ingredients").value);
+      const instructions = removeEmptyLines(document.getElementById("instructions").value);
+      const category = document.getElementById("category").value;
+      const imageInput = document.getElementById("recipe-image");
+
+      if (!title || !ingredients || !instructions) {
+        showToast("נא למלא כותרת, מצרכים והוראות הכנה", true);
+        return;
+      }
+
+      const doSave = (imageData) => {
+        const recipe = { title, quantity, ingredients, instructions, imageData, category };
+        saveRecipeToDB(recipe).then(() => {
+          showToast("המתכון נוסף בהצלחה!");
+          document.getElementById("title").value = "";
+          document.getElementById("quantity").value = "";
+          document.getElementById("ingredients").value = "";
+          document.getElementById("instructions").value = "";
+          document.getElementById("recipe-image").value = "";
+          addFormImageData = null;
+          const prev = document.getElementById("add-image-preview");
+          if (prev) { prev.src = ""; prev.style.display = "none"; }
+          loadAndDisplay();
+        }).catch(() => showToast("שגיאה בשמירה", true));
+      };
+
+      if (addFormImageData) {
+        doSave(addFormImageData);
+      } else if (imageInput.files && imageInput.files[0]) {
+        fileToDataUrl(imageInput.files[0]).then(doSave);
+      } else {
+        doSave(defaultImage);
+      }
+    }
+
+    // ---------- Export / Import ----------
+    async function exportRecipes() {
+      try {
+        const recipes = await getAllRecipes();
+        const dataStr = JSON.stringify(recipes, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const defaultName = "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
+        const name = prompt("שם הקובץ:", defaultName) || defaultName;
+        const filename = name.endsWith(".json") ? name : name + ".json";
+
+        if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+          const file = new File([blob], filename, { type: "application/json" });
+          await navigator.share({ files: [file], title: "ספר מתכונים" });
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+        showToast("הקובץ יוצא בהצלחה");
+      } catch (err) {
+        showToast("שגיאה בייצוא", true);
+      }
+    }
+
+    function importRecipes(file) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const newRecipes = JSON.parse(e.target.result);
+          if (!Array.isArray(newRecipes)) throw new Error("פורמט לא תקין");
+          const existing = await getAllRecipes();
+          let added = 0;
+          for (const r of newRecipes) {
+            const complete = {
+              title: r.title || "",
+              quantity: r.quantity || "",
+              ingredients: r.ingredients || "",
+              instructions: r.instructions || "",
+              imageData: r.imageData || defaultImage,
+              category: r.category || "ראשונות"
+            };
+            const isDup = existing.some(ex =>
+              ex.title === complete.title &&
+              ex.ingredients === complete.ingredients &&
+              ex.instructions === complete.instructions
+            );
+            if (!isDup) {
+              await saveRecipeToDB(complete);
+              added++;
+            }
+          }
+          showToast(`יובאו ${added} מתכונים חדשים`);
+          loadAndDisplay();
+        } catch (err) {
+          showToast("שגיאה בקריאת הקובץ – ודא שזה JSON תקין", true);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ---------- Local Search ----------
+    function doSearch() {
+      const word = document.getElementById("search-word").value.trim().toLowerCase();
+      if (!word) {
+        loadAndDisplay();
+        return;
+      }
+      loadAndDisplay(r =>
+        (r.title || "").toLowerCase().includes(word) ||
+        (r.ingredients || "").toLowerCase().includes(word) ||
+        (r.instructions || "").toLowerCase().includes(word)
+      );
+    }
+
+    function filterByCategory(cat) {
+      document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+      const btn = document.querySelector(`.cat-btn[data-cat="${cat}"]`);
+      if (btn) btn.classList.add("active");
+      loadAndDisplay(r => r.category === cat);
+    }
+
+    // ---------- Init ----------
+    document.addEventListener("DOMContentLoaded", async () => {
+      const savedTheme = localStorage.getItem("recipeTheme") || "dark";
+      setTheme(savedTheme);
+
+      try {
+        await initDB();
+        await loadAndDisplay();
+      } catch (err) {
+        showToast("שגיאה באתחול מסד הנתונים", true);
+        console.error(err);
+      }
+
+      document.getElementById("toggleAddBtn").onclick = () => {
+        const form = document.getElementById("add-form");
+        const isOpen = form.classList.toggle("open");
+        document.getElementById("toggleAddBtn").textContent = isOpen ? "✖️ סגור טופס" : "➕ הוסף מתכון";
+      };
+
+      document.getElementById("saveRecipeBtn").onclick = addRecipe;
+
+      document.getElementById("themeBtn").onclick = toggleTheme;
+      document.getElementById("helpBtn").onclick = () => document.getElementById("helpModal").classList.add("open");
+      document.getElementById("closeHelp").onclick = () => document.getElementById("helpModal").classList.remove("open");
+      document.getElementById("helpModal").onclick = (e) => {
+        if (e.target.id === "helpModal") e.target.classList.remove("open");
+      };
+
+      document.getElementById("exportBtn").onclick = exportRecipes;
+      document.getElementById("import-file").onchange = (e) => {
+        if (e.target.files[0]) importRecipes(e.target.files[0]);
+        e.target.value = "";
+      };
+      document.getElementById("deleteAllBtn").onclick = () => {
+        if (confirm("למחוק את כל המתכונים? פעולה זו אינה הפיכה!")) {
+          clearAllRecipes().then(() => {
+            showToast("כל המתכונים נמחקו");
+            loadAndDisplay();
+          });
+        }
+      };
+
+      document.getElementById("searchBtn").onclick = doSearch;
+      document.getElementById("clearSearchBtn").onclick = () => {
+        document.getElementById("search-word").value = "";
+        document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+        loadAndDisplay();
+      };
+      document.getElementById("search-word").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") doSearch();
+      });
+
+      document.querySelectorAll(".cat-btn").forEach(btn => {
+        btn.onclick = () => filterByCategory(btn.dataset.cat);
+      });
+
+      // HTML import section
+      document.getElementById("urlClearBtn").onclick = clearUrlImport;
+      document.getElementById("urlAddToBookBtn").onclick = addScrapedRecipeToBook;
+      document.getElementById("urlParseHtmlBtn").onclick = parseFromPastedHtml;
+      document.getElementById("url-preview-image-file").onchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        fileToDataUrl(file).then((data) => {
+          urlImportState.imageData = data;
+          const imgEl = document.getElementById("url-preview-image");
+          imgEl.src = data;
+          imgEl.style.display = "inline-block";
+          document.getElementById("url-preview-no-image").style.display = "none";
+          showToast("תמונה עודכנה");
+        });
+        e.target.value = "";
+      };
+
+      // Drag & drop: add-form image
+      const addDrop = document.getElementById("add-image-drop");
+      setupImageDropZone(addDrop, (data) => {
+        addFormImageData = data;
+        const prev = document.getElementById("add-image-preview");
+        prev.src = data;
+        prev.style.display = "inline-block";
+      });
+      document.getElementById("recipe-image").onchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        fileToDataUrl(file).then((data) => {
+          addFormImageData = data;
+          const prev = document.getElementById("add-image-preview");
+          prev.src = data;
+          prev.style.display = "inline-block";
+        });
+      };
+
+      // Drag & drop: HTML-import preview image
+      setupImageDropZone(document.getElementById("url-preview-image-wrap"), (data) => {
+        urlImportState.imageData = data;
+        const imgEl = document.getElementById("url-preview-image");
+        imgEl.src = data;
+        imgEl.style.display = "inline-block";
+        document.getElementById("url-preview-no-image").style.display = "none";
+      });
+
+      const htmlToggle = document.getElementById("htmlImportToggle");
+      const htmlBody = document.getElementById("htmlImportBody");
+      const htmlArrow = document.getElementById("htmlImportArrow");
+      htmlToggle.onclick = () => {
+        const open = htmlBody.classList.toggle("open");
+        htmlArrow.classList.toggle("open", open);
+        htmlArrow.textContent = open ? "▲" : "▼";
+      };
+
+      const scrollBtn = document.getElementById("scrollTop");
+      window.addEventListener("scroll", () => {
+        scrollBtn.style.display = window.scrollY > 200 ? "flex" : "none";
+      });
+      scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
+</body>
+</html>
