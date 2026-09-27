@@ -179,13 +179,6 @@
         opacity: 0; transition: opacity 0.25s; pointer-events: none; font-weight: 600;
       }
       .save-indicator.show { opacity: 1; }
-      .scale-btns { display: inline-flex; gap: 4px; margin-right: 6px; vertical-align: middle; }
-      .scale-btns button {
-        border: 1px solid var(--border); background: var(--input-bg); color: var(--text);
-        border-radius: 8px; padding: 2px 8px; font-size: 0.78rem; cursor: pointer; font-weight: 600;
-        transition: background 0.15s, border-color 0.15s;
-      }
-      .scale-btns button:hover { border-color: var(--primary); background: rgba(34,197,94,0.15); }
       .editable { display: block; min-height: 1.2em; outline: none; white-space: pre-wrap; }
       .editable[contenteditable="true"] { background: rgba(255, 165, 0, 0.15); border-radius: 4px; padding: 2px 4px; }
       .editable-select { font-size: 0.9rem; padding: 4px 8px; border-radius: 8px; max-width: 160px; display: inline-block; }
@@ -251,29 +244,7 @@
       .recipe-image.drag-over { outline: 3px dashed var(--primary); outline-offset: 4px; border-radius: 10px; }
       .drop-hint-edit { font-size: 0.8rem; opacity: 0.75; text-align: center; margin-top: 6px; }
       .sort-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.9rem; }
-      .sort-bar select,
-      #sort-select {
-        padding: 6px 10px; border-radius: 10px; border: 2px solid var(--border);
-        font-family: inherit; font-size: 0.9rem;
-        color-scheme: dark;
-        background-color: #1e293b !important;
-        color: #f1f5f9 !important;
-        -webkit-appearance: none; appearance: none;
-      }
-      .sort-bar select option,
-      #sort-select option {
-        background-color: #1e293b; color: #f1f5f9;
-      }
-      body[data-theme="light"] .sort-bar select,
-      body[data-theme="light"] #sort-select {
-        color-scheme: light;
-        background-color: #ffffff !important;
-        color: #1f2937 !important;
-      }
-      body[data-theme="light"] .sort-bar select option,
-      body[data-theme="light"] #sort-select option {
-        background-color: #ffffff; color: #1f2937;
-      }
+      .sort-bar select { padding: 6px 10px; border-radius: 10px; border: 2px solid var(--border); background: var(--input-bg); color: var(--text); font-family: inherit; font-size: 0.9rem; }
       .lightbox {
         display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); z-index: 3000;
         align-items: center; justify-content: center; cursor: zoom-out; padding: 16px;
@@ -482,7 +453,6 @@
         <li><strong>הוספת מתכון ידנית:</strong> לחץ "הוסף מתכון", מלא שדות ולחץ "שמור".</li>
         <li><strong>ייבוא מ־HTML:</strong> בעמוד המתכון → הצג מקור העמוד → העתק → הדבק בסעיף "ייבוא מ־HTML" → חלץ → ערוך והוסף לספר. מומלץ למלא גם את כתובת האתר כדי שתמונות ייטענו תקין.</li>
         <li><strong>חיפוש מקומי:</strong> הסינון מתבצע תוך כדי הקלדה. אפשר גם לסנן לפי קטגוריה ולמיין.</li>
-        <li><strong>כפל כמויות:</strong> כפתורי ×2 / ÷2 / מקורי ליד רשימת המצרכים.</li>
         <li><strong>מצב בישול:</strong> 🍳 – שלב־אחר־שלב במסך גדול (חצים לניווט).</li>
         <li><strong>מועדפים:</strong> ★ בפינת הכרטיס.</li>
         <li><strong>עריכה:</strong> ✏️ – ערוך ישירות; קטגוריה נבחרת מתוך רשימה. לחיצה שוב נועלת.</li>
@@ -619,30 +589,13 @@
       });
     }
 
-    // ---------- Fractions ----------
-    const FRACTION_VALUE = { "½": 0.5, "¼": 0.25, "¾": 0.75, "⅓": 1 / 3, "⅔": 2 / 3 };
-    const VALUE_FRACTION = [[0.5, "½"], [0.25, "¼"], [0.75, "¾"], [1 / 3, "⅓"], [2 / 3, "⅔"]];
+    // ---------- Fractions (display only) ----------
     function replaceFractions(text) {
       if (!text) return "";
       const map = { "1/2": "½", "1/4": "¼", "1/3": "⅓", "2/3": "⅔", "3/4": "¾" };
       let result = String(text);
       for (const [f, s] of Object.entries(map)) result = result.replace(new RegExp(f, "g"), s);
       return result;
-    }
-    function formatScaled(v) {
-      for (const [num, sym] of VALUE_FRACTION) if (Math.abs(v - num) < 0.03) return sym;
-      if (Math.abs(v - Math.round(v)) < 0.005) return String(Math.round(v));
-      return String(Math.round(v * 100) / 100).replace(".", ",");
-    }
-    function scaleIngredients(text, factor) {
-      if (!text) return "";
-      return String(text).split(/\r?\n/).map((line) => {
-        const m = line.match(/(\d+(?:[.,]\d+)?|½|¼|¾|⅓|⅔)/);
-        if (!m) return line;
-        let val = FRACTION_VALUE[m[1]] !== undefined ? FRACTION_VALUE[m[1]] : parseFloat(m[1].replace(",", "."));
-        if (isNaN(val)) return line;
-        return line.replace(m[1], formatScaled(val * factor));
-      }).join("\n");
     }
 
     // ---------- CRUD (with soft delete + cache) ----------
@@ -1736,13 +1689,7 @@
         <div class="recipe-image">
           <img src="${imgSrc}" alt="תמונת המתכון: ${title.replace(/"/g, "")}" loading="lazy" referrerpolicy="no-referrer" />
         </div>
-        <p class="recipe-meta"><strong>מצרכים:</strong>
-          <span class="scale-btns" role="group" aria-label="כפל כמויות">
-            <button data-f="2" title="הכפל כמויות">×2</button>
-            <button data-f="0.5" title="חצי כמויות">÷2</button>
-            <button data-f="1" title="חזור לכמויות המקוריות">מקורי</button>
-          </span>
-        </p>
+        <p class="recipe-meta"><strong>מצרכים:</strong></p>
         <div class="editable" data-field="ingredients" contenteditable="false">${ingredients.replace(/\n/g, "<br>")}</div>
         <p class="recipe-meta" style="margin-top:8px;"><strong>הוראות הכנה:</strong></p>
         <div class="editable" data-field="instructions" contenteditable="false">${instructions.replace(/\n/g, "<br>")}</div>
@@ -1812,17 +1759,6 @@
           }
         } catch (err) { showToast("שגיאה בעדכון", { isError: true }); }
       };
-
-      // Quantity scaling (display-only; original stays intact)
-      const ingEl = card.querySelector('[data-field="ingredients"]');
-      card.querySelectorAll(".scale-btns button").forEach((b) => {
-        b.onclick = () => {
-          const f = parseFloat(b.dataset.f);
-          const base = recipe.ingredients || "";
-          const txt = f === 1 ? base : scaleIngredients(base, f);
-          ingEl.innerHTML = replaceFractions(txt).replace(/\n/g, "<br>");
-        };
-      });
 
       // Lightbox on image click
       card.querySelector(".recipe-image img").onclick = () => openLightbox(imgSrc);
