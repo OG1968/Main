@@ -1626,44 +1626,72 @@
         }
       }
 
-      const isIngHead = (s) =>
-        /^(מצרכים|מרכיבים|רשימת מצרכים)\s*:?\s*$/i.test(s) ||
-        /^(מצרכים|מרכיבים)\s*[:：]/i.test(s) && s.length < 40;
-      const isInstHead = (s) =>
-        /^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת)/i.test(s) &&
-        s.length < 80;
+      // Wix blogs often prefix headings with "|"
+      const norm = (s) => String(s || "").replace(/^[|\u200f\u200e•\-\s]+/, "").trim();
+
+      const isIngHead = (s) => {
+        const t = norm(s);
+        if (/^(מצרכים|מרכיבים|רשימת מצרכים)\s*:?\s*$/i.test(t)) return true;
+        if (/^(מצרכים|מרכיבים)\s*[:：]/i.test(t) && t.length < 50) return true;
+        // "מה צריך להכנת..." (lioroooosh etc.)
+        if (/^מה\s+צריך(\s+להכנת)?/i.test(t) && t.length < 120) return true;
+        if (/^רשימת\s+מרכיבים/i.test(t)) return true;
+        return false;
+      };
+      const isInstHead = (s) => {
+        const t = norm(s);
+        return (
+          /^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת)/i.test(t) &&
+          t.length < 80
+        );
+      };
+      const isIngGroupHead = (s) => {
+        const t = norm(s);
+        if (!t || t.length > 90) return false;
+        if (isIngHead(s) || isInstHead(s)) return false;
+        if (/[:：]\s*$/.test(t) && t.length < 80) return true;
+        return false;
+      };
 
       let mode = null; // 'ing' | 'inst'
       const ings = [];
       const insts = [];
 
       for (let i = 0; i < lines.length; i++) {
-        const s = lines[i];
-        if (isIngHead(s) || /^מצרכים\s*:?\s*$/i.test(s)) {
+        const raw = lines[i];
+        const s = norm(raw);
+        if (!s) continue;
+
+        if (isIngHead(raw)) {
           mode = "ing";
-          // "מצרכים: קמח..." same line
-          const rest = s.replace(/^מצרכים\s*:?\s*/i, "").trim();
-          if (rest && rest.length > 2 && !isInstHead(rest)) ings.push(rest);
+          const rest = norm(
+            s.replace(/^(מצרכים|מרכיבים|רשימת מצרכים|מה\s+צריך(?:\s+להכנת[^\n]*)?)\s*:?\s*/i, "")
+          );
+          if (rest && rest.length > 2 && !isInstHead(rest) && rest !== s) ings.push(rest);
           continue;
         }
-        if (isInstHead(s)) {
+        if (isInstHead(raw)) {
           mode = "inst";
-          const rest = s.replace(/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת[^\s:]*)\s*:?\s*/i, "").trim();
+          const rest = norm(
+            s.replace(/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת[^\s:]*)\s*:?\s*/i, "")
+          );
           if (rest && rest.length > 3 && rest !== ".") insts.push(rest);
           continue;
         }
-        // Sub-headings under instructions stay as instruction lines
         if (mode === "ing") {
-          if (isInstHead(s)) {
+          if (isInstHead(raw)) {
             mode = "inst";
             continue;
           }
-          // stop ingredients if we hit a long narrative unrelated? keep going until inst head
-          if (s.length > 0 && s !== ":" && s !== ".") ings.push(s);
+          if (isIngGroupHead(raw)) {
+            ings.push("— " + s.replace(/[:：]\s*$/, "").trim());
+            continue;
+          }
+          if (s !== ":" && s !== "." && s !== "|") ings.push(s);
         } else if (mode === "inst") {
-          if (s === "." || s === ":") continue;
-          // stop if we hit another ingredients section (multiple recipes on page)
-          if (isIngHead(s) && insts.length >= 2) break;
+          if (s === "." || s === ":" || s === "|") continue;
+          if (isIngHead(raw) && insts.length >= 2) break;
+          if (/^(פוסטים אחרונים|דפים|מתכונים אהובים|רעיונות|שיתוף|עקבו|אינסטגרם|פייסבוק)/i.test(s)) break;
           insts.push(s);
         }
       }
