@@ -1652,25 +1652,58 @@
         if (/[:：]\s*$/.test(t) && t.length < 80) return true;
         return false;
       };
+      // Lioroooosh challah etc.: ingredients listed under a repeated "מתכון ..." title, no "מצרכים"
+      const isRecipeTitleHead = (s) => {
+        const t = norm(s);
+        if (!t || t.length > 100) return false;
+        if (isIngHead(s) || isInstHead(s)) return false;
+        if (/^מתכון(\s|$)/i.test(t)) return true;
+        return false;
+      };
+      const looksLikeIngredient = (s) => {
+        const t = norm(s);
+        if (!t || t.length < 2 || t.length > 120) return false;
+        if (isInstHead(s) || isIngHead(s)) return false;
+        if (/^(פוסטים|דפים|מתכונים אהובים|רעיונות|שיתוף|עקבו|אינסטגרם|פייסבוק|הכנתם|יש גם)/i.test(t)) return false;
+        // quantity / unit patterns (Hebrew recipes)
+        if (/\d/.test(t) && /(גר[ם'׳]|מ[״"]?ל|ק[״"]?ג|כפות?|כפיות?|כוסות?|ביצ|שקית|קורט|שמן|קמח|סוכר|מלח|מים)/i.test(t)) return true;
+        if (/^(שומשום|פרג|גרעינ|אבקת|להגשה|תוספות)/i.test(t)) return true;
+        if (t.length <= 60 && !/[.!?]$/.test(t) && !/^(איך|כש|לאחר|מכניסים|שמים|לשים)/i.test(t)) {
+          // short non-sentence line near recipe block
+          return /(גר[ם'׳]|ביצ|קמח|סוכר|מלח|שמן|מים|שמנת|חמאה|שוקולד)/i.test(t);
+        }
+        return false;
+      };
 
       let mode = null; // 'ing' | 'inst'
       const ings = [];
       const insts = [];
+      let instHeadIndex = -1;
 
       for (let i = 0; i < lines.length; i++) {
         const raw = lines[i];
         const s = norm(raw);
         if (!s) continue;
 
-        if (isIngHead(raw)) {
+        if (isIngHead(raw) || isRecipeTitleHead(raw)) {
+          // Title-as-header only starts ingredients if next lines look like ingredients
+          if (isRecipeTitleHead(raw) && !isIngHead(raw)) {
+            let ok = false;
+            for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+              if (isInstHead(lines[j])) break;
+              if (looksLikeIngredient(lines[j])) { ok = true; break; }
+            }
+            if (!ok) continue;
+          }
           mode = "ing";
           const rest = norm(
             s.replace(/^(מצרכים|מרכיבים|רשימת מצרכים|מה\s+צריך(?:\s+להכנת[^\n]*)?)\s*:?\s*/i, "")
           );
-          if (rest && rest.length > 2 && !isInstHead(rest) && rest !== s) ings.push(rest);
+          if (rest && rest.length > 2 && !isInstHead(rest) && rest !== s && !isRecipeTitleHead(rest)) ings.push(rest);
           continue;
         }
         if (isInstHead(raw)) {
+          if (instHeadIndex < 0) instHeadIndex = i;
           mode = "inst";
           const rest = norm(
             s.replace(/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת[^\s:]*)\s*:?\s*/i, "")
@@ -1680,6 +1713,7 @@
         }
         if (mode === "ing") {
           if (isInstHead(raw)) {
+            if (instHeadIndex < 0) instHeadIndex = i;
             mode = "inst";
             continue;
           }
@@ -1696,10 +1730,38 @@
         }
       }
 
+      // Fallback: no ingredients header — take ingredient-like lines just before "אופן ההכנה"
+      if (!ings.length && instHeadIndex > 0) {
+        const collected = [];
+        for (let i = instHeadIndex - 1; i >= 0 && collected.length < 40; i--) {
+          const s = norm(lines[i]);
+          if (!s) continue;
+          if (isInstHead(lines[i]) || isIngHead(lines[i])) break;
+          if (isRecipeTitleHead(lines[i])) break;
+          if (s.length > 140) break; // intro narrative
+          if (looksLikeIngredient(lines[i]) || (s.length <= 70 && !/[.!?]$/.test(s) && /\d/.test(s))) {
+            collected.push(s);
+          } else if (collected.length && !looksLikeIngredient(lines[i])) {
+            // allow short continuation like "שומשום, פרג..."
+            if (s.length <= 80 && !/^(איך|כש|לאחר|מכניסים|שמים)/i.test(s)) collected.push(s);
+            else break;
+          } else if (collected.length) {
+            break;
+          }
+        }
+        collected.reverse();
+        if (collected.length) ings.push(...collected);
+      }
+
       // Prefer first solid ingredients block (Wix pages may embed other recipes in data)
       out.ingredients = ings.filter((x) => {
         if (!x || x.length < 2) return false;
         if (/^(שיתוף|עקבו|הצטרפו|לייק)/i.test(x)) return false;
+        // drop repeated title / promo lines mistakenly pulled into ingredients
+        // (no \b — Hebrew word boundaries are unreliable in JS)
+        if (/^מתכון(\s|$)/i.test(x) && !/\d/.test(x)) return false;
+        if (/^(אז\s+)?הנה\s+(הוא|היא|זה)/i.test(x)) return false;
+        if (/^בתיאבון/i.test(x)) return false;
         return true;
       });
       // Cap runaway lists from mixed page data
