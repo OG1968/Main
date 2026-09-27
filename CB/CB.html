@@ -1631,8 +1631,8 @@
 
       const isIngHead = (s) => {
         const t = norm(s);
-        if (/^(מצרכים|מרכיבים|רשימת מצרכים)\s*:?\s*$/i.test(t)) return true;
-        if (/^(מצרכים|מרכיבים)\s*[:：]/i.test(t) && t.length < 50) return true;
+        // "מצרכים" / "מצרכים למתכון:" / "מצרכים לסלט"
+        if (/^(מצרכים|מרכיבים|רשימת מצרכים)/i.test(t) && t.length < 60) return true;
         // "מה צריך להכנת..." (lioroooosh etc.)
         if (/^מה\s+צריך(\s+להכנת)?/i.test(t) && t.length < 120) return true;
         if (/^רשימת\s+מרכיבים/i.test(t)) return true;
@@ -1641,7 +1641,7 @@
       const isInstHead = (s) => {
         const t = norm(s);
         return (
-          /^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת)/i.test(t) &&
+          /^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת|איך\s+מכינים)/i.test(t) &&
           t.length < 80
         );
       };
@@ -1824,22 +1824,28 @@
         .replace(/<link\b[^>]*>/gi, " ")
         .replace(/\s{2,}/g, " ");
 
-      // Prefer main/article/recipe containers when present (faster + cleaner)
+      // Prefer main/article/recipe containers only if they still contain recipe text
+      const hasRecipeMarkers = (s) =>
+        /מצרכים|אופן\s*הכנה|איך\s+מכינים|מה\s+צריך|recipeIngredient|jet-listing-dynamic-field__content/i.test(s || "");
+
       const mainPatterns = [
         /<article\b[^>]*>([\s\S]*?)<\/article>/i,
         /<main\b[^>]*>([\s\S]*?)<\/main>/i,
-        /<(?:div|section)\b[^>]*(?:id|class)=["'][^"']*(?:recipe|post-content|entry-content|recipe-content|content-container)[^"']*["'][^>]*>([\s\S]{200,80000}?)<\/(?:div|section)>/i
+        /<(?:div|section)\b[^>]*(?:id|class)=["'][^"']*(?:recipe|post-content|entry-content|recipe-content|content-container)[^"']*["'][^>]*>([\s\S]{200,120000}?)<\/(?:div|section)>/i
       ];
+      const fullHasMarkers = hasRecipeMarkers(h);
       for (const re of mainPatterns) {
         const m = h.match(re);
         if (m && m[1] && m[1].length > 200) {
+          // Don't drop JetEngine/Elementor recipe body for a small unrelated "recipe" widget
+          if (fullHasMarkers && !hasRecipeMarkers(m[1])) continue;
           h = m[1];
           break;
         }
       }
 
       // Soft cap to avoid freezing on huge pages
-      const MAX = 350000;
+      const MAX = 450000;
       if (h.length > MAX) h = h.slice(0, MAX);
 
       // Prepend meta so og:title / og:image still work
@@ -1896,11 +1902,44 @@
           }
           if (foodyItems.length) ingredients = foodyItems;
         }
+        // JetEngine / Elementor (tomerumansky etc.): dynamic field listing
+        if (!ingredients.length) {
+          const jetSource = contentHtml.includes("jet-listing-dynamic-field") ? contentHtml : html;
+          const jetItems = [];
+          const reJet = /jet-listing-dynamic-field__content[^>]*>([\s\S]*?)<\/(?:p|div)>/gi;
+          let jm;
+          while ((jm = reJet.exec(jetSource)) !== null) {
+            const line = stripHtmlToText(jm[1]).replace(/\s+/g, " ").trim();
+            if (!line || line.length < 2) continue;
+            // stop when instructions field appears inside listing
+            if (/^(אופן\s*הכנה|איך\s+מכינים)/i.test(line)) break;
+            // skip pure "לסלט:" style labels kept as group headers
+            jetItems.push(line);
+          }
+          if (jetItems.length >= 3) ingredients = jetItems;
+        }
       }
 
       // Heuristic: instructions from cleaned content
       if (!instructions) {
         instructions = extractInstructionsFromHtml(contentHtml);
+      }
+
+      // JetEngine instructions often sit in dynamic-field with <ul><li>
+      if (!instructions) {
+        const jetSrc = contentHtml.includes("אופן") ? contentHtml : html;
+        const jetInst = jetSrc.match(
+          /אופן\s*הכנה[\s\S]{0,800}?jet-listing-dynamic-field__content[^>]*>([\s\S]{0,12000}?)<\/div>\s*<\/div>/i
+        );
+        if (jetInst) {
+          const items = listItemsFromHtml(jetInst[1]);
+          if (items.length) {
+            instructions = items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
+          } else {
+            const t = stripHtmlToText(jetInst[1]);
+            if (t.length > 20) instructions = normalizeInstructions(t);
+          }
+        }
       }
 
       // Wix / blog posts: paragraphs after "מצרכים" / "אופן הכנה" (no Recipe schema)
