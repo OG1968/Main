@@ -162,6 +162,7 @@
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3); cursor: zoom-in;
       }
       .recipe-actions { position: absolute; left: 8px; top: 8px; display: flex; flex-direction: column; gap: 6px; }
+      .recipe-fav-wrap { position: absolute; right: 8px; top: 8px; }
       .action-btn {
         width: 32px; height: 32px; border: none; border-radius: 50%; color: #fff; font-size: 0.9rem;
         cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s;
@@ -172,10 +173,9 @@
       .action-edit { background: var(--primary); } .action-edit:hover { background: #22c55e; }
       .action-fav { background: #475569; font-size: 1.05rem; line-height: 1; }
       .action-fav.fav-on { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.35); }
-      .action-copy { background: #0ea5e9; } .action-copy:hover { background: #38bdf8; }
       .action-cook { background: #8b5cf6; } .action-cook:hover { background: #a78bfa; }
       .save-indicator {
-        position: absolute; top: 10px; right: 12px; font-size: 0.78rem; color: var(--primary);
+        position: absolute; top: 10px; right: 48px; font-size: 0.78rem; color: var(--primary);
         opacity: 0; transition: opacity 0.25s; pointer-events: none; font-weight: 600;
       }
       .save-indicator.show { opacity: 1; }
@@ -456,7 +456,7 @@
         <li><strong>מצב בישול:</strong> 🍳 – שלב־אחר־שלב במסך גדול (חצים לניווט).</li>
         <li><strong>מועדפים:</strong> ★ בפינת הכרטיס.</li>
         <li><strong>עריכה:</strong> ✏️ – ערוך ישירות; קטגוריה נבחרת מתוך רשימה. לחיצה שוב נועלת.</li>
-        <li><strong>מחיקה:</strong> 🗑️ – ניתן לבטל תוך 5 שניות. שיתוף 🚀, העתקת מצרכים 📋.</li>
+        <li><strong>מחיקה:</strong> 🗑️ – ניתן לבטל תוך 5 שניות. שיתוף 🚀. מועדף ★ בצד הנגדי.</li>
         <li><strong>ייצוא / ייבוא:</strong> גיבוי כקובץ JSON.</li>
         <li><strong>ערכת נושא:</strong> ☀️ / 🌙.</li>
       </ol>
@@ -1136,53 +1136,6 @@
       return items;
     }
 
-    /** Ingredients from <ul> right after headings that mention מצרכים/מרכיבים/לציפוי (FoodisGood style) */
-    function extractIngredientsFromHeadedLists(html) {
-      if (!html) return [];
-      const out = [];
-      const headingRe = /<(h[1-6])[^>]*>([\s\S]*?)<\/\1>/gi;
-      let hm;
-      while ((hm = headingRe.exec(html)) !== null) {
-        const title = stripHtmlToText(hm[2]).replace(/\s+/g, " ").trim();
-        if (!title || title.length > 160) continue;
-        const isIng =
-          /(מצרכים|מרכיבים|רשימת\s+מצרכים|רשימת\s+מרכיבים|מה\s+צריך|ingredients?)/i.test(title) ||
-          /^(לציפוי|לטיגון|לרוטב|למלית|לבצק|להגשה)/i.test(title) ||
-          (/(לציפוי|לטיגון)/i.test(title) && title.length < 40);
-        if (!isIng) continue;
-        // Collect following ul/ol until the next heading (keeps subgroup lists under their own h3)
-        const after = html.slice(hm.index + hm[0].length, hm.index + hm[0].length + 8000);
-        const stop = after.search(/<h[1-6]\b/i);
-        const chunk = stop >= 0 ? after.slice(0, stop) : after;
-        // subgroup label (e.g. לציפוי ולטיגון) — keep as section marker
-        if (/^(לציפוי|לטיגון|לרוטב|למלית|לבצק)/i.test(title) && !/(מצרכים|מרכיבים)/i.test(title)) {
-          out.push("— " + title.replace(/[:：]\s*$/, "").trim());
-        }
-        const lists = [...chunk.matchAll(/<(ul|ol)[^>]*>([\s\S]*?)<\/\1>/gi)];
-        for (const lm of lists) {
-          const items = listItemsFromHtml(lm[2]);
-          for (const it of items) {
-            if (it && it.length >= 2 && it.length < 200) out.push(it);
-          }
-        }
-        // Also grab lists that sit between this h and a nested h3 subgroup
-        if (!lists.length) {
-          const liOnly = listItemsFromHtml(chunk);
-          for (const it of liOnly) {
-            if (it && it.length >= 2 && it.length < 200) out.push(it);
-          }
-        }
-      }
-      // Deduplicate while preserving order
-      const seen = new Set();
-      return out.filter((x) => {
-        const k = x.replace(/\s+/g, " ").trim().toLowerCase();
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
-      });
-    }
-
     function extractInstructionsFromHtml(html) {
       const decoded = decodeHtmlEntities(html);
       const foodyContent = decoded.match(/class=["'][^"']*recipe-content[^"']*["'][^>]*>([\s\S]{0,20000}?)<\/div>/i)
@@ -1200,13 +1153,10 @@
         const text = stripHtmlToText(m[1]);
         if (text.length > 40) return text;
       }
-      // Headings: אופן הכנה / הוראות / איך להכין / איך מכינים
-      const headingRe = /<(h[1-6]|p|div|span)[^>]*>([\s\S]*?)(?:אופן\s*ההכנה|הוראות(?:\s*הכנה)?|אופן\s*הכנה|איך\s+להכין|איך\s+מכינים|ההכנה|הכנה)([\s\S]*?)<\/\1>/gi;
+      const headingRe = /<(h[1-6]|p|div|span)[^>]*>\s*(?:אופן\s*ההכנה|הוראות(?:\s*הכנה)?|אופן\s*הכנה|ההכנה|הכנה)\s*:?\s*<\/\1>/gi;
       let hm;
       const candidates = [];
       while ((hm = headingRe.exec(decoded)) !== null) {
-        const titleText = stripHtmlToText(hm[0]).replace(/\s+/g, " ").trim();
-        if (titleText.length > 120) continue;
         const after = decoded.slice(hm.index + hm[0].length, hm.index + hm[0].length + 12000);
         const ol = after.match(/<ol[^>]*>([\s\S]*?)<\/ol>/i);
         if (ol) {
@@ -1232,7 +1182,7 @@
         const items = listItemsFromHtml(block[1]);
         if (items.length < 2) continue;
         const blob = items.join(" ");
-        if (/(מחממים|מערבבים|מוסיפים|אופים|יוצקים|שמים|לשים|לחתוך|לבשל|מעבירים|מצננים|מטגנים|מבשלים|mix|bake|preheat|stir|add|pour)/i.test(blob)) {
+        if (/(מחממים|מערבבים|מוסיפים|אופים|יוצקים|שמים|לשים|לחתוך|לבשל|mix|bake|preheat|stir|add|pour)/i.test(blob)) {
           return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
         }
       }
@@ -1262,20 +1212,14 @@
       const norm = (s) => String(s || "").replace(/^[|\u200f\u200e•\-\s]+/, "").trim();
       const isIngHead = (s) => {
         const t = norm(s);
-        if (t.length > 140) return false;
-        if (/^(מצרכים|מרכיבים|רשימת מצרכים)/i.test(t) && t.length < 80) return true;
+        if (/^(מצרכים|מרכיבים|רשימת מצרכים)/i.test(t) && t.length < 60) return true;
         if (/^מה\s+צריך(\s+להכנת)?/i.test(t) && t.length < 120) return true;
         if (/^רשימת\s+מרכיבים/i.test(t)) return true;
-        // e.g. "קציצות פראסה לפסח: המרכיבים המדויקים לכ-20 קציצות"
-        if (/(מצרכים|מרכיבים)/i.test(t) && t.length < 120) return true;
-        if (/^(לציפוי|לטיגון)(\s|$)/i.test(t) && t.length < 50) return true;
         return false;
       };
       const isInstHead = (s) => {
         const t = norm(s);
-        if (t.length > 120) return false;
-        return (/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת|איך\s+מכינים|איך\s+להכין)/i.test(t) ||
-          (/איך\s+(להכין|מכינים)/i.test(t) && t.length < 100));
+        return (/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת|איך\s+מכינים)/i.test(t) && t.length < 80);
       };
       const isIngGroupHead = (s) => {
         const t = norm(s);
@@ -1451,12 +1395,7 @@
       image = absoluteUrl(image, pageUrl);
 
       if (!ingredients.length) {
-        // FoodisGood / blog style: <h2>…המרכיבים…</h2><ul><li>…
-        ingredients = extractIngredientsFromHeadedLists(contentHtml);
-        if (!ingredients.length) ingredients = extractIngredientsFromHeadedLists(html);
-        if (!ingredients.length) {
-          ingredients = extractListAfterMarker(contentHtml, { idOrClass: /(?:id|class)=["'][^"']*\bingredients?\b[^"']*["']/i, preferUl: true });
-        }
+        ingredients = extractListAfterMarker(contentHtml, { idOrClass: /(?:id|class)=["'][^"']*\bingredients?\b[^"']*["']/i, preferUl: true });
         if (!ingredients.length) {
           const foodyItems = [];
           const reFoody = /class=["'][^"']*ingredient-container[^"']*["'][^>]*>([\s\S]*?)<\/span>\s*<\/div>/gi;
@@ -1475,14 +1414,13 @@
           while ((jm = reJet.exec(jetSource)) !== null) {
             const line = stripHtmlToText(jm[1]).replace(/\s+/g, " ").trim();
             if (!line || line.length < 2) continue;
-            if (/^(אופן\s*הכנה|איך\s+מכינים|איך\s+להכין)/i.test(line)) break;
+            if (/^(אופן\s*הכנה|איך\s+מכינים)/i.test(line)) break;
             jetItems.push(line);
           }
           if (jetItems.length >= 3) ingredients = jetItems;
         }
       }
       if (!instructions) instructions = extractInstructionsFromHtml(contentHtml);
-      if (!instructions) instructions = extractInstructionsFromHtml(html);
       if (!instructions) {
         const jetSrc = contentHtml.includes("אופן") ? contentHtml : html;
         const jetInst = jetSrc.match(/אופן\s*הכנה[\s\S]{0,800}?jet-listing-dynamic-field__content[^>]*>([\s\S]{0,12000}?)<\/div>\s*<\/div>/i);
@@ -1741,8 +1679,9 @@
           <button class="action-btn action-delete" title="מחק" aria-label="מחק מתכון">🗑️</button>
           <button class="action-btn action-share" title="שתף" aria-label="שתף מתכון">🚀</button>
           <button class="action-btn action-edit" title="ערוך" aria-label="ערוך מתכון">✏️</button>
-          <button class="action-btn action-copy" title="העתק מצרכים" aria-label="העתק רשימת מצרכים">📋</button>
           <button class="action-btn action-cook" title="מצב בישול" aria-label="מצב בישול שלב אחר שלב">🍳</button>
+        </div>
+        <div class="recipe-fav-wrap">
           <button class="action-btn action-fav ${recipe.favorite ? "fav-on" : ""}" title="מועדף" aria-label="סמן כמועדף">${recipe.favorite ? "★" : "☆"}</button>
         </div>
         <h3 class="editable" data-field="title" contenteditable="false">${title.replace(/\n/g, "<br>")}</h3>
@@ -1788,22 +1727,6 @@
       card.querySelector(".action-share").onclick = () => shareRecipe(recipe);
       card.querySelector(".action-edit").onclick = () => toggleEditMode(card, recipe);
       card.querySelector(".action-cook").onclick = () => openCookMode(recipe);
-
-      card.querySelector(".action-copy").onclick = async () => {
-        const text = `${recipe.title}\n\nמצרכים:\n${recipe.ingredients || ""}`;
-        try {
-          await navigator.clipboard.writeText(text);
-          showToast("רשימת המצרכים הועתקה 📋");
-        } catch (_) {
-          const ta = document.createElement("textarea");
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          try { document.execCommand("copy"); showToast("רשימת המצרכים הועתקה 📋"); }
-          catch (e) { showToast("העתקה נכשלה", { isError: true }); }
-          ta.remove();
-        }
-      };
 
       card.querySelector(".action-fav").onclick = async (e) => {
         const btn = e.currentTarget;
