@@ -38,12 +38,11 @@
       body {
         font-family: "Heebo", "Segoe UI", Tahoma, sans-serif;
         color-scheme: dark;
-        background-color: #0b1220;
-        background-image:
+        background:
           radial-gradient(1100px 520px at 85% -10%, rgba(22, 163, 74, 0.22), transparent 60%),
           radial-gradient(900px 500px at -10% 110%, rgba(59, 130, 246, 0.16), transparent 60%),
           linear-gradient(160deg, #0b1220, #12203a 55%, #0d1a14);
-        background-attachment: scroll;
+        background-attachment: fixed;
         color: var(--text);
         min-height: 100vh;
         padding: 12px;
@@ -52,39 +51,29 @@
       }
       body[data-theme="light"] {
         color-scheme: light;
-        background-color: #fdf6ec;
-        background-image:
+        background:
           radial-gradient(1100px 520px at 85% -10%, rgba(22, 163, 74, 0.14), transparent 60%),
           linear-gradient(160deg, #fdf6ec, #f3ecdd);
-        background-attachment: scroll;
+        background-attachment: fixed;
       }
       .container { max-width: 720px; margin: 0 auto; }
       header {
         display: flex; align-items: center; justify-content: space-between;
-        flex-wrap: nowrap; gap: 6px;
-        margin-bottom: 16px; padding: 8px 12px;
+        margin-bottom: 16px; padding: 10px 14px;
         position: sticky; top: 8px; z-index: 100;
-        background: rgba(11, 18, 32, 0.92);
+        background: rgba(11, 18, 32, 0.72);
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
       }
-      body[data-theme="light"] header { background: rgba(255, 255, 255, 0.95); border-color: #eee4cf; }
+      body[data-theme="light"] header { background: rgba(255, 255, 255, 0.85); border-color: #eee4cf; }
       h1 {
         font-size: 1.75rem; font-weight: 800; text-align: center; flex: 1;
-        letter-spacing: 0.5px; min-width: 0;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        letter-spacing: 0.5px;
         background: linear-gradient(90deg, #34d399, #60a5fa, #34d399);
         -webkit-background-clip: text; background-clip: text; color: transparent;
       }
-      .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
-      .header-spacer { width: 80px; flex-shrink: 0; }
-      @media (max-width: 480px) {
-        header { padding: 6px 8px; top: 4px; }
-        h1 { font-size: 1.15rem; letter-spacing: 0; }
-        .header-spacer { width: 72px; }
-        .icon-btn { width: 32px; height: 32px; font-size: 1rem; }
-      }
+      .header-actions { display: flex; gap: 8px; }
       .icon-btn {
         width: 36px; height: 36px; border: none; border-radius: 50%;
         background: var(--primary); color: #fff; font-size: 1.1rem; cursor: pointer;
@@ -115,44 +104,12 @@
         background: var(--input-bg); color: var(--text); font-size: 1rem;
         transition: border-color 0.2s, box-shadow 0.2s;
       }
-      /* Selects: force dark readable colors (closed + open list) */
-      select,
-      .field select,
-      .sort-bar select,
-      .editable-select {
-        color-scheme: dark;
-        background-color: #1e293b !important;
-        color: #f1f5f9 !important;
-        -webkit-appearance: none;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23f1f5f9' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: left 12px center;
-        padding-left: 32px;
+      .field select {
+        color-scheme: dark; background-color: #1e293b; color: #f1f5f9;
       }
-      select option,
-      .field select option,
-      .sort-bar select option,
-      .editable-select option {
-        background-color: #1e293b;
-        color: #f1f5f9;
-      }
-      body[data-theme="light"] select,
-      body[data-theme="light"] .field select,
-      body[data-theme="light"] .sort-bar select,
-      body[data-theme="light"] .editable-select {
-        color-scheme: light;
-        background-color: #ffffff !important;
-        color: #1f2937 !important;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231f2937' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      }
-      body[data-theme="light"] select option,
-      body[data-theme="light"] .field select option,
-      body[data-theme="light"] .sort-bar select option,
-      body[data-theme="light"] .editable-select option {
-        background-color: #ffffff;
-        color: #1f2937;
-      }
+      .field select option { background-color: #1e293b; color: #f1f5f9; }
+      body[data-theme="light"] .field select { color-scheme: light; background-color: #ffffff; color: #1f2937; }
+      body[data-theme="light"] .field select option { background-color: #ffffff; color: #1f2937; }
       .field input:focus, .field textarea:focus, .field select:focus {
         outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
       }
@@ -224,10 +181,7 @@
       .save-indicator.show { opacity: 1; }
       .editable { display: block; min-height: 1.2em; outline: none; white-space: pre-wrap; }
       .editable[contenteditable="true"] { background: rgba(255, 165, 0, 0.15); border-radius: 4px; padding: 2px 4px; }
-      .editable-select {
-        font-size: 0.9rem; padding: 4px 8px; padding-left: 28px; border-radius: 8px;
-        max-width: 160px; display: inline-block; border: 2px solid var(--border);
-      }
+      .editable-select { font-size: 0.9rem; padding: 4px 8px; border-radius: 8px; max-width: 160px; display: inline-block; }
       .toast {
         position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 12px; color: #fff;
         font-weight: 600; z-index: 2000; max-width: 90%;
@@ -290,10 +244,7 @@
       .recipe-image.drag-over { outline: 3px dashed var(--primary); outline-offset: 4px; border-radius: 10px; }
       .drop-hint-edit { font-size: 0.8rem; opacity: 0.75; text-align: center; margin-top: 6px; }
       .sort-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.9rem; }
-      .sort-bar select {
-        padding: 6px 10px; padding-left: 28px; border-radius: 10px; border: 2px solid var(--border);
-        font-family: inherit; font-size: 0.9rem;
-      }
+      .sort-bar select { padding: 6px 10px; border-radius: 10px; border: 2px solid var(--border); background: var(--input-bg); color: var(--text); font-family: inherit; font-size: 0.9rem; }
       .lightbox {
         display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); z-index: 3000;
         align-items: center; justify-content: center; cursor: zoom-out; padding: 16px;
@@ -320,7 +271,7 @@
         <button class="icon-btn" id="helpBtn" title="הדרכה" aria-label="הדרכה">❓</button>
       </div>
       <h1>ספר מתכונים</h1>
-      <div class="header-spacer" aria-hidden="true"></div>
+      <div style="width: 80px;"></div>
     </header>
 
     <!-- כפתור ראשי להוספה -->
@@ -396,11 +347,11 @@
         </p>
         <div class="field">
           <label for="url-html-paste">HTML של העמוד</label>
-          <textarea id="url-html-paste" rows="6" placeholder="הדבק כאן את קוד המקור של העמוד..." dir="ltr" style="text-align:left;font-size:0.8rem;"></textarea>
+          <textarea id="url-html-paste" rows="6" placeholder="הדבק כאן את קוד המקור של העמוד..." dir="rtl" style="text-align:right;font-size:0.8rem;"></textarea>
         </div>
         <div class="field" style="margin-top:8px;">
           <label for="url-site-url">כתובת האתר (אופציונלי – לתיקון קישורי תמונות)</label>
-          <input type="text" id="url-site-url" placeholder="למשל: https://www.foodisgood.co.il" dir="ltr" style="text-align:left;font-size:0.85rem;" />
+          <input type="text" id="url-site-url" placeholder="למשל: https://www.foodisgood.co.il" dir="rtl" style="text-align:right;font-size:0.85rem;" />
         </div>
         <div class="search-type-row" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
           <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.95rem;">
