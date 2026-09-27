@@ -872,8 +872,8 @@
       </div>
       <div class="collapsible-body" id="htmlImportBody">
         <p style="font-size:0.85rem;opacity:0.8;margin-bottom:10px;">
-          בעמוד המתכון בדפדפן: לחץ ימני → <strong>הצג מקור העמוד</strong> (View Page Source) → העתק את כל הקוד והדבק כאן.
-          המערכת תחלץ כותרת, מצרכים, הוראות הכנה ותמונה (schema.org / JSON-LD).
+          בעמוד המתכון: לחץ ימני → <strong>הצג מקור העמוד</strong> → העתק והדבק כאן.
+          אפשר להדביק גם HTML ארוך מאוד — המערכת מסירה אוטומטית <code>script</code> / <code>style</code> וסורקת בעיקר את תוכן המתכון.
         </p>
         <div class="field">
           <label for="url-html-paste">HTML של העמוד</label>
@@ -1597,12 +1597,176 @@
       return "";
     }
 
+    /**
+     * Wix / blogs: extract ingredients & steps from sequential <p>/<span> text
+     * after headings like "מצרכים" / "אופן הכנה" (no schema.org Recipe).
+     */
+    function extractParagraphRecipeSections(html) {
+      const out = { ingredients: [], instructions: "" };
+      if (!html) return out;
+
+      // Collect readable paragraph-like lines in document order
+      const lines = [];
+      const blockRe = /<(?:p|div|h[1-6]|li)\b[^>]*>([\s\S]*?)<\/(?:p|div|h[1-6]|li)>/gi;
+      let bm;
+      while ((bm = blockRe.exec(html)) !== null) {
+        const t = stripHtmlToText(bm[1]).replace(/\s+/g, " ").trim();
+        if (!t || t.length < 1) continue;
+        // skip pure UI chrome
+        if (/^(שיתוף|share|facebook|instagram|התחבר)/i.test(t)) continue;
+        lines.push(t);
+      }
+      // Also span-only lines (Wix wraps almost everything in span)
+      if (lines.length < 5) {
+        const spanRe = /<span[^>]*>\s*([^<]{2,400})\s*<\/span>/gi;
+        let sm;
+        while ((sm = spanRe.exec(html)) !== null) {
+          const t = decodeHtmlEntities(sm[1]).replace(/\s+/g, " ").trim();
+          if (t && t.length >= 2) lines.push(t);
+        }
+      }
+
+      const isIngHead = (s) =>
+        /^(מצרכים|מרכיבים|רשימת מצרכים)\s*:?\s*$/i.test(s) ||
+        /^(מצרכים|מרכיבים)\s*[:：]/i.test(s) && s.length < 40;
+      const isInstHead = (s) =>
+        /^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת)/i.test(s) &&
+        s.length < 80;
+
+      let mode = null; // 'ing' | 'inst'
+      const ings = [];
+      const insts = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const s = lines[i];
+        if (isIngHead(s) || /^מצרכים\s*:?\s*$/i.test(s)) {
+          mode = "ing";
+          // "מצרכים: קמח..." same line
+          const rest = s.replace(/^מצרכים\s*:?\s*/i, "").trim();
+          if (rest && rest.length > 2 && !isInstHead(rest)) ings.push(rest);
+          continue;
+        }
+        if (isInstHead(s)) {
+          mode = "inst";
+          const rest = s.replace(/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת[^\s:]*)\s*:?\s*/i, "").trim();
+          if (rest && rest.length > 3 && rest !== ".") insts.push(rest);
+          continue;
+        }
+        // Sub-headings under instructions stay as instruction lines
+        if (mode === "ing") {
+          if (isInstHead(s)) {
+            mode = "inst";
+            continue;
+          }
+          // stop ingredients if we hit a long narrative unrelated? keep going until inst head
+          if (s.length > 0 && s !== ":" && s !== ".") ings.push(s);
+        } else if (mode === "inst") {
+          if (s === "." || s === ":") continue;
+          // stop if we hit another ingredients section (multiple recipes on page)
+          if (isIngHead(s) && insts.length >= 2) break;
+          insts.push(s);
+        }
+      }
+
+      // Prefer first solid ingredients block (Wix pages may embed other recipes in data)
+      out.ingredients = ings.filter((x) => {
+        if (!x || x.length < 2) return false;
+        if (/^(שיתוף|עקבו|הצטרפו|לייק)/i.test(x)) return false;
+        return true;
+      });
+      // Cap runaway lists from mixed page data
+      if (out.ingredients.length > 40) out.ingredients = out.ingredients.slice(0, 40);
+
+      if (insts.length) {
+        out.instructions = insts
+          .filter((x) => x && x.length > 1)
+          .map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`))
+          .join("\n");
+      }
+      return out;
+    }
+
+    function extractIngredientsFromOgDescription(html) {
+      const m =
+        html.match(/property=["']og:description["'][^>]*content=["']([^"']+)["']/i) ||
+        html.match(/content=["']([^"']+)["'][^>]*property=["']og:description["']/i);
+      if (!m) return [];
+      let desc = decodeHtmlEntities(m[1]);
+      const idx = desc.search(/מצרכים\s*:/i);
+      if (idx < 0) return [];
+      let part = desc.slice(idx).replace(/^מצרכים\s*:/i, "").trim();
+      // stop at instructions marker if present
+      part = part.split(/אופן\s*ההכנה|הוראות\s*הכנה/i)[0];
+      // Split by common patterns: number+unit or quantity words
+      // First try explicit separators
+      let items = part.split(/\s{2,}|\s*[\n|;]\s*/).map((s) => s.trim()).filter(Boolean);
+      if (items.length < 3) {
+        // Heuristic split before quantities: digits at start of ingredient
+        items = part
+          .replace(/(\d+\s*(?:גרם|כפות?|כפיות?|כוסות?|קילו|מ"ל|מל|שקית))/g, "\n$1")
+          .split(/\n/)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 2);
+      }
+      return items.slice(0, 30);
+    }
+
+    /**
+     * מנקה HTML ארוך: מסיר script/style/noscript/svg/iframe והערות,
+     * ומשאיר בעיקר תוכן. JSON-LD נשמר בנפרד לפני הקריאה לפונקציה זו.
+     */
+    function stripNonContentHtml(html) {
+      if (!html) return "";
+      let h = String(html);
+      // Keep a copy of head meta for title/image fallbacks (og:*)
+      const headMatch = h.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+      const headMeta = headMatch
+        ? headMatch[1].replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "")
+        : "";
+
+      h = h
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+        .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, " ")
+        .replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, " ")
+        .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, " ")
+        .replace(/<!--[\s\S]*?-->/g, " ")
+        .replace(/<link\b[^>]*>/gi, " ")
+        .replace(/\s{2,}/g, " ");
+
+      // Prefer main/article/recipe containers when present (faster + cleaner)
+      const mainPatterns = [
+        /<article\b[^>]*>([\s\S]*?)<\/article>/i,
+        /<main\b[^>]*>([\s\S]*?)<\/main>/i,
+        /<(?:div|section)\b[^>]*(?:id|class)=["'][^"']*(?:recipe|post-content|entry-content|recipe-content|content-container)[^"']*["'][^>]*>([\s\S]{200,80000}?)<\/(?:div|section)>/i
+      ];
+      for (const re of mainPatterns) {
+        const m = h.match(re);
+        if (m && m[1] && m[1].length > 200) {
+          h = m[1];
+          break;
+        }
+      }
+
+      // Soft cap to avoid freezing on huge pages
+      const MAX = 350000;
+      if (h.length > MAX) h = h.slice(0, MAX);
+
+      // Prepend meta so og:title / og:image still work
+      if (headMeta) h = headMeta + "\n" + h;
+      return h;
+    }
+
     function parseRecipeFromHtml(html, pageUrl, opts = {}) {
       if (opts.textFallback) {
         return parseTextFallbackRecipe(html, pageUrl);
       }
 
+      // 1) JSON-LD from full original (before stripping scripts)
       const ldRecipes = extractJsonLdRecipes(html);
+      // 2) Content-only HTML for heuristics (no scripts/styles)
+      const contentHtml = stripNonContentHtml(html);
+
       let title = "";
       let ingredients = [];
       let instructions = "";
@@ -1620,14 +1784,14 @@
         }
       }
 
-      if (!title) title = extractTitleFallback(html);
+      if (!title) title = extractTitleFallback(contentHtml) || extractTitleFallback(html);
       else title = cleanRecipeTitle(title);
-      if (!image) image = extractMetaImage(html, pageUrl);
+      if (!image) image = extractMetaImage(contentHtml, pageUrl) || extractMetaImage(html, pageUrl);
       image = absoluteUrl(image, pageUrl);
 
-      // Heuristic: ingredients from HTML (id / class)
+      // Heuristic: ingredients from cleaned content
       if (!ingredients.length) {
-        ingredients = extractListAfterMarker(html, {
+        ingredients = extractListAfterMarker(contentHtml, {
           idOrClass: /(?:id|class)=["'][^"']*\bingredients?\b[^"']*["']/i,
           preferUl: true
         });
@@ -1636,7 +1800,7 @@
           const foodyItems = [];
           const reFoody = /class=["'][^"']*ingredient-container[^"']*["'][^>]*>([\s\S]*?)<\/span>\s*<\/div>/gi;
           let fm;
-          while ((fm = reFoody.exec(html)) !== null) {
+          while ((fm = reFoody.exec(contentHtml)) !== null) {
             const line = stripHtmlToText(fm[1]);
             if (line && line.length > 1) foodyItems.push(line);
           }
@@ -1644,15 +1808,27 @@
         }
       }
 
-      // Heuristic: instructions – always try HTML when JSON-LD has none
-      // Many Hebrew sites (Elementor etc.) put steps under heading "ההכנה" without recipeInstructions
+      // Heuristic: instructions from cleaned content
       if (!instructions) {
-        instructions = extractInstructionsFromHtml(html);
+        instructions = extractInstructionsFromHtml(contentHtml);
+      }
+
+      // Wix / blog posts: paragraphs after "מצרכים" / "אופן הכנה" (no Recipe schema)
+      if (!ingredients.length || !instructions) {
+        const wix = extractParagraphRecipeSections(contentHtml);
+        if (!ingredients.length && wix.ingredients.length) ingredients = wix.ingredients;
+        if (!instructions && wix.instructions) instructions = wix.instructions;
+      }
+
+      // og:description sometimes packs ingredients in one line (Wix)
+      if (!ingredients.length) {
+        const fromOg = extractIngredientsFromOgDescription(html);
+        if (fromOg.length) ingredients = fromOg;
       }
 
       // If still empty and content looks like plain text – try text parser
-      if (!ingredients.length && !instructions && html.length > 100 && !/<html[\s>]/i.test(html)) {
-        return parseTextFallbackRecipe(html, pageUrl);
+      if (!ingredients.length && !instructions && contentHtml.length > 100 && !/<html[\s>]/i.test(contentHtml)) {
+        return parseTextFallbackRecipe(contentHtml, pageUrl);
       }
 
       return {
@@ -1714,8 +1890,13 @@
       }
       const baseUrl = "https://example.com/";
       urlImportState = { imageData: null, sourceUrl: baseUrl };
+      const kb = Math.round(html.length / 1024);
+      if (kb > 200) showToast(`מסמך גדול (${kb}KB) – מנקה סקריפטים וסגנונות...`);
       const parsed = parseRecipeFromHtml(html, baseUrl);
-      applyParsedToPreview(parsed, "חולץ מ־HTML שהודבק ידנית");
+      const note = kb > 100
+        ? `חולץ מ־HTML (${kb}KB, אחרי ניקוי script/style)`
+        : "חולץ מ־HTML שהודבק ידנית";
+      applyParsedToPreview(parsed, note);
     }
 
     async function addScrapedRecipeToBook() {
