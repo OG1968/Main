@@ -347,11 +347,11 @@
         </p>
         <div class="field">
           <label for="url-html-paste">HTML של העמוד</label>
-          <textarea id="url-html-paste" rows="6" placeholder="הדבק כאן את קוד המקור של העמוד..." dir="rtl" style="text-align:right;font-size:0.8rem;"></textarea>
+          <textarea id="url-html-paste" rows="6" placeholder="הדבק כאן את קוד המקור של העמוד..." dir="ltr" style="text-align:left;font-size:0.8rem;"></textarea>
         </div>
         <div class="field" style="margin-top:8px;">
           <label for="url-site-url">כתובת האתר (אופציונלי – לתיקון קישורי תמונות)</label>
-          <input type="text" id="url-site-url" placeholder="למשל: https://www.foodisgood.co.il" dir="rtl" style="text-align:right;font-size:0.85rem;" />
+          <input type="text" id="url-site-url" placeholder="למשל: https://www.foodisgood.co.il" dir="ltr" style="text-align:left;font-size:0.85rem;" />
         </div>
         <div class="search-type-row" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
           <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.95rem;">
@@ -1136,6 +1136,53 @@
       return items;
     }
 
+    /** Ingredients from <ul> right after headings that mention מצרכים/מרכיבים/לציפוי (FoodisGood style) */
+    function extractIngredientsFromHeadedLists(html) {
+      if (!html) return [];
+      const out = [];
+      const headingRe = /<(h[1-6])[^>]*>([\s\S]*?)<\/\1>/gi;
+      let hm;
+      while ((hm = headingRe.exec(html)) !== null) {
+        const title = stripHtmlToText(hm[2]).replace(/\s+/g, " ").trim();
+        if (!title || title.length > 160) continue;
+        const isIng =
+          /(מצרכים|מרכיבים|רשימת\s+מצרכים|רשימת\s+מרכיבים|מה\s+צריך|ingredients?)/i.test(title) ||
+          /^(לציפוי|לטיגון|לרוטב|למלית|לבצק|להגשה)/i.test(title) ||
+          (/(לציפוי|לטיגון)/i.test(title) && title.length < 40);
+        if (!isIng) continue;
+        // Collect following ul/ol until the next heading (keeps subgroup lists under their own h3)
+        const after = html.slice(hm.index + hm[0].length, hm.index + hm[0].length + 8000);
+        const stop = after.search(/<h[1-6]\b/i);
+        const chunk = stop >= 0 ? after.slice(0, stop) : after;
+        // subgroup label (e.g. לציפוי ולטיגון) — keep as section marker
+        if (/^(לציפוי|לטיגון|לרוטב|למלית|לבצק)/i.test(title) && !/(מצרכים|מרכיבים)/i.test(title)) {
+          out.push("— " + title.replace(/[:：]\s*$/, "").trim());
+        }
+        const lists = [...chunk.matchAll(/<(ul|ol)[^>]*>([\s\S]*?)<\/\1>/gi)];
+        for (const lm of lists) {
+          const items = listItemsFromHtml(lm[2]);
+          for (const it of items) {
+            if (it && it.length >= 2 && it.length < 200) out.push(it);
+          }
+        }
+        // Also grab lists that sit between this h and a nested h3 subgroup
+        if (!lists.length) {
+          const liOnly = listItemsFromHtml(chunk);
+          for (const it of liOnly) {
+            if (it && it.length >= 2 && it.length < 200) out.push(it);
+          }
+        }
+      }
+      // Deduplicate while preserving order
+      const seen = new Set();
+      return out.filter((x) => {
+        const k = x.replace(/\s+/g, " ").trim().toLowerCase();
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+    }
+
     function extractInstructionsFromHtml(html) {
       const decoded = decodeHtmlEntities(html);
       const foodyContent = decoded.match(/class=["'][^"']*recipe-content[^"']*["'][^>]*>([\s\S]{0,20000}?)<\/div>/i)
@@ -1153,10 +1200,13 @@
         const text = stripHtmlToText(m[1]);
         if (text.length > 40) return text;
       }
-      const headingRe = /<(h[1-6]|p|div|span)[^>]*>\s*(?:אופן\s*ההכנה|הוראות(?:\s*הכנה)?|אופן\s*הכנה|ההכנה|הכנה)\s*:?\s*<\/\1>/gi;
+      // Headings: אופן הכנה / הוראות / איך להכין / איך מכינים
+      const headingRe = /<(h[1-6]|p|div|span)[^>]*>([\s\S]*?)(?:אופן\s*ההכנה|הוראות(?:\s*הכנה)?|אופן\s*הכנה|איך\s+להכין|איך\s+מכינים|ההכנה|הכנה)([\s\S]*?)<\/\1>/gi;
       let hm;
       const candidates = [];
       while ((hm = headingRe.exec(decoded)) !== null) {
+        const titleText = stripHtmlToText(hm[0]).replace(/\s+/g, " ").trim();
+        if (titleText.length > 120) continue;
         const after = decoded.slice(hm.index + hm[0].length, hm.index + hm[0].length + 12000);
         const ol = after.match(/<ol[^>]*>([\s\S]*?)<\/ol>/i);
         if (ol) {
@@ -1182,7 +1232,7 @@
         const items = listItemsFromHtml(block[1]);
         if (items.length < 2) continue;
         const blob = items.join(" ");
-        if (/(מחממים|מערבבים|מוסיפים|אופים|יוצקים|שמים|לשים|לחתוך|לבשל|mix|bake|preheat|stir|add|pour)/i.test(blob)) {
+        if (/(מחממים|מערבבים|מוסיפים|אופים|יוצקים|שמים|לשים|לחתוך|לבשל|מעבירים|מצננים|מטגנים|מבשלים|mix|bake|preheat|stir|add|pour)/i.test(blob)) {
           return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
         }
       }
@@ -1212,14 +1262,20 @@
       const norm = (s) => String(s || "").replace(/^[|\u200f\u200e•\-\s]+/, "").trim();
       const isIngHead = (s) => {
         const t = norm(s);
-        if (/^(מצרכים|מרכיבים|רשימת מצרכים)/i.test(t) && t.length < 60) return true;
+        if (t.length > 140) return false;
+        if (/^(מצרכים|מרכיבים|רשימת מצרכים)/i.test(t) && t.length < 80) return true;
         if (/^מה\s+צריך(\s+להכנת)?/i.test(t) && t.length < 120) return true;
         if (/^רשימת\s+מרכיבים/i.test(t)) return true;
+        // e.g. "קציצות פראסה לפסח: המרכיבים המדויקים לכ-20 קציצות"
+        if (/(מצרכים|מרכיבים)/i.test(t) && t.length < 120) return true;
+        if (/^(לציפוי|לטיגון)(\s|$)/i.test(t) && t.length < 50) return true;
         return false;
       };
       const isInstHead = (s) => {
         const t = norm(s);
-        return (/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת|איך\s+מכינים)/i.test(t) && t.length < 80);
+        if (t.length > 120) return false;
+        return (/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת|איך\s+מכינים|איך\s+להכין)/i.test(t) ||
+          (/איך\s+(להכין|מכינים)/i.test(t) && t.length < 100));
       };
       const isIngGroupHead = (s) => {
         const t = norm(s);
@@ -1395,7 +1451,12 @@
       image = absoluteUrl(image, pageUrl);
 
       if (!ingredients.length) {
-        ingredients = extractListAfterMarker(contentHtml, { idOrClass: /(?:id|class)=["'][^"']*\bingredients?\b[^"']*["']/i, preferUl: true });
+        // FoodisGood / blog style: <h2>…המרכיבים…</h2><ul><li>…
+        ingredients = extractIngredientsFromHeadedLists(contentHtml);
+        if (!ingredients.length) ingredients = extractIngredientsFromHeadedLists(html);
+        if (!ingredients.length) {
+          ingredients = extractListAfterMarker(contentHtml, { idOrClass: /(?:id|class)=["'][^"']*\bingredients?\b[^"']*["']/i, preferUl: true });
+        }
         if (!ingredients.length) {
           const foodyItems = [];
           const reFoody = /class=["'][^"']*ingredient-container[^"']*["'][^>]*>([\s\S]*?)<\/span>\s*<\/div>/gi;
@@ -1414,13 +1475,14 @@
           while ((jm = reJet.exec(jetSource)) !== null) {
             const line = stripHtmlToText(jm[1]).replace(/\s+/g, " ").trim();
             if (!line || line.length < 2) continue;
-            if (/^(אופן\s*הכנה|איך\s+מכינים)/i.test(line)) break;
+            if (/^(אופן\s*הכנה|איך\s+מכינים|איך\s+להכין)/i.test(line)) break;
             jetItems.push(line);
           }
           if (jetItems.length >= 3) ingredients = jetItems;
         }
       }
       if (!instructions) instructions = extractInstructionsFromHtml(contentHtml);
+      if (!instructions) instructions = extractInstructionsFromHtml(html);
       if (!instructions) {
         const jetSrc = contentHtml.includes("אופן") ? contentHtml : html;
         const jetInst = jetSrc.match(/אופן\s*הכנה[\s\S]{0,800}?jet-listing-dynamic-field__content[^>]*>([\s\S]{0,12000}?)<\/div>\s*<\/div>/i);
