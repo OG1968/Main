@@ -928,16 +928,33 @@
       if (!url || !/^https?:\/\//i.test(url)) return url;
       const onProgress = typeof opts.onProgress === "function" ? opts.onProgress : null;
       const doCompress = opts.compress !== false;
+      // Image CDNs first (reliable CORS + work on mobile). Generic CORS proxies as fallback.
+      // weserv expects host/path without scheme, or a fully encoded URL.
+      const bare = url.replace(/^https?:\/\//i, "");
       const attempts = [
+        "https://images.weserv.nl/?url=" + encodeURIComponent(bare) + "&output=jpg&q=82&w=800&n=-1",
+        "https://wsrv.nl/?url=" + encodeURIComponent(bare) + "&output=jpg&q=82&w=800&n=-1",
         url,
         "https://corsproxy.io/?" + encodeURIComponent(url),
         "https://api.allorigins.win/raw?url=" + encodeURIComponent(url)
       ];
-      for (const src of attempts) {
+      const fetchWithTimeout = (src, ms = 18000) => {
+        const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const timer = ctrl ? setTimeout(() => ctrl.abort(), ms) : null;
+        return fetch(src, ctrl ? { signal: ctrl.signal, mode: "cors", credentials: "omit", referrerPolicy: "no-referrer" } : { mode: "cors", credentials: "omit", referrerPolicy: "no-referrer" })
+          .finally(() => { if (timer) clearTimeout(timer); });
+      };
+      for (let i = 0; i < attempts.length; i++) {
+        const src = attempts[i];
         try {
-          if (onProgress) onProgress(0, "מתחבר...");
-          const res = await fetch(src);
+          if (onProgress) onProgress(0, i === 0 ? "מתחבר..." : "מנסה מקור חלופי...");
+          const res = await fetchWithTimeout(src);
           if (!res.ok) continue;
+          const ctype = (res.headers.get("content-type") || "").toLowerCase();
+          // skip obvious non-image HTML/JSON error pages from proxies
+          if (ctype && !ctype.startsWith("image/") && !ctype.includes("octet-stream") && !ctype.includes("binary")) {
+            if (ctype.includes("json") || ctype.includes("text/html") || ctype.includes("text/plain")) continue;
+          }
           const total = Number(res.headers.get("content-length")) || 0;
           let blob;
           if (res.body && typeof res.body.getReader === "function") {
@@ -953,21 +970,23 @@
                 if (total > 0) {
                   onProgress(Math.min(0.95, received / total), `מוריד תמונה… ${Math.round(received / 1024)}KB`);
                 } else {
-                  // unknown size — pulse by KB received
                   const soft = Math.min(0.9, 0.15 + Math.log10(received + 10) / 6);
                   onProgress(soft, `מוריד תמונה… ${Math.round(received / 1024)}KB`);
                 }
               }
             }
-            blob = new Blob(chunks);
+            blob = new Blob(chunks, { type: ctype.startsWith("image/") ? ctype : "image/jpeg" });
           } else {
             if (onProgress) onProgress(0.4, "מוריד תמונה...");
             blob = await res.blob();
             if (onProgress) onProgress(0.85, "תמונה התקבלה...");
           }
           if (blob.size < 100) continue;
+          // reject tiny error payloads that look like JSON/HTML
+          if (blob.size < 800 && (ctype.includes("json") || ctype.includes("text"))) continue;
           if (onProgress) onProgress(0.92, "ממיר תמונה...");
           const raw = await fileToDataUrl(blob);
+          if (!raw || !/^data:image\//i.test(raw)) continue;
           if (doCompress) {
             if (onProgress) onProgress(0.96, "דוחס תמונה...");
             return await compressImageData(raw);
