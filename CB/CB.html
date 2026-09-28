@@ -293,6 +293,46 @@
       .cook-progress { text-align: center; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
       .cook-bar { height: 6px; border-radius: 6px; background: var(--input-bg); overflow: hidden; margin-bottom: 16px; }
       .cook-bar > div { height: 100%; background: linear-gradient(90deg, #22c55e, #3b82f6); transition: width 0.25s; }
+      .import-progress {
+        display: none !important;
+        margin-top: 14px; padding: 14px 16px; border-radius: 12px;
+        border: 2px solid rgba(34, 197, 94, 0.45);
+        background: linear-gradient(180deg, rgba(34, 197, 94, 0.12), rgba(59, 130, 246, 0.08));
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      }
+      .import-progress.visible { display: block !important; }
+      .import-progress-label {
+        font-size: 0.95rem; font-weight: 700; margin-bottom: 10px;
+        display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      }
+      .import-progress-pct {
+        font-size: 0.95rem; color: #22c55e; font-weight: 800;
+        min-width: 3.2em; text-align: left; direction: ltr;
+      }
+      .import-progress-track {
+        height: 14px; border-radius: 10px;
+        background: rgba(0,0,0,0.35);
+        overflow: hidden; border: 1px solid var(--border);
+      }
+      body[data-theme="light"] .import-progress-track { background: #e8e0d0; }
+      body[data-theme="light"] .import-progress {
+        background: linear-gradient(180deg, rgba(34, 197, 94, 0.1), #fff);
+        border-color: rgba(22, 163, 74, 0.4);
+      }
+      .import-progress-fill {
+        height: 100%; width: 0%; border-radius: 10px;
+        background: linear-gradient(90deg, #22c55e, #3b82f6, #22c55e);
+        background-size: 200% 100%;
+        transition: width 0.25s ease;
+        animation: importBarShimmer 1.4s linear infinite;
+      }
+      @keyframes importBarShimmer {
+        0% { background-position: 100% 0; }
+        100% { background-position: -100% 0; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .import-progress-fill { animation: none; }
+      }
       .cook-nav { display: flex; gap: 10px; }
       .cook-nav .btn { min-width: 100px; font-size: 1.1rem; padding: 14px; }
       .cook-hint { text-align: center; font-size: 0.78rem; opacity: 0.6; margin-top: 10px; }
@@ -438,6 +478,15 @@
           </div>
           <div class="btn-row" style="margin-top:12px;">
             <button class="btn btn-success" id="urlAddToBookBtn">💾 הוסף לספר המתכונים</button>
+          </div>
+          <div class="import-progress" id="url-import-progress" aria-live="polite">
+            <div class="import-progress-label">
+              <span id="url-import-progress-text">מתחיל...</span>
+              <span class="import-progress-pct" id="url-import-progress-pct">0%</span>
+            </div>
+            <div class="import-progress-track">
+              <div class="import-progress-fill" id="url-import-progress-fill"></div>
+            </div>
           </div>
         </div>
         <div id="url-import-status" style="margin-top:10px;"></div>
@@ -585,11 +634,13 @@
 
     // ---------- Toast (supports action button, e.g. Undo) ----------
     function showToast(msg, opts = {}) {
-      const { isError = false, actionText = null, onAction = null } = opts;
-      const existing = document.querySelector(".toast");
-      if (existing) existing.remove();
+      const { isError = false, actionText = null, onAction = null, persist = false } = opts;
+      // remove previous non-persist toasts; keep persist until cleared
+      document.querySelectorAll(".toast").forEach((t) => {
+        if (!t.classList.contains("persist") || persist) t.remove();
+      });
       const toast = document.createElement("div");
-      toast.className = "toast " + (isError ? "error" : "success");
+      toast.className = "toast " + (isError ? "error" : "success") + (persist ? " persist" : "");
       const span = document.createElement("span");
       span.textContent = msg;
       toast.appendChild(span);
@@ -600,9 +651,13 @@
         btn.onclick = () => { toast.remove(); onAction(); };
         toast.appendChild(btn);
         toast.style.animation = "slideIn 0.3s ease, fadeOut 0.4s ease 5.4s forwards";
+      } else if (persist) {
+        toast.style.animation = "slideIn 0.3s ease";
       }
       document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), actionText ? 6000 : 3200);
+      if (!persist) {
+        setTimeout(() => toast.remove(), actionText ? 6000 : 3200);
+      }
     }
 
     // ---------- Confirm modal (replaces confirm()/prompt()) ----------
@@ -708,31 +763,99 @@
 
     // ---------- Image compression (canvas resize) ----------
     // opts.force = true → always recompress (used by export); default skips small images
-    function compressImageData(dataUrl, maxDim = 800, quality = 0.82, opts = {}) {
+    // Faster defaults: 640px / 0.72 quality (was 800 / 0.82) — still looks good on phone
+    function compressImageData(dataUrl, maxDim = 640, quality = 0.72, opts = {}) {
       return new Promise((resolve) => {
         if (!dataUrl || !/^data:image\//.test(dataUrl)) return resolve(dataUrl);
-        // skip tiny SVG placeholders and non-raster data
         if (/^data:image\/svg\+xml/i.test(dataUrl)) return resolve(dataUrl);
-        if (!opts.force && dataUrl.length < 250000) return resolve(dataUrl);
+        // skip already-small images unless forced
+        if (!opts.force && dataUrl.length < 180000) return resolve(dataUrl);
         const img = new Image();
         img.onload = () => {
           try {
             const needsResize = img.width > maxDim || img.height > maxDim;
-            if (!opts.force && !needsResize) return resolve(dataUrl);
+            if (!opts.force && !needsResize && dataUrl.length < 400000) return resolve(dataUrl);
             const scale = needsResize ? Math.min(1, maxDim / Math.max(img.width, img.height)) : 1;
             const w = Math.max(1, Math.round(img.width * scale));
             const h = Math.max(1, Math.round(img.height * scale));
             const canvas = document.createElement("canvas");
             canvas.width = w; canvas.height = h;
-            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            const ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "medium";
+            ctx.drawImage(img, 0, 0, w, h);
             const out = canvas.toDataURL("image/jpeg", quality);
-            // keep original if somehow larger (rare)
             resolve(out.length < dataUrl.length || opts.force ? out : dataUrl);
           } catch (e) { resolve(dataUrl); }
         };
         img.onerror = () => resolve(dataUrl);
         img.src = dataUrl;
       });
+    }
+
+    // ---------- Progress UI helper ----------
+    function setBusy(btn, busy, labelBusy, labelIdle) {
+      if (!btn) return;
+      if (busy) {
+        btn.dataset._idleLabel = btn.dataset._idleLabel || btn.textContent;
+        btn.disabled = true;
+        btn.textContent = labelBusy || "⏳ עובד...";
+        btn.style.opacity = "0.75";
+        btn.style.cursor = "wait";
+      } else {
+        btn.disabled = false;
+        btn.textContent = labelIdle || btn.dataset._idleLabel || btn.textContent;
+        btn.style.opacity = "";
+        btn.style.cursor = "";
+      }
+    }
+    // Toast progress (used for manual save / export)
+    function showProgress(msg) {
+      showToast(msg, { persist: true });
+    }
+    function clearProgress() {
+      document.querySelectorAll(".toast.persist").forEach((t) => t.remove());
+    }
+    // Progress bar inside HTML-import card (right under "הוסף לספר")
+    function showImportProgress(pct, text) {
+      const wrap = document.getElementById("url-import-progress");
+      const fill = document.getElementById("url-import-progress-fill");
+      const label = document.getElementById("url-import-progress-text");
+      const pctEl = document.getElementById("url-import-progress-pct");
+      if (!wrap) {
+        console.warn("url-import-progress element missing");
+        return;
+      }
+      // ensure parent preview is open so the bar is visible
+      const preview = document.getElementById("url-import-preview");
+      if (preview) preview.style.display = "block";
+      const body = document.getElementById("htmlImportBody");
+      if (body && !body.classList.contains("open")) {
+        body.classList.add("open");
+        const arrow = document.getElementById("htmlImportArrow");
+        if (arrow) { arrow.classList.add("open"); arrow.textContent = "▲"; }
+      }
+      wrap.classList.add("visible");
+      wrap.style.display = "block";
+      const p = Math.max(0, Math.min(100, Math.round(Number(pct) || 0)));
+      if (fill) fill.style.width = p + "%";
+      if (pctEl) pctEl.textContent = p + "%";
+      if (label && text) label.textContent = text;
+      // scroll bar into view once at start of a run
+      if (!wrap.dataset._scrolled) {
+        wrap.dataset._scrolled = "1";
+        try { wrap.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (_) {}
+      }
+    }
+    function hideImportProgress() {
+      const wrap = document.getElementById("url-import-progress");
+      const fill = document.getElementById("url-import-progress-fill");
+      if (wrap) {
+        wrap.classList.remove("visible");
+        wrap.style.display = "none";
+        delete wrap.dataset._scrolled;
+      }
+      if (fill) fill.style.width = "0%";
     }
 
     function isPlaceholderImage(data) {
@@ -759,8 +882,13 @@
       return await compressImageData(raw);
     }
 
-    async function urlToDataUrl(url) {
+    // Download remote image with real byte progress when Content-Length is available.
+    // opts.onProgress(ratio 0..1, phaseText)
+    // opts.compress = true → also compress after download (default true for backward compat)
+    async function urlToDataUrl(url, opts = {}) {
       if (!url || !/^https?:\/\//i.test(url)) return url;
+      const onProgress = typeof opts.onProgress === "function" ? opts.onProgress : null;
+      const doCompress = opts.compress !== false;
       const attempts = [
         url,
         "https://corsproxy.io/?" + encodeURIComponent(url),
@@ -768,13 +896,46 @@
       ];
       for (const src of attempts) {
         try {
+          if (onProgress) onProgress(0, "מתחבר...");
           const res = await fetch(src);
           if (!res.ok) continue;
-          const blob = await res.blob();
+          const total = Number(res.headers.get("content-length")) || 0;
+          let blob;
+          if (res.body && typeof res.body.getReader === "function") {
+            const reader = res.body.getReader();
+            const chunks = [];
+            let received = 0;
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              received += value.byteLength;
+              if (onProgress) {
+                if (total > 0) {
+                  onProgress(Math.min(0.95, received / total), `מוריד תמונה… ${Math.round(received / 1024)}KB`);
+                } else {
+                  // unknown size — pulse by KB received
+                  const soft = Math.min(0.9, 0.15 + Math.log10(received + 10) / 6);
+                  onProgress(soft, `מוריד תמונה… ${Math.round(received / 1024)}KB`);
+                }
+              }
+            }
+            blob = new Blob(chunks);
+          } else {
+            if (onProgress) onProgress(0.4, "מוריד תמונה...");
+            blob = await res.blob();
+            if (onProgress) onProgress(0.85, "תמונה התקבלה...");
+          }
           if (blob.size < 100) continue;
+          if (onProgress) onProgress(0.92, "ממיר תמונה...");
           const raw = await fileToDataUrl(blob);
-          return await compressImageData(raw);
-        } catch (_) { /* next */ }
+          if (doCompress) {
+            if (onProgress) onProgress(0.96, "דוחס תמונה...");
+            return await compressImageData(raw);
+          }
+          if (onProgress) onProgress(1, "תמונה מוכנה");
+          return raw;
+        } catch (_) { /* next proxy */ }
       }
       return url; // fallback: keep remote URL for display
     }
@@ -878,7 +1039,7 @@
     }
 
     // ---------- Translation (Google free endpoint) ----------
-    async function translateText(text, targetLang = "he", sourceLang = "en") {
+    async function translateText(text, targetLang = "he", sourceLang = "en", onChunkProgress = null) {
       if (!text || !text.trim()) return text;
       const chunks = [];
       const maxLen = 450;
@@ -892,7 +1053,9 @@
         remaining = remaining.slice(splitAt).trimStart();
       }
       const translatedChunks = [];
-      for (const chunk of chunks) {
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        if (onChunkProgress) onChunkProgress(i / chunks.length, i + 1, chunks.length);
         try {
           const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(chunk)}`;
           const res = await fetch(url);
@@ -904,18 +1067,28 @@
           console.warn("Translation chunk failed, keeping original:", err);
           translatedChunks.push(chunk);
         }
-        await new Promise((r) => setTimeout(r, 120));
+        if (onChunkProgress) onChunkProgress((i + 1) / chunks.length, i + 1, chunks.length);
+        await new Promise((r) => setTimeout(r, 60));
       }
       return translatedChunks.join("\n");
     }
 
-    async function translateRecipeFields(title, ingredients, instructions) {
-      showToast("מתרגם לעברית...");
-      const [tTitle, tIng, tInst] = await Promise.all([
-        translateText(title, "he", "en"),
-        translateText(ingredients, "he", "en"),
-        translateText(instructions, "he", "en")
-      ]);
+    // Sequential translation with real per-chunk progress (title 10%, ingredients 40%, instructions 50%)
+    async function translateRecipeFields(title, ingredients, instructions, onProgress = null) {
+      const report = (ratio, text) => { if (onProgress) onProgress(ratio, text); };
+      report(0.02, "מתרגם כותרת...");
+      const tTitle = await translateText(title, "he", "en", (r) => {
+        report(0.02 + r * 0.08, "מתרגם כותרת...");
+      });
+      report(0.12, "מתרגם מצרכים...");
+      const tIng = await translateText(ingredients, "he", "en", (r, done, total) => {
+        report(0.12 + r * 0.38, `מתרגם מצרכים… ${done}/${total}`);
+      });
+      report(0.52, "מתרגם הוראות הכנה...");
+      const tInst = await translateText(instructions, "he", "en", (r, done, total) => {
+        report(0.52 + r * 0.46, `מתרגם הוראות… ${done}/${total}`);
+      });
+      report(1, "תרגום הושלם");
       return {
         title: removeEmptyLines(tTitle || title),
         ingredients: removeEmptyLines(tIng || ingredients),
@@ -1580,44 +1753,102 @@
       if (!title || !ingredients || !instructions) { showToast("נא למלא כותרת, מצרכים והוראות", { isError: true }); return; }
 
       const wantTranslate = document.getElementById("urlTranslateToHebrew").checked;
-      // FIX: detect Hebrew separately for title too, never translate Hebrew titles
       const alreadyHebrew = isPrimarilyHebrew(title + "\n" + ingredients) || isPrimarilyHebrew(instructions);
       const doTranslate = wantTranslate && !alreadyHebrew;
       const btn = document.getElementById("urlAddToBookBtn");
-      btn.disabled = true;
-      btn.textContent = doTranslate ? "מתרגם..." : "מוסיף...";
+      const needDownload = !!(imageData && /^https?:\/\//i.test(imageData));
+      const needCompress = !!(imageData && (/^https?:\/\//i.test(imageData) || /^data:image\//.test(imageData)));
+      setBusy(btn, true, doTranslate ? "⏳ מתרגם..." : "⏳ מוסיף...");
+
+      // Fixed percentage ranges so the bar moves smoothly with real sub-progress
+      // Translate: 0–45 | Download: 45–80 | Compress: 80–92 | Save: 92–100
+      // If a phase is skipped, its range is redistributed proportionally.
+      const phases = [];
+      if (doTranslate) phases.push({ id: "translate", weight: 45 });
+      if (needDownload) phases.push({ id: "download", weight: 35 });
+      else if (needCompress) phases.push({ id: "compress", weight: 12 });
+      if (needDownload && needCompress) phases.push({ id: "compress", weight: 12 });
+      phases.push({ id: "save", weight: 8 });
+      const totalW = phases.reduce((s, p) => s + p.weight, 0);
+      let cursor = 0;
+      const ranges = {};
+      for (const p of phases) {
+        const span = (p.weight / totalW) * 100;
+        ranges[p.id] = { start: cursor, end: cursor + span };
+        cursor += span;
+      }
+      const mapProgress = (phaseId, ratio, text) => {
+        const r = ranges[phaseId];
+        if (!r) return;
+        const pct = r.start + Math.max(0, Math.min(1, ratio)) * (r.end - r.start);
+        showImportProgress(pct, text);
+      };
+
       try {
+        showImportProgress(1, "מתחיל...");
         if (doTranslate) {
-          const translated = await translateRecipeFields(title, ingredients, instructions);
+          setBusy(btn, true, "⏳ מתרגם...");
+          const translated = await translateRecipeFields(title, ingredients, instructions, (ratio, text) => {
+            mapProgress("translate", ratio, text);
+          });
           title = translated.title;
           ingredients = translated.ingredients;
           instructions = translated.instructions;
+          mapProgress("translate", 1, "תרגום הושלם");
         }
-        if (imageData && /^https?:\/\//i.test(imageData)) imageData = await urlToDataUrl(imageData);
-        if (imageData && /^data:image\//.test(imageData)) imageData = await compressImageData(imageData);
 
+        if (needDownload) {
+          setBusy(btn, true, "⏳ מוריד תמונה...");
+          // download only — compress is separate so progress stays accurate
+          imageData = await urlToDataUrl(imageData, {
+            compress: false,
+            onProgress: (ratio, text) => mapProgress("download", ratio, text || "מוריד תמונה...")
+          });
+          mapProgress("download", 1, "הורדה הושלמה");
+        }
+
+        if (imageData && /^data:image\//.test(imageData) && ranges.compress) {
+          setBusy(btn, true, "⏳ דוחס תמונה...");
+          mapProgress("compress", 0.15, "דוחס תמונה...");
+          // yield so UI paints before heavy canvas work
+          await new Promise((r) => setTimeout(r, 30));
+          mapProgress("compress", 0.4, "דוחס תמונה...");
+          imageData = await compressImageData(imageData);
+          mapProgress("compress", 1, "דחיסה הושלמה");
+        }
+
+        setBusy(btn, true, "⏳ שומר...");
+        mapProgress("save", 0.2, "בודק כפילויות...");
         const existing = await getAllRecipes();
         const newKey = recipeKey(title, ingredients);
         const isDup = existing.some((ex) => recipeKey(ex.title, ex.ingredients) === newKey);
-        if (isDup) { showToast("המתכון כבר קיים בספר", { isError: true }); return; }
+        if (isDup) {
+          hideImportProgress();
+          showToast("המתכון כבר קיים בספר", { isError: true });
+          return;
+        }
 
+        mapProgress("save", 0.6, "שומר למסד נתונים...");
         await saveRecipeToDB({
           title, quantity: "", ingredients, instructions, imageData, category,
           sourceUrl: urlImportState.sourceUrl || "",
           favorite: false, deleted: false, createdAt: Date.now()
         });
+        showImportProgress(100, "הושלם ✓");
+        await new Promise((r) => setTimeout(r, 400));
+        hideImportProgress();
         showToast(`"${title}" נוסף בהצלחה!`);
-        refresh();
+        await refresh();
         document.getElementById("url-import-preview").style.display = "none";
         document.getElementById("url-import-status").innerHTML = "";
         const pasteEl = document.getElementById("url-html-paste");
         if (pasteEl) pasteEl.value = "";
       } catch (err) {
         console.error(err);
+        hideImportProgress();
         showToast("שגיאה בהוספת המתכון", { isError: true });
       } finally {
-        btn.disabled = false;
-        btn.textContent = "💾 הוסף לספר המתכונים";
+        setBusy(btn, false, null, "💾 הוסף לספר המתכונים");
       }
     }
 
@@ -1634,6 +1865,7 @@
       document.getElementById("url-preview-image").style.display = "none";
       document.getElementById("url-preview-no-image").style.display = "none";
       urlImportState = { imageData: null, sourceUrl: "" };
+      hideImportProgress();
     }
 
     // ---------- Display ----------
@@ -1957,32 +2189,47 @@
       const instructions = removeEmptyLines(document.getElementById("instructions").value);
       const category = document.getElementById("category").value;
       const imageInput = document.getElementById("recipe-image");
+      const btn = document.getElementById("saveRecipeBtn");
 
       if (!title || !ingredients || !instructions) {
         showToast("נא למלא כותרת, מצרכים והוראות הכנה", { isError: true });
         return;
       }
 
-      const doSave = async (imageData) => {
-        if (imageData && /^data:image\//.test(imageData)) imageData = await compressImageData(imageData);
-        const recipe = { title, quantity, ingredients, instructions, imageData, category, favorite: false, deleted: false, createdAt: Date.now() };
-        saveRecipeToDB(recipe).then(() => {
-          showToast("המתכון נוסף בהצלחה!");
-          document.getElementById("title").value = "";
-          document.getElementById("quantity").value = "";
-          document.getElementById("ingredients").value = "";
-          document.getElementById("instructions").value = "";
-          document.getElementById("recipe-image").value = "";
-          addFormImageData = null;
-          const prev = document.getElementById("add-image-preview");
-          if (prev) { prev.src = ""; prev.style.display = "none"; }
-          refresh();
-        }).catch(() => showToast("שגיאה בשמירה", { isError: true }));
-      };
+      setBusy(btn, true, "⏳ שומר...");
+      showProgress("שומר מתכון...");
+      try {
+        let imageData = defaultImage;
+        if (addFormImageData) {
+          showProgress("דוחס תמונה...");
+          imageData = addFormImageData;
+          if (/^data:image\//.test(imageData)) imageData = await compressImageData(imageData);
+        } else if (imageInput.files && imageInput.files[0]) {
+          showProgress("קורא ודוחס תמונה...");
+          imageData = await processImageFile(imageInput.files[0]);
+        }
 
-      if (addFormImageData) doSave(addFormImageData);
-      else if (imageInput.files && imageInput.files[0]) doSave(await processImageFile(imageInput.files[0]));
-      else doSave(defaultImage);
+        showProgress("כותב למסד נתונים...");
+        const recipe = { title, quantity, ingredients, instructions, imageData, category, favorite: false, deleted: false, createdAt: Date.now() };
+        await saveRecipeToDB(recipe);
+        clearProgress();
+        showToast("המתכון נוסף בהצלחה!");
+        document.getElementById("title").value = "";
+        document.getElementById("quantity").value = "";
+        document.getElementById("ingredients").value = "";
+        document.getElementById("instructions").value = "";
+        document.getElementById("recipe-image").value = "";
+        addFormImageData = null;
+        const prev = document.getElementById("add-image-preview");
+        if (prev) { prev.src = ""; prev.style.display = "none"; }
+        await refresh();
+      } catch (err) {
+        console.error(err);
+        clearProgress();
+        showToast("שגיאה בשמירה", { isError: true });
+      } finally {
+        setBusy(btn, false, null, "💾 שמור מתכון");
+      }
     }
 
     // ---------- Export / Import (with schema validation) ----------
@@ -2011,10 +2258,10 @@
       // Export-only: smaller dimensions + always recompress; omit placeholder images
       let imageData = null;
       if (r.imageData && !isPlaceholderImage(r.imageData) && /^data:image\//.test(r.imageData)) {
-        imageData = await compressImageData(r.imageData, 480, 0.75, { force: true });
+        imageData = await compressImageData(r.imageData, 420, 0.68, { force: true });
         if (isPlaceholderImage(imageData)) imageData = null;
       } else if (r.imageData && /^https?:\/\//i.test(r.imageData)) {
-        imageData = r.imageData; // keep remote URL as-is (rare)
+        imageData = r.imageData;
       }
       return {
         title: r.title || "מתכון ללא שם",
@@ -2029,18 +2276,25 @@
     }
 
     async function exportRecipes() {
+      const btn = document.getElementById("exportBtn");
       try {
         const recipes = await getAllRecipes();
         if (!recipes.length) { showToast("אין מתכונים לייצוא", { isError: true }); return; }
-        showToast("מכין ייצוא (דוחס תמונות)...");
+        setBusy(btn, true, "⏳ מכין ייצוא...");
         const prepared = [];
-        for (const r of recipes) {
-          prepared.push(await prepareRecipeForExport(r));
+        const total = recipes.length;
+        for (let i = 0; i < total; i++) {
+          showProgress(`דוחס תמונות לייצוא… ${i + 1}/${total}`);
+          setBusy(btn, true, `⏳ ${i + 1}/${total}`);
+          prepared.push(await prepareRecipeForExport(recipes[i]));
+          // yield to UI so progress toast updates
+          await new Promise((r) => setTimeout(r, 0));
         }
-        // pretty-printed JSON for readability
+        showProgress("יוצר קובץ JSON...");
         const dataStr = JSON.stringify(prepared, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
         const defaultName = "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
+        clearProgress();
         const name = await showConfirm({
           title: "ייצוא מתכונים", message: "בחר שם לקובץ הגיבוי:",
           confirmText: "⬇️ ייצא", danger: false, input: true, inputValue: defaultName
@@ -2066,7 +2320,10 @@
         showToast("הקובץ יוצא בהצלחה");
       } catch (err) {
         console.error(err);
+        clearProgress();
         showToast("שגיאה בייצוא", { isError: true });
+      } finally {
+        setBusy(btn, false, null, "⬇️ יצא לקובץ");
       }
     }
 
