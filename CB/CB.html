@@ -707,26 +707,39 @@
     }
 
     // ---------- Image compression (canvas resize) ----------
-    function compressImageData(dataUrl, maxDim = 800, quality = 0.82) {
+    // opts.force = true → always recompress (used by export); default skips small images
+    function compressImageData(dataUrl, maxDim = 800, quality = 0.82, opts = {}) {
       return new Promise((resolve) => {
         if (!dataUrl || !/^data:image\//.test(dataUrl)) return resolve(dataUrl);
-        if (dataUrl.length < 250000) return resolve(dataUrl);
+        // skip tiny SVG placeholders and non-raster data
+        if (/^data:image\/svg\+xml/i.test(dataUrl)) return resolve(dataUrl);
+        if (!opts.force && dataUrl.length < 250000) return resolve(dataUrl);
         const img = new Image();
         img.onload = () => {
           try {
-            if (img.width <= maxDim && img.height <= maxDim) return resolve(dataUrl);
-            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+            const needsResize = img.width > maxDim || img.height > maxDim;
+            if (!opts.force && !needsResize) return resolve(dataUrl);
+            const scale = needsResize ? Math.min(1, maxDim / Math.max(img.width, img.height)) : 1;
             const w = Math.max(1, Math.round(img.width * scale));
             const h = Math.max(1, Math.round(img.height * scale));
             const canvas = document.createElement("canvas");
             canvas.width = w; canvas.height = h;
             canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL("image/jpeg", quality));
+            const out = canvas.toDataURL("image/jpeg", quality);
+            // keep original if somehow larger (rare)
+            resolve(out.length < dataUrl.length || opts.force ? out : dataUrl);
           } catch (e) { resolve(dataUrl); }
         };
         img.onerror = () => resolve(dataUrl);
         img.src = dataUrl;
       });
+    }
+
+    function isPlaceholderImage(data) {
+      if (!data || typeof data !== "string") return true;
+      if (data === defaultImage) return true;
+      if (/^data:image\/svg\+xml/i.test(data)) return true;
+      return false;
     }
 
     // ---------- Image drag & drop / file helpers ----------
@@ -1980,7 +1993,10 @@
       const ingredients = str(r.ingredients, 20000);
       const instructions = str(r.instructions, 50000);
       if (!title && !ingredients && !instructions) return null;
-      const imageData = typeof r.imageData === "string" && r.imageData.length < 8_000_000 ? r.imageData : defaultImage;
+      let imageData = null;
+      if (typeof r.imageData === "string" && r.imageData.length > 0 && r.imageData.length < 8_000_000 && !isPlaceholderImage(r.imageData)) {
+        imageData = r.imageData;
+      }
       return {
         title: title || "מתכון ללא שם",
         quantity: str(r.quantity, 100),
@@ -1991,11 +2007,38 @@
       };
     }
 
+    async function prepareRecipeForExport(r) {
+      // Export-only: smaller dimensions + always recompress; omit placeholder images
+      let imageData = null;
+      if (r.imageData && !isPlaceholderImage(r.imageData) && /^data:image\//.test(r.imageData)) {
+        imageData = await compressImageData(r.imageData, 480, 0.75, { force: true });
+        if (isPlaceholderImage(imageData)) imageData = null;
+      } else if (r.imageData && /^https?:\/\//i.test(r.imageData)) {
+        imageData = r.imageData; // keep remote URL as-is (rare)
+      }
+      return {
+        title: r.title || "מתכון ללא שם",
+        quantity: r.quantity || "",
+        ingredients: r.ingredients || "",
+        instructions: r.instructions || "",
+        imageData,
+        category: CATEGORIES.includes(r.category) ? r.category : "עיקריות",
+        favorite: !!r.favorite,
+        createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now()
+      };
+    }
+
     async function exportRecipes() {
       try {
         const recipes = await getAllRecipes();
         if (!recipes.length) { showToast("אין מתכונים לייצוא", { isError: true }); return; }
-        const dataStr = JSON.stringify(recipes, null, 2);
+        showToast("מכין ייצוא (דוחס תמונות)...");
+        const prepared = [];
+        for (const r of recipes) {
+          prepared.push(await prepareRecipeForExport(r));
+        }
+        // pretty-printed JSON for readability
+        const dataStr = JSON.stringify(prepared, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
         const defaultName = "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
         const name = await showConfirm({
@@ -2022,6 +2065,7 @@
         }
         showToast("הקובץ יוצא בהצלחה");
       } catch (err) {
+        console.error(err);
         showToast("שגיאה בייצוא", { isError: true });
       }
     }
