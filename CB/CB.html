@@ -176,6 +176,12 @@
       .recipe-card h3 { text-align: center; margin-bottom: 8px; font-size: 1.15rem; padding: 0 40px; }
       .recipe-meta { font-size: 0.9rem; margin-bottom: 6px; }
       .recipe-meta strong { color: var(--primary); }
+      .gluten-badge {
+        display: inline-block; margin-right: 6px; padding: 2px 8px; border-radius: 999px;
+        font-size: 0.75rem; font-weight: 700; vertical-align: middle;
+        background: linear-gradient(135deg, #86efac, #22c55e); color: #052e16;
+      }
+      body[data-theme="light"] .gluten-badge { background: linear-gradient(135deg, #bbf7d0, #16a34a); color: #052e16; }
       .recipe-image { text-align: center; margin: 10px 0; }
       .recipe-image img {
         max-width: 100%; max-height: 180px; border-radius: 8px; object-fit: cover;
@@ -387,11 +393,17 @@
             <option value="עיקריות">עיקריות</option>
             <option value="תוספות">תוספות</option>
             <option value="קינוחים">קינוחים</option>
+            <option value="סלטים">סלטים</option>
+            <option value="נישנושים">נישנושים</option>
           </select>
         </div>
         <div class="field">
           <label for="quantity">לכמות</label>
           <input type="text" id="quantity" placeholder="למשל: 4 מנות" />
+        </div>
+        <div class="field full-width" style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+          <input type="checkbox" id="glutenFree" style="width:auto;" />
+          <label for="glutenFree" style="margin:0;cursor:pointer;">ללא גלוטן</label>
         </div>
         <div class="field full-width">
           <label for="ingredients">רשימת מצרכים *</label>
@@ -460,7 +472,13 @@
               <option value="עיקריות" selected>עיקריות</option>
               <option value="תוספות">תוספות</option>
               <option value="קינוחים">קינוחים</option>
+              <option value="סלטים">סלטים</option>
+              <option value="נישנושים">נישנושים</option>
             </select>
+          </div>
+          <div class="field" style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="url-preview-glutenFree" style="width:auto;" />
+            <label for="url-preview-glutenFree" style="margin:0;cursor:pointer;">ללא גלוטן</label>
           </div>
           <div class="field" style="margin-top:8px;">
             <label>מצרכים</label>
@@ -530,7 +548,13 @@
           <option value="עיקריות">עיקריות</option>
           <option value="תוספות">תוספות</option>
           <option value="קינוחים">קינוחים</option>
+          <option value="סלטים">סלטים</option>
+          <option value="נישנושים">נישנושים</option>
         </select>
+        <label for="gluten-filter" style="white-space:nowrap;">
+          <input type="checkbox" id="gluten-filter" style="width:auto;vertical-align:middle;" />
+          ללא גלוטן
+        </label>
       </div>
       <div id="recipes"></div>
       <div class="pagination" id="pagination"></div>
@@ -547,7 +571,7 @@
       <ol>
         <li><strong>הוספת מתכון ידנית:</strong> לחץ "הוסף מתכון", מלא שדות ולחץ "שמור".</li>
         <li><strong>ייבוא מ־HTML:</strong> בעמוד המתכון → הצג מקור העמוד → העתק → הדבק בסעיף "ייבוא מ־HTML" → חלץ → ערוך והוסף לספר. מומלץ למלא גם את כתובת האתר כדי שתמונות ייטענו תקין.</li>
-        <li><strong>חיפוש מקומי:</strong> הסינון מתבצע תוך כדי הקלדה. סינון לפי קטגוריה ומיון – מהתפריטים מעל רשימת המתכונים.</li>
+        <li><strong>חיפוש מקומי:</strong> הסינון מתבצע תוך כדי הקלדה. סינון לפי קטגוריה, ללא גלוטן ומיון – מהתפריטים מעל רשימת המתכונים.</li>
         <li><strong>מצב בישול:</strong> 🍳 – שלב־אחר־שלב במסך גדול (חצים לניווט).</li>
         <li><strong>מועדפים:</strong> ★ בפינת הכרטיס.</li>
         <li><strong>עריכה:</strong> ✏️ – ערוך ישירות; קטגוריה נבחרת מתוך רשימה. לחיצה שוב נועלת.</li>
@@ -598,7 +622,7 @@
   <div class="lightbox" id="lightbox"><img src="" alt="תמונה מוגדלת" /></div>
   <script>
     const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect fill='%23444' width='200' height='150'/%3E%3Ctext fill='%23aaa' font-family='sans-serif' font-size='16' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3E%D7%90%D7%99%D7%9F %D7%AA%D7%9E%D7%95%D7%A0%D7%94%3C/text%3E%3C/svg%3E";
-    const CATEGORIES = ["ראשונות", "עיקריות", "תוספות", "קינוחים"];
+    const CATEGORIES = ["ראשונות", "עיקריות", "תוספות", "קינוחים", "סלטים", "נישנושים"];
     const PAGE_SIZE = 10;
     let db = null;
     let currentPage = 1;
@@ -1865,7 +1889,9 @@
       if (!hint) return "עיקריות";
       const c = String(hint).toLowerCase();
       if (/dessert|cake|sweet|קינוח|עוג/.test(c)) return "קינוחים";
-      if (/starter|appetizer|soup|salad|ראשונ|סלט|מרק/.test(c)) return "ראשונות";
+      if (/salad|סלט/.test(c)) return "סלטים";
+      if (/snack|נישנוש|חטיף|מזון מהיר/.test(c)) return "נישנושים";
+      if (/starter|appetizer|soup|ראשונ|מרק/.test(c)) return "ראשונות";
       if (/side|תוספ/.test(c)) return "תוספות";
       return "עיקריות";
     }
@@ -1921,6 +1947,7 @@
       let ingredients = removeEmptyLines(document.getElementById("url-preview-ingredients").value);
       let instructions = removeEmptyLines(document.getElementById("url-preview-instructions").value);
       const category = document.getElementById("url-preview-category").value;
+      const glutenFree = !!(document.getElementById("url-preview-glutenFree") && document.getElementById("url-preview-glutenFree").checked);
       let imageData = urlImportState.imageData || defaultImage;
 
       if (!title || !ingredients || !instructions) { showToast("נא למלא כותרת, מצרכים והוראות", { isError: true }); return; }
@@ -2006,7 +2033,7 @@
         await saveRecipeToDB({
           title, quantity: "", ingredients, instructions, imageData, category,
           sourceUrl: urlImportState.sourceUrl || "",
-          favorite: false, deleted: false, createdAt: Date.now()
+          glutenFree, favorite: false, deleted: false, createdAt: Date.now()
         });
         showImportProgress(100, "הושלם ✓");
         await new Promise((r) => setTimeout(r, 400));
@@ -2038,6 +2065,8 @@
       document.getElementById("url-preview-instructions").value = "";
       document.getElementById("url-preview-image").style.display = "none";
       document.getElementById("url-preview-no-image").style.display = "none";
+      const gfPreview = document.getElementById("url-preview-glutenFree");
+      if (gfPreview) gfPreview.checked = false;
       urlImportState = { imageData: null, sourceUrl: "" };
       hideImportProgress();
     }
@@ -2151,7 +2180,7 @@
           <button class="action-btn action-fav ${recipe.favorite ? "fav-on" : ""}" title="מועדף" aria-label="סמן כמועדף">${recipe.favorite ? "★" : "☆"}</button>
         </div>
         <h3 class="editable" data-field="title" contenteditable="false">${title.replace(/\n/g, "<br>")}</h3>
-        <p class="recipe-meta"><strong>קטגוריה:</strong> <span class="editable" data-field="category" contenteditable="false">${recipe.category || "ראשונות"}</span></p>
+        <p class="recipe-meta"><strong>קטגוריה:</strong> <span class="editable" data-field="category" contenteditable="false">${recipe.category || "ראשונות"}</span>${recipe.glutenFree ? ' <span class="gluten-badge" title="ללא גלוטן">🌾❌ ללא גלוטן</span>' : ""}</p>
         <p class="recipe-meta"><strong>כמות:</strong> <span class="editable" data-field="quantity" contenteditable="false">${quantity}</span></p>
         <div class="recipe-image">
           <img src="${imgSrc}" alt="תמונת המתכון: ${title.replace(/"/g, "")}" loading="lazy" referrerpolicy="no-referrer" />
@@ -2259,6 +2288,36 @@
         };
         catSpan.style.display = "none";
         catSpan.parentNode.insertBefore(catSelect, catSpan.nextSibling);
+
+        // Gluten-free toggle while editing
+        const existingBadge = catSpan.parentNode.querySelector(".gluten-badge");
+        if (existingBadge) existingBadge.style.display = "none";
+        let gfLabel = catSpan.parentNode.querySelector(".gluten-edit-label");
+        if (!gfLabel) {
+          gfLabel = document.createElement("label");
+          gfLabel.className = "gluten-edit-label";
+          gfLabel.style.cssText = "margin-right:8px;font-size:0.85rem;cursor:pointer;display:inline-flex;align-items:center;gap:4px;";
+          const gfCb = document.createElement("input");
+          gfCb.type = "checkbox";
+          gfCb.checked = !!recipe.glutenFree;
+          gfCb.style.width = "auto";
+          gfCb.onchange = () => {
+            const val = gfCb.checked;
+            updateRecipeInDB(recipe.id, { glutenFree: val })
+              .then(() => {
+                recipe.glutenFree = val;
+                flashSaved(card);
+              })
+              .catch(() => showToast("שגיאה בעדכון", { isError: true }));
+          };
+          gfLabel.appendChild(gfCb);
+          gfLabel.appendChild(document.createTextNode(" ללא גלוטן"));
+          catSpan.parentNode.appendChild(gfLabel);
+        } else {
+          gfLabel.style.display = "inline-flex";
+          const cb = gfLabel.querySelector("input");
+          if (cb) cb.checked = !!recipe.glutenFree;
+        }
       } else if (catSpan._select) {
         catSpan._select.remove();
         catSpan._select = null;
@@ -2267,6 +2326,23 @@
       if (!newState && catSpan) {
         catSpan.style.display = "";
         catSpan.textContent = recipe.category || "ראשונות";
+        const gfLabel = catSpan.parentNode.querySelector(".gluten-edit-label");
+        if (gfLabel) gfLabel.remove();
+        // refresh badge
+        let badge = catSpan.parentNode.querySelector(".gluten-badge");
+        if (recipe.glutenFree) {
+          if (!badge) {
+            badge = document.createElement("span");
+            badge.className = "gluten-badge";
+            badge.title = "ללא גלוטן";
+            badge.textContent = "🌾❌ ללא גלוטן";
+            catSpan.parentNode.appendChild(badge);
+          } else {
+            badge.style.display = "";
+          }
+        } else if (badge) {
+          badge.remove();
+        }
       }
 
       card.classList.toggle("editing", newState);
@@ -2367,6 +2443,7 @@
       const ingredients = removeEmptyLines(document.getElementById("ingredients").value);
       const instructions = removeEmptyLines(document.getElementById("instructions").value);
       const category = document.getElementById("category").value;
+      const glutenFree = !!(document.getElementById("glutenFree") && document.getElementById("glutenFree").checked);
       const imageInput = document.getElementById("recipe-image");
       const btn = document.getElementById("saveRecipeBtn");
 
@@ -2376,8 +2453,17 @@
       }
 
       setBusy(btn, true, "⏳ שומר...");
-      showProgress("שומר מתכון...");
+      showProgress("בודק כפילויות...");
       try {
+        const existing = await getAllRecipes();
+        const newKey = recipeKey(title, ingredients);
+        const isDup = existing.some((ex) => recipeKey(ex.title, ex.ingredients) === newKey);
+        if (isDup) {
+          clearProgress();
+          showToast("המתכון כבר קיים בספר (כותרת + מצרכים זהים)", { isError: true });
+          return;
+        }
+
         let imageData = defaultImage;
         if (addFormImageData) {
           showProgress("דוחס תמונה...");
@@ -2390,7 +2476,7 @@
 
         showProgress("כותב למסד נתונים...");
         await warnIfStorageLow();
-        const recipe = { title, quantity, ingredients, instructions, imageData, category, favorite: false, deleted: false, createdAt: Date.now() };
+        const recipe = { title, quantity, ingredients, instructions, imageData, category, glutenFree, favorite: false, deleted: false, createdAt: Date.now() };
         await saveRecipeToDB(recipe);
         clearProgress();
         showToast("המתכון נוסף בהצלחה!");
@@ -2399,6 +2485,7 @@
         document.getElementById("ingredients").value = "";
         document.getElementById("instructions").value = "";
         document.getElementById("recipe-image").value = "";
+        if (document.getElementById("glutenFree")) document.getElementById("glutenFree").checked = false;
         addFormImageData = null;
         const prev = document.getElementById("add-image-preview");
         if (prev) { prev.src = ""; prev.style.display = "none"; }
@@ -2429,6 +2516,7 @@
         quantity: str(r.quantity, 100),
         ingredients, instructions, imageData,
         category: CATEGORIES.includes(r.category) ? r.category : "עיקריות",
+        glutenFree: !!r.glutenFree,
         favorite: !!r.favorite, deleted: false,
         createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now()
       };
@@ -2450,6 +2538,7 @@
         instructions: r.instructions || "",
         imageData,
         category: CATEGORIES.includes(r.category) ? r.category : "עיקריות",
+        glutenFree: !!r.glutenFree,
         favorite: !!r.favorite,
         createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now()
       };
@@ -2546,9 +2635,11 @@
     function buildFilterFn() {
       const word = document.getElementById("search-word").value.trim().toLowerCase();
       const cat = (document.getElementById("category-filter") || {}).value || "";
-      if (!word && !cat) return null;
+      const glutenOnly = !!(document.getElementById("gluten-filter") && document.getElementById("gluten-filter").checked);
+      if (!word && !cat && !glutenOnly) return null;
       return (r) => {
         if (cat && r.category !== cat) return false;
+        if (glutenOnly && !r.glutenFree) return false;
         if (!word) return true;
         return (
           (r.title || "").toLowerCase().includes(word) ||
@@ -2571,6 +2662,8 @@
       document.getElementById("search-word").value = "";
       const catEl = document.getElementById("category-filter");
       if (catEl) catEl.value = "";
+      const glutenEl = document.getElementById("gluten-filter");
+      if (glutenEl) glutenEl.checked = false;
       currentFilterFn = null;
       currentPage = 1;
       refresh();
@@ -2641,6 +2734,14 @@
         currentPage = 1;
         refresh();
       };
+      const glutenFilterEl = document.getElementById("gluten-filter");
+      if (glutenFilterEl) {
+        glutenFilterEl.onchange = () => {
+          currentFilterFn = buildFilterFn();
+          currentPage = 1;
+          refresh();
+        };
+      }
       document.getElementById("sort-select").onchange = () => {
         const filtered = currentFilterFn ? cacheAll.filter(currentFilterFn) : cacheAll;
         renderRecipes(sortRecipes(filtered));
