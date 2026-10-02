@@ -9,11 +9,13 @@
   <link rel="icon" type="image/png" href="CB.png" />
   <link rel="shortcut icon" type="image/png" href="CB.png" />
   <link rel="apple-touch-icon" href="CB.png" />
+  <link rel="manifest" href='data:application/manifest+json,{"name":"ספר מתכונים","short_name":"מתכונים","dir":"rtl","lang":"he","start_url":".","scope":".","display":"standalone","background_color":"%230b1220","theme_color":"%230b1220","icons":[{"src":"CB.png","sizes":"192x192","type":"image/png"},{"src":"CB.png","sizes":"512x512","type":"image/png"}]}' />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet" />
 
   <style>
+      @import url("https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap");
       :root {
         --primary: #16a34a;
         --primary-hover: #15803d;
@@ -354,13 +356,14 @@
   <div class="container">
     <header>
       <div class="header-actions">
-        <button class="icon-btn" id="themeBtn" title="החלף ערכת נושא" aria-label="החלפת ערכת נושא">🌙</button>
+        <button class="icon-btn" id="themeBtn" title="החלף ערכת נושא" aria-label="החלפת ערכת נושא">☀️</button>
         <button class="icon-btn" id="helpBtn" title="הדרכה" aria-label="הדרכה">❓</button>
       </div>
       <h1>ספר מתכונים</h1>
       <div class="header-spacer" aria-hidden="true"></div>
     </header>
 
+    <!-- ייצוא / ייבוא / מחיקה – מתחת לכותרת -->
     <div class="btn-row" style="margin-bottom: 12px;">
       <button class="btn btn-primary" id="exportBtn">⬇️ יצא לקובץ</button>
       <label class="btn btn-primary file-label">
@@ -370,10 +373,12 @@
       <button class="btn btn-danger" id="deleteAllBtn">🗑️ מחק הכל</button>
     </div>
 
+    <!-- כפתור ראשי להוספה -->
     <div class="btn-row" style="margin-bottom: 12px;">
       <button class="btn btn-primary" id="toggleAddBtn">➕ הוסף מתכון</button>
     </div>
 
+    <!-- טופס הוספת מתכון -->
     <section id="add-form">
       <h2>הוספת / עריכת מתכון</h2>
       <div class="form-grid">
@@ -383,7 +388,14 @@
         </div>
         <div class="field">
           <label for="category">קטגוריה</label>
-          <select id="category"></select>
+          <select id="category">
+            <option value="ראשונות">ראשונות</option>
+            <option value="עיקריות">עיקריות</option>
+            <option value="תוספות">תוספות</option>
+            <option value="קינוחים">קינוחים</option>
+            <option value="סלטים">סלטים</option>
+            <option value="נישנושים">נישנושים</option>
+          </select>
         </div>
         <div class="field">
           <label for="quantity">לכמות</label>
@@ -415,10 +427,10 @@
       </div>
       <div class="btn-row">
         <button class="btn btn-success" id="saveRecipeBtn">💾 שמור מתכון</button>
-        <button class="btn btn-secondary" id="cancelEditBtn" style="display:none;">ביטול עריכה</button>
       </div>
     </section>
 
+    <!-- ייבוא מתכון מ־HTML -->
     <section id="html-import-section">
       <div class="collapsible-header" id="htmlImportToggle" title="לחץ לפתיחה / סגירה">
         <h2>📋 ייבוא מתכון מ־HTML</h2>
@@ -427,7 +439,7 @@
       <div class="collapsible-body" id="htmlImportBody">
         <p style="font-size:0.85rem;opacity:0.8;margin-bottom:10px;">
           בעמוד המתכון: לחץ ימני → <strong>הצג מקור העמוד</strong> → העתק והדבק כאן.
-          אפשר להדביק גם HTML ארוך מאוד – המערכת מסירה אוטומטית <code>script</code> / <code>style</code> וסורקת בעיקר את תוכן המתכון.
+          אפשר להדביק גם HTML ארוך מאוד — המערכת מסירה אוטומטית <code>script</code> / <code>style</code> וסורקת בעיקר את תוכן המתכון.
         </p>
         <div class="field">
           <label for="url-html-paste">HTML של העמוד</label>
@@ -455,7 +467,14 @@
           </div>
           <div class="field" style="margin-top:8px;">
             <label>קטגוריה</label>
-            <select id="url-preview-category"></select>
+            <select id="url-preview-category">
+              <option value="ראשונות">ראשונות</option>
+              <option value="עיקריות" selected>עיקריות</option>
+              <option value="תוספות">תוספות</option>
+              <option value="קינוחים">קינוחים</option>
+              <option value="סלטים">סלטים</option>
+              <option value="נישנושים">נישנושים</option>
+            </select>
           </div>
           <div class="field" style="margin-top:8px;display:flex;align-items:center;gap:8px;">
             <input type="checkbox" id="url-preview-glutenFree" style="width:auto;" />
@@ -498,6 +517,7 @@
       </div>
     </section>
 
+    <!-- חיפוש מקומי וסינון -->
     <section>
       <h2>חיפוש וסינון מקומי</h2>
       <div class="field">
@@ -510,6 +530,7 @@
       </div>
     </section>
 
+    <!-- רשימת מתכונים -->
     <section>
       <h2>המתכונים שלי <span id="recipe-count" style="font-weight:400;font-size:0.9rem;"></span></h2>
       <div class="sort-bar">
@@ -521,7 +542,15 @@
           <option value="category">קטגוריה</option>
         </select>
         <label for="category-filter">קטגוריה:</label>
-        <select id="category-filter"></select>
+        <select id="category-filter">
+          <option value="">הכל</option>
+          <option value="ראשונות">ראשונות</option>
+          <option value="עיקריות">עיקריות</option>
+          <option value="תוספות">תוספות</option>
+          <option value="קינוחים">קינוחים</option>
+          <option value="סלטים">סלטים</option>
+          <option value="נישנושים">נישנושים</option>
+        </select>
         <label for="gluten-filter" style="white-space:nowrap;">
           <input type="checkbox" id="gluten-filter" style="width:auto;vertical-align:middle;" />
           ללא גלוטן
@@ -534,20 +563,21 @@
 
   <button class="icon-btn" id="scrollTop" title="חזרה למעלה" aria-label="חזרה למעלה">⬆️</button>
 
-  <div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <!-- מודל הדרכה -->
+  <div class="modal" id="helpModal">
     <div class="modal-content">
       <button class="close" id="closeHelp" aria-label="סגירה">&times;</button>
-      <h2 id="helpTitle">הדרכה מהירה</h2>
+      <h2>הדרכה מהירה</h2>
       <ol>
         <li><strong>הוספת מתכון ידנית:</strong> לחץ "הוסף מתכון", מלא שדות ולחץ "שמור".</li>
         <li><strong>ייבוא מ־HTML:</strong> בעמוד המתכון → הצג מקור העמוד → העתק → הדבק בסעיף "ייבוא מ־HTML" → חלץ → ערוך והוסף לספר. מומלץ למלא גם את כתובת האתר כדי שתמונות ייטענו תקין.</li>
         <li><strong>חיפוש מקומי:</strong> הסינון מתבצע תוך כדי הקלדה. סינון לפי קטגוריה, ללא גלוטן ומיון – מהתפריטים מעל רשימת המתכונים.</li>
         <li><strong>מצב בישול:</strong> 🍳 – שלב־אחר־שלב במסך גדול (חצים לניווט).</li>
         <li><strong>מועדפים:</strong> ★ בפינת הכרטיס.</li>
-        <li><strong>עריכה:</strong> ✏️ – עורך ישירות; קטגוריה נבחרת מתוך רשימה. לחיצה שוב נועלת.</li>
-        <li><strong>מחיקה:</strong> 🗑️ – ניתן לבטל תוך 6 שניות. שיתוף 🚀. מועדף ★ בצד הנגדי.</li>
+        <li><strong>עריכה:</strong> ✏️ – ערוך ישירות; קטגוריה נבחרת מתוך רשימה. לחיצה שוב נועלת.</li>
+        <li><strong>מחיקה:</strong> 🗑️ – ניתן לבטל תוך 5 שניות. שיתוף 🚀. מועדף ★ בצד הנגדי.</li>
         <li><strong>ייצוא / ייבוא:</strong> גיבוי כקובץ JSON.</li>
-        <li><strong>ערכת נושא:</strong> 🌙 / ☀️.</li>
+        <li><strong>ערכת נושא:</strong> ☀️ / 🌙.</li>
       </ol>
       <p style="margin-top:12px;font-size:0.9rem;opacity:0.85;">
         המתכונים נשמרים מקומית בדפדפן. תמונות נדחסות אוטומטית לפני שמירה.<br>
@@ -556,7 +586,8 @@
     </div>
   </div>
 
-  <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <!-- מודל אישור כללי -->
+  <div class="modal" id="confirmModal">
     <div class="modal-content">
       <button class="close" id="confirmClose" aria-label="סגירה">&times;</button>
       <h2 id="confirmTitle"></h2>
@@ -571,7 +602,8 @@
     </div>
   </div>
 
-  <div class="modal" id="cookModal" role="dialog" aria-modal="true" aria-labelledby="cookTitle">
+  <!-- מודל מצב בישול -->
+  <div class="modal" id="cookModal">
     <div class="modal-content" style="max-width:560px;">
       <button class="close" id="cookClose" aria-label="סגירה">&times;</button>
       <h2 id="cookTitle" style="padding-left:30px;"></h2>
@@ -586,6 +618,7 @@
     </div>
   </div>
 
+  <!-- לייטבוקס תמונה -->
   <div class="lightbox" id="lightbox"><img src="" alt="תמונה מוגדלת" /></div>
   <script>
     const defaultImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect fill='%23444' width='200' height='150'/%3E%3Ctext fill='%23aaa' font-family='sans-serif' font-size='16' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3E%D7%90%D7%99%D7%9F %D7%AA%D7%9E%D7%95%D7%A0%D7%94%3C/text%3E%3C/svg%3E";
@@ -595,7 +628,6 @@
     let currentPage = 1;
     let currentFilterFn = null;
     let cacheAll = [];
-    let editingId = null; // id of recipe currently being edited in add-form
 
     // ---------- IndexedDB ----------
     function initDB() {
@@ -612,11 +644,11 @@
       });
     }
 
-    // ---------- Theme ----------
+    // ---------- Theme (icon shows the TARGET state) ----------
     function setTheme(theme) {
       document.body.setAttribute("data-theme", theme);
       localStorage.setItem("recipeTheme", theme);
-      document.getElementById("themeBtn").textContent = theme === "dark" ? "🌙" : "☀️";
+      document.getElementById("themeBtn").textContent = theme === "dark" ? "☀️" : "🌙";
       const bg = theme === "dark" ? "#0b1220" : "#fdf6ec";
       document.documentElement.style.backgroundColor = bg;
       let meta = document.querySelector('meta[name="theme-color"]');
@@ -632,9 +664,10 @@
       setTheme(current === "dark" ? "light" : "dark");
     }
 
-    // ---------- Toast ----------
+    // ---------- Toast (supports action button, e.g. Undo) ----------
     function showToast(msg, opts = {}) {
-      const { isError = false, actionText = null, onAction = null, persist = false, duration = null } = opts;
+      const { isError = false, actionText = null, onAction = null, persist = false } = opts;
+      // remove previous non-persist toasts; keep persist until cleared
       document.querySelectorAll(".toast").forEach((t) => {
         if (!t.classList.contains("persist") || persist) t.remove();
       });
@@ -643,26 +676,23 @@
       const span = document.createElement("span");
       span.textContent = msg;
       toast.appendChild(span);
-      let lifeMs = 3200;
       if (actionText && onAction) {
         const btn = document.createElement("button");
         btn.className = "toast-action";
         btn.textContent = actionText;
         btn.onclick = () => { toast.remove(); onAction(); };
         toast.appendChild(btn);
-        lifeMs = duration || 6200;
-        toast.style.animation = `slideIn 0.3s ease, fadeOut 0.4s ease ${(lifeMs - 800) / 1000}s forwards`;
+        toast.style.animation = "slideIn 0.3s ease, fadeOut 0.4s ease 5.4s forwards";
       } else if (persist) {
         toast.style.animation = "slideIn 0.3s ease";
-        lifeMs = null;
-      } else if (duration) {
-        lifeMs = duration;
       }
       document.body.appendChild(toast);
-      if (lifeMs) setTimeout(() => toast.remove(), lifeMs);
+      if (!persist) {
+        setTimeout(() => toast.remove(), actionText ? 6000 : 3200);
+      }
     }
 
-    // ---------- Confirm modal ----------
+    // ---------- Confirm modal (replaces confirm()/prompt()) ----------
     function showConfirm({ title, message, confirmText = "אישור", danger = true, input = false, inputValue = "" }) {
       return new Promise((resolve) => {
         const modal = document.getElementById("confirmModal");
@@ -693,49 +723,21 @@
       });
     }
 
-    // ---------- Helpers ----------
+    // ---------- HTML escaping (defense-in-depth: all innerHTML output goes through this) ----------
     function esc(s) {
       return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     }
 
-    // Bounded fractions: avoid 11/2 → 1½, 1/25 → ½5
+    // ---------- Fractions (display only) ----------
     function replaceFractions(text) {
       if (!text) return "";
-      const map = [
-        [/(?<!\d)1\/2(?!\d)/g, "½"],
-        [/(?<!\d)1\/4(?!\d)/g, "¼"],
-        [/(?<!\d)1\/3(?!\d)/g, "⅓"],
-        [/(?<!\d)2\/3(?!\d)/g, "⅔"],
-        [/(?<!\d)3\/4(?!\d)/g, "¾"]
-      ];
+      const map = { "1/2": "½", "1/4": "¼", "1/3": "⅓", "2/3": "⅔", "3/4": "¾" };
       let result = String(text);
-      for (const [re, s] of map) result = result.replace(re, s);
+      for (const [f, s] of Object.entries(map)) result = result.replace(new RegExp(f, "g"), s);
       return result;
     }
 
-    function numberSteps(items) {
-      if (!Array.isArray(items)) return "";
-      return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
-    }
-
-    function renderCategoryOptions(selectEl, selected = "", includeAll = false) {
-      selectEl.innerHTML = "";
-      if (includeAll) {
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "הכל";
-        selectEl.appendChild(opt);
-      }
-      for (const c of CATEGORIES) {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        if (c === selected) opt.selected = true;
-        selectEl.appendChild(opt);
-      }
-    }
-
-    // ---------- CRUD ----------
+    // ---------- CRUD (with soft delete + cache) ----------
     function saveRecipeToDB(recipe) {
       return new Promise((resolve, reject) => {
         const tx = db.transaction(["recipes"], "readwrite");
@@ -765,15 +767,6 @@
           if (!includeDeleted) all = all.filter((r) => !r.deleted);
           resolve(all);
         };
-        req.onerror = () => reject(req.error);
-      });
-    }
-    function getRecipeById(id) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(["recipes"], "readonly");
-        const store = tx.objectStore("recipes");
-        const req = store.get(id);
-        req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
       });
     }
@@ -815,67 +808,44 @@
       return (String(title || "") + "|" + String(ingredients || "")).replace(/\s+/g, " ").trim().toLowerCase();
     }
 
-    // ---------- Image compression (async, non-blocking where possible) ----------
-    async function compressImageData(dataUrl, maxDim = 640, quality = 0.72, opts = {}) {
-      if (!dataUrl || !/^data:image\//.test(dataUrl)) return dataUrl;
-      if (/^data:image\/svg\+xml/i.test(dataUrl)) return dataUrl;
-      if (!opts.force && dataUrl.length < 180000) return dataUrl;
-      try {
-        let blob;
-        try {
-          const res = await fetch(dataUrl);
-          blob = await res.blob();
-        } catch (_) { return dataUrl; }
-        if (!blob || !blob.type.startsWith("image/")) return dataUrl;
-
-        let bitmap = null;
-        if (typeof createImageBitmap === "function") {
-          try { bitmap = await createImageBitmap(blob); } catch (_) { bitmap = null; }
-        }
-        let w0, h0;
-        if (bitmap) { w0 = bitmap.width; h0 = bitmap.height; }
-        else {
-          const img = await new Promise((res, rej) => {
-            const i = new Image();
-            i.onload = () => res(i);
-            i.onerror = rej;
-            i.src = dataUrl;
-          });
-          w0 = img.naturalWidth; h0 = img.naturalHeight;
-          bitmap = img;
-        }
-        if (!w0 || !h0) return dataUrl;
-        const needsResize = w0 > maxDim || h0 > maxDim;
-        if (!opts.force && !needsResize && dataUrl.length < 400000) {
-          if (bitmap && bitmap.close) bitmap.close();
-          return dataUrl;
-        }
-        const scale = needsResize ? Math.min(1, maxDim / Math.max(w0, h0)) : 1;
-        const w = Math.max(1, Math.round(w0 * scale));
-        const h = Math.max(1, Math.round(h0 * scale));
-        const canvas = document.createElement("canvas");
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "medium";
-        ctx.drawImage(bitmap, 0, 0, w, h);
-        if (bitmap && bitmap.close) bitmap.close();
-        const isPng = blob.type === "image/png" || /^data:image\/png/i.test(dataUrl);
-        const outBlob = await new Promise((res) => canvas.toBlob(res, isPng ? "image/png" : "image/jpeg", quality));
-        if (!outBlob) return dataUrl;
-        const outUrl = await new Promise((res) => {
-          const r = new FileReader();
-          r.onload = () => res(r.result);
-          r.onerror = () => res(dataUrl);
-          r.readAsDataURL(outBlob);
-        });
-        return (outUrl && outUrl.length < dataUrl.length) || opts.force ? outUrl : dataUrl;
-      } catch (_) {
-        return dataUrl;
-      }
+    // ---------- Image compression (canvas resize) ----------
+    // opts.force = true → always recompress (used by export); default skips small images
+    // Faster defaults: 640px / 0.72 quality (was 800 / 0.82) — still looks good on phone
+    function compressImageData(dataUrl, maxDim = 640, quality = 0.72, opts = {}) {
+      return new Promise((resolve) => {
+        if (!dataUrl || !/^data:image\//.test(dataUrl)) return resolve(dataUrl);
+        if (/^data:image\/svg\+xml/i.test(dataUrl)) return resolve(dataUrl);
+        // skip already-small images unless forced
+        if (!opts.force && dataUrl.length < 180000) return resolve(dataUrl);
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const needsResize = img.width > maxDim || img.height > maxDim;
+            if (!opts.force && !needsResize && dataUrl.length < 400000) return resolve(dataUrl);
+            const scale = needsResize ? Math.min(1, maxDim / Math.max(img.width, img.height)) : 1;
+            const w = Math.max(1, Math.round(img.width * scale));
+            const h = Math.max(1, Math.round(img.height * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "medium";
+            ctx.drawImage(img, 0, 0, w, h);
+            let hasAlpha = false;
+            try {
+              const px = ctx.getImageData(0, 0, w, h).data;
+              for (let i = 3; i < px.length; i += 16) { if (px[i] < 255) { hasAlpha = true; break; } }
+            } catch (_) { hasAlpha = /^data:image\/png/i.test(dataUrl); }
+            const out = canvas.toDataURL(hasAlpha ? "image/png" : "image/jpeg", quality);
+            resolve(out.length < dataUrl.length || opts.force ? out : dataUrl);
+          } catch (e) { resolve(dataUrl); }
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
     }
 
-    // ---------- Progress UI ----------
+    // ---------- Progress UI helper ----------
     function setBusy(btn, busy, labelBusy, labelIdle) {
       if (!btn) return;
       if (busy) {
@@ -891,16 +861,24 @@
         btn.style.cursor = "";
       }
     }
-    function showProgress(msg) { showToast(msg, { persist: true }); }
+    // Toast progress (used for manual save / export)
+    function showProgress(msg) {
+      showToast(msg, { persist: true });
+    }
     function clearProgress() {
       document.querySelectorAll(".toast.persist").forEach((t) => t.remove());
     }
+    // Progress bar inside HTML-import card (right under "הוסף לספר")
     function showImportProgress(pct, text) {
       const wrap = document.getElementById("url-import-progress");
       const fill = document.getElementById("url-import-progress-fill");
       const label = document.getElementById("url-import-progress-text");
       const pctEl = document.getElementById("url-import-progress-pct");
-      if (!wrap) return;
+      if (!wrap) {
+        console.warn("url-import-progress element missing");
+        return;
+      }
+      // ensure parent preview is open so the bar is visible
       const preview = document.getElementById("url-import-preview");
       if (preview) preview.style.display = "block";
       const body = document.getElementById("htmlImportBody");
@@ -915,6 +893,7 @@
       if (fill) fill.style.width = p + "%";
       if (pctEl) pctEl.textContent = p + "%";
       if (label && text) label.textContent = text;
+      // scroll bar into view once at start of a run
       if (!wrap.dataset._scrolled) {
         wrap.dataset._scrolled = "1";
         try { wrap.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (_) {}
@@ -931,6 +910,7 @@
       if (fill) fill.style.width = "0%";
     }
 
+    // ---------- Storage quota guard (IndexedDB fails silently when full, esp. iOS) ----------
     async function warnIfStorageLow() {
       try {
         if (!navigator.storage || !navigator.storage.estimate) return;
@@ -938,16 +918,7 @@
         if (quota && usage / quota > 0.8) {
           showToast("אזור האחסון בדפדפן כמעט מלא – מומלץ לייצא גיבוי ולנקות תמונות ישנות", { isError: true });
         }
-      } catch (_) {}
-    }
-
-    async function requestPersistentStorage() {
-      try {
-        if (navigator.storage && typeof navigator.storage.persist === "function") {
-          const already = navigator.storage.persisted ? await navigator.storage.persisted() : false;
-          if (!already) await navigator.storage.persist();
-        }
-      } catch (_) {}
+      } catch (_) { /* estimate unavailable – ignore */ }
     }
 
     function isPlaceholderImage(data) {
@@ -957,13 +928,7 @@
       return false;
     }
 
-    function isSafeImageSrc(src) {
-      if (!src || typeof src !== "string") return false;
-      return /^data:image\/(png|jpe?g|gif|webp|avif|bmp|svg\+xml);/i.test(src)
-        || /^https?:\/\//i.test(src);
-    }
-
-    // ---------- Drop zone ----------
+    // ---------- Image drag & drop / file helpers ----------
     let addFormImageData = null;
 
     function fileToDataUrl(file) {
@@ -974,14 +939,21 @@
         reader.readAsDataURL(file);
       });
     }
+
     async function processImageFile(file) {
       const raw = await fileToDataUrl(file);
       return await compressImageData(raw);
     }
+
+    // Download remote image with real byte progress when Content-Length is available.
+    // opts.onProgress(ratio 0..1, phaseText)
+    // opts.compress = true → also compress after download (default true for backward compat)
     async function urlToDataUrl(url, opts = {}) {
       if (!url || !/^https?:\/\//i.test(url)) return url;
       const onProgress = typeof opts.onProgress === "function" ? opts.onProgress : null;
       const doCompress = opts.compress !== false;
+      // Image CDNs first (reliable CORS + work on mobile). Generic CORS proxies as fallback.
+      // weserv expects host/path without scheme, or a fully encoded URL.
       const bare = url.replace(/^https?:\/\//i, "");
       const attempts = [
         "https://images.weserv.nl/?url=" + encodeURIComponent(bare) + "&output=jpg&q=82&w=800&n=-1",
@@ -1003,6 +975,7 @@
           const res = await fetchWithTimeout(src);
           if (!res.ok) continue;
           const ctype = (res.headers.get("content-type") || "").toLowerCase();
+          // skip obvious non-image HTML/JSON error pages from proxies
           if (ctype && !ctype.startsWith("image/") && !ctype.includes("octet-stream") && !ctype.includes("binary")) {
             if (ctype.includes("json") || ctype.includes("text/html") || ctype.includes("text/plain")) continue;
           }
@@ -1018,8 +991,12 @@
               chunks.push(value);
               received += value.byteLength;
               if (onProgress) {
-                if (total > 0) onProgress(Math.min(0.95, received / total), `מוריד תמונה… ${Math.round(received / 1024)}KB`);
-                else onProgress(Math.min(0.9, 0.15 + Math.log10(received + 10) / 6), `מוריד תמונה… ${Math.round(received / 1024)}KB`);
+                if (total > 0) {
+                  onProgress(Math.min(0.95, received / total), `מוריד תמונה… ${Math.round(received / 1024)}KB`);
+                } else {
+                  const soft = Math.min(0.9, 0.15 + Math.log10(received + 10) / 6);
+                  onProgress(soft, `מוריד תמונה… ${Math.round(received / 1024)}KB`);
+                }
               }
             }
             blob = new Blob(chunks, { type: ctype.startsWith("image/") ? ctype : "image/jpeg" });
@@ -1029,6 +1006,7 @@
             if (onProgress) onProgress(0.85, "תמונה התקבלה...");
           }
           if (blob.size < 100) continue;
+          // reject tiny error payloads that look like JSON/HTML
           if (blob.size < 800 && (ctype.includes("json") || ctype.includes("text"))) continue;
           if (onProgress) onProgress(0.92, "ממיר תמונה...");
           const raw = await fileToDataUrl(blob);
@@ -1039,9 +1017,9 @@
           }
           if (onProgress) onProgress(1, "תמונה מוכנה");
           return raw;
-        } catch (_) {}
+        } catch (_) { /* next proxy */ }
       }
-      return url;
+      return url; // fallback: keep remote URL for display
     }
 
     function extractImageUrlFromDrop(dt) {
@@ -1088,8 +1066,9 @@
       });
     }
 
+    // ---------- Lightbox ----------
     function openLightbox(src) {
-      if (!src || src === defaultImage || !isSafeImageSrc(src)) return;
+      if (!src || src === defaultImage) return;
       const lb = document.getElementById("lightbox");
       lb.querySelector("img").src = src;
       lb.classList.add("open");
@@ -1127,6 +1106,7 @@
       document.getElementById("cookModal").classList.remove("open");
     }
 
+    // ---------- Hebrew detection ----------
     function isPrimarilyHebrew(text) {
       const s = String(text || "");
       const hebrew = (s.match(/[\u0590-\u05FF]/g) || []).length;
@@ -1140,29 +1120,28 @@
       return String(text).split(/\r?\n/).map((line) => line.trim()).filter((line) => line.length > 0).join("\n");
     }
 
-    // ---------- Translation (preserves separators, uses sl=auto) ----------
-    async function translateText(text, targetLang = "he", sourceLang = "auto", onChunkProgress = null) {
+    // ---------- Translation (Google free endpoint) ----------
+    async function translateText(text, targetLang = "he", sourceLang = "en", onChunkProgress = null) {
       if (!text || !text.trim()) return text;
       const chunks = [];
       const maxLen = 450;
       let remaining = text;
       while (remaining.length > 0) {
-        if (remaining.length <= maxLen) { chunks.push({ text: remaining, sep: "" }); break; }
-        let sep = "\n";
+        if (remaining.length <= maxLen) { chunks.push(remaining); break; }
         let splitAt = remaining.lastIndexOf("\n", maxLen);
-        if (splitAt < maxLen * 0.5) { sep = " "; splitAt = remaining.lastIndexOf(" ", maxLen); }
-        if (splitAt < maxLen * 0.5) { sep = ""; splitAt = maxLen; }
-        chunks.push({ text: remaining.slice(0, splitAt), sep });
-        remaining = remaining.slice(splitAt + (sep ? sep.length : 0));
+        if (splitAt < maxLen * 0.5) splitAt = remaining.lastIndexOf(" ", maxLen);
+        if (splitAt < maxLen * 0.5) splitAt = maxLen;
+        chunks.push(remaining.slice(0, splitAt));
+        remaining = remaining.slice(splitAt).trimStart();
       }
       const translatedChunks = [];
       for (let i = 0; i < chunks.length; i++) {
-        const { text: chunk, sep } = chunks[i];
+        const chunk = chunks[i];
         if (onChunkProgress) onChunkProgress(i / chunks.length, i + 1, chunks.length);
         let part = null;
         for (let attempt = 0; attempt < 3 && part === null; attempt++) {
           try {
-            if (attempt > 0) await new Promise((r) => setTimeout(r, 500 * Math.pow(3, attempt - 1)));
+            if (attempt > 0) await new Promise((r) => setTimeout(r, 500 * Math.pow(3, attempt - 1))); // 500ms, then 1500ms
             const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(chunk)}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error("HTTP " + res.status);
@@ -1172,25 +1151,26 @@
             if (attempt === 2) console.warn("Translation chunk failed after retries, keeping original:", err);
           }
         }
-        translatedChunks.push({ text: part ? part : chunk, sep });
+        translatedChunks.push(part ? part : chunk);
         if (onChunkProgress) onChunkProgress((i + 1) / chunks.length, i + 1, chunks.length);
         await new Promise((r) => setTimeout(r, 60));
       }
-      return translatedChunks.map((c, i) => c.text + (i < translatedChunks.length - 1 ? c.sep : "")).join("");
+      return translatedChunks.join("\n");
     }
 
+    // Sequential translation with real per-chunk progress (title 10%, ingredients 40%, instructions 50%)
     async function translateRecipeFields(title, ingredients, instructions, onProgress = null) {
       const report = (ratio, text) => { if (onProgress) onProgress(ratio, text); };
       report(0.02, "מתרגם כותרת...");
-      const tTitle = await translateText(title, "he", "auto", (r) => {
+      const tTitle = await translateText(title, "he", "en", (r) => {
         report(0.02 + r * 0.08, "מתרגם כותרת...");
       });
       report(0.12, "מתרגם מצרכים...");
-      const tIng = await translateText(ingredients, "he", "auto", (r, done, total) => {
+      const tIng = await translateText(ingredients, "he", "en", (r, done, total) => {
         report(0.12 + r * 0.38, `מתרגם מצרכים… ${done}/${total}`);
       });
       report(0.52, "מתרגם הוראות הכנה...");
-      const tInst = await translateText(instructions, "he", "auto", (r, done, total) => {
+      const tInst = await translateText(instructions, "he", "en", (r, done, total) => {
         report(0.52 + r * 0.46, `מתרגם הוראות… ${done}/${total}`);
       });
       report(1, "תרגום הושלם");
@@ -1201,127 +1181,145 @@
       };
     }
 
-    // ---------- Recipe scrapers ----------
+    // ---------- URL Recipe Scraper ----------
     let urlImportState = { imageData: null, sourceUrl: "" };
 
-    function decodeHtmlEntities(str) {
-      let s = String(str || "");
-      s = s.replace(/&#x([0-9a-f]+);/gi, (_, h) => { try { return String.fromCodePoint(parseInt(h, 16)); } catch { return ""; } });
-      s = s.replace(/&#(\d+);/g, (_, n) => { try { return String.fromCodePoint(parseInt(n, 10)); } catch { return ""; } });
-      const named = {
-        nbsp: " ", quot: '"', amp: "&", lt: "<", gt: ">", apos: "'", "#39": "'",
-        lsquo: "\u2018", rsquo: "\u2019", ldquo: "\u201C", rdquo: "\u201D",
-        ndash: "\u2013", mdash: "\u2014", hellip: "\u2026", times: "\u00D7", deg: "\u00B0",
-        frac12: "\u00BD", frac14: "\u00BC", frac34: "\u00BE"
-      };
-      s = s.replace(/&([a-z0-9#]+);/gi, (m, name) => { const key = name.toLowerCase(); return named[key] != null ? named[key] : m; });
-      return s;
-    }
-
-    function cleanRecipeNoise(text) {
-      if (!text) return "";
-      let t = decodeHtmlEntities(String(text));
-      t = t.replace(/\[caption[^\]]*\][\s\S]*?\[\/caption\]/gi, " ");
-      t = t.replace(/\[caption[^\]]*\]/gi, " ");
-      t = t.replace(/\[\/caption\]/gi, " ");
-      t = t.replace(/\[caption[^\]]{0,200}/gi, " ");
-      t = t.replace(/\[\/?(?:gallery|embed|audio|video|playlist)[^\]]*\]/gi, " ");
-      t = t.replace(/<\/?(?:figure|figcaption)[^>]*>/gi, " ");
-      t = t.split(/\r?\n/).filter((line) => {
-        const s = line.trim();
-        if (!s) return false;
-        if (/caption\s+id=/i.test(s)) return false;
-        if (/attachment_\d+/i.test(s) && /align/i.test(s)) return false;
-        if (/^id=["'„і«»]?attachment/i.test(s)) return false;
-        if (/align(?:center|left|right)/i.test(s) && /width\s*=/i.test(s)) return false;
-        if (/^\.?\s*\[?\s*caption\b/i.test(s)) return false;
-        if (/^[.\s]+$/.test(s)) return false;
-        return true;
-      }).join("\n");
-      t = t.replace(/\.?\s*\[caption[^\]]*/gi, "");
-      t = t.replace(/caption\s+id\s*=\s*["'„і«»][^"'„і«»]*["'„і«»][^.\n]*/gi, "");
-      t = t.replace(/^\.\s*$/gm, "");
-      t = t.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
-      return t;
-    }
-
-    function stripHtmlToText(chunk) {
-      return cleanRecipeNoise(decodeHtmlEntities(String(chunk || "")
-        .replace(/\[caption[^\]]*\][\s\S]*?\[\/caption\]/gi, " ")
-        .replace(/\[caption[^\]]*\]/gi, " ")
-        .replace(/<br\s*\/?>/gi, "\n")
-        .replace(/<\/p>/gi, "\n")
-        .replace(/<\/li>/gi, "\n")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/[ \t]+\n/g, "\n")
-        .replace(/\n{3,}/g, "\n\n")
-        .replace(/[ \t]{2,}/g, " ")
-        .trim()));
-    }
-
-    function absoluteUrl(maybeRelative, baseUrl) {
-      if (!maybeRelative) return "";
-      if (/^(https?:|data:|blob:)/i.test(maybeRelative)) return maybeRelative;
-      if (!baseUrl || /example\.com/i.test(baseUrl)) return maybeRelative;
-      try { return new URL(maybeRelative, baseUrl).href; } catch { return maybeRelative; }
-    }
-
-    function pickImage(val) {
-      if (!val) return "";
-      if (typeof val === "string") return val.trim();
-      if (Array.isArray(val)) { for (const v of val) { const u = pickImage(v); if (u) return u; } return ""; }
-      if (val && typeof val === "object") return (val.url || val.contentUrl || val["@id"] || "").toString().trim();
-      return "";
-    }
-
-    function cleanRecipeTitle(raw) {
-      if (!raw) return "";
-      let t = decodeHtmlEntities(String(raw)).trim();
-      t = t.replace(/^\s*מתכון\s*[:\-–—|]\s*/i, "");
-      t = t.replace(/^\s*מתכון\s+/i, "");
-      t = t.replace(/^\s*recipes?\s*[:\-–—|]\s*/i, "");
-      t = t.replace(/^\s*recipes?\s+/i, "");
-      t = t.replace(/\s*[|\-–—]\s*[^|\-–—]{0,30}$/u, "");
-      return t.trim();
-    }
-
-    function normalizeInstructions(val) {
-      if (!val) return "";
-      if (typeof val === "string") {
-        let t = val.replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n").replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim();
-        t = cleanRecipeNoise(t);
-        t = t.replace(/^\s*אופן\s*הכנה\s*/i, "").trim();
-        if (t && !/\n/.test(t) && t.length > 80) {
-          const parts = t.split(/(?<=[.!?׃])\s+(?=[א-תA-Z])/);
-          if (parts.length >= 3) t = parts.map((p, i) => `${i + 1}. ${p.trim()}`).join("\n");
-        }
-        return cleanRecipeNoise(t);
+    function unwrapJsonLd(node) {
+      if (!node) return null;
+      if (Array.isArray(node)) {
+        for (const item of node) { const found = unwrapJsonLd(item); if (found) return found; }
+        return null;
       }
-      if (Array.isArray(val)) {
-        const steps = [];
-        val.forEach((item) => {
-          if (typeof item === "string") {
-            const s = cleanRecipeNoise(item.trim());
-            if (s) steps.push(s);
-          } else if (item && typeof item === "object") {
-            if (item["@type"] === "HowToSection" && Array.isArray(item.itemListElement)) {
-              item.itemListElement.forEach((sub) => {
-                const text = cleanRecipeNoise((sub.text || sub.name || "").toString().trim());
-                if (text) steps.push(text);
-              });
-            } else {
-              const text = cleanRecipeNoise((item.text || item.name || "").toString().trim());
-              if (text) steps.push(text);
+      if (typeof node !== "object") return null;
+      const type = node["@type"];
+      const types = Array.isArray(type) ? type : (type ? [type] : []);
+      if (types.some((t) => String(t).toLowerCase() === "recipe")) return node;
+      if (node["@graph"]) return unwrapJsonLd(node["@graph"]);
+      if (node.mainEntity) return unwrapJsonLd(node.mainEntity);
+      return null;
+    }
+
+    function extractJsonLdRecipes(html) {
+      const recipes = [];
+      const re = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+      let m;
+      while ((m = re.exec(html)) !== null) {
+        try {
+          let raw = m[1].trim().replace(/^\uFEFF/, "");
+          raw = raw.replace(/[\u0000-\u001F\u007F]/g, " ");
+          const data = JSON.parse(raw);
+          const recipe = unwrapJsonLd(data);
+          if (recipe) recipes.push(recipe);
+        } catch (_) { /* invalid json */ }
+      }
+      return recipes;
+    }
+
+    /**
+     * Mako / Next.js embeds full ingredient groups in page JSON (pageData.ingredients.ingredientsGroup),
+     * while schema.org Recipe often only lists the first group (e.g. sponge cake only).
+     * Returns string[] with optional section headers like "לגנאש שוקולד:".
+     */
+    function extractMakoIngredientsGroups(html) {
+      if (!html || typeof html !== "string") return [];
+
+      function extractBalancedArray(str, openIdx) {
+        // openIdx must point at '['
+        let depth = 0;
+        let inStr = false;
+        let esc = false;
+        for (let i = openIdx; i < str.length; i++) {
+          const c = str[i];
+          if (inStr) {
+            if (esc) esc = false;
+            else if (c === "\\") esc = true;
+            else if (c === '"') inStr = false;
+            continue;
+          }
+          if (c === '"') { inStr = true; continue; }
+          if (c === "[") depth++;
+          else if (c === "]") {
+            depth--;
+            if (depth === 0) return str.slice(openIdx, i + 1);
+          }
+        }
+        return null;
+      }
+
+      function groupsToLines(groups) {
+        if (!Array.isArray(groups) || !groups.length) return [];
+        const lines = [];
+        for (const g of groups) {
+          if (!g || typeof g !== "object") continue;
+          const name = (g.name || "").toString().trim();
+          const items = Array.isArray(g.ingredients) ? g.ingredients : [];
+          if (name) lines.push(name.replace(/:$/, "") + ":");
+          for (const item of items) {
+            const s = String(item == null ? "" : item).trim();
+            if (s) lines.push(s);
+          }
+        }
+        return lines.length >= 2 ? lines : [];
+      }
+
+      // 1) Find "ingredientsGroup": [ ... ] with balanced brackets (handles nested arrays)
+      let searchFrom = 0;
+      while (searchFrom < html.length) {
+        const keyIdx = html.indexOf('"ingredientsGroup"', searchFrom);
+        if (keyIdx < 0) break;
+        const afterKey = html.slice(keyIdx, keyIdx + 40);
+        const colonBracket = afterKey.match(/"ingredientsGroup"\s*:\s*\[/);
+        if (colonBracket) {
+          const openIdx = keyIdx + colonBracket[0].length - 1; // position of '['
+          const arrStr = extractBalancedArray(html, openIdx);
+          if (arrStr) {
+            try {
+              const groups = JSON.parse(arrStr);
+              const lines = groupsToLines(groups);
+              if (lines.length) return lines;
+            } catch (_) {
+              try {
+                const groups = JSON.parse(arrStr.replace(/\\"/g, '"').replace(/\\n/g, "\n").replace(/\\\\/g, "\\"));
+                const lines = groupsToLines(groups);
+                if (lines.length) return lines;
+              } catch (__) { /* continue */ }
             }
           }
-        });
-        return numberSteps(steps);
+        }
+        searchFrom = keyIdx + 18;
       }
-      if (val && typeof val === "object") {
-        if (val.text) return cleanRecipeNoise(String(val.text).trim());
-        if (Array.isArray(val.itemListElement)) return normalizeInstructions(val.itemListElement);
+
+      // 2) Fallback: walk __NEXT_DATA__ / pageProps if present
+      const nextRe = /<script[^>]*id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i;
+      const nm = html.match(nextRe);
+      if (nm) {
+        try {
+          const data = JSON.parse(nm[1]);
+          const walk = (node, depth) => {
+            if (!node || depth > 12) return null;
+            if (Array.isArray(node)) {
+              for (const x of node) { const f = walk(x, depth + 1); if (f) return f; }
+              return null;
+            }
+            if (typeof node === "object") {
+              if (Array.isArray(node.ingredientsGroup) && node.ingredientsGroup.length)
+                return node.ingredientsGroup;
+              if (node.ingredients && Array.isArray(node.ingredients.ingredientsGroup))
+                return node.ingredients.ingredientsGroup;
+              for (const k of Object.keys(node)) {
+                if (k === "props" || k === "pageProps" || k === "pageData" || k === "dehydratedState" || k === "query") {
+                  const f = walk(node[k], depth + 1);
+                  if (f) return f;
+                }
+              }
+            }
+            return null;
+          };
+          const lines = groupsToLines(walk(data, 0));
+          if (lines.length) return lines;
+        } catch (_) { /* ignore */ }
       }
-      return "";
+      return [];
     }
 
     function normalizeIngredientList(val) {
@@ -1351,109 +1349,86 @@
       return [];
     }
 
-    // DOMParser-based JSON-LD extraction (safer & faster than regex on huge HTML)
-    function extractJsonLdRecipes(html) {
-      const recipes = [];
-      try {
-        const doc = new DOMParser().parseFromString(html, "text/html");
-        const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
-        scripts.forEach((s) => {
-          try {
-            let raw = (s.textContent || "").trim().replace(/^\uFEFF/, "").replace(/[\u0000-\u001F\u007F]/g, " ");
-            const data = JSON.parse(raw);
-            const found = findRecipeNode(data);
-            if (found) recipes.push(found);
-          } catch (_) {}
-        });
-      } catch (_) {
-        // Fallback to regex if DOMParser unavailable
-        const re = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-        let m;
-        while ((m = re.exec(html)) !== null) {
-          try {
-            let raw = m[1].trim().replace(/^\uFEFF/, "").replace(/[\u0000-\u001F\u007F]/g, " ");
-            const data = JSON.parse(raw);
-            const found = findRecipeNode(data);
-            if (found) recipes.push(found);
-          } catch (_) {}
-        }
-      }
-      return recipes;
-    }
-    function findRecipeNode(node, depth = 0) {
-      if (!node || depth > 20) return null;
-      if (Array.isArray(node)) {
-        for (const item of node) { const f = findRecipeNode(item, depth + 1); if (f) return f; }
-        return null;
-      }
-      if (typeof node !== "object") return null;
-      const type = node["@type"];
-      const types = Array.isArray(type) ? type : (type ? [type] : []);
-      if (types.some((t) => String(t).toLowerCase() === "recipe")) return node;
-      if (node["@graph"]) return findRecipeNode(node["@graph"], depth + 1);
-      if (node.mainEntity) return findRecipeNode(node.mainEntity, depth + 1);
-      return null;
+    function cleanRecipeNoise(text) {
+      if (!text) return "";
+      let t = decodeHtmlEntities(String(text));
+      t = t.replace(/\[caption[^\]]*\][\s\S]*?\[\/caption\]/gi, " ");
+      t = t.replace(/\[caption[^\]]*\]/gi, " ");
+      t = t.replace(/\[\/caption\]/gi, " ");
+      t = t.replace(/\[caption[^\]]{0,200}/gi, " ");
+      t = t.replace(/\[\/?(?:gallery|embed|audio|video|playlist)[^\]]*\]/gi, " ");
+      t = t.replace(/<\/?(?:figure|figcaption)[^>]*>/gi, " ");
+      t = t.split(/\r?\n/).filter((line) => {
+        const s = line.trim();
+        if (!s) return false;
+        if (/caption\s+id=/i.test(s)) return false;
+        if (/attachment_\d+/i.test(s) && /align/i.test(s)) return false;
+        if (/^id=["'״«»]?attachment/i.test(s)) return false;
+        if (/align(?:center|left|right)/i.test(s) && /width\s*=/i.test(s)) return false;
+        if (/^\.?\s*\[?\s*caption\b/i.test(s)) return false;
+        if (/^[.\s]+$/.test(s)) return false;
+        return true;
+      }).join("\n");
+      t = t.replace(/\.?\s*\[caption[^\]]*/gi, "");
+      t = t.replace(/caption\s+id\s*=\s*["'״«»][^"'״«»]*["'״«»][^.\n]*/gi, "");
+      t = t.replace(/^\.\s*$/gm, "");
+      t = t.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+      return t;
     }
 
-    function extractMakoIngredientsGroups(html) {
-      if (!html || typeof html !== "string") return [];
-      function extractBalancedArray(str, openIdx) {
-        let depth = 0, inStr = false, esc = false;
-        for (let i = openIdx; i < str.length; i++) {
-          const c = str[i];
-          if (inStr) {
-            if (esc) esc = false;
-            else if (c === "\\") esc = true;
-            else if (c === '"') inStr = false;
-            continue;
-          }
-          if (c === '"') { inStr = true; continue; }
-          if (c === "[") depth++;
-          else if (c === "]") { depth--; if (depth === 0) return str.slice(openIdx, i + 1); }
+    function normalizeInstructions(val) {
+      if (!val) return "";
+      if (typeof val === "string") {
+        let t = val.replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n").replace(/<[^>]+>/g, "").replace(/\n{3,}/g, "\n\n").trim();
+        t = cleanRecipeNoise(t);
+        t = t.replace(/^\s*אופן\s*הכנה\s*/i, "").trim();
+        if (t && !/\n/.test(t) && t.length > 80) {
+          const parts = t.split(/(?<=[.!?。])\s+(?=[א-תA-Z])/);
+          if (parts.length >= 3) t = parts.map((p, i) => `${i + 1}. ${p.trim()}`).join("\n");
         }
-        return null;
+        return cleanRecipeNoise(t);
       }
-      function groupsToLines(groups) {
-        if (!Array.isArray(groups) || !groups.length) return [];
-        const lines = [];
-        for (const g of groups) {
-          if (!g || typeof g !== "object") continue;
-          const name = (g.name || "").toString().trim();
-          const items = Array.isArray(g.ingredients) ? g.ingredients : [];
-          if (name) lines.push(name.replace(/:$/, "") + ":");
-          for (const item of items) {
-            const s = String(item == null ? "" : item).trim();
-            if (s) lines.push(s);
-          }
-        }
-        return lines.length >= 2 ? lines : [];
-      }
-      let searchFrom = 0;
-      while (searchFrom < html.length) {
-        const keyIdx = html.indexOf('"ingredientsGroup"', searchFrom);
-        if (keyIdx < 0) break;
-        const afterKey = html.slice(keyIdx, keyIdx + 40);
-        const colonBracket = afterKey.match(/"ingredientsGroup"\s*:\s*\[/);
-        if (colonBracket) {
-          const openIdx = keyIdx + colonBracket[0].length - 1;
-          const arrStr = extractBalancedArray(html, openIdx);
-          if (arrStr) {
-            try {
-              const groups = JSON.parse(arrStr);
-              const lines = groupsToLines(groups);
-              if (lines.length) return lines;
-            } catch (_) {
-              try {
-                const groups = JSON.parse(arrStr.replace(/\\"/g, '"').replace(/\\n/g, "\n").replace(/\\\\/g, "\\"));
-                const lines = groupsToLines(groups);
-                if (lines.length) return lines;
-              } catch (__) {}
+      if (Array.isArray(val)) {
+        const steps = [];
+        val.forEach((item) => {
+          if (typeof item === "string") {
+            const s = cleanRecipeNoise(item.trim());
+            if (s) steps.push(`${steps.length + 1}. ${s}`);
+          } else if (item && typeof item === "object") {
+            if (item["@type"] === "HowToSection" && Array.isArray(item.itemListElement)) {
+              item.itemListElement.forEach((sub) => {
+                const text = cleanRecipeNoise((sub.text || sub.name || "").toString().trim());
+                if (text) steps.push(`${steps.length + 1}. ${text}`);
+              });
+            } else {
+              const text = cleanRecipeNoise((item.text || item.name || "").toString().trim());
+              if (text) steps.push(`${steps.length + 1}. ${text}`);
             }
           }
-        }
-        searchFrom = keyIdx + 18;
+        });
+        return steps.join("\n");
       }
-      return [];
+      if (val && typeof val === "object") {
+        if (val.text) return cleanRecipeNoise(String(val.text).trim());
+        if (Array.isArray(val.itemListElement)) return normalizeInstructions(val.itemListElement);
+      }
+      return "";
+    }
+
+    function pickImage(val) {
+      if (!val) return "";
+      if (typeof val === "string") return val.trim();
+      if (Array.isArray(val)) { for (const v of val) { const u = pickImage(v); if (u) return u; } return ""; }
+      if (val && typeof val === "object") return (val.url || val.contentUrl || val["@id"] || "").toString().trim();
+      return "";
+    }
+
+    // FIX: never invent example.com URLs — keep relative URLs as-is when no real base given
+    function absoluteUrl(maybeRelative, baseUrl) {
+      if (!maybeRelative) return "";
+      if (/^(https?:|data:|blob:)/i.test(maybeRelative)) return maybeRelative;
+      if (!baseUrl || /example\.com/i.test(baseUrl)) return maybeRelative;
+      try { return new URL(maybeRelative, baseUrl).href; } catch { return maybeRelative; }
     }
 
     function extractMetaImage(html, baseUrl) {
@@ -1471,7 +1446,21 @@
       return "";
     }
 
+    // FIX: strip short site-suffixes only (dash/pipe near the END), never a mid-title dash
+    function cleanRecipeTitle(raw) {
+      if (!raw) return "";
+      let t = decodeHtmlEntities(String(raw)).trim();
+      t = t.replace(/^\s*מתכון\s*[:\-–—|]\s*/i, "");
+      t = t.replace(/^\s*מתכון\s+/i, "");
+      t = t.replace(/^\s*recipes?\s*[:\-–—|]\s*/i, "");
+      t = t.replace(/^\s*recipes?\s+/i, "");
+      // site suffix: "| קרין גורן" / "- שני סנדרס" — only when the suffix is short (<= 30 chars after the dash)
+      t = t.replace(/\s*[|\-–—]\s*[^|\-–—]{0,30}$/u, "");
+      return t.trim();
+    }
+
     function extractTitleFallback(html) {
+      // FIX: prefer og:title, then <h1> (often cleaner than <title>), then <title>
       const og = html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i)
         || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["']/i);
       if (og && og[1]) return cleanRecipeTitle(og[1]);
@@ -1513,7 +1502,9 @@
         }
       }
       ingredients = ingLines;
-      if (instLines.length) instructions = numberSteps(instLines);
+      if (instLines.length) {
+        instructions = instLines.map((l, i) => (/^\d+[\.)]/.test(l) ? l : `${i + 1}. ${l}`)).join("\n");
+      }
       return {
         title: title || "מתכון ללא שם",
         ingredients: cleanRecipeNoise(ingredients.join("\n")),
@@ -1524,19 +1515,47 @@
       };
     }
 
+    function decodeHtmlEntities(str) {
+      let s = String(str || "");
+      s = s.replace(/&#x([0-9a-f]+);/gi, (_, h) => { try { return String.fromCodePoint(parseInt(h, 16)); } catch { return ""; } });
+      s = s.replace(/&#(\d+);/g, (_, n) => { try { return String.fromCodePoint(parseInt(n, 10)); } catch { return ""; } });
+      const named = {
+        nbsp: " ", quot: '"', amp: "&", lt: "<", gt: ">", apos: "'", "#39": "'",
+        lsquo: "\u2018", rsquo: "\u2019", ldquo: "\u201C", rdquo: "\u201D",
+        ndash: "\u2013", mdash: "\u2014", hellip: "\u2026", times: "\u00D7", deg: "\u00B0",
+        frac12: "\u00BD", frac14: "\u00BC", frac34: "\u00BE"
+      };
+      s = s.replace(/&([a-z0-9#]+);/gi, (m, name) => { const key = name.toLowerCase(); return named[key] != null ? named[key] : m; });
+      return s;
+    }
+
+    function stripHtmlToText(chunk) {
+      return cleanRecipeNoise(decodeHtmlEntities(String(chunk || "")
+        .replace(/\[caption[^\]]*\][\s\S]*?\[\/caption\]/gi, " ")
+        .replace(/\[caption[^\]]*\]/gi, " ")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<\/li>/gi, "\n")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/[ \t]+\n/g, "\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .replace(/[ \t]{2,}/g, " ")
+        .trim()));
+    }
+
     function listItemsFromHtml(chunk) {
       const lis = [...String(chunk).matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)];
       return lis.map((m) => stripHtmlToText(m[1])).filter((s) => s.length > 0);
     }
 
-    function extractListAfterMarker(html, { idOrClass }) {
+    function extractListAfterMarker(html, { idOrClass, preferUl = false }) {
       const re = new RegExp(idOrClass.source + "[^>]*>([\\s\\S]{0,12000}?)</(?:div|section|article)", idOrClass.flags);
       const m = html.match(re);
       if (!m) return [];
       const chunk = m[1];
       let items = listItemsFromHtml(chunk);
       if (!items.length) {
-        const listMatch = chunk.match(/<(?:ol|ul)[^>]*>([\s\S]*?)<\/(?:ol|ul)>/i);
+        const listMatch = chunk.match(preferUl ? /<ul[^>]*>([\s\S]*?)<\/ul>/i : /<(?:ol|ul)[^>]*>([\s\S]*?)<\/(?:ol|ul)>/i);
         if (listMatch) items = listItemsFromHtml(listMatch[1]);
       }
       return items;
@@ -1544,11 +1563,18 @@
 
     function extractInstructionsFromHtml(html) {
       const decoded = decodeHtmlEntities(html);
+      const foodyContent = decoded.match(/class=["'][^"']*recipe-content[^"']*["'][^>]*>([\s\S]{0,20000}?)<\/div>/i)
+        || html.match(/class=["'][^"']*recipe-content[^"']*["'][^>]*>([\s\S]{0,20000}?)<\/div>/i);
+      if (foodyContent) {
+        const chunk = decodeHtmlEntities(foodyContent[1]);
+        const items = listItemsFromHtml(chunk);
+        if (items.length >= 2) return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
+      }
       const classRe = /class=["'][^"']*(?:instruction|direction|method|steps?|preparation)[^"']*["'][^>]*>([\s\S]{0,15000}?)<\/(?:div|section|article|ol|ul)/i;
       let m = html.match(classRe);
       if (m) {
         const items = listItemsFromHtml(m[1]);
-        if (items.length) return numberSteps(items);
+        if (items.length) return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
         const text = stripHtmlToText(m[1]);
         if (text.length > 40) return text;
       }
@@ -1560,12 +1586,19 @@
         const ol = after.match(/<ol[^>]*>([\s\S]*?)<\/ol>/i);
         if (ol) {
           const items = listItemsFromHtml(ol[1]);
-          if (items.length >= 1) { candidates.push(numberSteps(items)); continue; }
+          if (items.length >= 1) { candidates.push(items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n")); continue; }
         }
         const ul = after.match(/<ul[^>]*>([\s\S]*?)<\/ul>/i);
         if (ul) {
           const items = listItemsFromHtml(ul[1]);
-          if (items.length >= 1) { candidates.push(numberSteps(items)); continue; }
+          if (items.length >= 1) { candidates.push(items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n")); continue; }
+        }
+        const nextWidget = after.match(/elementor-widget-text-editor[^>]*>([\s\S]{0,10000}?)<\/div>\s*<\/div>/i);
+        if (nextWidget) {
+          const items = listItemsFromHtml(nextWidget[1]);
+          if (items.length >= 1) { candidates.push(items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n")); continue; }
+          const text = stripHtmlToText(nextWidget[1]);
+          if (text.length > 40) candidates.push(text);
         }
       }
       if (candidates.length) { candidates.sort((a, b) => b.length - a.length); return candidates[0]; }
@@ -1575,10 +1608,156 @@
         if (items.length < 2) continue;
         const blob = items.join(" ");
         if (/(מחממים|מערבבים|מוסיפים|אופים|יוצקים|שמים|לשים|לחתוך|לבשל|mix|bake|preheat|stir|add|pour)/i.test(blob)) {
-          return numberSteps(items);
+          return items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
         }
       }
       return "";
+    }
+
+    function extractParagraphRecipeSections(html) {
+      const out = { ingredients: [], instructions: "" };
+      if (!html) return out;
+      const lines = [];
+      const blockRe = /<(?:p|div|h[1-6]|li)\b[^>]*>([\s\S]*?)<\/(?:p|div|h[1-6]|li)>/gi;
+      let bm;
+      while ((bm = blockRe.exec(html)) !== null) {
+        const t = stripHtmlToText(bm[1]).replace(/\s+/g, " ").trim();
+        if (!t || t.length < 1) continue;
+        if (/^(שיתוף|share|facebook|instagram|התחבר)/i.test(t)) continue;
+        lines.push(t);
+      }
+      if (lines.length < 5) {
+        const spanRe = /<span[^>]*>\s*([^<]{2,400})\s*<\/span>/gi;
+        let sm;
+        while ((sm = spanRe.exec(html)) !== null) {
+          const t = decodeHtmlEntities(sm[1]).replace(/\s+/g, " ").trim();
+          if (t && t.length >= 2) lines.push(t);
+        }
+      }
+      const norm = (s) => String(s || "").replace(/^[|\u200f\u200e•\-\s]+/, "").trim();
+      const isIngHead = (s) => {
+        const t = norm(s);
+        if (/^(מצרכים|מרכיבים|רשימת מצרכים)/i.test(t) && t.length < 60) return true;
+        if (/^מה\s+צריך(\s+להכנת)?/i.test(t) && t.length < 120) return true;
+        if (/^רשימת\s+מרכיבים/i.test(t)) return true;
+        return false;
+      };
+      const isInstHead = (s) => {
+        const t = norm(s);
+        return (/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת|איך\s+מכינים)/i.test(t) && t.length < 80);
+      };
+      const isIngGroupHead = (s) => {
+        const t = norm(s);
+        if (!t || t.length > 90) return false;
+        if (isIngHead(s) || isInstHead(s)) return false;
+        if (/[:：]\s*$/.test(t) && t.length < 80) return true;
+        return false;
+      };
+      const isRecipeTitleHead = (s) => {
+        const t = norm(s);
+        if (!t || t.length > 100) return false;
+        if (isIngHead(s) || isInstHead(s)) return false;
+        if (/^מתכון(\s|$)/i.test(t)) return true;
+        return false;
+      };
+      const looksLikeIngredient = (s) => {
+        const t = norm(s);
+        if (!t || t.length < 2 || t.length > 120) return false;
+        if (isInstHead(s) || isIngHead(s)) return false;
+        if (/^(פוסטים|דפים|מתכונים אהובים|רעיונות|שיתוף|עקבו|אינסטגרם|פייסבוק|הכנתם|יש גם)/i.test(t)) return false;
+        if (/\d/.test(t) && /(גר[ם'׳]|מ[״"]?ל|ק[״"]?ג|כפות?|כפיות?|כוסות?|ביצ|שקית|קורט|שמן|קמח|סוכר|מלח|מים)/i.test(t)) return true;
+        if (/^(שומשום|פרג|גרעינ|אבקת|להגשה|תוספות)/i.test(t)) return true;
+        if (t.length <= 60 && !/[.!?]$/.test(t) && !/^(איך|כש|לאחר|מכניסים|שמים|לשים)/i.test(t)) {
+          return /(גר[ם'׳]|ביצ|קמח|סוכר|מלח|שמן|מים|שמנת|חמאה|שוקולד)/i.test(t);
+        }
+        return false;
+      };
+      let mode = null;
+      const ings = [];
+      const insts = [];
+      let instHeadIndex = -1;
+      for (let i = 0; i < lines.length; i++) {
+        const raw = lines[i];
+        const s = norm(raw);
+        if (!s) continue;
+        if (isIngHead(raw) || isRecipeTitleHead(raw)) {
+          if (isRecipeTitleHead(raw) && !isIngHead(raw)) {
+            let ok = false;
+            for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+              if (isInstHead(lines[j])) break;
+              if (looksLikeIngredient(lines[j])) { ok = true; break; }
+            }
+            if (!ok) continue;
+          }
+          mode = "ing";
+          const rest = norm(s.replace(/^(מצרכים|מרכיבים|רשימת מצרכים|מה\s+צריך(?:\s+להכנת[^\n]*)?)\s*:?\s*/i, ""));
+          if (rest && rest.length > 2 && !isInstHead(rest) && rest !== s && !isRecipeTitleHead(rest)) ings.push(rest);
+          continue;
+        }
+        if (isInstHead(raw)) {
+          if (instHeadIndex < 0) instHeadIndex = i;
+          mode = "inst";
+          const rest = norm(s.replace(/^(אופן\s*ההכנה|אופן\s*הכנה|הוראות(?:\s*הכנה)?|ההכנה|אופן\s*הכנת[^\s:]*)\s*:?\s*/i, ""));
+          if (rest && rest.length > 3 && rest !== ".") insts.push(rest);
+          continue;
+        }
+        if (mode === "ing") {
+          if (isInstHead(raw)) { if (instHeadIndex < 0) instHeadIndex = i; mode = "inst"; continue; }
+          if (isIngGroupHead(raw)) { ings.push("— " + s.replace(/[:：]\s*$/, "").trim()); continue; }
+          if (s !== ":" && s !== "." && s !== "|") ings.push(s);
+        } else if (mode === "inst") {
+          if (s === "." || s === ":" || s === "|") continue;
+          if (isIngHead(raw) && insts.length >= 2) break;
+          if (/^(פוסטים אחרונים|דפים|מתכונים אהובים|רעיונות|שיתוף|עקבו|אינסטגרם|פייסבוק)/i.test(s)) break;
+          insts.push(s);
+        }
+      }
+      if (!ings.length && instHeadIndex > 0) {
+        const collected = [];
+        for (let i = instHeadIndex - 1; i >= 0 && collected.length < 40; i--) {
+          const s = norm(lines[i]);
+          if (!s) continue;
+          if (isInstHead(lines[i]) || isIngHead(lines[i])) break;
+          if (isRecipeTitleHead(lines[i])) break;
+          if (s.length > 140) break;
+          if (looksLikeIngredient(lines[i]) || (s.length <= 70 && !/[.!?]$/.test(s) && /\d/.test(s))) collected.push(s);
+          else if (collected.length && !looksLikeIngredient(lines[i])) {
+            if (s.length <= 80 && !/^(איך|כש|לאחר|מכניסים|שמים)/i.test(s)) collected.push(s);
+            else break;
+          } else if (collected.length) break;
+        }
+        collected.reverse();
+        if (collected.length) ings.push(...collected);
+      }
+      out.ingredients = ings.filter((x) => {
+        if (!x || x.length < 2) return false;
+        if (/^(שיתוף|עקבו|הצטרפו|לייק)/i.test(x)) return false;
+        if (/^מתכון(\s|$)/i.test(x) && !/\d/.test(x)) return false;
+        if (/^(אז\s+)?הנה\s+(הוא|היא|זה)/i.test(x)) return false;
+        if (/^בתיאבון/i.test(x)) return false;
+        return true;
+      });
+      if (out.ingredients.length > 40) out.ingredients = out.ingredients.slice(0, 40);
+      if (insts.length) {
+        out.instructions = insts.filter((x) => x && x.length > 1).map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
+      }
+      return out;
+    }
+
+    function extractIngredientsFromOgDescription(html) {
+      const m = html.match(/property=["']og:description["'][^>]*content=["']([^"']+)["']/i)
+        || html.match(/content=["']([^"']+)["'][^>]*property=["']og:description["']/i);
+      if (!m) return [];
+      let desc = decodeHtmlEntities(m[1]);
+      const idx = desc.search(/מצרכים\s*:/i);
+      if (idx < 0) return [];
+      let part = desc.slice(idx).replace(/^מצרכים\s*:/i, "").trim();
+      part = part.split(/אופן\s*ההכנה|הוראות\s*הכנה/i)[0];
+      let items = part.split(/\s{2,}|\s*[\n|;]\s*/).map((s) => s.trim()).filter(Boolean);
+      if (items.length < 3) {
+        items = part.replace(/(\d+\s*(?:גרם|כפות?|כפיות?|כוסות?|קילו|מ"ל|מל|שקית))/g, "\n$1").split(/\n/).map((s) => s.trim()).filter((s) => s.length > 2);
+      }
+      return items.slice(0, 30);
     }
 
     function stripNonContentHtml(html) {
@@ -1597,6 +1776,21 @@
         .replace(/<!--[\s\S]*?-->/g, " ")
         .replace(/<link\b[^>]*>/gi, " ")
         .replace(/\s{2,}/g, " ");
+      const hasRecipeMarkers = (s) => /מצרכים|אופן\s*הכנה|איך\s+מכינים|מה\s+צריך|recipeIngredient|jet-listing-dynamic-field__content/i.test(s || "");
+      const mainPatterns = [
+        /<article\b[^>]*>([\s\S]*?)<\/article>/i,
+        /<main\b[^>]*>([\s\S]*?)<\/main>/i,
+        /<(?:div|section)\b[^>]*(?:id|class)=["'][^"']*(?:recipe|post-content|entry-content|recipe-content|content-container)[^"']*["'][^>]*>([\s\S]{200,120000}?)<\/(?:div|section)>/i
+      ];
+      const fullHasMarkers = hasRecipeMarkers(h);
+      for (const re of mainPatterns) {
+        const m = h.match(re);
+        if (m && m[1] && m[1].length > 200) {
+          if (fullHasMarkers && !hasRecipeMarkers(m[1])) continue;
+          h = m[1];
+          break;
+        }
+      }
       const MAX = 450000;
       if (h.length > MAX) h = h.slice(0, MAX);
       if (headMeta) h = headMeta + "\n" + h;
@@ -1620,14 +1814,28 @@
         image = pickImage(r.image) || pickImage(r.thumbnailUrl);
         if (r.recipeCategory) categoryHint = Array.isArray(r.recipeCategory) ? r.recipeCategory[0] : String(r.recipeCategory);
       }
+      // Mako (and similar) put FULL multi-group ingredients in page JSON; JSON-LD often only has group #1
       const makoGroups = extractMakoIngredientsGroups(html);
-      if (makoGroups.length > ingredients.length) ingredients = makoGroups;
+      if (makoGroups.length > ingredients.length) {
+        ingredients = makoGroups;
+      }
       if (!title) title = extractTitleFallback(contentHtml) || extractTitleFallback(html);
       else title = cleanRecipeTitle(title);
       if (!image) image = extractMetaImage(contentHtml, pageUrl) || extractMetaImage(html, pageUrl);
       image = absoluteUrl(image, pageUrl);
+
       if (!ingredients.length) {
-        ingredients = extractListAfterMarker(contentHtml, { idOrClass: /(?:id|class)=["'][^"']*\bingredients?\b[^"']*["']/i });
+        ingredients = extractListAfterMarker(contentHtml, { idOrClass: /(?:id|class)=["'][^"']*\bingredients?\b[^"']*["']/i, preferUl: true });
+        if (!ingredients.length) {
+          const foodyItems = [];
+          const reFoody = /class=["'][^"']*ingredient-container[^"']*["'][^>]*>([\s\S]*?)<\/span>\s*<\/div>/gi;
+          let fm;
+          while ((fm = reFoody.exec(contentHtml)) !== null) {
+            const line = stripHtmlToText(fm[1]);
+            if (line && line.length > 1) foodyItems.push(line);
+          }
+          if (foodyItems.length) ingredients = foodyItems;
+        }
         if (!ingredients.length) {
           const jetSource = contentHtml.includes("jet-listing-dynamic-field") ? contentHtml : html;
           const jetItems = [];
@@ -1636,29 +1844,33 @@
           while ((jm = reJet.exec(jetSource)) !== null) {
             const line = stripHtmlToText(jm[1]).replace(/\s+/g, " ").trim();
             if (!line || line.length < 2) continue;
-            if (/^(אופן\s*הכנה|איך\s*מכינים)/i.test(line)) break;
+            if (/^(אופן\s*הכנה|איך\s+מכינים)/i.test(line)) break;
             jetItems.push(line);
           }
           if (jetItems.length >= 3) ingredients = jetItems;
         }
       }
       if (!instructions) instructions = extractInstructionsFromHtml(contentHtml);
+      if (!instructions) {
+        const jetSrc = contentHtml.includes("אופן") ? contentHtml : html;
+        const jetInst = jetSrc.match(/אופן\s*הכנה[\s\S]{0,800}?jet-listing-dynamic-field__content[^>]*>([\s\S]{0,12000}?)<\/div>\s*<\/div>/i);
+        if (jetInst) {
+          const items = listItemsFromHtml(jetInst[1]);
+          if (items.length) instructions = items.map((s, i) => (/^\d+[\.)]/.test(s) ? s : `${i + 1}. ${s}`)).join("\n");
+          else {
+            const t = stripHtmlToText(jetInst[1]);
+            if (t.length > 20) instructions = normalizeInstructions(t);
+          }
+        }
+      }
       if (!ingredients.length || !instructions) {
-        // fallback minimal: heading-based
-        if (!ingredients.length) {
-          const m = html.match(/מצרכים\s*:?\s*<\/[^>]+>([\s\S]{0,8000}?)(?:אופן\s*הכנה|הוראות)/i);
-          if (m) {
-            const items = listItemsFromHtml(m[1]);
-            if (items.length) ingredients = items;
-          }
-        }
-        if (!instructions) {
-          const m2 = html.match(/(?:אופן\s*הכנה|הוראות\s*הכנה)\s*:?\s*<\/[^>]+>([\s\S]{0,12000})/i);
-          if (m2) {
-            const items = listItemsFromHtml(m2[1]);
-            if (items.length) instructions = numberSteps(items);
-          }
-        }
+        const wix = extractParagraphRecipeSections(contentHtml);
+        if (!ingredients.length && wix.ingredients.length) ingredients = wix.ingredients;
+        if (!instructions && wix.instructions) instructions = wix.instructions;
+      }
+      if (!ingredients.length) {
+        const fromOg = extractIngredientsFromOgDescription(html);
+        if (fromOg.length) ingredients = fromOg;
       }
       if (!ingredients.length && !instructions && contentHtml.length > 100 && !/<html[\s>]/i.test(contentHtml)) {
         return parseTextFallbackRecipe(contentHtml, pageUrl);
@@ -1698,7 +1910,7 @@
       document.getElementById("url-preview-category").value = mapScrapedCategory(parsed.categoryHint);
       const imgEl = document.getElementById("url-preview-image");
       const noImg = document.getElementById("url-preview-no-image");
-      if (parsed.image && isSafeImageSrc(parsed.image)) {
+      if (parsed.image) {
         urlImportState.imageData = parsed.image;
         imgEl.src = parsed.image;
         imgEl.style.display = "inline-block";
@@ -1718,6 +1930,7 @@
     function parseFromPastedHtml() {
       const html = (document.getElementById("url-html-paste").value || "").trim();
       if (!html || html.length < 50) { showToast("הדבק את קוד המקור של העמוד", { isError: true }); return; }
+      // FIX: use user-provided site URL as base so relative image URLs resolve correctly
       let site = (document.getElementById("url-site-url").value || "").trim();
       if (site && !/^https?:\/\//i.test(site)) site = "https://" + site;
       const baseUrl = site;
@@ -1735,7 +1948,7 @@
       let instructions = removeEmptyLines(document.getElementById("url-preview-instructions").value);
       const category = document.getElementById("url-preview-category").value;
       const glutenFree = !!(document.getElementById("url-preview-glutenFree") && document.getElementById("url-preview-glutenFree").checked);
-      let imageData = urlImportState.imageData;
+      let imageData = urlImportState.imageData || defaultImage;
 
       if (!title || !ingredients || !instructions) { showToast("נא למלא כותרת, מצרכים והוראות", { isError: true }); return; }
 
@@ -1743,15 +1956,18 @@
       const alreadyHebrew = isPrimarilyHebrew(title + "\n" + ingredients) || isPrimarilyHebrew(instructions);
       const doTranslate = wantTranslate && !alreadyHebrew;
       const btn = document.getElementById("urlAddToBookBtn");
-      const needDownload = !!(imageData && /^https?:\/\//i.test(imageData) && isSafeImageSrc(imageData));
-      const needCompress = !!(imageData && /^data:image\//.test(imageData));
+      const needDownload = !!(imageData && /^https?:\/\//i.test(imageData));
+      const needCompress = !!(imageData && (/^https?:\/\//i.test(imageData) || /^data:image\//.test(imageData)));
       setBusy(btn, true, doTranslate ? "⏳ מתרגם..." : "⏳ מוסיף...");
 
+      // Fixed percentage ranges so the bar moves smoothly with real sub-progress
+      // Translate: 0–45 | Download: 45–80 | Compress: 80–92 | Save: 92–100
+      // If a phase is skipped, its range is redistributed proportionally.
       const phases = [];
       if (doTranslate) phases.push({ id: "translate", weight: 45 });
       if (needDownload) phases.push({ id: "download", weight: 35 });
-      if (needDownload && needCompress) phases.push({ id: "compress", weight: 12 });
       else if (needCompress) phases.push({ id: "compress", weight: 12 });
+      if (needDownload && needCompress) phases.push({ id: "compress", weight: 12 });
       phases.push({ id: "save", weight: 8 });
       const totalW = phases.reduce((s, p) => s + p.weight, 0);
       let cursor = 0;
@@ -1772,28 +1988,35 @@
         showImportProgress(1, "מתחיל...");
         if (doTranslate) {
           setBusy(btn, true, "⏳ מתרגם...");
-          const translated = await translateRecipeFields(title, ingredients, instructions, (ratio, text) => mapProgress("translate", ratio, text));
+          const translated = await translateRecipeFields(title, ingredients, instructions, (ratio, text) => {
+            mapProgress("translate", ratio, text);
+          });
           title = translated.title;
           ingredients = translated.ingredients;
           instructions = translated.instructions;
           mapProgress("translate", 1, "תרגום הושלם");
         }
+
         if (needDownload) {
           setBusy(btn, true, "⏳ מוריד תמונה...");
+          // download only — compress is separate so progress stays accurate
           imageData = await urlToDataUrl(imageData, {
             compress: false,
             onProgress: (ratio, text) => mapProgress("download", ratio, text || "מוריד תמונה...")
           });
           mapProgress("download", 1, "הורדה הושלמה");
         }
+
         if (imageData && /^data:image\//.test(imageData) && ranges.compress) {
           setBusy(btn, true, "⏳ דוחס תמונה...");
           mapProgress("compress", 0.15, "דוחס תמונה...");
+          // yield so UI paints before heavy canvas work
           await new Promise((r) => setTimeout(r, 30));
           mapProgress("compress", 0.4, "דוחס תמונה...");
           imageData = await compressImageData(imageData);
           mapProgress("compress", 1, "דחיסה הושלמה");
         }
+
         setBusy(btn, true, "⏳ שומר...");
         mapProgress("save", 0.2, "בודק כפילויות...");
         const existing = await getAllRecipes();
@@ -1804,11 +2027,11 @@
           showToast("המתכון כבר קיים בספר", { isError: true });
           return;
         }
+
         mapProgress("save", 0.6, "שומר למסד נתונים...");
         await warnIfStorageLow();
-        if (imageData && !isSafeImageSrc(imageData)) imageData = null;
         await saveRecipeToDB({
-          title, quantity: "", ingredients, instructions, imageData: imageData || null, category,
+          title, quantity: "", ingredients, instructions, imageData, category,
           sourceUrl: urlImportState.sourceUrl || "",
           glutenFree, favorite: false, deleted: false, createdAt: Date.now()
         });
@@ -1859,12 +2082,6 @@
       return arr;
     }
 
-    function getVisibleSorted() {
-      const filtered = currentFilterFn ? cacheAll.filter(currentFilterFn) : cacheAll;
-      return sortRecipes(filtered);
-    }
-    function render() { renderRecipes(getVisibleSorted()); }
-
     function renderPagination(total) {
       const container = document.getElementById("pagination");
       container.innerHTML = "";
@@ -1880,10 +2097,10 @@
         b.textContent = label;
         if (active) b.classList.add("active");
         if (disabled) b.disabled = true;
-        else b.onclick = () => { currentPage = page; render(); };
+        else b.onclick = () => { currentPage = page; renderRecipes(sortRecipes(currentFilterFn ? cacheAll.filter(currentFilterFn) : cacheAll)); };
         container.appendChild(b);
       };
-      mkBtn("«", currentPage - 1, { disabled: currentPage === 1 });
+      mkBtn("‹", currentPage - 1, { disabled: currentPage === 1 });
       const windowSize = 5;
       let start = Math.max(1, currentPage - Math.floor(windowSize / 2));
       let end = Math.min(pages, start + windowSize - 1);
@@ -1891,7 +2108,7 @@
       if (start > 1) { mkBtn("1", 1); if (start > 2) { const d = document.createElement("button"); d.textContent = "…"; d.disabled = true; container.appendChild(d); } }
       for (let p = start; p <= end; p++) mkBtn(String(p), p, { active: p === currentPage });
       if (end < pages) { if (end < pages - 1) { const d = document.createElement("button"); d.textContent = "…"; d.disabled = true; container.appendChild(d); } mkBtn(String(pages), pages); }
-      mkBtn("»", currentPage + 1, { disabled: currentPage === pages });
+      mkBtn("›", currentPage + 1, { disabled: currentPage === pages });
     }
 
     function renderRecipes(recipes) {
@@ -1922,12 +2139,14 @@
     async function refresh() {
       try {
         cacheAll = await getAllRecipes();
-        render();
+        const filtered = currentFilterFn ? cacheAll.filter(currentFilterFn) : cacheAll;
+        renderRecipes(sortRecipes(filtered));
       } catch (err) {
         showToast("שגיאה בטעינת מתכונים", { isError: true });
         console.error(err);
       }
     }
+    // backward-compatible alias
     function loadAndDisplay(filterFn = null) { currentFilterFn = filterFn; currentPage = 1; return refresh(); }
 
     function flashSaved(card) {
@@ -1947,11 +2166,7 @@
       const quantity = esc(replaceFractions(recipe.quantity || ""));
       const ingredients = esc(replaceFractions(recipe.ingredients || ""));
       const instructions = esc(replaceFractions(recipe.instructions || ""));
-      const rawImg = recipe.imageData && typeof recipe.imageData === "string" && recipe.imageData.trim() && isSafeImageSrc(recipe.imageData)
-        ? recipe.imageData
-        : defaultImage;
-      const imgSrc = esc(rawImg);
-      const titleAttr = esc((recipe.title || "").replace(/"/g, ""));
+      const imgSrc = recipe.imageData && recipe.imageData.trim() ? recipe.imageData : defaultImage;
 
       card.innerHTML = `
         <span class="save-indicator" aria-live="polite">נשמר ✓</span>
@@ -1965,10 +2180,10 @@
           <button class="action-btn action-fav ${recipe.favorite ? "fav-on" : ""}" title="מועדף" aria-label="סמן כמועדף">${recipe.favorite ? "★" : "☆"}</button>
         </div>
         <h3 class="editable" data-field="title" contenteditable="false">${title.replace(/\n/g, "<br>")}</h3>
-        <p class="recipe-meta"><strong>קטגוריה:</strong> <span class="editable" data-field="category" contenteditable="false">${esc(recipe.category || "ראשונות")}</span>${recipe.glutenFree ? ' <span class="gluten-badge" title="ללא גלוטן">🌾❌ ללא גלוטן</span>' : ""}</p>
+        <p class="recipe-meta"><strong>קטגוריה:</strong> <span class="editable" data-field="category" contenteditable="false">${recipe.category || "ראשונות"}</span>${recipe.glutenFree ? ' <span class="gluten-badge" title="ללא גלוטן">🌾❌ ללא גלוטן</span>' : ""}</p>
         <p class="recipe-meta"><strong>כמות:</strong> <span class="editable" data-field="quantity" contenteditable="false">${quantity}</span></p>
         <div class="recipe-image">
-          <img src="${imgSrc}" alt="תמונת המתכון: ${titleAttr}" loading="lazy" referrerpolicy="no-referrer" />
+          <img src="${imgSrc}" alt="תמונת המתכון: ${title.replace(/"/g, "")}" loading="lazy" referrerpolicy="no-referrer" />
         </div>
         <p class="recipe-meta"><strong>מצרכים:</strong></p>
         <div class="editable" data-field="ingredients" contenteditable="false">${ingredients.replace(/\n/g, "<br>")}</div>
@@ -1976,15 +2191,16 @@
         <div class="editable" data-field="instructions" contenteditable="false">${instructions.replace(/\n/g, "<br>")}</div>
       `;
 
+      // Soft delete with Undo
       card.querySelector(".action-delete").onclick = async () => {
         try {
           await updateRecipeInDB(recipe.id, { deleted: true, deletedAt: Date.now() });
           card.remove();
           cacheAll = cacheAll.filter((r) => r.id !== recipe.id);
-          render();
+          const filtered = currentFilterFn ? cacheAll.filter(currentFilterFn) : cacheAll;
+          renderRecipes(sortRecipes(filtered));
           showToast("המתכון נמחק", {
             actionText: "↩️ בטל",
-            duration: 6200,
             onAction: async () => {
               try {
                 await updateRecipeInDB(recipe.id, { deleted: false, deletedAt: null });
@@ -1992,13 +2208,14 @@
               } catch (e) { console.error(e); }
             }
           });
-          // Purge at same time as undo button disappears (6.2s)
+          // Purge permanently after 5 seconds if not restored
           setTimeout(async () => {
             try {
-              const r = await getRecipeById(recipe.id);
+              const all = await getAllRecipes({ includeDeleted: true });
+              const r = all.find((x) => x.id === recipe.id);
               if (r && r.deleted) await deleteRecipeById(recipe.id);
             } catch (e) { console.error(e); }
-          }, 6300);
+          }, 5000);
         } catch (e) { console.error(e); showToast("שגיאה במחיקה", { isError: true }); }
       };
 
@@ -2015,16 +2232,20 @@
           btn.classList.toggle("fav-on", newVal);
           btn.textContent = newVal ? "★" : "☆";
           flashSaved(card);
-          if (document.getElementById("sort-select").value === "favorite") render();
+          // re-sort if sorting by favorites
+          if (document.getElementById("sort-select").value === "favorite") {
+            const filtered = currentFilterFn ? cacheAll.filter(currentFilterFn) : cacheAll;
+            renderRecipes(sortRecipes(filtered));
+          }
         } catch (err) { showToast("שגיאה בעדכון", { isError: true }); }
       };
 
-      card.querySelector(".recipe-image img").onclick = () => openLightbox(rawImg);
+      // Lightbox on image click
+      card.querySelector(".recipe-image img").onclick = () => openLightbox(imgSrc);
 
       return card;
     }
 
-    // Edit mode: uses contenteditable + select; re-renders fractions on exit
     function toggleEditMode(card, recipe) {
       const editables = card.querySelectorAll(".editable");
       const isEditing = editables[0].contentEditable === "true";
@@ -2033,14 +2254,12 @@
       let catSelect = null;
 
       editables.forEach((el) => {
-        const field = el.dataset.field;
+        el.contentEditable = newState ? "true" : "false";
+        clearTimeout(el._saveT);
         if (newState) {
-          el.contentEditable = "true";
-          // Show original (non-fraction) text so blur without change is a no-op
-          el.innerText = recipe[field] || "";
-          clearTimeout(el._saveT);
           const save = () => {
             clearTimeout(el._saveT);
+            const field = el.dataset.field;
             const value = el.innerText;
             if (value === recipe[field]) return;
             updateRecipeInDB(recipe.id, { [field]: value })
@@ -2049,15 +2268,10 @@
           };
           el.oninput = () => { clearTimeout(el._saveT); el._saveT = setTimeout(save, 500); };
           el.onblur = save;
-        } else {
-          el.contentEditable = "false";
-          el.oninput = null;
-          el.onblur = null;
-          // Restore fraction-displayed value
-          el.innerHTML = esc(replaceFractions(recipe[field] || "")).replace(/\n/g, "<br>");
-        }
+        } else { el.oninput = null; el.onblur = null; }
       });
 
+      // FIX: category edited via <select>, not free text
       if (newState) {
         catSelect = document.createElement("select");
         catSelect.className = "editable-select";
@@ -2075,6 +2289,7 @@
         catSpan.style.display = "none";
         catSpan.parentNode.insertBefore(catSelect, catSpan.nextSibling);
 
+        // Gluten-free toggle while editing
         const existingBadge = catSpan.parentNode.querySelector(".gluten-badge");
         if (existingBadge) existingBadge.style.display = "none";
         let gfLabel = catSpan.parentNode.querySelector(".gluten-edit-label");
@@ -2089,7 +2304,10 @@
           gfCb.onchange = () => {
             const val = gfCb.checked;
             updateRecipeInDB(recipe.id, { glutenFree: val })
-              .then(() => { recipe.glutenFree = val; flashSaved(card); })
+              .then(() => {
+                recipe.glutenFree = val;
+                flashSaved(card);
+              })
               .catch(() => showToast("שגיאה בעדכון", { isError: true }));
           };
           gfLabel.appendChild(gfCb);
@@ -2110,6 +2328,7 @@
         catSpan.textContent = recipe.category || "ראשונות";
         const gfLabel = catSpan.parentNode.querySelector(".gluten-edit-label");
         if (gfLabel) gfLabel.remove();
+        // refresh badge
         let badge = catSpan.parentNode.querySelector(".gluten-badge");
         if (recipe.glutenFree) {
           if (!badge) {
@@ -2179,9 +2398,6 @@
         const data = await processImageFile(file);
         updateRecipeInDB(id, { imageData: data }).then(() => {
           container.querySelector("img").src = data;
-          // also update in-memory cache
-          const cached = cacheAll.find((r) => r.id === id);
-          if (cached) cached.imageData = data;
           if (card) flashSaved(card);
           showToast("תמונה עודכנה");
         }).catch(() => showToast("שגיאה בעדכון תמונה", { isError: true }));
@@ -2194,8 +2410,6 @@
       if (!ok) return;
       updateRecipeInDB(id, { imageData: null }).then(() => {
         container.querySelector("img").src = defaultImage;
-        const cached = cacheAll.find((r) => r.id === id);
-        if (cached) cached.imageData = null;
         if (card) flashSaved(card);
         showToast("תמונה הוסרה");
       }).catch(() => showToast("שגיאה", { isError: true }));
@@ -2222,45 +2436,7 @@
       }
     }
 
-    // ---------- Add/Edit Recipe (uses same form) ----------
-    function resetAddForm() {
-      document.getElementById("title").value = "";
-      document.getElementById("quantity").value = "";
-      document.getElementById("ingredients").value = "";
-      document.getElementById("instructions").value = "";
-      document.getElementById("recipe-image").value = "";
-      if (document.getElementById("glutenFree")) document.getElementById("glutenFree").checked = false;
-      document.getElementById("category").value = CATEGORIES[0];
-      addFormImageData = null;
-      const prev = document.getElementById("add-image-preview");
-      if (prev) { prev.src = ""; prev.style.display = "none"; }
-      editingId = null;
-      const cancelBtn = document.getElementById("cancelEditBtn");
-      if (cancelBtn) cancelBtn.style.display = "none";
-      document.getElementById("saveRecipeBtn").textContent = "💾 שמור מתכון";
-    }
-
-    function startEditRecipe(id) {
-      const r = cacheAll.find((x) => x.id === id);
-      if (!r) return;
-      editingId = id;
-      document.getElementById("title").value = r.title || "";
-      document.getElementById("quantity").value = r.quantity || "";
-      document.getElementById("ingredients").value = r.ingredients || "";
-      document.getElementById("instructions").value = r.instructions || "";
-      document.getElementById("category").value = CATEGORIES.includes(r.category) ? r.category : CATEGORIES[0];
-      document.getElementById("glutenFree").checked = !!r.glutenFree;
-      addFormImageData = (r.imageData && isSafeImageSrc(r.imageData)) ? r.imageData : null;
-      const prev = document.getElementById("add-image-preview");
-      if (addFormImageData) { prev.src = addFormImageData; prev.style.display = "inline-block"; }
-      else { prev.src = ""; prev.style.display = "none"; }
-      const form = document.getElementById("add-form");
-      if (!form.classList.contains("open")) document.getElementById("toggleAddBtn").click();
-      document.getElementById("saveRecipeBtn").textContent = "💾 עדכן מתכון";
-      document.getElementById("cancelEditBtn").style.display = "inline-block";
-      form.scrollIntoView({ behavior: "smooth" });
-    }
-
+    // ---------- Add Recipe ----------
     async function addRecipe() {
       const title = document.getElementById("title").value.trim();
       const quantity = document.getElementById("quantity").value.trim();
@@ -2281,43 +2457,45 @@
       try {
         const existing = await getAllRecipes();
         const newKey = recipeKey(title, ingredients);
-        // Only check duplicates when creating a new recipe
-        if (!editingId) {
-          const isDup = existing.some((ex) => recipeKey(ex.title, ex.ingredients) === newKey);
-          if (isDup) {
-            clearProgress();
-            showToast("המתכון כבר קיים בספר (כותרת + מצרכים זהים)", { isError: true });
-            return;
-          }
+        const isDup = existing.some((ex) => recipeKey(ex.title, ex.ingredients) === newKey);
+        if (isDup) {
+          clearProgress();
+          showToast("המתכון כבר קיים בספר (כותרת + מצרכים זהים)", { isError: true });
+          return;
         }
 
-        let imageData = addFormImageData || null;
-        if (!imageData && imageInput.files && imageInput.files[0]) {
+        let imageData = defaultImage;
+        if (addFormImageData) {
+          showProgress("דוחס תמונה...");
+          imageData = addFormImageData;
+          if (/^data:image\//.test(imageData)) imageData = await compressImageData(imageData);
+        } else if (imageInput.files && imageInput.files[0]) {
           showProgress("קורא ודוחס תמונה...");
           imageData = await processImageFile(imageInput.files[0]);
         }
-        if (imageData && !isSafeImageSrc(imageData)) imageData = null;
 
         showProgress("כותב למסד נתונים...");
         await warnIfStorageLow();
-
-        if (editingId) {
-          await updateRecipeInDB(editingId, { title, quantity, ingredients, instructions, category, glutenFree, imageData });
-          showToast("המתכון עודכן בהצלחה!");
-        } else {
-          const recipe = { title, quantity, ingredients, instructions, imageData, category, glutenFree, favorite: false, deleted: false, createdAt: Date.now(), sourceUrl: "" };
-          await saveRecipeToDB(recipe);
-          showToast("המתכון נוסף בהצלחה!");
-        }
+        const recipe = { title, quantity, ingredients, instructions, imageData, category, glutenFree, favorite: false, deleted: false, createdAt: Date.now() };
+        await saveRecipeToDB(recipe);
         clearProgress();
-        resetAddForm();
+        showToast("המתכון נוסף בהצלחה!");
+        document.getElementById("title").value = "";
+        document.getElementById("quantity").value = "";
+        document.getElementById("ingredients").value = "";
+        document.getElementById("instructions").value = "";
+        document.getElementById("recipe-image").value = "";
+        if (document.getElementById("glutenFree")) document.getElementById("glutenFree").checked = false;
+        addFormImageData = null;
+        const prev = document.getElementById("add-image-preview");
+        if (prev) { prev.src = ""; prev.style.display = "none"; }
         await refresh();
       } catch (err) {
         console.error(err);
         clearProgress();
         showToast("שגיאה בשמירה", { isError: true });
       } finally {
-        setBusy(btn, false, null, editingId ? "💾 עדכן מתכון" : "💾 שמור מתכון");
+        setBusy(btn, false, null, "💾 שמור מתכון");
       }
     }
 
@@ -2330,7 +2508,7 @@
       const instructions = str(r.instructions, 50000);
       if (!title && !ingredients && !instructions) return null;
       let imageData = null;
-      if (typeof r.imageData === "string" && r.imageData.length > 0 && r.imageData.length < 8_000_000 && !isPlaceholderImage(r.imageData) && isSafeImageSrc(r.imageData)) {
+      if (typeof r.imageData === "string" && r.imageData.length > 0 && r.imageData.length < 8_000_000 && !isPlaceholderImage(r.imageData)) {
         imageData = r.imageData;
       }
       return {
@@ -2340,17 +2518,17 @@
         category: CATEGORIES.includes(r.category) ? r.category : "עיקריות",
         glutenFree: !!r.glutenFree,
         favorite: !!r.favorite, deleted: false,
-        createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now(),
-        sourceUrl: str(r.sourceUrl, 2000)
+        createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now()
       };
     }
 
     async function prepareRecipeForExport(r) {
+      // Export-only: smaller dimensions + always recompress; omit placeholder images
       let imageData = null;
-      if (r.imageData && !isPlaceholderImage(r.imageData) && /^data:image\//.test(r.imageData) && isSafeImageSrc(r.imageData)) {
+      if (r.imageData && !isPlaceholderImage(r.imageData) && /^data:image\//.test(r.imageData)) {
         imageData = await compressImageData(r.imageData, 420, 0.68, { force: true });
-        if (isPlaceholderImage(imageData) || !isSafeImageSrc(imageData)) imageData = null;
-      } else if (r.imageData && /^https?:\/\//i.test(r.imageData) && isSafeImageSrc(r.imageData)) {
+        if (isPlaceholderImage(imageData)) imageData = null;
+      } else if (r.imageData && /^https?:\/\//i.test(r.imageData)) {
         imageData = r.imageData;
       }
       return {
@@ -2362,8 +2540,7 @@
         category: CATEGORIES.includes(r.category) ? r.category : "עיקריות",
         glutenFree: !!r.glutenFree,
         favorite: !!r.favorite,
-        createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now(),
-        sourceUrl: r.sourceUrl || ""
+        createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now()
       };
     }
 
@@ -2379,6 +2556,7 @@
           showProgress(`דוחס תמונות לייצוא… ${i + 1}/${total}`);
           setBusy(btn, true, `⏳ ${i + 1}/${total}`);
           prepared.push(await prepareRecipeForExport(recipes[i]));
+          // yield to UI so progress toast updates
           await new Promise((r) => setTimeout(r, 0));
         }
         showProgress("יוצר קובץ JSON...");
@@ -2387,8 +2565,8 @@
         const defaultName = "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
         clearProgress();
         const name = await showConfirm({
-          title: "ייצוא מתכונים", message: "בחר שם לקובץ הגיבוי (תמונות נדחסות ל־420px כדי לחסוך מקום):",
-          confirmText: "⬇️ יצא", danger: false, input: true, inputValue: defaultName
+          title: "ייצוא מתכונים", message: "בחר שם לקובץ הגיבוי:",
+          confirmText: "⬇️ ייצא", danger: false, input: true, inputValue: defaultName
         });
         if (!name) return;
         const filename = name.endsWith(".json") ? name : name + ".json";
@@ -2452,7 +2630,7 @@
       reader.readAsText(file);
     }
 
-    // ---------- Local search ----------
+    // ---------- Local Search (live, debounced) + category filter ----------
     let searchTimer = null;
     function buildFilterFn() {
       const word = document.getElementById("search-word").value.trim().toLowerCase();
@@ -2493,26 +2671,17 @@
 
     // ---------- Init ----------
     document.addEventListener("DOMContentLoaded", async () => {
-      // Populate category selects from array
-      renderCategoryOptions(document.getElementById("category"), CATEGORIES[0]);
-      renderCategoryOptions(document.getElementById("url-preview-category"), "עיקריות");
-      renderCategoryOptions(document.getElementById("category-filter"), "", true);
-
-      // Theme: respect saved preference or system
-      const savedTheme = localStorage.getItem("recipeTheme")
-        || (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      const savedTheme = localStorage.getItem("recipeTheme") || "dark";
       setTheme(savedTheme);
 
-      // Request persistent storage
-      requestPersistentStorage();
-
-      // PWA service worker (optional)
+      // ---------- PWA: register service worker when sw.js is hosted alongside ----------
       if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-        navigator.serviceWorker.register("sw.js").catch(() => {});
+        navigator.serviceWorker.register("sw.js").catch(() => { /* sw.js not present – app works fully without it */ });
       }
 
       try {
         await initDB();
+        // Purge recipes that were soft-deleted and never restored
         const allWithDeleted = await getAllRecipes({ includeDeleted: true });
         for (const r of allWithDeleted) {
           if (r.deleted && (!r.deletedAt || Date.now() - r.deletedAt > 60000)) {
@@ -2529,15 +2698,9 @@
         const form = document.getElementById("add-form");
         const isOpen = form.classList.toggle("open");
         document.getElementById("toggleAddBtn").textContent = isOpen ? "✖️ סגור טופס" : "➕ הוסף מתכון";
-        if (!isOpen && editingId) resetAddForm();
       };
 
       document.getElementById("saveRecipeBtn").onclick = addRecipe;
-      document.getElementById("cancelEditBtn").onclick = () => {
-        resetAddForm();
-        const form = document.getElementById("add-form");
-        if (form.classList.contains("open")) document.getElementById("toggleAddBtn").click();
-      };
       document.getElementById("themeBtn").onclick = toggleTheme;
       document.getElementById("helpBtn").onclick = () => document.getElementById("helpModal").classList.add("open");
       document.getElementById("closeHelp").onclick = () => document.getElementById("helpModal").classList.remove("open");
@@ -2563,7 +2726,7 @@
 
       document.getElementById("searchBtn").onclick = applySearch;
       document.getElementById("clearSearchBtn").onclick = resetFilters;
-      document.getElementById("search-word").addEventListener("input", doSearch);
+      document.getElementById("search-word").addEventListener("input", doSearch); // live filtering
       document.getElementById("search-word").addEventListener("keydown", (e) => { if (e.key === "Enter") applySearch(); });
 
       document.getElementById("category-filter").onchange = () => {
@@ -2579,8 +2742,12 @@
           refresh();
         };
       }
-      document.getElementById("sort-select").onchange = () => render();
+      document.getElementById("sort-select").onchange = () => {
+        const filtered = currentFilterFn ? cacheAll.filter(currentFilterFn) : cacheAll;
+        renderRecipes(sortRecipes(filtered));
+      };
 
+      // HTML import section
       document.getElementById("urlClearBtn").onclick = clearUrlImport;
       document.getElementById("urlAddToBookBtn").onclick = addScrapedRecipeToBook;
       document.getElementById("urlParseHtmlBtn").onclick = parseFromPastedHtml;
@@ -2597,6 +2764,7 @@
         e.target.value = "";
       };
 
+      // Drag & drop: add-form image
       const addDrop = document.getElementById("add-image-drop");
       setupImageDropZone(addDrop, (data) => {
         addFormImageData = data;
@@ -2614,6 +2782,7 @@
         prev.style.display = "inline-block";
       };
 
+      // Drag & drop: HTML-import preview image
       setupImageDropZone(document.getElementById("url-preview-image-wrap"), (data) => {
         urlImportState.imageData = data;
         const imgEl = document.getElementById("url-preview-image");
@@ -2631,14 +2800,17 @@
         htmlArrow.textContent = open ? "▲" : "▼";
       };
 
+      // Lightbox
       const lightbox = document.getElementById("lightbox");
       lightbox.onclick = () => lightbox.classList.remove("open");
 
+      // Cooking mode
       document.getElementById("cookClose").onclick = closeCookMode;
       document.getElementById("cookPrev").onclick = () => cookNav(-1);
       document.getElementById("cookNext").onclick = () => cookNav(1);
       document.getElementById("cookModal").onclick = (e) => { if (e.target.id === "cookModal") closeCookMode(); };
 
+      // Global keyboard: Esc closes modals; arrows navigate cooking steps
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           document.querySelectorAll(".modal.open").forEach((m) => m.classList.remove("open"));
@@ -2654,9 +2826,6 @@
       });
       scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
     });
-
-    // Expose for edit-from-card (optional)
-    window.startEditRecipe = startEditRecipe;
   </script>
 </body>
 </html>
