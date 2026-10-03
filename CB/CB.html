@@ -207,6 +207,15 @@
       .save-indicator.show { opacity: 1; }
       .editable { display: block; min-height: 1.2em; outline: none; white-space: pre-wrap; }
       .editable[contenteditable="true"] { background: rgba(255, 165, 0, 0.15); border-radius: 4px; padding: 2px 4px; }
+      /* quantity sits inline inside recipe-meta – keep it editable even when empty */
+      .recipe-meta .editable[data-field="quantity"] {
+        display: inline-block; min-width: 4.5em; min-height: 1.2em;
+        vertical-align: baseline; white-space: pre-wrap;
+      }
+      .recipe-meta .editable[data-field="quantity"][contenteditable="true"],
+      .recipe-meta .editable[data-field="quantity"][contenteditable="plaintext-only"] {
+        min-width: 8em; padding: 2px 6px;
+      }
       .editable-select { font-size: 0.9rem; padding: 4px 8px; border-radius: 8px; max-width: 160px; display: inline-block; }
       .toast {
         position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 12px; color: #fff;
@@ -457,6 +466,10 @@
           <div class="field" style="margin-top:8px;">
             <label>קטגוריה</label>
             <select id="url-preview-category"></select>
+          </div>
+          <div class="field" style="margin-top:8px;">
+            <label for="url-preview-quantity">לכמות</label>
+            <input type="text" id="url-preview-quantity" placeholder="למשל: 4 מנות" />
           </div>
           <div class="field" style="margin-top:8px;display:flex;align-items:center;gap:8px;">
             <input type="checkbox" id="url-preview-glutenFree" style="width:auto;" />
@@ -1669,6 +1682,8 @@
       document.getElementById("url-preview-ingredients").value = parsed.ingredients;
       document.getElementById("url-preview-instructions").value = parsed.instructions;
       document.getElementById("url-preview-category").value = mapScrapedCategory(parsed.categoryHint);
+      const qtyEl = document.getElementById("url-preview-quantity");
+      if (qtyEl) qtyEl.value = (parsed.quantity || "").toString().trim();
       const imgEl = document.getElementById("url-preview-image");
       const noImg = document.getElementById("url-preview-no-image");
       if (parsed.image && isSafeImageSrc(parsed.image)) {
@@ -1708,6 +1723,7 @@
       let ingredients = removeEmptyLines(document.getElementById("url-preview-ingredients").value);
       let instructions = removeEmptyLines(document.getElementById("url-preview-instructions").value);
       const category = document.getElementById("url-preview-category").value;
+      const quantity = (document.getElementById("url-preview-quantity")?.value || "").trim();
       const glutenFree = !!(document.getElementById("url-preview-glutenFree") && document.getElementById("url-preview-glutenFree").checked);
       let imageData = urlImportState.imageData;
 
@@ -1785,7 +1801,7 @@
         await warnIfStorageLow();
         if (imageData && !isSafeImageSrc(imageData)) imageData = null;
         const newRecipe = {
-          title, quantity: "", ingredients, instructions, imageData: imageData || null, category,
+          title, quantity, ingredients, instructions, imageData: imageData || null, category,
           sourceUrl: safeHttpUrl(urlImportState.sourceUrl),
           glutenFree, favorite: false, createdAt: Date.now()
         };
@@ -1819,6 +1835,8 @@
       document.getElementById("url-preview-title").value = "";
       document.getElementById("url-preview-ingredients").value = "";
       document.getElementById("url-preview-instructions").value = "";
+      const qtyPreview = document.getElementById("url-preview-quantity");
+      if (qtyPreview) qtyPreview.value = "";
       document.getElementById("url-preview-image").style.display = "none";
       document.getElementById("url-preview-no-image").style.display = "none";
       const gfPreview = document.getElementById("url-preview-glutenFree");
@@ -2008,8 +2026,28 @@
       const catSpan = card.querySelector('[data-field="category"]');
       let catSelect = null;
 
+      // Shared save helper so exit-edit can flush pending changes before locking
+      const saveFieldFromEl = (el, field) => {
+        let value = (el.innerText || "").replace(/\u00a0/g, " ");
+        if (field === "title" || field === "quantity") value = value.replace(/\s*\n\s*/g, " ").trim();
+        if (value === (recipe[field] || "")) return;
+        if (field !== "quantity" && !value.trim()) {
+          showToast("השדה לא יכול להיות ריק", { isError: true });
+          el.innerText = recipe[field] || "";
+          return;
+        }
+        const prev = recipe[field];
+        recipe[field] = value; // optimistic
+        searchIndex.delete(recipe);
+        updateRecipeInDB(recipe.id, { [field]: value })
+          .then(() => flashSaved(card))
+          .catch(() => { recipe[field] = prev; searchIndex.delete(recipe); showToast("שגיאה בעדכון", { isError: true }); });
+      };
+
       editables.forEach((el) => {
         const field = el.dataset.field;
+        // category is edited via <select>, not contenteditable – skip to avoid overwriting select changes
+        if (field === "category") return;
         if (newState) {
           el.contentEditable = "plaintext-only";
           if (el.contentEditable !== "plaintext-only") el.contentEditable = "true";
@@ -2018,20 +2056,7 @@
           clearTimeout(el._saveT);
           const save = () => {
             clearTimeout(el._saveT);
-            let value = el.innerText.replace(/\u00a0/g, " ");
-            if (field === "title" || field === "quantity") value = value.replace(/\s*\n\s*/g, " ").trim();
-            if (value === (recipe[field] || "")) return;
-            if (field !== "quantity" && !value.trim()) {
-              showToast("השדה לא יכול להיות ריק", { isError: true });
-              el.innerText = recipe[field] || "";
-              return;
-            }
-            const prev = recipe[field];
-            recipe[field] = value; // optimistic: exit-edit re-render right after blur sees the new value
-            searchIndex.delete(recipe);
-            updateRecipeInDB(recipe.id, { [field]: value })
-              .then(() => flashSaved(card))
-              .catch(() => { recipe[field] = prev; searchIndex.delete(recipe); showToast("שגיאה בעדכון", { isError: true }); });
+            saveFieldFromEl(el, field);
           };
           el.oninput = () => { clearTimeout(el._saveT); el._saveT = setTimeout(save, 500); };
           el.onblur = save;
@@ -2041,13 +2066,17 @@
             document.execCommand("insertText", false, (e.clipboardData || window.clipboardData).getData("text/plain"));
           };
         } else {
-          el.contentEditable = "false";
+          // Flush any pending debounce / unsaved DOM edits before locking
           clearTimeout(el._saveT);
+          if (el.isContentEditable || el.contentEditable === "true" || el.contentEditable === "plaintext-only") {
+            saveFieldFromEl(el, field);
+          }
+          el.contentEditable = "false";
           el.oninput = null;
           el.onblur = null;
           el.onkeydown = null;
           el.onpaste = null;
-          // Restore fraction-displayed value
+          // Restore fraction-displayed value from (possibly just-updated) recipe
           el.innerHTML = esc(replaceFractions(recipe[field] || "")).replace(/\n/g, "<br>");
         }
       });
