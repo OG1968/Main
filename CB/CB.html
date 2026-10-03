@@ -1906,27 +1906,47 @@
           .toLowerCase();
       }
 
-      // ---------- Image compression (async, non-blocking where possible) ----------
-      async function compressImageData(
-        dataUrl,
-        maxDim = 640,
-        quality = 0.72,
-        opts = {},
-      ) {
-        if (!dataUrl || !/^data:image\//.test(dataUrl)) return dataUrl;
+      // ---------- Image compression: fit to the recipe "icon" box, never enlarge ----------
+      // The recipe icon is drawn inside a box of max 100% x 180 CSS px (card is at most ~650px wide).
+      // We store the image at 2x of that box (sharp on retina screens) and never upscale.
+      const ICON_CSS_W = 650;
+      const ICON_CSS_H = 180;
+      const ICON_SCALE = 2;
+      const ICON_MAX_W = ICON_CSS_W * ICON_SCALE;
+      const ICON_MAX_H = ICON_CSS_H * ICON_SCALE;
+      const ICON_Q_WEBP = 0.86;
+      const ICON_Q_JPEG = 0.88;
+      let _webpEncodeOk = null;
+      function canEncodeWebp() {
+        if (_webpEncodeOk === null) {
+          try {
+            const c = document.createElement("canvas");
+            c.width = c.height = 1;
+            _webpEncodeOk = c
+              .toDataURL("image/webp", 0.8)
+              .startsWith("data:image/webp");
+          } catch (_) {
+            _webpEncodeOk = false;
+          }
+        }
+        return _webpEncodeOk;
+      }
+      async function compressImageData(dataUrl, _legacyMaxDim, _legacyQ, opts) {
+        if (arguments.length > 1 && typeof _legacyMaxDim === "object")
+          opts = _legacyMaxDim;
+        opts = opts || {};
+        if (!dataUrl || !/^data:image\//i.test(dataUrl)) return dataUrl;
         if (/^data:image\/svg\+xml/i.test(dataUrl)) return dataUrl;
-        if (!opts.force && dataUrl.length < 180000) return dataUrl;
+        let bitmap = null;
         try {
           let blob;
           try {
-            const res = await fetch(dataUrl);
-            blob = await res.blob();
+            blob = await (await fetch(dataUrl)).blob();
           } catch (_) {
             return dataUrl;
           }
           if (!blob || !blob.type.startsWith("image/")) return dataUrl;
 
-          let bitmap = null;
           if (typeof createImageBitmap === "function") {
             try {
               bitmap = await createImageBitmap(blob);
@@ -1950,28 +1970,58 @@
             bitmap = img;
           }
           if (!w0 || !h0) return dataUrl;
-          const needsResize = w0 > maxDim || h0 > maxDim;
-          if (!opts.force && !needsResize && dataUrl.length < 400000) {
-            if (bitmap && bitmap.close) bitmap.close();
+
+          // fit inside the icon box, never enlarge
+          const scale = Math.min(1, ICON_MAX_W / w0, ICON_MAX_H / h0);
+          const fitsBox = scale >= 1;
+          const isLossy = /^image\/(jpeg|webp)$/i.test(blob.type);
+          // already icon-sized and already lossy-compressed: keep as is (avoid generation loss)
+          if (fitsBox && isLossy) {
+            if (bitmap.close) bitmap.close();
             return dataUrl;
           }
-          const scale = needsResize
-            ? Math.min(1, maxDim / Math.max(w0, h0))
-            : 1;
           const w = Math.max(1, Math.round(w0 * scale));
           const h = Math.max(1, Math.round(h0 * scale));
-          const canvas = document.createElement("canvas");
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext("2d");
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = "medium";
-          ctx.drawImage(bitmap, 0, 0, w, h);
-          if (bitmap && bitmap.close) bitmap.close();
-          const isPng =
-            blob.type === "image/png" || /^data:image\/png/i.test(dataUrl);
-          const outBlob = await new Promise((res) =>
-            canvas.toBlob(res, isPng ? "image/png" : "image/jpeg", quality),
+
+          // step-down resize (halving) for the best downscale quality
+          let src = bitmap,
+            sw = w0,
+            sh = h0;
+          const mk = (cw, ch) => {
+            const c = document.createElement("canvas");
+            c.width = cw;
+            c.height = ch;
+            const x = c.getContext("2d");
+            x.imageSmoothingEnabled = true;
+            x.imageSmoothingQuality = "high";
+            return [c, x];
+          };
+          const useWebp = canEncodeWebp();
+          while (sw / 2 >= w && sh / 2 >= h && sw > w * 2) {
+            const nw = Math.max(w, Math.round(sw / 2));
+            const nh = Math.max(h, Math.round(sh / 2));
+            const [c, x] = mk(nw, nh);
+            x.drawImage(src, 0, 0, nw, nh);
+            src = c;
+            sw = nw;
+            sh = nh;
+          }
+          const [canvas, ctx] = mk(w, h);
+          if (!useWebp) {
+            // JPEG has no alpha: paint a white background first
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, w, h);
+          }
+          ctx.drawImage(src, 0, 0, w, h);
+          if (bitmap.close) bitmap.close();
+          bitmap = null;
+
+          let outBlob = await new Promise((res) =>
+            canvas.toBlob(
+              res,
+              useWebp ? "image/webp" : "image/jpeg",
+              useWebp ? ICON_Q_WEBP : ICON_Q_JPEG,
+            ),
           );
           if (!outBlob) return dataUrl;
           const outUrl = await new Promise((res) => {
@@ -1980,11 +2030,15 @@
             r.onerror = () => res(dataUrl);
             r.readAsDataURL(outBlob);
           });
-          return (outUrl && outUrl.length < dataUrl.length) || opts.force
+          if (!outUrl || !/^data:image\//i.test(outUrl)) return dataUrl;
+          // keep the original only if it is already smaller and not oversized
+          return outUrl.length < dataUrl.length || !fitsBox || opts.force
             ? outUrl
             : dataUrl;
         } catch (_) {
           return dataUrl;
+        } finally {
+          if (bitmap && bitmap.close) bitmap.close();
         }
       }
 
@@ -2132,10 +2186,18 @@
         const attempts = [
           "https://images.weserv.nl/?url=" +
             encodeURIComponent(bare) +
-            "&output=jpg&q=82&w=800&n=-1",
+            "&output=jpg&q=92&w=" +
+            ICON_MAX_W +
+            "&h=" +
+            ICON_MAX_H +
+            "&fit=inside&we&n=-1",
           "https://wsrv.nl/?url=" +
             encodeURIComponent(bare) +
-            "&output=jpg&q=82&w=800&n=-1",
+            "&output=jpg&q=92&w=" +
+            ICON_MAX_W +
+            "&h=" +
+            ICON_MAX_H +
+            "&fit=inside&we&n=-1",
           url,
           "https://corsproxy.io/?" + encodeURIComponent(url),
           "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
@@ -3247,15 +3309,16 @@
           /^https?:\/\//i.test(imageData) &&
           isSafeImageSrc(imageData)
         );
-        const needCompress = !!(imageData && /^data:image\//.test(imageData));
+        const needCompress = !!(
+          imageData &&
+          (/^data:image\//.test(imageData) || needDownload)
+        );
         setBusy(btn, true, doTranslate ? "⏳ מתרגם..." : "⏳ מוסיף...");
 
         const phases = [];
         if (doTranslate) phases.push({ id: "translate", weight: 45 });
         if (needDownload) phases.push({ id: "download", weight: 35 });
-        if (needDownload && needCompress)
-          phases.push({ id: "compress", weight: 12 });
-        else if (needCompress) phases.push({ id: "compress", weight: 12 });
+        if (needCompress) phases.push({ id: "compress", weight: 12 });
         phases.push({ id: "save", weight: 8 });
         const totalW = phases.reduce((s, p) => s + p.weight, 0);
         let cursor = 0;
@@ -4138,26 +4201,38 @@
         };
       }
 
-      function prepareRecipeForExport(r) {
+      // compact export: empty / default fields are omitted (sanitizeRecipe restores the defaults on import)
+      async function prepareRecipeForExport(r, imgCache) {
         let imageData = null;
         if (
           r.imageData &&
           !isPlaceholderImage(r.imageData) &&
           isSafeImageSrc(r.imageData)
-        )
-          imageData = r.imageData; // original quality, no re-compression
-        return {
+        ) {
+          imageData = r.imageData;
+          if (/^data:image\//i.test(imageData)) {
+            const key = r.id != null ? r.id + ":" + imageData.length : null;
+            if (key && imgCache.has(key)) imageData = imgCache.get(key);
+            else {
+              imageData = await compressImageData(imageData);
+              if (key) imgCache.set(key, imageData);
+            }
+          }
+        }
+        const out = {
           title: r.title || "מתכון ללא שם",
-          quantity: r.quantity || "",
           ingredients: r.ingredients || "",
           instructions: r.instructions || "",
-          imageData,
           category: CATEGORIES.includes(r.category) ? r.category : "עיקריות",
-          glutenFree: !!r.glutenFree,
-          favorite: !!r.favorite,
           createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now(),
-          sourceUrl: safeHttpUrl(r.sourceUrl),
         };
+        if (r.quantity) out.quantity = r.quantity;
+        if (imageData) out.imageData = imageData;
+        if (r.glutenFree) out.glutenFree = true;
+        if (r.favorite) out.favorite = true;
+        const su = safeHttpUrl(r.sourceUrl);
+        if (su) out.sourceUrl = su;
+        return out;
       }
 
       function downloadBlob(blob, filename) {
@@ -4181,15 +4256,22 @@
             return;
           }
           setBusy(btn, true, "⏳ מכין ייצוא...");
-          const blob = new Blob(
-            [JSON.stringify(recipes.map(prepareRecipeForExport))],
-            { type: "application/json" },
-          );
+          const imgCache = new Map();
+          const prepared = [];
+          for (let i = 0; i < recipes.length; i++) {
+            setBusy(btn, true, `⏳ מכווץ תמונות ${i + 1}/${recipes.length}...`);
+            prepared.push(await prepareRecipeForExport(recipes[i], imgCache));
+          }
+          setBusy(btn, true, "⏳ מכין ייצוא...");
+          const blob = new Blob([JSON.stringify(prepared)], {
+            type: "application/json",
+          });
           const defaultName =
             "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
           const name = await showConfirm({
             title: "ייצוא מתכונים",
-            message: "בחר שם לקובץ הגיבוי (התמונות נשמרות באיכות המקורית):",
+            message:
+              "בחר שם לקובץ הגיבוי (התמונות מכווצות לגודל האייקון באיכות גבוהה):",
             confirmText: "🔻 יצא",
             danger: false,
             input: true,
