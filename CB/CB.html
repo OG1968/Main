@@ -1906,6 +1906,138 @@
           .toLowerCase();
       }
 
+      // ---------- Content fingerprint ("barcode") – duplicate detection independent of the title ----------
+      // MinHash over 3-word shingles of ingredients + instructions. Content-based (not position-based),
+      // so an added line, different numbering/niqqud/punctuation or scaled quantities barely change it.
+      // Format: "<version>:" + 32 x 4 hex chars. Bump FP_VER if the algorithm changes (old values are rebuilt on load).
+      const FP_VER = 1;
+      const FP_N = 32;
+      const FP_BLOCK = 0.9; // >= : treated as the same recipe, blocked
+      const FP_WARN = 0.6; //  >= : "similar recipe", ask the user
+      const FP_SEEDS = Array.from({ length: FP_N }, (_, k) =>
+        Math.imul(k + 1, 0x9e3779b1),
+      );
+      function fpNormText(s) {
+        return String(s || "")
+          .toLowerCase()
+          .normalize("NFC")
+          .replace(/\p{M}+/gu, "") // niqqud / combining marks
+          .replace(/[^\p{L}\s]+/gu, " ") // digits, punctuation, fractions, emoji, maqaf -> space
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+      function fpHash32(str) {
+        // FNV-1a + final avalanche
+        let h = 0x811c9dc5;
+        for (let i = 0; i < str.length; i++) {
+          h ^= str.charCodeAt(i);
+          h = Math.imul(h, 0x01000193);
+        }
+        h ^= h >>> 15;
+        h = Math.imul(h, 0x2c1b3c6d);
+        h ^= h >>> 12;
+        return h >>> 0;
+      }
+      function makeFingerprint(r) {
+        const words = fpNormText(
+          (r.ingredients || "") + " " + (r.instructions || ""),
+        )
+          .split(" ")
+          .filter((w) => w.length > 1);
+        if (words.length < 3) return "";
+        const mins = new Array(FP_N).fill(0xffff);
+        const seen = new Set();
+        for (let i = 0; i <= words.length - 3; i++) {
+          const sh = words[i] + " " + words[i + 1] + " " + words[i + 2];
+          if (seen.has(sh)) continue;
+          seen.add(sh);
+          const base = fpHash32(sh);
+          for (let k = 0; k < FP_N; k++) {
+            let y = Math.imul(base ^ FP_SEEDS[k], 0x85ebca6b);
+            y ^= y >>> 13;
+            y = Math.imul(y, 0xc2b2ae35);
+            y ^= y >>> 16;
+            const v = y & 0xffff;
+            if (v < mins[k]) mins[k] = v;
+          }
+        }
+        return (
+          FP_VER +
+          ":" +
+          mins.map((m) => m.toString(16).padStart(4, "0")).join("")
+        );
+      }
+      const _fpParsed = new Map();
+      function fpParse(fp) {
+        if (typeof fp !== "string" || !fp.startsWith(FP_VER + ":")) return null;
+        let a = _fpParsed.get(fp);
+        if (a === undefined) {
+          const hex = fp.slice(FP_VER.toString().length + 1);
+          if (!/^[0-9a-f]+$/.test(hex) || hex.length !== FP_N * 4) a = null;
+          else {
+            a = new Uint16Array(FP_N);
+            for (let k = 0; k < FP_N; k++)
+              a[k] = parseInt(hex.substr(k * 4, 4), 16);
+          }
+          if (_fpParsed.size > 20000) _fpParsed.clear();
+          _fpParsed.set(fp, a);
+        }
+        return a;
+      }
+      function fpSimilarity(a, b) {
+        const x = fpParse(a),
+          y = fpParse(b);
+        if (!x || !y) return 0;
+        let same = 0;
+        for (let k = 0; k < FP_N; k++) if (x[k] === y[k]) same++;
+        return same / FP_N;
+      }
+      // best match with similarity >= FP_WARN, or null
+      function findSimilar(fp, list = cacheAll, excludeId = null) {
+        if (!fpParse(fp)) return null;
+        let best = null;
+        for (const ex of list) {
+          if (excludeId != null && ex.id === excludeId) continue;
+          const sim = fpSimilarity(fp, ex.fp);
+          if (sim >= FP_WARN && (!best || sim > best.sim))
+            best = { recipe: ex, sim };
+        }
+        return best;
+      }
+      // true = OK to add, false = blocked / user cancelled
+      async function confirmNotDuplicate(fp) {
+        const m = findSimilar(fp);
+        if (!m) return true;
+        const pct = Math.round(m.sim * 100);
+        const name = m.recipe.title || "מתכון ללא שם";
+        if (m.sim >= FP_BLOCK) {
+          showToast(`המתכון כבר קיים בספר: "${name}" (דמיון ${pct}%)`, {
+            isError: true,
+            duration: 6000,
+          });
+          return false;
+        }
+        return !!(await showConfirm({
+          title: "נמצא מתכון דומה",
+          message: `במתכון "${name}" שכבר בספר יש דמיון של ${pct}% בתוכן. להוסיף בכל זאת?`,
+          confirmText: "➕ הוסף בכל זאת",
+          danger: false,
+        }));
+      }
+      // one-time (per FP_VER) fill for recipes saved before this feature existed
+      async function backfillFingerprints() {
+        const stale = cacheAll.filter((r) => !fpParse(r.fp));
+        if (!stale.length) return;
+        stale.forEach((r) => {
+          r.fp = makeFingerprint(r);
+        });
+        const changed = stale.filter((r) => r.fp);
+        if (!changed.length) return;
+        await runTx("readwrite", (s) => {
+          changed.forEach((r) => s.put(r));
+        });
+      }
+
       // ---------- Image compression: fit to the recipe "icon" box, never enlarge ----------
       // The recipe icon is drawn inside a box of max 100% x 180 CSS px (card is at most ~650px wide).
       // We store the image at 2x of that box (sharp on retina screens) and never upscale.
@@ -2186,10 +2318,18 @@
         const attempts = [
           "https://images.weserv.nl/?url=" +
             encodeURIComponent(bare) +
-            "&output=jpg&q=92&w=" + ICON_MAX_W + "&h=" + ICON_MAX_H + "&fit=inside&we&n=-1",
+            "&output=jpg&q=92&w=" +
+            ICON_MAX_W +
+            "&h=" +
+            ICON_MAX_H +
+            "&fit=inside&we&n=-1",
           "https://wsrv.nl/?url=" +
             encodeURIComponent(bare) +
-            "&output=jpg&q=92&w=" + ICON_MAX_W + "&h=" + ICON_MAX_H + "&fit=inside&we&n=-1",
+            "&output=jpg&q=92&w=" +
+            ICON_MAX_W +
+            "&h=" +
+            ICON_MAX_H +
+            "&fit=inside&we&n=-1",
           url,
           "https://corsproxy.io/?" + encodeURIComponent(url),
           "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
@@ -3378,6 +3518,9 @@
             showToast("המתכון כבר קיים בספר", { isError: true });
             return;
           }
+          const fp = makeFingerprint({ ingredients, instructions });
+          hideImportProgress(); // so the confirm dialog (if any) is not hidden behind the progress overlay
+          if (!(await confirmNotDuplicate(fp))) return;
           mapProgress("save", 0.6, "שומר למסד נתונים...");
           await warnIfStorageLow();
           if (imageData && !isSafeImageSrc(imageData)) imageData = null;
@@ -3392,6 +3535,7 @@
             glutenFree,
             favorite: false,
             createdAt: Date.now(),
+            fp,
           };
           newRecipe.id = await saveRecipeToDB(newRecipe);
           cacheAll.push(newRecipe);
@@ -3757,12 +3901,19 @@
             return;
           }
           const prev = recipe[field];
+          const prevFp = recipe.fp;
           recipe[field] = value; // optimistic
           searchIndex.delete(recipe);
-          updateRecipeInDB(recipe.id, { [field]: value })
+          const updates = { [field]: value };
+          if (field === "ingredients" || field === "instructions") {
+            recipe.fp = makeFingerprint(recipe);
+            updates.fp = recipe.fp;
+          }
+          updateRecipeInDB(recipe.id, updates)
             .then(() => flashSaved(card))
             .catch(() => {
               recipe[field] = prev;
+              recipe.fp = prevFp;
               searchIndex.delete(recipe);
               showToast("שגיאה בעדכון", { isError: true });
             });
@@ -4119,6 +4270,8 @@
             });
             return;
           }
+          const fp = makeFingerprint({ ingredients, instructions });
+          if (!(await confirmNotDuplicate(fp))) return;
           let imageData = addFormImageData || null;
           if (!imageData && imageInput.files && imageInput.files[0])
             imageData = await processImageFile(imageInput.files[0]);
@@ -4135,6 +4288,7 @@
             favorite: false,
             createdAt: Date.now(),
             sourceUrl: "",
+            fp,
           };
           recipe.id = await saveRecipeToDB(recipe);
           cacheAll.push(recipe);
@@ -4190,6 +4344,8 @@
           favorite: !!r.favorite,
           createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now(),
           sourceUrl: safeHttpUrl(r.sourceUrl),
+          // always recomputed from the content – a file-supplied fp is never trusted
+          fp: makeFingerprint({ ingredients, instructions }),
         };
       }
 
@@ -4224,6 +4380,8 @@
         if (r.favorite) out.favorite = true;
         const su = safeHttpUrl(r.sourceUrl);
         if (su) out.sourceUrl = su;
+        const fp = fpParse(r.fp) ? r.fp : makeFingerprint(r);
+        if (fp) out.fp = fp;
         return out;
       }
 
@@ -4251,11 +4409,7 @@
           const imgCache = new Map();
           const prepared = [];
           for (let i = 0; i < recipes.length; i++) {
-            setBusy(
-              btn,
-              true,
-              `⏳ מכווץ תמונות ${i + 1}/${recipes.length}...`,
-            );
+            setBusy(btn, true, `⏳ מכווץ תמונות ${i + 1}/${recipes.length}...`);
             prepared.push(await prepareRecipeForExport(recipes[i], imgCache));
           }
           setBusy(btn, true, "⏳ מכין ייצוא...");
@@ -4266,7 +4420,8 @@
             "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
           const name = await showConfirm({
             title: "ייצוא מתכונים",
-            message: "בחר שם לקובץ הגיבוי (התמונות מכווצות לגודל האייקון באיכות גבוהה):",
+            message:
+              "בחר שם לקובץ הגיבוי (התמונות מכווצות לגודל האייקון באיכות גבוהה):",
             confirmText: "🔻 יצא",
             danger: false,
             input: true,
@@ -4330,6 +4485,16 @@
               }
               const key = recipeKey(complete.title, complete.ingredients);
               if (existingKeys.has(key)) {
+                skipped++;
+                continue;
+              }
+              // content-based duplicate (>= 90% similar), against the book and against earlier items of this file
+              const sim1 = findSimilar(complete.fp);
+              const sim2 = findSimilar(complete.fp, toAdd);
+              if (
+                (sim1 && sim1.sim >= FP_BLOCK) ||
+                (sim2 && sim2.sim >= FP_BLOCK)
+              ) {
                 skipped++;
                 continue;
               }
@@ -4461,6 +4626,7 @@
           }
           cacheAll = all.filter((r) => !r.deleted);
           render();
+          backfillFingerprints().catch((e) => console.error(e)); // non-blocking
         } catch (err) {
           showToast("שגיאה באתחול מסד הנתונים", { isError: true });
           console.error(err);
