@@ -2186,18 +2186,10 @@
         const attempts = [
           "https://images.weserv.nl/?url=" +
             encodeURIComponent(bare) +
-            "&output=jpg&q=92&w=" +
-            ICON_MAX_W +
-            "&h=" +
-            ICON_MAX_H +
-            "&fit=inside&we&n=-1",
+            "&output=jpg&q=92&w=" + ICON_MAX_W + "&h=" + ICON_MAX_H + "&fit=inside&we&n=-1",
           "https://wsrv.nl/?url=" +
             encodeURIComponent(bare) +
-            "&output=jpg&q=92&w=" +
-            ICON_MAX_W +
-            "&h=" +
-            ICON_MAX_H +
-            "&fit=inside&we&n=-1",
+            "&output=jpg&q=92&w=" + ICON_MAX_W + "&h=" + ICON_MAX_H + "&fit=inside&we&n=-1",
           url,
           "https://corsproxy.io/?" + encodeURIComponent(url),
           "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
@@ -4259,7 +4251,11 @@
           const imgCache = new Map();
           const prepared = [];
           for (let i = 0; i < recipes.length; i++) {
-            setBusy(btn, true, `⏳ מכווץ תמונות ${i + 1}/${recipes.length}...`);
+            setBusy(
+              btn,
+              true,
+              `⏳ מכווץ תמונות ${i + 1}/${recipes.length}...`,
+            );
             prepared.push(await prepareRecipeForExport(recipes[i], imgCache));
           }
           setBusy(btn, true, "⏳ מכין ייצוא...");
@@ -4270,8 +4266,7 @@
             "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
           const name = await showConfirm({
             title: "ייצוא מתכונים",
-            message:
-              "בחר שם לקובץ הגיבוי (התמונות מכווצות לגודל האייקון באיכות גבוהה):",
+            message: "בחר שם לקובץ הגיבוי (התמונות מכווצות לגודל האייקון באיכות גבוהה):",
             confirmText: "🔻 יצא",
             danger: false,
             input: true,
