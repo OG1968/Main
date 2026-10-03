@@ -163,6 +163,36 @@
       .btn-web:hover { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
       .file-label { display: flex; align-items: center; justify-content: center; cursor: pointer; }
       .file-label input { display: none; }
+      /* ---- Action bar: one compact row, adapts to small screens ---- */
+      .action-bar { display: flex; flex-wrap: nowrap; gap: 8px; margin-bottom: 12px; }
+      .action-bar .btn {
+        flex: 1 1 0; min-width: 0; margin: 0;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        white-space: nowrap; padding: 10px 8px; font-size: 0.9rem;
+      }
+      .action-bar .btn .ico { font-size: 1.1em; line-height: 1; flex-shrink: 0; }
+      .action-bar .btn .lbl { overflow: hidden; text-overflow: ellipsis; }
+      /* small screens: icon above a tiny label */
+      @media (max-width: 600px) {
+        .action-bar { gap: 6px; }
+        .action-bar .btn {
+          flex-direction: column; gap: 2px; padding: 7px 2px;
+          font-size: 0.7rem; font-weight: 600; border-radius: 10px; line-height: 1.15;
+        }
+        .action-bar .btn .ico { font-size: 1.25rem; }
+      }
+      /* very small screens: utility buttons become icon-only, "add" keeps its label */
+      @media (max-width: 420px) {
+        .action-bar { gap: 5px; margin-bottom: 8px; }
+        .action-bar .btn { min-height: 42px; }
+        .action-bar .btn-util { flex: 0 0 44px; padding: 6px 0; }
+        .action-bar .btn-util .lbl {
+          position: absolute; width: 1px; height: 1px; overflow: hidden;
+          clip: rect(0 0 0 0); white-space: nowrap;
+        }
+        .action-bar .btn-add { flex: 1 1 auto; flex-direction: row; gap: 6px; font-size: 0.85rem; padding: 6px 8px; }
+        .action-bar .btn-add .ico { font-size: 1.1rem; }
+      }
       .recipe-card {
         background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
         padding: 14px; margin-bottom: 12px; position: relative; overflow: hidden;
@@ -388,17 +418,13 @@
       <div class="header-spacer" aria-hidden="true"></div>
     </header>
 
-    <div class="btn-row" style="margin-bottom: 12px;">
-      <button class="btn btn-primary" id="exportBtn">⬇️ יצא לקובץ</button>
-      <label class="btn btn-primary file-label">
-        ⬆️ יבא מקובץ
+    <div class="action-bar">
+      <button class="btn btn-primary btn-util" id="exportBtn" title="יצא לקובץ" aria-label="יצא לקובץ"><span class="ico">⬇️</span><span class="lbl">יצא לקובץ</span></button>
+      <label class="btn btn-primary btn-util file-label" title="יבא מקובץ" aria-label="יבא מקובץ"><span class="ico">⬆️</span><span class="lbl">יבא מקובץ</span>
         <input type="file" id="import-file" accept=".json" />
       </label>
-      <button class="btn btn-danger" id="deleteAllBtn">🗑️ מחק הכל</button>
-    </div>
-
-    <div class="btn-row" style="margin-bottom: 12px;">
-      <button class="btn btn-primary" id="toggleAddBtn">➕ הוסף מתכון</button>
+      <button class="btn btn-danger btn-util" id="deleteAllBtn" title="מחק הכל" aria-label="מחק הכל"><span class="ico">🗑️</span><span class="lbl">מחק הכל</span></button>
+      <button class="btn btn-primary btn-add" id="toggleAddBtn" aria-label="הוסף מתכון"><span class="ico">➕</span><span class="lbl">הוסף מתכון</span></button>
     </div>
 
     <section id="add-form">
@@ -881,15 +907,28 @@
     // ---------- Progress UI ----------
     function setBusy(btn, busy, labelBusy, labelIdle) {
       if (!btn) return;
+      const hasIcon = !!btn.querySelector(".ico") || btn.dataset._idleHTML;
       if (busy) {
-        btn.dataset._idleLabel = btn.dataset._idleLabel || btn.textContent;
+        if (hasIcon) {
+          btn.dataset._idleHTML = btn.dataset._idleHTML || btn.innerHTML;
+          const txt = (labelBusy || "⏳ עובד...").replace(/^⏳\s*/, "");
+          btn.innerHTML = '<span class="ico">⏳</span><span class="lbl"></span>';
+          btn.querySelector(".lbl").textContent = txt;
+        } else {
+          btn.dataset._idleLabel = btn.dataset._idleLabel || btn.textContent;
+          btn.textContent = labelBusy || "⏳ עובד...";
+        }
         btn.disabled = true;
-        btn.textContent = labelBusy || "⏳ עובד...";
         btn.style.opacity = "0.75";
         btn.style.cursor = "wait";
       } else {
         btn.disabled = false;
-        btn.textContent = labelIdle || btn.dataset._idleLabel || btn.textContent;
+        if (hasIcon && btn.dataset._idleHTML) {
+          btn.innerHTML = btn.dataset._idleHTML;
+          delete btn.dataset._idleHTML;
+        } else {
+          btn.textContent = labelIdle || btn.dataset._idleLabel || btn.textContent;
+        }
         btn.style.opacity = "";
         btn.style.cursor = "";
       }
@@ -2565,7 +2604,10 @@
       document.getElementById("toggleAddBtn").onclick = () => {
         const form = document.getElementById("add-form");
         const isOpen = form.classList.toggle("open");
-        document.getElementById("toggleAddBtn").textContent = isOpen ? "✖️ סגור טופס" : "➕ הוסף מתכון";
+        const tb = document.getElementById("toggleAddBtn");
+        tb.querySelector(".ico").textContent = isOpen ? "✖️" : "➕";
+        tb.querySelector(".lbl").textContent = isOpen ? "סגור טופס" : "הוסף מתכון";
+        tb.setAttribute("aria-label", isOpen ? "סגור טופס" : "הוסף מתכון");
       };
 
       document.getElementById("saveRecipeBtn").onclick = addRecipe;
