@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1220" />
   <meta name="color-scheme" content="dark light" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' data: blob: https://translate.googleapis.com https://images.weserv.nl https://wsrv.nl https://corsproxy.io https://api.allorigins.win; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'" />
   <title>ספר מתכונים</title>
   <link rel="icon" type="image/png" href="CB.png" />
   <link rel="shortcut icon" type="image/png" href="CB.png" />
   <link rel="apple-touch-icon" href="CB.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800&display=swap" rel="stylesheet" /></noscript>
 
   <style>
       :root {
@@ -110,7 +112,7 @@
       section {
         border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 16px;
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
-        backdrop-filter: blur(6px); box-shadow: var(--shadow);
+        box-shadow: var(--shadow);
       }
       body[data-theme="light"] section { background: #fff; }
       section h2 {
@@ -375,7 +377,7 @@
     </div>
 
     <section id="add-form">
-      <h2>הוספת / עריכת מתכון</h2>
+      <h2>הוספת מתכון</h2>
       <div class="form-grid">
         <div class="field">
           <label for="title">כותרת *</label>
@@ -415,7 +417,6 @@
       </div>
       <div class="btn-row">
         <button class="btn btn-success" id="saveRecipeBtn">💾 שמור מתכון</button>
-        <button class="btn btn-secondary" id="cancelEditBtn" style="display:none;">ביטול עריכה</button>
       </div>
     </section>
 
@@ -551,7 +552,7 @@
       </ol>
       <p style="margin-top:12px;font-size:0.9rem;opacity:0.85;">
         המתכונים נשמרים מקומית בדפדפן. תמונות נדחסות אוטומטית לפני שמירה.<br>
-        מומלץ לייצא גיבוי מדי פעם. תרגום (אופציונלי): Google Translate – ניתן לערוך אחרי ההוספה.
+        מומלץ לייצא גיבוי מדי פעם. תרגום (אופציונלי): Google Translate – ניתן לערוך אחרי ההוספה.<br>פרטיות: הורדת תמונה מכתובת עוברת דרך שירותי צד שלישי (weserv / wsrv / corsproxy / allorigins), ותרגום שולח את הטקסט ל־Google Translate.
       </p>
     </div>
   </div>
@@ -595,14 +596,20 @@
     let currentPage = 1;
     let currentFilterFn = null;
     let cacheAll = [];
-    let editingId = null; // id of recipe currently being edited in add-form
+    const searchIndex = new WeakMap(); // cached lowercase search text per recipe object
+    const heCollator = new Intl.Collator("he");
 
     // ---------- IndexedDB ----------
     function initDB() {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open("RecipeDB", 1);
         request.onerror = () => reject(request.error);
-        request.onsuccess = () => { db = request.result; resolve(db); };
+        request.onblocked = () => showToast("סגור לשוניות אחרות של האפליקציה כדי להשלים עדכון", { isError: true });
+        request.onsuccess = () => {
+          db = request.result;
+          db.onversionchange = () => { db.close(); showToast("האפליקציה עודכנה בלשונית אחרת – רענן את הדף", { isError: true }); };
+          resolve(db);
+        };
         request.onupgradeneeded = (e) => {
           const database = e.target.result;
           if (!database.objectStoreNames.contains("recipes")) {
@@ -663,6 +670,7 @@
     }
 
     // ---------- Confirm modal ----------
+    let confirmCancelFn = null;
     function showConfirm({ title, message, confirmText = "אישור", danger = true, input = false, inputValue = "" }) {
       return new Promise((resolve) => {
         const modal = document.getElementById("confirmModal");
@@ -676,6 +684,7 @@
         wrap.style.display = input ? "block" : "none";
         if (input) { inputEl.value = inputValue; setTimeout(() => inputEl.focus(), 50); }
         const done = (val) => {
+          confirmCancelFn = null;
           modal.classList.remove("open");
           okBtn.onclick = cancelBtn.onclick = closeBtn.onclick = null;
           modal.onclick = null;
@@ -689,6 +698,7 @@
         closeBtn.onclick = () => done(null);
         modal.onclick = (e) => { if (e.target === modal) done(null); };
         inputEl.onkeydown = (e) => { if (e.key === "Enter") okBtn.click(); };
+        confirmCancelFn = () => done(null);
         modal.classList.add("open");
       });
     }
@@ -735,80 +745,43 @@
       }
     }
 
-    // ---------- CRUD ----------
-    function saveRecipeToDB(recipe) {
+    // ---------- CRUD (resolve on tx.oncomplete so commit/quota errors are not missed) ----------
+    function runTx(mode, fn) {
       return new Promise((resolve, reject) => {
-        const tx = db.transaction(["recipes"], "readwrite");
-        const store = tx.objectStore("recipes");
-        const req = store.add(recipe);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
-    function saveRecipesBatch(list) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(["recipes"], "readwrite");
-        const store = tx.objectStore("recipes");
-        list.forEach((r) => store.add(r));
-        tx.oncomplete = () => resolve(list.length);
+        let tx, result;
+        try { tx = db.transaction(["recipes"], mode); } catch (e) { reject(e); return; }
+        try { result = fn(tx.objectStore("recipes")); } catch (e) { try { tx.abort(); } catch (_) {} reject(e); return; }
+        tx.oncomplete = () => resolve(typeof result === "function" ? result() : result);
         tx.onerror = () => reject(tx.error);
-        tx.onabort = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error("aborted"));
       });
     }
+    function saveRecipeToDB(recipe) { return runTx("readwrite", (s) => { const q = s.add(recipe); return () => q.result; }); }
+    function saveRecipesBatch(list) { return runTx("readwrite", (s) => { const qs = list.map((r) => s.add(r)); return () => qs.map((q) => q.result); }); }
+    function restoreRecipes(list) { return runTx("readwrite", (s) => { list.forEach((r) => s.put(r)); return list.length; }); }
     function getAllRecipes({ includeDeleted = false } = {}) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(["recipes"], "readonly");
-        const store = tx.objectStore("recipes");
-        const req = store.getAll();
-        req.onsuccess = () => {
-          let all = req.result || [];
-          if (!includeDeleted) all = all.filter((r) => !r.deleted);
-          resolve(all);
-        };
-        req.onerror = () => reject(req.error);
+      return runTx("readonly", (s) => {
+        const q = s.getAll();
+        return () => { const all = q.result || []; return includeDeleted ? all : all.filter((r) => !r.deleted); };
       });
     }
-    function getRecipeById(id) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(["recipes"], "readonly");
-        const store = tx.objectStore("recipes");
-        const req = store.get(id);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
-    function deleteRecipeById(id) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(["recipes"], "readwrite");
-        const store = tx.objectStore("recipes");
-        const req = store.delete(id);
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
-      });
-    }
+    function deleteRecipeById(id) { return runTx("readwrite", (s) => { s.delete(id); }); }
+    function deleteRecipesByIds(ids) { return runTx("readwrite", (s) => { ids.forEach((id) => s.delete(id)); }); }
+    function clearAllRecipes() { return runTx("readwrite", (s) => { s.clear(); }); }
     function updateRecipeInDB(id, updates) {
       return new Promise((resolve, reject) => {
         const tx = db.transaction(["recipes"], "readwrite");
         const store = tx.objectStore("recipes");
-        const getReq = store.get(id);
-        getReq.onsuccess = () => {
-          const recipe = getReq.result;
-          if (!recipe) return reject(new Error("not found"));
-          Object.assign(recipe, updates);
-          const putReq = store.put(recipe);
-          putReq.onsuccess = () => resolve(recipe);
-          putReq.onerror = () => reject(putReq.error);
+        let out = null;
+        const g = store.get(id);
+        g.onsuccess = () => {
+          if (!g.result) { tx.abort(); return; }
+          out = Object.assign(g.result, updates);
+          store.put(out);
         };
-        getReq.onerror = () => reject(getReq.error);
-      });
-    }
-    function clearAllRecipes() {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(["recipes"], "readwrite");
-        const store = tx.objectStore("recipes");
-        const req = store.clear();
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
+        tx.oncomplete = () => resolve(out);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error("not found"));
       });
     }
     function recipeKey(title, ingredients) {
@@ -1064,22 +1037,27 @@
       const imageFile = files.find((f) => f.type.startsWith("image/"));
       if (imageFile) return await processImageFile(imageFile);
       const url = extractImageUrlFromDrop(dt);
-      if (url) return await urlToDataUrl(url);
+      if (url) {
+        const data = await urlToDataUrl(url);
+        return /^data:image\//i.test(data) ? data : null; // never keep a hotlink
+      }
       return null;
     }
 
-    function setupImageDropZone(zoneEl, onImage) {
+    function setupImageDropZone(zoneEl, onImage, isEnabled = () => true) {
       if (!zoneEl || zoneEl.dataset.dropReady) return;
       zoneEl.dataset.dropReady = "1";
-      zoneEl.addEventListener("dragenter", (e) => { e.preventDefault(); e.stopPropagation(); zoneEl.classList.add("drag-over"); });
-      zoneEl.addEventListener("dragover", (e) => { e.preventDefault(); e.stopPropagation(); zoneEl.classList.add("drag-over"); });
+      const over = (e) => { e.preventDefault(); e.stopPropagation(); if (isEnabled()) zoneEl.classList.add("drag-over"); };
+      zoneEl.addEventListener("dragenter", over);
+      zoneEl.addEventListener("dragover", over);
       zoneEl.addEventListener("dragleave", (e) => { if (!zoneEl.contains(e.relatedTarget)) zoneEl.classList.remove("drag-over"); });
       zoneEl.addEventListener("drop", async (e) => {
         e.preventDefault(); e.stopPropagation();
         zoneEl.classList.remove("drag-over");
+        if (!isEnabled()) return;
         try {
           const data = await resolveDroppedImage(e.dataTransfer);
-          if (!data) { showToast("לא זוהתה תמונה – גרור קובץ תמונה או תמונה מאתר", { isError: true }); return; }
+          if (!data) { showToast("לא ניתן לטעון את התמונה – גרור קובץ תמונה או נסה שוב", { isError: true }); return; }
           onImage(data);
         } catch (err) {
           console.error(err);
@@ -1111,7 +1089,6 @@
       document.getElementById("cookProgress").textContent = `שלב ${idx + 1} מתוך ${steps.length}`;
       document.getElementById("cookBarFill").style.width = `${((idx + 1) / steps.length) * 100}%`;
       document.getElementById("cookPrev").disabled = idx === 0;
-      document.getElementById("cookNext").disabled = idx === steps.length - 1;
       document.getElementById("cookNext").textContent = idx === steps.length - 1 ? "סיום ✓" : "הבא ←";
     }
     function cookNav(dir) {
@@ -1180,20 +1157,16 @@
     }
 
     async function translateRecipeFields(title, ingredients, instructions, onProgress = null) {
-      const report = (ratio, text) => { if (onProgress) onProgress(ratio, text); };
-      report(0.02, "מתרגם כותרת...");
-      const tTitle = await translateText(title, "he", "auto", (r) => {
-        report(0.02 + r * 0.08, "מתרגם כותרת...");
-      });
-      report(0.12, "מתרגם מצרכים...");
-      const tIng = await translateText(ingredients, "he", "auto", (r, done, total) => {
-        report(0.12 + r * 0.38, `מתרגם מצרכים… ${done}/${total}`);
-      });
-      report(0.52, "מתרגם הוראות הכנה...");
-      const tInst = await translateText(instructions, "he", "auto", (r, done, total) => {
-        report(0.52 + r * 0.46, `מתרגם הוראות… ${done}/${total}`);
-      });
-      report(1, "תרגום הושלם");
+      const p = { t: 0, i: 0, n: 0 };
+      let label = "מתרגם...";
+      const report = (text) => { if (text) label = text; if (onProgress) onProgress(0.1 * p.t + 0.4 * p.i + 0.5 * p.n, label); };
+      report("מתרגם...");
+      const [tTitle, tIng, tInst] = await Promise.all([
+        translateText(title, "he", "auto", (r) => { p.t = r; report(); }),
+        translateText(ingredients, "he", "auto", (r, d, tot) => { p.i = r; report(`מתרגם מצרכים… ${d}/${tot}`); }),
+        translateText(instructions, "he", "auto", (r, d, tot) => { p.n = r; report(`מתרגם הוראות… ${d}/${tot}`); })
+      ]);
+      p.t = p.i = p.n = 1; report("תרגום הושלם");
       return {
         title: removeEmptyLines(tTitle || title),
         ingredients: removeEmptyLines(tIng || ingredients),
@@ -1700,6 +1673,7 @@
       const noImg = document.getElementById("url-preview-no-image");
       if (parsed.image && isSafeImageSrc(parsed.image)) {
         urlImportState.imageData = parsed.image;
+        imgEl.referrerPolicy = "no-referrer";
         imgEl.src = parsed.image;
         imgEl.style.display = "inline-block";
         noImg.style.display = "none";
@@ -1785,6 +1759,10 @@
             onProgress: (ratio, text) => mapProgress("download", ratio, text || "מוריד תמונה...")
           });
           mapProgress("download", 1, "הורדה הושלמה");
+          if (imageData && /^https?:\/\//i.test(imageData)) {
+            imageData = null;
+            showToast("לא ניתן היה להוריד את התמונה – המתכון יישמר בלי תמונה", { isError: true });
+          }
         }
         if (imageData && /^data:image\//.test(imageData) && ranges.compress) {
           setBusy(btn, true, "⏳ דוחס תמונה...");
@@ -1796,9 +1774,8 @@
         }
         setBusy(btn, true, "⏳ שומר...");
         mapProgress("save", 0.2, "בודק כפילויות...");
-        const existing = await getAllRecipes();
         const newKey = recipeKey(title, ingredients);
-        const isDup = existing.some((ex) => recipeKey(ex.title, ex.ingredients) === newKey);
+        const isDup = cacheAll.some((ex) => recipeKey(ex.title, ex.ingredients) === newKey);
         if (isDup) {
           hideImportProgress();
           showToast("המתכון כבר קיים בספר", { isError: true });
@@ -1807,16 +1784,18 @@
         mapProgress("save", 0.6, "שומר למסד נתונים...");
         await warnIfStorageLow();
         if (imageData && !isSafeImageSrc(imageData)) imageData = null;
-        await saveRecipeToDB({
+        const newRecipe = {
           title, quantity: "", ingredients, instructions, imageData: imageData || null, category,
-          sourceUrl: urlImportState.sourceUrl || "",
-          glutenFree, favorite: false, deleted: false, createdAt: Date.now()
-        });
+          sourceUrl: safeHttpUrl(urlImportState.sourceUrl),
+          glutenFree, favorite: false, createdAt: Date.now()
+        };
+        newRecipe.id = await saveRecipeToDB(newRecipe);
+        cacheAll.push(newRecipe);
         showImportProgress(100, "הושלם ✓");
         await new Promise((r) => setTimeout(r, 400));
         hideImportProgress();
         showToast(`"${title}" נוסף בהצלחה!`);
-        await refresh();
+        render();
         document.getElementById("url-import-preview").style.display = "none";
         document.getElementById("url-import-status").innerHTML = "";
         const pasteEl = document.getElementById("url-html-paste");
@@ -1852,8 +1831,8 @@
     function sortRecipes(recipes) {
       const mode = document.getElementById("sort-select").value;
       const arr = [...recipes];
-      if (mode === "name") arr.sort((a, b) => String(a.title || "").localeCompare(String(b.title || ""), "he"));
-      else if (mode === "category") arr.sort((a, b) => String(a.category || "").localeCompare(String(b.category || ""), "he"));
+      if (mode === "name") arr.sort((a, b) => heCollator.compare(String(a.title || ""), String(b.title || "")));
+      else if (mode === "category") arr.sort((a, b) => heCollator.compare(String(a.category || ""), String(b.category || "")));
       else if (mode === "favorite") arr.sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || (b.createdAt || b.id || 0) - (a.createdAt || a.id || 0));
       else arr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0) || (b.id || 0) - (a.id || 0));
       return arr;
@@ -1938,6 +1917,27 @@
       el._t = setTimeout(() => el.classList.remove("show"), 1500);
     }
 
+    let undoBuffer = [];
+    let undoTimer = null;
+    async function deleteRecipeWithUndo(recipe) {
+      try { await deleteRecipeById(recipe.id); }
+      catch (e) { console.error(e); showToast("שגיאה במחיקה", { isError: true }); return; }
+      cacheAll = cacheAll.filter((r) => r.id !== recipe.id);
+      undoBuffer.push(recipe);
+      render();
+      clearTimeout(undoTimer);
+      undoTimer = setTimeout(() => { undoBuffer = []; }, 6300);
+      showToast(undoBuffer.length === 1 ? "המתכון נמחק" : `${undoBuffer.length} מתכונים נמחקו`, {
+        actionText: "↩️ בטל",
+        duration: 6200,
+        onAction: async () => {
+          const list = undoBuffer; undoBuffer = []; clearTimeout(undoTimer);
+          try { await restoreRecipes(list); cacheAll.push(...list); render(); }
+          catch (e) { console.error(e); showToast("שגיאה בשחזור", { isError: true }); }
+        }
+      });
+    }
+
     function createRecipeCard(recipe) {
       const card = document.createElement("div");
       card.className = "recipe-card";
@@ -1976,31 +1976,7 @@
         <div class="editable" data-field="instructions" contenteditable="false">${instructions.replace(/\n/g, "<br>")}</div>
       `;
 
-      card.querySelector(".action-delete").onclick = async () => {
-        try {
-          await updateRecipeInDB(recipe.id, { deleted: true, deletedAt: Date.now() });
-          card.remove();
-          cacheAll = cacheAll.filter((r) => r.id !== recipe.id);
-          render();
-          showToast("המתכון נמחק", {
-            actionText: "↩️ בטל",
-            duration: 6200,
-            onAction: async () => {
-              try {
-                await updateRecipeInDB(recipe.id, { deleted: false, deletedAt: null });
-                await refresh();
-              } catch (e) { console.error(e); }
-            }
-          });
-          // Purge at same time as undo button disappears (6.2s)
-          setTimeout(async () => {
-            try {
-              const r = await getRecipeById(recipe.id);
-              if (r && r.deleted) await deleteRecipeById(recipe.id);
-            } catch (e) { console.error(e); }
-          }, 6300);
-        } catch (e) { console.error(e); showToast("שגיאה במחיקה", { isError: true }); }
-      };
+      card.querySelector(".action-delete").onclick = () => deleteRecipeWithUndo(recipe);
 
       card.querySelector(".action-share").onclick = () => shareRecipe(recipe);
       card.querySelector(".action-edit").onclick = () => toggleEditMode(card, recipe);
@@ -2019,7 +1995,7 @@
         } catch (err) { showToast("שגיאה בעדכון", { isError: true }); }
       };
 
-      card.querySelector(".recipe-image img").onclick = () => openLightbox(rawImg);
+      card.querySelector(".recipe-image img").onclick = () => openLightbox(recipe.imageData);
 
       return card;
     }
@@ -2027,7 +2003,7 @@
     // Edit mode: uses contenteditable + select; re-renders fractions on exit
     function toggleEditMode(card, recipe) {
       const editables = card.querySelectorAll(".editable");
-      const isEditing = editables[0].contentEditable === "true";
+      const isEditing = card.classList.contains("editing");
       const newState = !isEditing;
       const catSpan = card.querySelector('[data-field="category"]');
       let catSelect = null;
@@ -2035,24 +2011,42 @@
       editables.forEach((el) => {
         const field = el.dataset.field;
         if (newState) {
-          el.contentEditable = "true";
+          el.contentEditable = "plaintext-only";
+          if (el.contentEditable !== "plaintext-only") el.contentEditable = "true";
           // Show original (non-fraction) text so blur without change is a no-op
           el.innerText = recipe[field] || "";
           clearTimeout(el._saveT);
           const save = () => {
             clearTimeout(el._saveT);
-            const value = el.innerText;
-            if (value === recipe[field]) return;
+            let value = el.innerText.replace(/\u00a0/g, " ");
+            if (field === "title" || field === "quantity") value = value.replace(/\s*\n\s*/g, " ").trim();
+            if (value === (recipe[field] || "")) return;
+            if (field !== "quantity" && !value.trim()) {
+              showToast("השדה לא יכול להיות ריק", { isError: true });
+              el.innerText = recipe[field] || "";
+              return;
+            }
+            const prev = recipe[field];
+            recipe[field] = value; // optimistic: exit-edit re-render right after blur sees the new value
+            searchIndex.delete(recipe);
             updateRecipeInDB(recipe.id, { [field]: value })
-              .then(() => { recipe[field] = value; flashSaved(card); })
-              .catch(() => showToast("שגיאה בעדכון", { isError: true }));
+              .then(() => flashSaved(card))
+              .catch(() => { recipe[field] = prev; searchIndex.delete(recipe); showToast("שגיאה בעדכון", { isError: true }); });
           };
           el.oninput = () => { clearTimeout(el._saveT); el._saveT = setTimeout(save, 500); };
           el.onblur = save;
+          el.onkeydown = (field === "title" || field === "quantity") ? (e) => { if (e.key === "Enter") { e.preventDefault(); el.blur(); } } : null;
+          el.onpaste = (e) => {
+            e.preventDefault();
+            document.execCommand("insertText", false, (e.clipboardData || window.clipboardData).getData("text/plain"));
+          };
         } else {
           el.contentEditable = "false";
+          clearTimeout(el._saveT);
           el.oninput = null;
           el.onblur = null;
+          el.onkeydown = null;
+          el.onpaste = null;
           // Restore fraction-displayed value
           el.innerHTML = esc(replaceFractions(recipe[field] || "")).replace(/\n/g, "<br>");
         }
@@ -2160,7 +2154,7 @@
             flashSaved(card);
             showToast("תמונה עודכנה");
           }).catch(() => showToast("שגיאה בעדכון תמונה", { isError: true }));
-        });
+        }, () => card.classList.contains("editing"));
       } else {
         const btns = imgContainer.querySelector(".image-btns");
         if (btns) btns.remove();
@@ -2202,27 +2196,36 @@
     }
 
     function shareRecipe(recipe) {
-      const text = `\u200F${recipe.title}\n\nכמות: ${recipe.quantity || ""}\n\nמצרכים:\n${recipe.ingredients}\n\nהוראות הכנה:\n${recipe.instructions}`;
-      if (navigator.share) {
-        navigator.share({ title: recipe.title, text }).catch(() => {});
-      } else {
-        const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-        const tg = `https://t.me/share/url?text=${encodeURIComponent(text)}`;
-        const win = window.open("", "share", "width=400,height=300");
-        if (!win) { showToast("חסום חלון קופץ – אפשר שיתוף ידני", { isError: true }); return; }
-        win.document.write(`
-          <html dir="rtl"><head><title>שתף</title></head>
-          <body style="font-family:sans-serif;padding:20px;text-align:center;">
-            <h3>שתף מתכון</h3>
-            <p><a href="${wa}" target="_blank">וואטסאפ</a></p>
-            <p><a href="${tg}" target="_blank">טלגרם</a></p>
-            <button onclick="window.close()">סגור</button>
-          </body></html>
-        `);
-      }
+      const text = `\u200F${recipe.title}\n\n` + (recipe.quantity ? `כמות: ${recipe.quantity}\n\n` : "") + `מצרכים:\n${recipe.ingredients}\n\nהוראות הכנה:\n${recipe.instructions}`;
+      if (navigator.share) { navigator.share({ title: recipe.title, text }).catch(() => {}); return; }
+      const win = window.open("", "share", "width=400,height=320");
+      if (!win) { showToast("חסום חלון קופץ – אפשר שיתוף ידני", { isError: true }); return; }
+      win.opener = null;
+      const short = text.length > 400 ? text.slice(0, 400) + "…" : text; // keeps wa.me / t.me links within URL limits
+      const d = win.document;
+      d.documentElement.dir = "rtl";
+      d.title = "שתף";
+      d.body.style.cssText = "font-family:sans-serif;padding:20px;text-align:center;";
+      const h = d.createElement("h3"); h.textContent = "שתף מתכון"; d.body.appendChild(h);
+      const link = (label, href) => {
+        const p = d.createElement("p"), a = d.createElement("a");
+        a.href = href; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = label;
+        p.appendChild(a); d.body.appendChild(p);
+      };
+      link("וואטסאפ", `https://wa.me/?text=${encodeURIComponent(short)}`);
+      link("טלגרם", `https://t.me/share/url?text=${encodeURIComponent(short)}`);
+      const copy = d.createElement("button");
+      copy.textContent = "העתק ללוח (מלא)";
+      copy.onclick = async () => {
+        try { await (win.navigator.clipboard || navigator.clipboard).writeText(text); copy.textContent = "הועתק ✓"; }
+        catch (_) { copy.textContent = "ההעתקה נכשלה"; }
+      };
+      const close = d.createElement("button");
+      close.textContent = "סגור"; close.onclick = () => win.close();
+      d.body.append(copy, " ", close);
     }
 
-    // ---------- Add/Edit Recipe (uses same form) ----------
+    // ---------- Add Recipe ----------
     function resetAddForm() {
       document.getElementById("title").value = "";
       document.getElementById("quantity").value = "";
@@ -2234,31 +2237,6 @@
       addFormImageData = null;
       const prev = document.getElementById("add-image-preview");
       if (prev) { prev.src = ""; prev.style.display = "none"; }
-      editingId = null;
-      const cancelBtn = document.getElementById("cancelEditBtn");
-      if (cancelBtn) cancelBtn.style.display = "none";
-      document.getElementById("saveRecipeBtn").textContent = "💾 שמור מתכון";
-    }
-
-    function startEditRecipe(id) {
-      const r = cacheAll.find((x) => x.id === id);
-      if (!r) return;
-      editingId = id;
-      document.getElementById("title").value = r.title || "";
-      document.getElementById("quantity").value = r.quantity || "";
-      document.getElementById("ingredients").value = r.ingredients || "";
-      document.getElementById("instructions").value = r.instructions || "";
-      document.getElementById("category").value = CATEGORIES.includes(r.category) ? r.category : CATEGORIES[0];
-      document.getElementById("glutenFree").checked = !!r.glutenFree;
-      addFormImageData = (r.imageData && isSafeImageSrc(r.imageData)) ? r.imageData : null;
-      const prev = document.getElementById("add-image-preview");
-      if (addFormImageData) { prev.src = addFormImageData; prev.style.display = "inline-block"; }
-      else { prev.src = ""; prev.style.display = "none"; }
-      const form = document.getElementById("add-form");
-      if (!form.classList.contains("open")) document.getElementById("toggleAddBtn").click();
-      document.getElementById("saveRecipeBtn").textContent = "💾 עדכן מתכון";
-      document.getElementById("cancelEditBtn").style.display = "inline-block";
-      form.scrollIntoView({ behavior: "smooth" });
     }
 
     async function addRecipe() {
@@ -2275,53 +2253,37 @@
         showToast("נא למלא כותרת, מצרכים והוראות הכנה", { isError: true });
         return;
       }
-
       setBusy(btn, true, "⏳ שומר...");
-      showProgress("בודק כפילויות...");
       try {
-        const existing = await getAllRecipes();
         const newKey = recipeKey(title, ingredients);
-        // Only check duplicates when creating a new recipe
-        if (!editingId) {
-          const isDup = existing.some((ex) => recipeKey(ex.title, ex.ingredients) === newKey);
-          if (isDup) {
-            clearProgress();
-            showToast("המתכון כבר קיים בספר (כותרת + מצרכים זהים)", { isError: true });
-            return;
-          }
+        if (cacheAll.some((ex) => recipeKey(ex.title, ex.ingredients) === newKey)) {
+          showToast("המתכון כבר קיים בספר (כותרת + מצרכים זהים)", { isError: true });
+          return;
         }
-
         let imageData = addFormImageData || null;
-        if (!imageData && imageInput.files && imageInput.files[0]) {
-          showProgress("קורא ודוחס תמונה...");
-          imageData = await processImageFile(imageInput.files[0]);
-        }
+        if (!imageData && imageInput.files && imageInput.files[0]) imageData = await processImageFile(imageInput.files[0]);
         if (imageData && !isSafeImageSrc(imageData)) imageData = null;
-
-        showProgress("כותב למסד נתונים...");
         await warnIfStorageLow();
-
-        if (editingId) {
-          await updateRecipeInDB(editingId, { title, quantity, ingredients, instructions, category, glutenFree, imageData });
-          showToast("המתכון עודכן בהצלחה!");
-        } else {
-          const recipe = { title, quantity, ingredients, instructions, imageData, category, glutenFree, favorite: false, deleted: false, createdAt: Date.now(), sourceUrl: "" };
-          await saveRecipeToDB(recipe);
-          showToast("המתכון נוסף בהצלחה!");
-        }
-        clearProgress();
+        const recipe = { title, quantity, ingredients, instructions, imageData, category, glutenFree, favorite: false, createdAt: Date.now(), sourceUrl: "" };
+        recipe.id = await saveRecipeToDB(recipe);
+        cacheAll.push(recipe);
+        showToast("המתכון נוסף בהצלחה!");
         resetAddForm();
-        await refresh();
+        render();
       } catch (err) {
         console.error(err);
-        clearProgress();
         showToast("שגיאה בשמירה", { isError: true });
       } finally {
-        setBusy(btn, false, null, editingId ? "💾 עדכן מתכון" : "💾 שמור מתכון");
+        setBusy(btn, false, null, "💾 שמור מתכון");
       }
     }
 
     // ---------- Export / Import (with schema validation) ----------
+    function safeHttpUrl(u) {
+      if (typeof u !== "string" || u.length > 2000) return "";
+      try { const x = new URL(u.trim()); return /^https?:$/.test(x.protocol) ? x.href : ""; } catch (_) { return ""; }
+    }
+
     function sanitizeRecipe(r) {
       if (!r || typeof r !== "object") return null;
       const str = (v, max) => (typeof v === "string" ? v.slice(0, max) : "");
@@ -2330,7 +2292,8 @@
       const instructions = str(r.instructions, 50000);
       if (!title && !ingredients && !instructions) return null;
       let imageData = null;
-      if (typeof r.imageData === "string" && r.imageData.length > 0 && r.imageData.length < 8_000_000 && !isPlaceholderImage(r.imageData) && isSafeImageSrc(r.imageData)) {
+      // imported files may only carry embedded images – remote URLs would let a crafted file ping third-party servers
+      if (typeof r.imageData === "string" && r.imageData.length > 0 && r.imageData.length < 8_000_000 && /^data:image\//i.test(r.imageData) && !isPlaceholderImage(r.imageData) && isSafeImageSrc(r.imageData)) {
         imageData = r.imageData;
       }
       return {
@@ -2339,20 +2302,15 @@
         ingredients, instructions, imageData,
         category: CATEGORIES.includes(r.category) ? r.category : "עיקריות",
         glutenFree: !!r.glutenFree,
-        favorite: !!r.favorite, deleted: false,
+        favorite: !!r.favorite,
         createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now(),
-        sourceUrl: str(r.sourceUrl, 2000)
+        sourceUrl: safeHttpUrl(r.sourceUrl)
       };
     }
 
-    async function prepareRecipeForExport(r) {
+    function prepareRecipeForExport(r) {
       let imageData = null;
-      if (r.imageData && !isPlaceholderImage(r.imageData) && /^data:image\//.test(r.imageData) && isSafeImageSrc(r.imageData)) {
-        imageData = await compressImageData(r.imageData, 420, 0.68, { force: true });
-        if (isPlaceholderImage(imageData) || !isSafeImageSrc(imageData)) imageData = null;
-      } else if (r.imageData && /^https?:\/\//i.test(r.imageData) && isSafeImageSrc(r.imageData)) {
-        imageData = r.imageData;
-      }
+      if (r.imageData && !isPlaceholderImage(r.imageData) && isSafeImageSrc(r.imageData)) imageData = r.imageData; // original quality, no re-compression
       return {
         title: r.title || "מתכון ללא שם",
         quantity: r.quantity || "",
@@ -2363,8 +2321,16 @@
         glutenFree: !!r.glutenFree,
         favorite: !!r.favorite,
         createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now(),
-        sourceUrl: r.sourceUrl || ""
+        sourceUrl: safeHttpUrl(r.sourceUrl)
       };
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.style.display = "none";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
     }
 
     async function exportRecipes() {
@@ -2373,87 +2339,85 @@
         const recipes = await getAllRecipes();
         if (!recipes.length) { showToast("אין מתכונים לייצוא", { isError: true }); return; }
         setBusy(btn, true, "⏳ מכין ייצוא...");
-        const prepared = [];
-        const total = recipes.length;
-        for (let i = 0; i < total; i++) {
-          showProgress(`דוחס תמונות לייצוא… ${i + 1}/${total}`);
-          setBusy(btn, true, `⏳ ${i + 1}/${total}`);
-          prepared.push(await prepareRecipeForExport(recipes[i]));
-          await new Promise((r) => setTimeout(r, 0));
-        }
-        showProgress("יוצר קובץ JSON...");
-        const dataStr = JSON.stringify(prepared, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
+        const blob = new Blob([JSON.stringify(recipes.map(prepareRecipeForExport))], { type: "application/json" });
         const defaultName = "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
-        clearProgress();
         const name = await showConfirm({
-          title: "ייצוא מתכונים", message: "בחר שם לקובץ הגיבוי (תמונות נדחסות ל־420px כדי לחסוך מקום):",
+          title: "ייצוא מתכונים", message: "בחר שם לקובץ הגיבוי (התמונות נשמרות באיכות המקורית):",
           confirmText: "⬇️ יצא", danger: false, input: true, inputValue: defaultName
         });
         if (!name) return;
         const filename = name.endsWith(".json") ? name : name + ".json";
         if (navigator.share && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
           try {
-            const file = new File([blob], filename, { type: "application/json" });
-            await navigator.share({ files: [file], title: "ספר מתכונים" });
-          } catch (_) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url; a.download = filename; a.click();
-            URL.revokeObjectURL(url);
+            await navigator.share({ files: [new File([blob], filename, { type: "application/json" })], title: "ספר מתכונים" });
+          } catch (err) {
+            if (err && err.name === "AbortError") return; // user dismissed the share sheet
+            downloadBlob(blob, filename);
           }
         } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url; a.download = filename; a.click();
-          URL.revokeObjectURL(url);
+          downloadBlob(blob, filename);
         }
         showToast("הקובץ יוצא בהצלחה");
       } catch (err) {
         console.error(err);
-        clearProgress();
         showToast("שגיאה בייצוא", { isError: true });
       } finally {
         setBusy(btn, false, null, "⬇️ יצא לקובץ");
       }
     }
 
-    async function importRecipes(file) {
+    function importRecipes(file) {
       const reader = new FileReader();
+      reader.onerror = () => showToast("שגיאה בקריאת הקובץ", { isError: true });
       reader.onload = async (e) => {
-        let newRecipes;
         try {
-          newRecipes = JSON.parse(e.target.result);
-          if (!Array.isArray(newRecipes)) throw new Error("פורמט לא תקין");
-        } catch (_) {
-          showToast("שגיאה בקריאת הקובץ – ודא שזה JSON תקין", { isError: true });
-          return;
+          let newRecipes;
+          try {
+            newRecipes = JSON.parse(e.target.result);
+            if (!Array.isArray(newRecipes)) throw new Error("bad format");
+          } catch (_) {
+            showToast("שגיאה בקריאת הקובץ – ודא שזה JSON תקין", { isError: true });
+            return;
+          }
+          const existingKeys = new Set(cacheAll.map((ex) => recipeKey(ex.title, ex.ingredients)));
+          const toAdd = [];
+          let skipped = 0;
+          for (const raw of newRecipes) {
+            const complete = sanitizeRecipe(raw);
+            if (!complete) { skipped++; continue; }
+            const key = recipeKey(complete.title, complete.ingredients);
+            if (existingKeys.has(key)) { skipped++; continue; }
+            existingKeys.add(key);
+            toAdd.push(complete);
+          }
+          let added = 0;
+          if (toAdd.length) {
+            try {
+              const ids = await saveRecipesBatch(toAdd);
+              toAdd.forEach((r, i) => { r.id = ids[i]; cacheAll.push(r); });
+              added = ids.length;
+            } catch (_) { skipped += toAdd.length; }
+          }
+          showToast(`יובאו ${added} מתכונים חדשים${skipped ? ` · ${skipped} דולגו (כפול/לא תקין)` : ""}`);
+          render();
+        } catch (err) {
+          console.error(err);
+          showToast("שגיאה בייבוא", { isError: true });
         }
-        const existing = await getAllRecipes();
-        const existingKeys = new Set(existing.map((ex) => recipeKey(ex.title, ex.ingredients)));
-        const toAdd = [];
-        let skipped = 0;
-        for (const raw of newRecipes) {
-          const complete = sanitizeRecipe(raw);
-          if (!complete) { skipped++; continue; }
-          const key = recipeKey(complete.title, complete.ingredients);
-          if (existingKeys.has(key)) { skipped++; continue; }
-          existingKeys.add(key);
-          toAdd.push(complete);
-        }
-        let added = 0;
-        if (toAdd.length) {
-          try { added = await saveRecipesBatch(toAdd); }
-          catch (_) { skipped += toAdd.length; }
-        }
-        showToast(`יובאו ${added} מתכונים חדשים${skipped ? ` · ${skipped} דולגו (כפול/לא תקין)` : ""}`);
-        refresh();
       };
       reader.readAsText(file);
     }
 
-    // ---------- Local search ----------
+    // ---------- Local search (filters the in-memory cache, no DB re-read) ----------
     let searchTimer = null;
+    function searchText(r) {
+      let t = searchIndex.get(r);
+      if (t === undefined) {
+        t = [r.title, r.ingredients, r.instructions].map((v) => v || "").join("\u0000").toLowerCase();
+        searchIndex.set(r, t);
+      }
+      return t;
+    }
     function buildFilterFn() {
       const word = document.getElementById("search-word").value.trim().toLowerCase();
       const cat = (document.getElementById("category-filter") || {}).value || "";
@@ -2462,18 +2426,13 @@
       return (r) => {
         if (cat && r.category !== cat) return false;
         if (glutenOnly && !r.glutenFree) return false;
-        if (!word) return true;
-        return (
-          (r.title || "").toLowerCase().includes(word) ||
-          (r.ingredients || "").toLowerCase().includes(word) ||
-          (r.instructions || "").toLowerCase().includes(word)
-        );
+        return !word || searchText(r).includes(word);
       };
     }
     function applySearch() {
       currentFilterFn = buildFilterFn();
       currentPage = 1;
-      refresh();
+      render();
     }
     function doSearch() {
       clearTimeout(searchTimer);
@@ -2488,7 +2447,7 @@
       if (glutenEl) glutenEl.checked = false;
       currentFilterFn = null;
       currentPage = 1;
-      refresh();
+      render();
     }
 
     // ---------- Init ----------
@@ -2513,13 +2472,11 @@
 
       try {
         await initDB();
-        const allWithDeleted = await getAllRecipes({ includeDeleted: true });
-        for (const r of allWithDeleted) {
-          if (r.deleted && (!r.deletedAt || Date.now() - r.deletedAt > 60000)) {
-            try { await deleteRecipeById(r.id); } catch (_) {}
-          }
-        }
-        await refresh();
+        const all = await getAllRecipes({ includeDeleted: true });
+        const legacy = all.filter((r) => r.deleted).map((r) => r.id); // leftovers of the old soft-delete
+        if (legacy.length) { try { await deleteRecipesByIds(legacy); } catch (_) {} }
+        cacheAll = all.filter((r) => !r.deleted);
+        render();
       } catch (err) {
         showToast("שגיאה באתחול מסד הנתונים", { isError: true });
         console.error(err);
@@ -2529,15 +2486,9 @@
         const form = document.getElementById("add-form");
         const isOpen = form.classList.toggle("open");
         document.getElementById("toggleAddBtn").textContent = isOpen ? "✖️ סגור טופס" : "➕ הוסף מתכון";
-        if (!isOpen && editingId) resetAddForm();
       };
 
       document.getElementById("saveRecipeBtn").onclick = addRecipe;
-      document.getElementById("cancelEditBtn").onclick = () => {
-        resetAddForm();
-        const form = document.getElementById("add-form");
-        if (form.classList.contains("open")) document.getElementById("toggleAddBtn").click();
-      };
       document.getElementById("themeBtn").onclick = toggleTheme;
       document.getElementById("helpBtn").onclick = () => document.getElementById("helpModal").classList.add("open");
       document.getElementById("closeHelp").onclick = () => document.getElementById("helpModal").classList.remove("open");
@@ -2555,10 +2506,12 @@
           confirmText: "🗑️ מחק הכל"
         });
         if (!ok) return;
-        clearAllRecipes().then(() => {
+        try {
+          await clearAllRecipes();
+          cacheAll = []; undoBuffer = [];
           showToast("כל המתכונים נמחקו");
           resetFilters();
-        });
+        } catch (e) { console.error(e); showToast("שגיאה במחיקה", { isError: true }); }
       };
 
       document.getElementById("searchBtn").onclick = applySearch;
@@ -2566,18 +2519,10 @@
       document.getElementById("search-word").addEventListener("input", doSearch);
       document.getElementById("search-word").addEventListener("keydown", (e) => { if (e.key === "Enter") applySearch(); });
 
-      document.getElementById("category-filter").onchange = () => {
-        currentFilterFn = buildFilterFn();
-        currentPage = 1;
-        refresh();
-      };
+      document.getElementById("category-filter").onchange = applySearch;
       const glutenFilterEl = document.getElementById("gluten-filter");
       if (glutenFilterEl) {
-        glutenFilterEl.onchange = () => {
-          currentFilterFn = buildFilterFn();
-          currentPage = 1;
-          refresh();
-        };
+        glutenFilterEl.onchange = applySearch;
       }
       document.getElementById("sort-select").onchange = () => render();
 
@@ -2641,6 +2586,7 @@
 
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
+          if (confirmCancelFn) confirmCancelFn();
           document.querySelectorAll(".modal.open").forEach((m) => m.classList.remove("open"));
           cookState = null;
           lightbox.classList.remove("open");
@@ -2649,14 +2595,14 @@
       });
 
       const scrollBtn = document.getElementById("scrollTop");
+      let scrollShown = false;
       window.addEventListener("scroll", () => {
-        scrollBtn.style.display = window.scrollY > 200 ? "flex" : "none";
-      });
+        const show = window.scrollY > 200;
+        if (show !== scrollShown) { scrollShown = show; scrollBtn.style.display = show ? "flex" : "none"; }
+      }, { passive: true });
       scrollBtn.onclick = () => window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    // Expose for edit-from-card (optional)
-    window.startEditRecipe = startEditRecipe;
   </script>
 </body>
 </html>
