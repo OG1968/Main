@@ -529,20 +529,12 @@
     </section>
 
     <section>
-      <h2>חיפוש וסינון מקומי</h2>
+      <h2>חיפוש מיון וסינון</h2>
       <div class="field">
         <label for="search-word">מילת חיפוש</label>
         <input type="text" id="search-word" placeholder="הקלד לסינון מיידי..." />
       </div>
-      <div class="btn-row">
-        <button class="btn btn-primary" id="searchBtn">🔍 הצג תוצאות</button>
-        <button class="btn btn-secondary" id="clearSearchBtn">הצג הכל</button>
-      </div>
-    </section>
-
-    <section>
-      <h2>המתכונים שלי <span id="recipe-count" style="font-weight:400;font-size:0.9rem;"></span></h2>
-      <div class="sort-bar">
+      <div class="sort-bar" style="margin-top:12px;margin-bottom:4px;">
         <label for="sort-select">מיון:</label>
         <select id="sort-select">
           <option value="newest">החדשים</option>
@@ -557,6 +549,14 @@
           ללא גלוטן
         </label>
       </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="searchBtn">🔍 הצג תוצאות</button>
+        <button class="btn btn-secondary" id="clearSearchBtn">הצג הכל</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>המתכונים שלי <span id="recipe-count" style="font-weight:400;font-size:0.9rem;"></span></h2>
       <div id="recipes"></div>
       <div class="pagination" id="pagination"></div>
     </section>
@@ -571,7 +571,7 @@
       <ol>
         <li><strong>הוספת מתכון ידנית:</strong> לחץ "הוסף מתכון", מלא שדות ולחץ "שמור".</li>
         <li><strong>ייבוא מ־HTML:</strong> בעמוד המתכון → הצג מקור העמוד → העתק → הדבק בסעיף "ייבוא מ־HTML" → חלץ → ערוך והוסף לספר. מומלץ למלא גם את כתובת האתר כדי שתמונות ייטענו תקין.</li>
-        <li><strong>חיפוש מקומי:</strong> הסינון מתבצע תוך כדי הקלדה. סינון לפי קטגוריה, ללא גלוטן ומיון – מהתפריטים מעל רשימת המתכונים.</li>
+        <li><strong>חיפוש מיון וסינון:</strong> הסינון מתבצע תוך כדי הקלדה. מיון, סינון לפי קטגוריה וללא גלוטן – מתוך הסעיף "חיפוש מיון וסינון".</li>
         <li><strong>תצוגה מצומצמת:</strong> הכרטיס מציג כותרת, קטגוריה, כמות ותמונה בלבד. לחץ על הכרטיס (או על "לחץ להצגת המתכון המלא") כדי לפתוח מצרכים, הוראות וכפתורי פעולה (מחק / שתף / ערוך / בישול). לחץ שוב או על "סגור מתכון" כדי לקפל.</li>
         <li><strong>מצב בישול:</strong> 🍳 – שלב־אחר־שלב במסך גדול (חצים לניווט).</li>
         <li><strong>מועדפים:</strong> ★ בפינת הכרטיס.</li>
