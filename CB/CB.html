@@ -292,6 +292,8 @@
       .modal-content .close { position: absolute; left: 12px; top: 10px; font-size: 1.5rem; cursor: pointer; background: none; border: none; color: var(--text); }
       .modal-content ol { padding-right: 20px; line-height: 1.7; }
       #scrollTop { position: fixed; bottom: 20px; left: 20px; display: none; z-index: 100; }
+      #scrollTop, #scrollTop:hover { background: transparent; box-shadow: none; }
+      #scrollTop { font-size: 1.6rem; }
       #add-form { display: none; }
       #add-form.open { display: block; }
       .empty-msg { text-align: center; padding: 24px; opacity: 0.7; }
@@ -419,8 +421,8 @@
     </header>
 
     <div class="action-bar">
-      <button class="btn btn-primary btn-util" id="exportBtn" title="יצא לקובץ" aria-label="יצא לקובץ"><span class="ico">⬇️</span><span class="lbl">יצא לקובץ</span></button>
-      <label class="btn btn-primary btn-util file-label" title="יבא מקובץ" aria-label="יבא מקובץ"><span class="ico">⬆️</span><span class="lbl">יבא מקובץ</span>
+      <button class="btn btn-primary btn-util" id="exportBtn" title="יצא לקובץ" aria-label="יצא לקובץ"><span class="ico">🔻</span><span class="lbl">יצא לקובץ</span></button>
+      <label class="btn btn-primary btn-util file-label" title="יבא מקובץ" aria-label="יבא מקובץ"><span class="ico">🔺</span><span class="lbl">יבא מקובץ</span>
         <input type="file" id="import-file" accept=".json" />
       </label>
       <button class="btn btn-danger btn-util" id="deleteAllBtn" title="מחק הכל" aria-label="מחק הכל"><span class="ico">🗑️</span><span class="lbl">מחק הכל</span></button>
@@ -588,7 +590,7 @@
     </section>
   </div>
 
-  <button class="icon-btn" id="scrollTop" title="חזרה למעלה" aria-label="חזרה למעלה">⬆️</button>
+  <button class="icon-btn" id="scrollTop" title="חזרה למעלה" aria-label="חזרה למעלה">🔼</button>
 
   <div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
     <div class="modal-content">
@@ -2462,7 +2464,7 @@
         const defaultName = "recipes_" + new Date().toISOString().slice(0, 10) + ".json";
         const name = await showConfirm({
           title: "ייצוא מתכונים", message: "בחר שם לקובץ הגיבוי (התמונות נשמרות באיכות המקורית):",
-          confirmText: "⬇️ יצא", danger: false, input: true, inputValue: defaultName
+          confirmText: "🔻 יצא", danger: false, input: true, inputValue: defaultName
         });
         if (!name) return;
         const filename = name.endsWith(".json") ? name : name + ".json";
@@ -2481,7 +2483,7 @@
         console.error(err);
         showToast("שגיאה בייצוא", { isError: true });
       } finally {
-        setBusy(btn, false, null, "⬇️ יצא לקובץ");
+        setBusy(btn, false, null, "🔻 יצא לקובץ");
       }
     }
 
