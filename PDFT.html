@@ -29,12 +29,20 @@ button.sec{background:transparent;color:var(--tx);border:1px solid var(--bd)}
 .pages{display:grid;gap:12px;margin-top:14px}
 .pages canvas{width:100%;height:auto;border:1px solid var(--bd);border-radius:8px;background:#fff}
 .hint{font-size:13px;color:var(--mut);margin-top:10px}
+.warn{background:#fff3cd;border:1px solid #ffc107;color:#664d03;padding:12px;border-radius:8px;margin-bottom:12px}
 </style>
 </head>
 <body>
 <main>
 <h1>מתרגם מסמכים לעברית</h1>
-<p class="sub">גרסה משופרת – OCR מקומי + תרגום מקומי (Chrome/Edge) או אונליין.</p>
+<p class="sub">OCR מקומי + תרגום מקומי (Chrome/Edge) או אונליין.</p>
+
+<div id="fileproto" class="warn" style="display:none">
+  <b>⚠️ הקובץ רץ ישירות מהדיסק (file://)</b><br>
+  הדפדפן חוסם תרגום במצב זה. הפעל את <code>הפעל.bat</code> שבאותה תיקייה,<br>
+  או הרץ ידנית: <code>python -m http.server 8000</code><br>
+  ואז פתח: <a href="http://localhost:8000/PDFT.html">http://localhost:8000/PDFT.html</a>
+</div>
 
 <div class="card">
   <div id="drop">גררו לכאן קובץ (PNG / JPG / PDF) או לחצו לבחירה</div>
@@ -46,7 +54,7 @@ button.sec{background:transparent;color:var(--tx);border:1px solid var(--bd)}
   </div>
   <div id="status"></div>
   <div class="bar"><i id="prog"></i></div>
-  <p class="hint">מומלץ Chrome או Edge – משתמש בתרגום מקומי (ללא מכסה). Firefox משתמש בשירותים חינמיים (ייתכן מכסה יומית). זיהוי טקסט מקומי (Tesseract.js). מסמכים ארוכים לוקחים זמן. הטקסט ב-PDF הסופי הוא תמונה.</p>
+  <p class="hint">מומלץ Chrome או Edge. מסמכים ארוכים לוקחים זמן. הטקסט ב-PDF הסופי הוא תמונה.</p>
 </div>
 <div class="pages" id="pages"></div>
 </main>
@@ -59,6 +67,10 @@ const $ = id => document.getElementById(id);
 const FONT = 'Heebo, "Noto Sans Hebrew", Arial, sans-serif';
 let srcCanvases = [], outCanvases = [], pdfBlob = null, ctl = null, worker = null;
 let browserTranslator = null;
+
+// זיהוי file://
+const IS_FILE = location.protocol === 'file:';
+if (IS_FILE) $('fileproto').style.display = 'block';
 
 if (window.pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -126,7 +138,7 @@ async function load(f) {
 // ---------- OCR ----------
 async function ensureWorker() {
   if (worker) return worker;
-  setStatus('טוען מנוע OCR (פעם ראשונה יכול לקחת כ־20 שניות)...');
+  setStatus('טוען מנוע OCR (פעם ראשונה ~20 שניות)...');
   worker = await Tesseract.createWorker('eng', 1, {
     logger: m => {
       if (m.status === 'recognizing text') {
@@ -224,14 +236,18 @@ const isFailure = s => {
   const l = s.toLowerCase();
   return l.includes('mymemory warning') || l.includes('quota') ||
          l.includes('rate limit') || l.includes('too many requests') ||
-         l.includes('invalid request') || l.includes('please enable');
+         l.includes('invalid request');
 };
 
 async function ensureBrowserTranslator() {
   if (browserTranslator) return browserTranslator;
-  if (!('Translator' in self)) return null;
+  if (!('Translator' in self)) {
+    console.log('[Translator] API not present');
+    return null;
+  }
   try {
     const av = await Translator.availability({ sourceLanguage:'en', targetLanguage:'he' });
+    console.log('[Translator] availability:', av);
     if (av === 'unavailable') return null;
     setStatus('טוען מודל תרגום מקומי (פעם ראשונה יכול לקחת דקה)...');
     browserTranslator = await Translator.create({
@@ -244,7 +260,7 @@ async function ensureBrowserTranslator() {
     });
     return browserTranslator;
   } catch (e) {
-    console.warn('Browser Translator API unavailable:', e);
+    console.warn('[Translator] creation failed:', e);
     return null;
   }
 }
@@ -285,35 +301,10 @@ async function translateMyMemory(text, signal) {
   return he;
 }
 
-async function translateLibre(text, signal) {
-  const hosts = [
-    'https://libretranslate.de/translate',
-    'https://translate.astian.org/translate',
-    'https://libretranslate.pussthecat.org/translate'
-  ];
-  let lastErr;
-  for (const host of hosts) {
-    try {
-      const res = await fetch(host, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({ q:text, source:'en', target:'he', format:'text' }),
-        signal
-      });
-      if (!res.ok) throw new Error('Libre HTTP ' + res.status);
-      const data = await res.json();
-      const he = data.translatedText || '';
-      if (he && !isFailure(he)) return he;
-    } catch (e) { lastErr = e; }
-  }
-  throw lastErr || new Error('all libre failed');
-}
-
 async function translateLingva(text, signal) {
   const hosts = [
     'https://lingva.ml',
-    'https://lingva.garudalinux.org',
-    'https://translate.plausibility.cloud'
+    'https://lingva.garudalinux.org'
   ];
   let lastErr;
   for (const host of hosts) {
@@ -349,23 +340,30 @@ async function translateText(text, signal) {
     }
   }
 
-  const providers = [translateBrowser, translateGoogle, translateMyMemory, translateLibre, translateLingva];
+  const providers = [
+    ['browser', translateBrowser],
+    ['google', translateGoogle],
+    ['mymemory', translateMyMemory],
+    ['lingva', translateLingva]
+  ];
   let lastErr = null;
-  for (const fn of providers) {
+  for (const [name, fn] of providers) {
     if (signal?.aborted) throw { code:'cancelled' };
     try {
       const he = await fn(text, signal);
       if (he && !isFailure(he)) {
+        console.log(`[${name}] OK:`, he.slice(0, 50));
         translateCache.set(key, he);
         return he;
       }
     } catch (e) {
+      console.warn(`[${name}] failed:`, e.message || e);
       if (e.name === 'AbortError' || e.code === 'cancelled') throw { code:'cancelled' };
       lastErr = e;
     }
   }
 
-  console.warn('Translation failed for:', text.slice(0, 60), lastErr);
+  console.error('All providers failed:', text.slice(0, 60), lastErr);
   translateCache.set(key, text);
   return text;
 }
@@ -470,6 +468,12 @@ function drawBlocks(src, dst, blocks) {
 $('go').onclick = async () => {
   if (!srcCanvases.length) return;
 
+  if (IS_FILE) {
+    setStatus('❌ הקובץ רץ מ-file:// – הדפדפן חוסם תרגום.\n\n' +
+              'הפעל את "הפעל.bat" וגש ל-http://localhost:8000/PDFT.html', true);
+    return;
+  }
+
   try {
     await document.fonts.load('400 16px Heebo');
     await document.fonts.load('700 16px Heebo');
@@ -485,19 +489,19 @@ $('go').onclick = async () => {
     await ensureWorker();
 
     const hasBrowser = await ensureBrowserTranslator();
-    if (hasBrowser) setStatus('משתמש בתרגום מקומי של הדפדפן (ללא מכסה).');
-    else setStatus('תרגום מקומי לא זמין – עובר לשירותים אונליין (ייתכן מכסה).');
+    if (hasBrowser) setStatus('משתמש בתרגום מקומי של הדפדפן.');
+    else setStatus('עובר לשירותי תרגום אונליין.');
 
     for (let i = 0; i < srcCanvases.length; i++) {
       if (ctl.signal.aborted) throw { code:'cancelled' };
 
-      setStatus(`עמוד ${i+1}/${srcCanvases.length}: מזהה טקסט (OCR)...`);
+      setStatus(`עמוד ${i+1}/${srcCanvases.length}: מזהה טקסט...`);
       setProg(i / srcCanvases.length);
 
       const blocks = await ocrPage(srcCanvases[i], ctl.signal);
       if (!blocks.length) { setStatus(`עמוד ${i+1}: לא נמצא טקסט.`); continue; }
 
-      setStatus(`עמוד ${i+1}: מתרגם ${blocks.length} קטעים לעברית...`);
+      setStatus(`עמוד ${i+1}: מתרגם ${blocks.length} קטעים...`);
       const { success } = await translateBlocks(blocks, ctl.signal, (done, total, ok) => {
         setStatus(`עמוד ${i+1}: מתרגם ${done}/${total} (הצלחות: ${ok})...`);
       });
@@ -507,7 +511,7 @@ $('go').onclick = async () => {
       drawBlocks(srcCanvases[i], d, blocks);
 
       if (success === 0) {
-        setStatus(`עמוד ${i+1}: זוהו ${blocks.length} קטעים, אך אף אחד לא תורגם. נסו Chrome/Edge.`, true);
+        setStatus(`עמוד ${i+1}: זוהו ${blocks.length} קטעים, אך אף אחד לא תורגם.\nפתח F12 לראות שגיאות.`, true);
       } else {
         setStatus(`עמוד ${i+1}: תורגמו ${success}/${blocks.length} קטעים.`);
       }
