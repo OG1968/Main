@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מתרגם מסמכים לעברית – עצמאי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f5f2;--card:#fff;--tx:#1b1b1b;--mut:#6b6b6b;--bd:#d9d6cf;--ac:#c4481c;--acx:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171a;--card:#222226;--tx:#efefef;--mut:#9a9a9f;--bd:#3a3a40;--ac:#ff8a5c;--acx:#1b1b1b}}
+:root[data-theme="dark"]{--bg:#17171a;--card:#222226;--tx:#efefef;--mut:#9a9a9f;--bd:#3a3a40;--ac:#ff8a5c;--acx:#1b1b1b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Heebo,Arial,sans-serif;line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:26px;margin:0 0 4px}
+p.sub{color:var(--mut);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:16px}
+#drop{border:2px dashed var(--bd);border-radius:12px;padding:32px 12px;text-align:center;cursor:pointer;color:var(--mut)}
+#drop.over{border-color:var(--ac);color:var(--tx)}
+button{font:inherit;background:var(--ac);color:var(--acx);border:0;border-radius:10px;padding:10px 20px;cursor:pointer;font-weight:700}
+button:disabled{opacity:.45;cursor:default}
+button.sec{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+#status{color:var(--mut);min-height:24px;white-space:pre-wrap}
+#status.err{color:#d33}
+.bar{height:6px;border-radius:3px;background:var(--bd);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;width:0;background:var(--ac);transition:width .3s}
+.pages{display:grid;gap:12px;margin-top:14px}
+.pages canvas{width:100%;height:auto;border:1px solid var(--bd);border-radius:8px;background:#fff}
+.hint{font-size:13px;color:var(--mut);margin-top:10px}
+</style>
+</head>
+<body>
+<main>
+<h1>מתרגם מסמכים לעברית</h1>
+<p class="sub">גרסה עצמאית – ללא תלות ב-Claude. OCR מקומי + תרגום אונליין.</p>
+
+<div class="card">
+  <div id="drop">גררו לכאן קובץ (PNG / JPG / PDF) או לחצו לבחירה</div>
+  <input id="file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden>
+  <div class="row">
+    <button id="go" disabled>תרגם ל-PDF</button>
+    <button id="stop" class="sec" hidden>עצור</button>
+    <button id="save" class="sec" hidden>הורד PDF</button>
+  </div>
+  <div id="status"></div>
+  <div class="bar"><i id="prog"></i></div>
+  <p class="hint">האפליקציה עובדת בדפדפן רגיל (Chrome / Edge / Firefox). זיהוי טקסט מקומי (Tesseract.js). תרגום דרך שירותים חינמיים (Google / MyMemory). אם אין תרגום – המכסה היומית נגמרה, נסו שוב מאוחר יותר. מסמכים ארוכים לוקחים זמן. הטקסט ב-PDF הסופי הוא תמונה.</p>
+</div>
+<div class="pages" id="pages"></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const FONT = 'Heebo, "Noto Sans Hebrew", Arial, sans-serif';
+let srcCanvases = [], outCanvases = [], pdfBlob = null, ctl = null, worker = null;
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+}
+
+const setStatus = (t, err) => {
+  $('status').textContent = t;
+  $('status').className = err ? 'err' : '';
+};
+const setProg = f => { $('prog').style.width = (f * 100) + '%'; };
+
+// ---------- file loading ----------
+const drop = $('drop'), input = $('file');
+drop.onclick = () => input.click();
+input.onchange = () => input.files[0] && load(input.files[0]);
+['dragover','dragenter'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', ev => ev.dataTransfer.files[0] && load(ev.dataTransfer.files[0]));
+
+async function load(f) {
+  srcCanvases = []; outCanvases = []; pdfBlob = null;
+  $('pages').innerHTML = ''; $('save').hidden = true; setProg(0);
+  setStatus('טוען את ' + f.name + '...');
+  try {
+    if (f.type === 'application/pdf') {
+      const doc = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+      for (let i = 1; i <= doc.numPages; i++) {
+        const p = await doc.getPage(i);
+        const v0 = p.getViewport({ scale: 1 });
+        const v = p.getViewport({ scale: Math.min(2.2, 2000 / Math.max(v0.width, v0.height)) });
+        const c = document.createElement('canvas');
+        c.width = v.width; c.height = v.height;
+        await p.render({ canvasContext: c.getContext('2d'), viewport: v }).promise;
+        srcCanvases.push(c);
+      }
+    } else {
+      const img = new Image();
+      img.src = URL.createObjectURL(f);
+      await img.decode();
+      const k = Math.min(1, 2200 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * k);
+      c.height = Math.round(img.height * k);
+      const x = c.getContext('2d');
+      x.fillStyle = '#fff';
+      x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(img, 0, 0, c.width, c.height);
+      srcCanvases.push(c);
+      URL.revokeObjectURL(img.src);
+    }
+    srcCanvases.forEach(c => {
+      const d = document.createElement('canvas');
+      d.width = c.width; d.height = c.height;
+      d.getContext('2d').drawImage(c, 0, 0);
+      outCanvases.push(d);
+      $('pages').appendChild(d);
+    });
+    setStatus('נטענו ' + srcCanvases.length + ' עמודים. לחצו "תרגם ל-PDF".');
+    $('go').disabled = false;
+  } catch (e) {
+    setStatus('לא הצלחתי לקרוא את הקובץ: ' + (e.message || e), true);
+  }
+}
+
+// ---------- OCR with Tesseract ----------
+async function ensureWorker() {
+  if (worker) return worker;
+  setStatus('טוען מנוע OCR (פעם ראשונה יכול לקחת כ־20 שניות)...');
+  worker = await Tesseract.createWorker('eng', 1, {
+    logger: m => {
+      if (m.status === 'recognizing text') {
+        setStatus('מזהה טקסט... ' + Math.round((m.progress || 0) * 100) + '%');
+      }
+    }
+  });
+  return worker;
+}
+
+/** Group Tesseract words into coherent text blocks (lines / short paragraphs) */
+function groupWords(words, pageW, pageH) {
+  if (!words || !words.length) return [];
+
+  // Filter low-confidence / tiny words
+  const good = words.filter(w => {
+    const t = (w.text || '').trim();
+    if (t.length < 1) return false;
+    if (w.confidence < 40) return false;
+    const h = w.bbox.y1 - w.bbox.y0;
+    if (h < 6) return false;
+    return true;
+  });
+
+  // Sort top-to-bottom, then left-to-right
+  good.sort((a, b) => {
+    const ay = (a.bbox.y0 + a.bbox.y1) / 2;
+    const by = (b.bbox.y0 + b.bbox.y1) / 2;
+    if (Math.abs(ay - by) > 8) return ay - by;
+    return a.bbox.x0 - b.bbox.x0;
+  });
+
+  // Cluster into lines by vertical proximity
+  const lines = [];
+  let cur = null;
+  for (const w of good) {
+    const cy = (w.bbox.y0 + w.bbox.y1) / 2;
+    const h = w.bbox.y1 - w.bbox.y0;
+    if (!cur) {
+      cur = { words: [w], y0: w.bbox.y0, y1: w.bbox.y1, x0: w.bbox.x0, x1: w.bbox.x1 };
+      continue;
+    }
+    const prevCy = (cur.y0 + cur.y1) / 2;
+    const avgH = (cur.y1 - cur.y0 + h) / 2;
+    if (Math.abs(cy - prevCy) < avgH * 0.7) {
+      cur.words.push(w);
+      cur.y0 = Math.min(cur.y0, w.bbox.y0);
+      cur.y1 = Math.max(cur.y1, w.bbox.y1);
+      cur.x0 = Math.min(cur.x0, w.bbox.x0);
+      cur.x1 = Math.max(cur.x1, w.bbox.x1);
+    } else {
+      lines.push(cur);
+      cur = { words: [w], y0: w.bbox.y0, y1: w.bbox.y1, x0: w.bbox.x0, x1: w.bbox.x1 };
+    }
+  }
+  if (cur) lines.push(cur);
+
+  // Merge consecutive lines that look like a paragraph (similar left edge + small gap)
+  const blocks = [];
+  let blk = null;
+  for (const ln of lines) {
+    const text = ln.words.map(w => w.text.trim()).join(' ').replace(/\s+/g, ' ').trim();
+    if (!text) continue;
+    const lineH = ln.y1 - ln.y0;
+    if (!blk) {
+      blk = {
+        text,
+        x0: ln.x0, y0: ln.y0, x1: ln.x1, y1: ln.y1,
+        lines: 1,
+        bold: false
+      };
+      continue;
+    }
+    const gap = ln.y0 - blk.y1;
+    const leftDiff = Math.abs(ln.x0 - blk.x0);
+    const sameColumn = leftDiff < pageW * 0.08;
+    if (sameColumn && gap < lineH * 1.4 && gap > -lineH * 0.3) {
+      blk.text += ' ' + text;
+      blk.y1 = ln.y1;
+      blk.x0 = Math.min(blk.x0, ln.x0);
+      blk.x1 = Math.max(blk.x1, ln.x1);
+      blk.lines += 1;
+    } else {
+      blocks.push(blk);
+      blk = {
+        text,
+        x0: ln.x0, y0: ln.y0, x1: ln.x1, y1: ln.y1,
+        lines: 1,
+        bold: false
+      };
+    }
+  }
+  if (blk) blocks.push(blk);
+
+  // Convert to normalized 0-1000 boxes + detect rough alignment
+  return blocks.map(b => {
+    const box = [
+      (b.x0 / pageW) * 1000,
+      (b.y0 / pageH) * 1000,
+      (b.x1 / pageW) * 1000,
+      (b.y1 / pageH) * 1000
+    ];
+    const midX = (b.x0 + b.x1) / 2;
+    let align = 'right';
+    if (Math.abs(midX - pageW / 2) < pageW * 0.12 && (b.x1 - b.x0) < pageW * 0.55) {
+      align = 'center';
+    } else if (b.x0 < pageW * 0.15) {
+      align = 'left'; // rare for English docs, but keep
+    }
+    // Most English body text is left-aligned; for Hebrew overlay we prefer right
+    // so force right for normal paragraphs
+    if (align !== 'center') align = 'right';
+    return {
+      box,
+      en: b.text,
+      he: '',          // filled later
+      lines: b.lines,
+      bold: false,
+      align
+    };
+  });
+}
+
+async function ocrPage(canvas, signal) {
+  const w = await ensureWorker();
+  if (signal?.aborted) throw { code: 'cancelled' };
+
+  // Tesseract works better with a pure image; we already have canvas
+  const { data } = await w.recognize(canvas, {}, { text: false, blocks: false, words: true });
+  if (signal?.aborted) throw { code: 'cancelled' };
+
+  const blocks = groupWords(data.words || [], canvas.width, canvas.height);
+  return blocks;
+}
+
+// ---------- Translation (multiple free providers + fallbacks) ----------
+const translateCache = new Map();
+
+function hasHebrew(str) {
+  return /[\u0590-\u05FF]/.test(str || '');
+}
+
+function isFailureMessage(str) {
+  if (!str) return true;
+  const s = str.toLowerCase();
+  return s.includes('mymemory warning') ||
+         s.includes('quota') ||
+         s.includes('available free') ||
+         s.includes('rate limit') ||
+         s.includes('too many requests') ||
+         s.includes('sorry') ||
+         s.length < 1;
+}
+
+/** Google Translate free endpoint (works for most home users) */
+async function translateGoogle(text, signal) {
+  const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=he&dt=t&q=' +
+    encodeURIComponent(text);
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error('Google HTTP ' + res.status);
+  const data = await res.json();
+  // format: [[["hebrew","english",...],...], ...]
+  if (!Array.isArray(data) || !Array.isArray(data[0])) throw new Error('bad google format');
+  const he = data[0].map(part => part[0] || '').join('');
+  if (!he || isFailureMessage(he) || !hasHebrew(he)) throw new Error('google no hebrew');
+  return he;
+}
+
+/** MyMemory free endpoint */
+async function translateMyMemory(text, signal) {
+  const url = 'https://api.mymemory.translated.net/get?q=' +
+    encodeURIComponent(text) + '&langpair=en|he';
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error('MyMemory HTTP ' + res.status);
+  const data = await res.json();
+  let he = (data.responseData && data.responseData.translatedText) || '';
+  if (isFailureMessage(he) || he === text) {
+    if (data.matches && data.matches[0] && data.matches[0].translation) {
+      he = data.matches[0].translation;
+    }
+  }
+  if (!he || isFailureMessage(he) || he === text) throw new Error('mymemory failed');
+  // Accept even without Hebrew chars (numbers, model names etc.)
+  return he;
+}
+
+/** Lingva public instances (Google frontend mirrors) */
+async function translateLingva(text, signal) {
+  const hosts = [
+    'https://lingva.ml',
+    'https://lingva.garudalinux.org',
+    'https://translate.plausibility.cloud'
+  ];
+  let lastErr;
+  for (const host of hosts) {
+    try {
+      const url = host + '/api/v1/en/he/' + encodeURIComponent(text);
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error('Lingva HTTP ' + res.status);
+      const data = await res.json();
+      const he = data.translation || data.text || '';
+      if (he && !isFailureMessage(he) && (hasHebrew(he) || he !== text)) return he;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('all lingva failed');
+}
+
+async function translateText(text, signal) {
+  const key = text.trim().toLowerCase();
+  if (!key) return '';
+  if (translateCache.has(key)) return translateCache.get(key);
+
+  // Split very long text to stay under provider limits
+  const bytes = new TextEncoder().encode(text).length;
+  if (bytes > 400) {
+    const parts = text.split(/(?<=[.!?])\s+/).filter(Boolean);
+    if (parts.length > 1) {
+      const out = [];
+      for (const p of parts) {
+        if (signal?.aborted) throw { code: 'cancelled' };
+        out.push(await translateText(p, signal));
+      }
+      const joined = out.join(' ');
+      translateCache.set(key, joined);
+      return joined;
+    }
+  }
+
+  const providers = [translateGoogle, translateMyMemory, translateLingva];
+  let lastErr = null;
+  for (const fn of providers) {
+    if (signal?.aborted) throw { code: 'cancelled' };
+    try {
+      const he = await fn(text, signal);
+      if (he && !isFailureMessage(he)) {
+        translateCache.set(key, he);
+        return he;
+      }
+    } catch (e) {
+      if (e.name === 'AbortError' || e.code === 'cancelled') throw { code: 'cancelled' };
+      lastErr = e;
+    }
+  }
+
+  // All providers failed – keep original English so user sees the problem
+  console.warn('Translation failed for:', text.slice(0, 60), lastErr);
+  translateCache.set(key, text);
+  return text;
+}
+
+async function translateBlocks(blocks, signal, onProgress) {
+  let success = 0;
+  for (let i = 0; i < blocks.length; i++) {
+    if (signal?.aborted) throw { code: 'cancelled' };
+    const he = await translateText(blocks[i].en, signal);
+    blocks[i].he = he;
+    if (hasHebrew(he) || he !== blocks[i].en) success++;
+    if (onProgress) onProgress(i + 1, blocks.length, success);
+  }
+  return { blocks, success };
+}
+
+// ---------- Drawing ----------
+const lum = ([r, g, b]) => 0.299 * r + 0.587 * g + 0.114 * b;
+
+function bgColor(ctx, x0, y0, x1, y1, W, H) {
+  const pts = [
+    [x0 - 3, y0 - 3], [x1 + 3, y0 - 3], [x0 - 3, y1 + 3], [x1 + 3, y1 + 3],
+    [(x0 + x1) / 2, y0 - 2], [(x0 + x1) / 2, y1 + 2]
+  ];
+  let best = null;
+  for (const [x, y] of pts) {
+    const cx = Math.max(0, Math.min(W - 1, Math.round(x)));
+    const cy = Math.max(0, Math.min(H - 1, Math.round(y)));
+    const d = ctx.getImageData(cx, cy, 1, 1).data;
+    const c = [d[0], d[1], d[2]];
+    if (!best || lum(c) > lum(best)) best = c;
+  }
+  return best || [255, 255, 255];
+}
+
+function wrapText(ctx, t, maxW) {
+  const out = [];
+  let cur = '';
+  for (const w of t.split(/\s+/)) {
+    const n = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(n).width <= maxW || !cur) cur = n;
+    else { out.push(cur); cur = w; }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+function drawBlocks(src, dst, blocks) {
+  const W = dst.width, H = dst.height;
+  const sctx = src.getContext('2d');
+  const ctx = dst.getContext('2d');
+
+  const items = blocks
+    .filter(b => b.box && b.he)
+    .map(b => {
+      const [x0, y0, x1, y1] = b.box.map((v, i) => (v / 1000) * (i % 2 ? H : W));
+      return { b, x0, y0, x1, y1 };
+    });
+
+  // erase original text
+  for (const it of items) {
+    const bg = bgColor(sctx, it.x0, it.y0, it.x1, it.y1, W, H);
+    it.bg = bg;
+    ctx.fillStyle = `rgb(${bg[0]},${bg[1]},${bg[2]})`;
+    ctx.fillRect(it.x0 - 2, it.y0 - 2, it.x1 - it.x0 + 4, it.y1 - it.y0 + 4);
+  }
+
+  // write Hebrew
+  ctx.direction = 'rtl';
+  ctx.textBaseline = 'middle';
+
+  for (const { b, x0, y0, x1, y1, bg } of items) {
+    const w = x1 - x0, h = y1 - y0;
+    const n = Math.max(1, b.lines || 1);
+    const weight = b.bold ? '700' : '400';
+    const align = b.align || 'right';
+
+    let size = Math.max(9, h / n / 1.25);
+    let lines;
+    const maxW = n === 1 ? w * (align === 'center' ? 1.1 : 1.3) : w * 1.08;
+
+    for (; size > 7; size -= 0.4) {
+      ctx.font = `${weight} ${size}px ${FONT}`;
+      if (n === 1 && ctx.measureText(b.he).width <= maxW) {
+        lines = [b.he];
+      } else {
+        lines = wrapText(ctx, b.he, maxW);
+      }
+      if (lines.length * size * 1.25 <= h * 1.25 + size * 0.5) break;
+    }
+
+    const lead = size * 1.25;
+    const top = y0 + h / 2 - (lines.length * lead) / 2;
+    ctx.fillStyle = lum(bg) < 120 ? '#ffffff' : '#111111';
+    ctx.textAlign = align;
+    const x = align === 'right' ? x1 : (align === 'left' ? x0 : (x0 + x1) / 2);
+
+    lines.forEach((l, i) => {
+      ctx.fillText(l, x, top + lead * (i + 0.5));
+    });
+  }
+}
+
+// ---------- Main run ----------
+$('go').onclick = async () => {
+  if (!srcCanvases.length) return;
+
+  try {
+    await document.fonts.load('400 16px Heebo');
+    await document.fonts.load('700 16px Heebo');
+  } catch (e) {}
+
+  $('go').disabled = true;
+  $('stop').hidden = false;
+  $('save').hidden = true;
+  pdfBlob = null;
+  ctl = new AbortController();
+
+  try {
+    await ensureWorker();
+
+    for (let i = 0; i < srcCanvases.length; i++) {
+      if (ctl.signal.aborted) throw { code: 'cancelled' };
+
+      setStatus(`עמוד ${i + 1}/${srcCanvases.length}: מזהה טקסט (OCR)...`);
+      setProg(i / srcCanvases.length);
+
+      const blocks = await ocrPage(srcCanvases[i], ctl.signal);
+      if (!blocks.length) {
+        setStatus(`עמוד ${i + 1}: לא נמצא טקסט לקריאה.`);
+        continue;
+      }
+
+      setStatus(`עמוד ${i + 1}: מתרגם ${blocks.length} קטעים לעברית...`);
+      const { success } = await translateBlocks(blocks, ctl.signal, (done, total, ok) => {
+        setStatus(`עמוד ${i + 1}: מתרגם ${done}/${total} (הצלחות: ${ok})...`);
+      });
+
+      // draw only blocks that have content
+      const d = outCanvases[i];
+      d.getContext('2d').drawImage(srcCanvases[i], 0, 0);
+      drawBlocks(srcCanvases[i], d, blocks);
+
+      if (success === 0) {
+        setStatus(`עמוד ${i + 1}: זוהו ${blocks.length} קטעים, אך אף אחד לא תורגם לעברית. ייתכן שמכסת התרגום החינמי נגמרה – נסו שוב מאוחר יותר.`, true);
+      } else {
+        setStatus(`עמוד ${i + 1}: תורגמו ${success}/${blocks.length} קטעי טקסט לעברית.`);
+      }
+    }
+
+    setProg(1);
+    buildPdf();
+    setStatus('הסתיים. בדקו את התוצאה למטה ולחצו "הורד PDF". אם אין עברית – מכסת התרגום החינמי כנראה נגמרה, נסו שוב מאוחר יותר.');
+  } catch (e) {
+    if (e.code === 'cancelled') {
+      setStatus('בוטל.');
+    } else {
+      setStatus('שגיאה: ' + (e.message || e.code || e), true);
+      console.error(e);
+    }
+  } finally {
+    $('go').disabled = false;
+    $('stop').hidden = true;
+  }
+};
+
+$('stop').onclick = () => {
+  if (ctl) ctl.abort();
+};
+
+function buildPdf() {
+  const { jsPDF } = window.jspdf;
+  let pdf = null;
+  outCanvases.forEach((c, i) => {
+    const o = c.width > c.height ? 'l' : 'p';
+    const fmt = [c.width, c.height];
+    if (!pdf) pdf = new jsPDF({ unit: 'px', format: fmt, orientation: o, hotfixes: ['px_scaling'] });
+    else pdf.addPage(fmt, o);
+    pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, c.width, c.height);
+  });
+  pdfBlob = pdf.output('blob');
+  $('save').hidden = false;
+}
+
+$('save').onclick = () => {
+  if (!pdfBlob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(pdfBlob);
+  a.download = 'translated_he.pdf';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+  setStatus('הקובץ הורד.');
+};
+
+// cleanup worker when page unloads
+window.addEventListener('beforeunload', () => {
+  if (worker) worker.terminate().catch(() => {});
+});
+</script>
+</body>
+</html>
