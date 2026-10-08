@@ -969,7 +969,7 @@
                 <button class="btn btn-success" id="addRowBtn" data-tip="הוסף שורה חדשה">➕ הוסף</button>
                 <button class="btn btn-danger" id="deleteSelectedBtn" data-tip="מחק שורה/ות מסומנות">🗑️ מחק</button>
                 <button class="btn btn-selected" id="showSelectedBtn" data-tip="הצג שורות מסומנות בלבד">👁️ מסומנים</button>
-                <button class="btn btn-archive" id="archiveBtn" data-tip="העבר שורות לטאב הארכיב">📁 ארכיב</button>
+                <button class="btn btn-move" id="moveBtn" data-tip="העבר שורות נבחרות לטאב אחר">↔️ העבר</button>
                 <button class="btn btn-sort" id="sortBtn" data-tip="מיון לפי סטטוס">🔽 מיון</button>
                 <button class="btn btn-excel" id="exportExcelBtn" data-tip="יצא סטטוסים לקובץ אקסל">📊 יצא</button>
                 <button class="btn btn-load" id="loadExcelBtn" data-tip="יבא סטטוסים מקובץ אקסל">📂 יבא</button>
@@ -1056,6 +1056,22 @@
             <div class="modal-actions">
                 <button class="btn btn-secondary" id="cancelLoadBtn">ביטול</button>
                 <button class="btn btn-load" id="confirmLoadBtn" disabled>טען קובץ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- מודל להעברת שורות בין טאבים -->
+    <div class="modal-overlay" id="moveModal">
+        <div class="modal">
+            <h2>↔️ העברת שורות</h2>
+            <p style="color:#64748b; margin-bottom:16px;" id="moveModalDesc">בחר לאיזה טאב להעביר את השורות הנבחרות:</p>
+            <div class="move-targets" style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn btn-success" id="moveToToysBtn" style="justify-content:center; min-height:44px; font-size:0.95rem;">🧸 צעצועים</button>
+                <button class="btn btn-load" id="moveToElectronicsBtn" style="justify-content:center; min-height:44px; font-size:0.95rem;">🔌 אלקטרוניקה קלה</button>
+                <button class="btn btn-archive" id="moveToArchiveBtn" style="justify-content:center; min-height:44px; font-size:0.95rem;">📁 ארכיב</button>
+            </div>
+            <div class="modal-actions" style="margin-top:20px;">
+                <button class="btn btn-secondary" id="cancelMoveBtn">ביטול</button>
             </div>
         </div>
     </div>
@@ -1456,18 +1472,6 @@
                 document.getElementById('tabToys').classList.toggle('active', view === 'toys');
                 document.getElementById('tabElectronics').classList.toggle('active', view === 'electronics');
                 document.getElementById('tabArchive').classList.toggle('active', view === 'archive');
-
-                // כפתור ארכיב / שחזור לפי תצוגה
-                const archBtn = document.getElementById('archiveBtn');
-                if (archBtn) {
-                    if (view === 'archive') {
-                        archBtn.textContent = '↩️ שחזר';
-                        archBtn.setAttribute('data-tip', 'החזר שורות נבחרות לטאב האחרון');
-                    } else {
-                        archBtn.textContent = '📁 ארכיב';
-                        archBtn.setAttribute('data-tip', 'העבר שורות לטאב הארכיב');
-                    }
-                }
 
                 filterSelect.value = 'all';
                 searchInput.value = '';
@@ -1871,93 +1875,119 @@
                 renderTable(filterSelect.value);
             }
 
-            function moveToArchive() {
+            function openMoveModal() {
                 const checkboxes = document.querySelectorAll('.row-checkbox:checked');
                 if (checkboxes.length === 0) {
-                    alert(currentView === 'archive' ? 'לא נבחרו שורות לשחזור' : 'לא נבחרו שורות להעברה לארכיב');
+                    alert('לא נבחרו שורות להעברה. סמן שורות עם הצ׳קבוקס ואז לחץ שוב.');
+                    return;
+                }
+                const desc = document.getElementById('moveModalDesc');
+                if (desc) desc.textContent = 'בחר לאיזה טאב להעביר ' + checkboxes.length + ' שורות נבחרות:';
+
+                // השבתת כפתור הטאב הנוכחי
+                const toysBtn = document.getElementById('moveToToysBtn');
+                const elecBtn = document.getElementById('moveToElectronicsBtn');
+                const archBtn = document.getElementById('moveToArchiveBtn');
+                if (toysBtn) {
+                    toysBtn.disabled = (currentView === 'toys');
+                    toysBtn.style.opacity = currentView === 'toys' ? '0.45' : '1';
+                    toysBtn.style.cursor = currentView === 'toys' ? 'not-allowed' : 'pointer';
+                }
+                if (elecBtn) {
+                    elecBtn.disabled = (currentView === 'electronics');
+                    elecBtn.style.opacity = currentView === 'electronics' ? '0.45' : '1';
+                    elecBtn.style.cursor = currentView === 'electronics' ? 'not-allowed' : 'pointer';
+                }
+                if (archBtn) {
+                    archBtn.disabled = (currentView === 'archive');
+                    archBtn.style.opacity = currentView === 'archive' ? '0.45' : '1';
+                    archBtn.style.cursor = currentView === 'archive' ? 'not-allowed' : 'pointer';
+                }
+
+                document.getElementById('moveModal').classList.add('active');
+            }
+
+            function closeMoveModal() {
+                document.getElementById('moveModal').classList.remove('active');
+            }
+
+            function performMove(targetView) {
+                if (targetView === currentView) {
+                    alert('השורות כבר נמצאות בטאב זה.');
+                    closeMoveModal();
+                    return;
+                }
+                const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    closeMoveModal();
                     return;
                 }
 
-                if (currentView === 'archive') {
-                    // שחזור מארכיב לטאב האחרון (צעצועים / אלקטרוניקה)
-                    const targetLabel = lastMainView === 'electronics' ? 'אלקטרוניקה קלה' : 'צעצועים';
-                    if (!confirm('לשחזר ' + checkboxes.length + ' שורות ל' + targetLabel + '?')) return;
-                    const idsToRestore = new Set();
-                    checkboxes.forEach(cb => {
-                        const tr = cb.closest('tr');
-                        if (tr && tr.dataset.rowId) idsToRestore.add(tr.dataset.rowId);
-                    });
-                    ensureRowIds(archiveData);
-                    const toRestore = [];
-                    archiveData = archiveData.filter(r => {
-                        if (r._id && idsToRestore.has(r._id)) { toRestore.push(r); return false; }
-                        return true;
-                    });
-                    const targetData = lastMainView === 'electronics' ? electronicsData : toysData;
-                    ensureRowIds(targetData);
-                    const existingOrders = new Set(
-                        targetData.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
-                    );
-                    toRestore.forEach(r => {
-                        const k = String(r.order || '').trim();
-                        if (k && k !== 'חדש' && k !== 'x' && existingOrders.has(k)) return;
-                        targetData.push(r);
-                        if (k) existingOrders.add(k);
-                    });
-                    saveArchive(archiveData);
-                    if (lastMainView === 'electronics') saveElectronicsData(electronicsData);
-                    else saveToysData(toysData);
-                    showSelectedOnly = false;
-                    selectedIdsSnapshot = [];
-                    const selBtn = document.getElementById('showSelectedBtn');
-                    if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
-                    renderTable(filterSelect.value);
-                    updateStats(getActiveData());
-                    alert('↩️ שוחזרו ' + toRestore.length + ' שורות ל' + targetLabel);
-                    return;
-                }
+                const labels = { toys: 'צעצועים', electronics: 'אלקטרוניקה קלה', archive: 'ארכיב' };
+                const targetLabel = labels[targetView] || targetView;
+                if (!confirm('להעביר ' + checkboxes.length + ' שורות לטאב "' + targetLabel + '"?')) return;
 
-                // העברה מטאב נוכחי לארכיב
-                if (!confirm('להעביר ' + checkboxes.length + ' שורות לארכיב?\nהן לא יוצגו כאן, אך יופיעו בטאב "ארכיב".')) return;
-                const idsToArchive = new Set();
+                const idsToMove = new Set();
                 checkboxes.forEach(cb => {
                     const tr = cb.closest('tr');
-                    if (tr && tr.dataset.rowId) idsToArchive.add(tr.dataset.rowId);
+                    if (tr && tr.dataset.rowId) idsToMove.add(tr.dataset.rowId);
                 });
-                const toArchive = [];
-                if (currentView === 'electronics') {
-                    ensureRowIds(electronicsData);
-                    electronicsData = electronicsData.filter(r => {
-                        if (r._id && idsToArchive.has(r._id)) { toArchive.push(r); return false; }
-                        return true;
-                    });
-                } else {
-                    ensureRowIds(toysData);
-                    toysData = toysData.filter(r => {
-                        if (r._id && idsToArchive.has(r._id)) { toArchive.push(r); return false; }
-                        return true;
-                    });
-                }
-                ensureRowIds(archiveData);
+
+                // הוצאה מהמקור
+                let sourceArr;
+                if (currentView === 'archive') sourceArr = archiveData;
+                else if (currentView === 'electronics') sourceArr = electronicsData;
+                else sourceArr = toysData;
+                ensureRowIds(sourceArr);
+
+                const toMove = [];
+                const remaining = sourceArr.filter(r => {
+                    if (r._id && idsToMove.has(r._id)) { toMove.push(r); return false; }
+                    return true;
+                });
+
+                if (currentView === 'archive') archiveData = remaining;
+                else if (currentView === 'electronics') electronicsData = remaining;
+                else toysData = remaining;
+
+                // הוספה ליעד (עם מניעת כפילויות לפי מספר הזמנה)
+                let targetArr;
+                if (targetView === 'archive') targetArr = archiveData;
+                else if (targetView === 'electronics') targetArr = electronicsData;
+                else targetArr = toysData;
+                ensureRowIds(targetArr);
+
                 const existingOrders = new Set(
-                    archiveData.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
+                    targetArr.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
                 );
-                toArchive.forEach(r => {
+                let added = 0;
+                toMove.forEach(r => {
                     const k = String(r.order || '').trim();
                     if (k && k !== 'חדש' && k !== 'x' && existingOrders.has(k)) return;
-                    archiveData.push(r);
+                    targetArr.push(r);
                     if (k) existingOrders.add(k);
+                    added++;
                 });
-                saveArchive(archiveData);
-                if (currentView === 'electronics') saveElectronicsData(electronicsData);
-                else saveToysData(toysData);
+
+                // שמירה
+                if (currentView === 'archive' || targetView === 'archive') saveArchive(archiveData);
+                if (currentView === 'electronics' || targetView === 'electronics') saveElectronicsData(electronicsData);
+                if (currentView === 'toys' || targetView === 'toys') saveToysData(toysData);
+
+                // עדכון משתנים אם צריך
+                if (targetView === 'archive') archiveData = targetArr;
+                else if (targetView === 'electronics') electronicsData = targetArr;
+                else toysData = targetArr;
+
                 showSelectedOnly = false;
                 selectedIdsSnapshot = [];
                 const selBtn = document.getElementById('showSelectedBtn');
                 if (selBtn) { selBtn.classList.remove('active'); selBtn.textContent = '👁️ מסומנים'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
+
+                closeMoveModal();
                 renderTable(filterSelect.value);
                 updateStats(getActiveData());
-                alert('📁 הועברו ' + toArchive.length + ' שורות לארכיב (סה"כ בארכיב: ' + archiveData.length + ')');
+                alert('↔️ הועברו ' + added + ' שורות לטאב "' + targetLabel + '"');
             }
 
             function parseSheetToRows(sheet) {
@@ -2349,7 +2379,7 @@
             document.getElementById('addRowBtn').addEventListener('click', addNewRow);
             document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedRows);
             document.getElementById('showSelectedBtn').addEventListener('click', toggleShowSelected);
-            document.getElementById('archiveBtn').addEventListener('click', moveToArchive);
+            document.getElementById('moveBtn').addEventListener('click', openMoveModal);
             document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
             document.getElementById('sortBtn').addEventListener('click', sortData);
             document.getElementById('tabToys').addEventListener('click', function() { switchView('toys'); });
@@ -2359,6 +2389,22 @@
                 const checkboxes = document.querySelectorAll('.row-checkbox');
                 checkboxes.forEach(cb => cb.checked = this.checked);
             });
+
+            // מודל העברה בין טאבים
+            document.getElementById('cancelMoveBtn').addEventListener('click', closeMoveModal);
+            document.getElementById('moveModal').addEventListener('click', function(e) {
+                if (e.target === this) closeMoveModal();
+            });
+            document.getElementById('moveToToysBtn').addEventListener('click', function() {
+                if (!this.disabled) performMove('toys');
+            });
+            document.getElementById('moveToElectronicsBtn').addEventListener('click', function() {
+                if (!this.disabled) performMove('electronics');
+            });
+            document.getElementById('moveToArchiveBtn').addEventListener('click', function() {
+                if (!this.disabled) performMove('archive');
+            });
+
             renderTable('all');
             updateStats(toysData);
         })();
