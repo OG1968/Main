@@ -1,0 +1,2878 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>ניהול משלוחים</title>
+    <!-- Favicon מקומי -->
+    <link rel="icon" href="SS.png" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: #90c0fc;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1550px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            padding: 20px 15px 20px;
+            overflow: visible;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin: 0 0 8px 0;
+            color: #0b1e33;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 15px;
+            overflow: visible;
+            position: relative;
+            z-index: 20;
+        }
+        .filter-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        .filter-area label {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.9rem;
+        }
+        .filter-area select,
+        .filter-area input {
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            min-height: 40px;
+        }
+        .filter-area select {
+            min-width: 100px;
+            flex: 1;
+            max-width: 180px;
+        }
+        .search-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 150px;
+        }
+        .search-area input {
+            width: 100%;
+            min-width: 120px;
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.9rem;
+            outline: none;
+            min-height: 40px;
+        }
+        .search-area input:focus {
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+            position: relative;
+            z-index: 100;
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.78rem;
+            background: #eef2f6;
+            color: #1e293b;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            min-height: 36px;
+            min-width: 76px;
+            white-space: nowrap;
+            flex: 0 0 auto;
+            line-height: 1.15;
+        }
+        /* כפתורי שורת הכלים – אייקון מעל, כיתוב מתחת */
+        .action-buttons .btn {
+            flex-direction: column;
+            border-radius: 16px;
+            padding: 8px 8px 7px;
+            min-height: 58px;
+            min-width: 84px;
+            gap: 3px;
+            font-size: 0.72rem;
+            white-space: normal;
+        }
+        .action-buttons .btn .btn-icon {
+            font-size: 1.2rem;
+            line-height: 1;
+            display: block;
+        }
+        .action-buttons .btn .btn-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            line-height: 1.2;
+            display: block;
+            text-align: center;
+            white-space: normal;
+            max-width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14);
+        }
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        .btn-success {
+            background: #0f7b3a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #0b662f;
+        }
+        .btn-danger {
+            background: #b91c1c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #991515;
+        }
+        .btn-excel {
+            background: #1d6f42;
+            color: white;
+        }
+        .btn-excel:hover {
+            background: #155a34;
+        }
+        .btn-sort {
+            background: #6c5b7b;
+            color: white;
+        }
+        .btn-sort:hover {
+            background: #5a4a68;
+        }
+        .btn-load {
+            background: #7c3aed;
+            color: white;
+        }
+        .btn-load:hover {
+            background: #6d28d9;
+        }
+        .btn-move {
+            background: #d97706;
+            color: white;
+        }
+        .btn-move:hover {
+            background: #b45309;
+        }
+        .btn-archive {
+            background: #475569;
+            color: white;
+        }
+        .btn-archive:hover {
+            background: #334155;
+        }
+        .btn-selected {
+            background: #0891b2;
+            color: white;
+        }
+        .btn-selected:hover {
+            background: #0e7490;
+        }
+        .btn-selected.active {
+            background: #155e75;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* טיפ ריחוף מעוצב */
+        .btn[data-tip] {
+            position: relative;
+            z-index: 1;
+        }
+        .btn[data-tip]:hover {
+            z-index: 500;
+        }
+        .btn[data-tip]::after {
+            content: attr(data-tip);
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+            background: #4c1d95;
+            color: #ffffff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            line-height: 1.35;
+            padding: 8px 14px;
+            border-radius: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+            z-index: 501;
+            box-shadow: 0 6px 18px rgba(76, 29, 149, 0.35);
+        }
+        .btn[data-tip]::before {
+            content: '';
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-4px);
+            border: 6px solid transparent;
+            border-bottom-color: #4c1d95;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+            z-index: 501;
+        }
+        .btn[data-tip]:hover::after,
+        .btn[data-tip]:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+        /* כפתורים בקצוות – יישור טיפ כדי שלא ייחתך */
+        .action-buttons .btn:last-child[data-tip]::after {
+            left: auto;
+            right: 0;
+            transform: translateX(0) translateY(-4px);
+        }
+        .action-buttons .btn:last-child[data-tip]::before {
+            left: auto;
+            right: 16px;
+            transform: translateX(0) translateY(-4px);
+        }
+        .action-buttons .btn:last-child[data-tip]:hover::after,
+        .action-buttons .btn:last-child[data-tip]:hover::before {
+            transform: translateX(0) translateY(0);
+        }
+        .action-buttons .btn:first-child[data-tip]::after {
+            left: 0;
+            transform: translateX(0) translateY(-4px);
+        }
+        .action-buttons .btn:first-child[data-tip]::before {
+            left: 16px;
+            transform: translateX(0) translateY(-4px);
+        }
+        .action-buttons .btn:first-child[data-tip]:hover::after,
+        .action-buttons .btn:first-child[data-tip]:hover::before {
+            transform: translateX(0) translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            /* במובייל – טיפ מעל הכפתור, רוחב אחיד, 2 שורות, בלי לחתוך בשוליים */
+            .btn[data-tip]::after {
+                top: auto;
+                bottom: calc(100% + 8px);
+                left: 50%;
+                right: auto;
+                font-size: 0.7rem;
+                padding: 7px 10px;
+                white-space: normal;
+                width: 132px;
+                max-width: min(132px, calc(100vw - 20px));
+                box-sizing: border-box;
+                text-align: center;
+                line-height: 1.3;
+                transform: translateX(-50%) translateY(4px);
+                word-break: break-word;
+            }
+            .btn[data-tip]::before {
+                top: auto;
+                bottom: calc(100% + 2px);
+                left: 50%;
+                right: auto;
+                border-bottom-color: transparent;
+                border-top-color: #4c1d95;
+                transform: translateX(-50%) translateY(4px);
+            }
+            .btn[data-tip]:hover::after,
+            .btn[data-tip]:hover::before {
+                transform: translateX(-50%) translateY(0);
+            }
+            /* כפתור ראשון (ימין ב-RTL) – יישור לימין כדי שלא ייחתך */
+            .action-buttons .btn:first-child[data-tip]::after {
+                left: auto;
+                right: 0;
+                transform: translateX(0) translateY(4px);
+            }
+            .action-buttons .btn:first-child[data-tip]::before {
+                left: auto;
+                right: 14px;
+                transform: translateX(0) translateY(4px);
+            }
+            .action-buttons .btn:first-child[data-tip]:hover::after,
+            .action-buttons .btn:first-child[data-tip]:hover::before {
+                transform: translateX(0) translateY(0);
+            }
+            /* כפתור אחרון (שמאל ב-RTL) – יישור לשמאל כדי שלא ייחתך */
+            .action-buttons .btn:last-child[data-tip]::after {
+                left: 0;
+                right: auto;
+                transform: translateX(0) translateY(4px);
+            }
+            .action-buttons .btn:last-child[data-tip]::before {
+                left: 14px;
+                right: auto;
+                transform: translateX(0) translateY(4px);
+            }
+            .action-buttons .btn:last-child[data-tip]:hover::after,
+            .action-buttons .btn:last-child[data-tip]:hover::before {
+                transform: translateX(0) translateY(0);
+            }
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 6px 10px;
+            margin: 8px 0 12px 0;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-start;
+            background: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .stats-bar span {
+            font-size: 0.8rem;
+            color: #1e293b;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+            line-height: 1.3;
+        }
+        .stats-bar strong {
+            color: #0b1e33;
+            font-size: 0.85rem;
+        }
+        .stats-bar .stat-amount {
+            color: #0f7b3a;
+            font-weight: 700;
+        }
+        .stats-bar .stat-preparing {
+            color: #eab308;
+            font-weight: 700;
+        }
+        .stats-bar .stat-missing {
+            color: #dc2626;
+            font-weight: 700;
+        }
+        .stats-bar .stat-cancelled {
+            color: #7f1d1d;
+            font-weight: 700;
+        }
+        .stats-bar .stat-inprogress {
+            color: #2563eb;
+            font-weight: 700;
+        }
+        .view-tabs {
+            display: flex;
+            gap: 0;
+            margin: 0 0 12px 0;
+            border-bottom: 2px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        .view-tab {
+            padding: 8px 20px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: 0.2s;
+            border-radius: 8px 8px 0 0;
+            font-family: inherit;
+        }
+        .view-tab:hover {
+            color: #0b1e33;
+            background: #f1f5f9;
+        }
+        .view-tab.active {
+            color: #1e3a5f;
+            border-bottom-color: #1e3a5f;
+            background: #f8fafc;
+        }
+        .view-tab .tab-count {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 0.75rem;
+            padding: 1px 8px;
+            border-radius: 20px;
+            margin-right: 6px;
+            font-weight: 700;
+        }
+        .view-tab.active .tab-count {
+            background: #1e3a5f;
+            color: white;
+        }
+        .view-tab.archive-tab.active {
+            color: #475569;
+            border-bottom-color: #475569;
+        }
+        .view-tab.archive-tab.active .tab-count {
+            background: #475569;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 1000px;
+        }
+        th {
+            background: #969696;
+            color: #1a2c44;
+            font-weight: 700;
+            padding: 12px 6px;
+            border-bottom: 2px solid #d0dbe8;
+            text-align: center;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            font-size: 0.8rem;
+        }
+        td {
+            padding: 4px 3px;
+            border-bottom: 1px solid #e9edf3;
+            text-align: center;
+            vertical-align: middle;
+            min-height: 38px;
+            font-size: 0.8rem;
+        }
+        td[contenteditable="true"] {
+            outline: none;
+            transition: background 0.1s;
+            border-radius: 4px;
+            min-width: 40px;
+            padding: 3px 4px;
+        }
+        td[contenteditable="true"]:hover {
+            background: rgba(30, 58, 95, 0.05);
+        }
+        td[contenteditable="true"]:focus {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: inset 0 0 0 2px #1e3a5f;
+        }
+        .status-arrived td:not(.row-actions) {
+            background-color: #009953;
+        }
+        .status-onway td:not(.row-actions) {
+            background-color: #3bffa6;
+        }
+        .status-inprogress td:not(.row-actions) {
+            background-color: #93c5fd;
+        }
+        .status-missing td:not(.row-actions) {
+            background-color: #fc8d97;
+        }
+        .status-preparing td:not(.row-actions) {
+            background-color: #ffe5b4;
+        }
+        .status-cancelled td:not(.row-actions) {
+            background-color: #ff293c;
+            text-decoration: line-through;
+        }
+        .status-pending td:not(.row-actions) {
+            background-color: #e0e0e0;
+        }
+        .status-empty td:not(.row-actions) {
+            background-color: #ffffff;
+        }
+        .row-actions {
+            background-color: #ffffff !important;
+        }
+        td:first-child {
+            background-color: #ffffff !important;
+        }
+        .status-select,
+        .type-select {
+            padding: 3px 6px;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.75rem;
+            cursor: pointer;
+            outline: none;
+            font-weight: 500;
+            width: 75px;
+            min-height: 30px;
+        }
+        .type-select {
+            width: 65px;
+        }
+        .save-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #22c55e;
+            margin-right: 8px;
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+        .save-indicator.saving {
+            background: #eab308;
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.4);
+            }
+        }
+        .footer-info {
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+        .footer-bottom {
+            margin-top: 18px;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-top: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: transparent;
+            width: 100%;
+            max-width: 1550px;
+        }
+        .footer-bottom .copyright {
+            font-size: 1rem;
+            color: #0b1e33;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .footer-bottom .logo {
+            display: flex;
+            align-items: center;
+        }
+        .footer-bottom .logo img {
+            height: 36px;
+            width: auto;
+            max-width: 180px;
+            display: block;
+            object-fit: contain;
+        }
+        .counter {
+            background: #002555;
+            padding: 5px 18px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .empty-row-msg {
+            text-align: center;
+            padding: 30px 0;
+            color: #6a7c94;
+        }
+        /* גרירת שורות */
+        .sortable-ghost {
+            opacity: 0.45;
+            background: #c8ebfb !important;
+        }
+        .sortable-ghost td:not(.row-actions) {
+            background: #c8ebfb !important;
+        }
+        .sortable-chosen {
+            box-shadow: 0 0 0 2px #1e3a5f;
+        }
+        .sortable-drag {
+            opacity: 0.95;
+            cursor: grabbing !important;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #64748b;
+            font-size: 1.05rem;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            padding: 2px 5px;
+            border-radius: 6px;
+            line-height: 1;
+        }
+        .drag-handle:hover {
+            background: #e2e8f0;
+            color: #1e3a5f;
+        }
+        .drag-handle:active,
+        .sortable-chosen .drag-handle {
+            cursor: grabbing;
+        }
+        /* כשאין אפשרות למיון – הידית לא פעילה */
+        #tableBody.no-sort .drag-handle {
+            opacity: 0.35;
+            cursor: default;
+            pointer-events: none;
+        }
+        .row-actions {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff !important;
+            flex-wrap: nowrap;
+        }
+        .row-actions button {
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 30px;
+            transition: 0.1s;
+            min-width: 28px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .row-actions .delete-btn:hover {
+            background: #fecaca;
+            color: #b91c1c;
+        }
+        .row-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .mobile-table-controls {
+            display: none;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .mobile-table-controls button {
+            padding: 8px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 30px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal h2 {
+            margin-top: 0;
+            color: #0b1e33;
+        }
+        .modal .drop-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 20px 0;
+        }
+        .modal .drop-zone:hover,
+        .modal .drop-zone.dragover {
+            border-color: #2563eb;
+            background: #f0f7ff;
+        }
+        .modal .drop-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .modal .drop-zone p {
+            margin: 5px 0;
+            color: #64748b;
+        }
+        .modal .drop-zone .file-name {
+            color: #0b1e33;
+            font-weight: 600;
+        }
+        .modal .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        .modal .modal-actions .btn {
+            min-width: 100px;
+            justify-content: center;
+        }
+        .modal .btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .modal .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        .modal .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+            display: none;
+        }
+        .modal .progress-bar .progress-fill {
+            height: 100%;
+            background: #2563eb;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 12px 8px;
+                border-radius: 16px;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding-bottom: 12px;
+            }
+            .filter-area {
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: nowrap;
+                gap: 6px;
+                width: 100%;
+            }
+            .filter-area label {
+                font-size: 0.78rem;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            .filter-area select {
+                flex: 0 1 110px;
+                min-width: 80px;
+                max-width: 130px;
+                width: auto;
+                font-size: 0.8rem;
+                min-height: 36px;
+                padding: 6px 10px;
+            }
+            .search-area {
+                flex: 1 1 0;
+                min-width: 0;
+                width: auto;
+            }
+            .search-area input {
+                width: 100%;
+                min-width: 0;
+                min-height: 36px;
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            .filter-area .save-indicator {
+                flex-shrink: 0;
+            }
+            /* טאבים – תמיד בשורה אחת */
+            .view-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                gap: 0;
+                scrollbar-width: none;
+            }
+            .view-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            .view-tab {
+                flex: 1 1 0;
+                min-width: 0;
+                padding: 8px 6px;
+                font-size: 0.75rem;
+                text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .view-tab .tab-count {
+                font-size: 0.68rem;
+                padding: 1px 6px;
+                margin-right: 3px;
+            }
+            .action-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+                max-width: 100%;
+                margin: 0;
+            }
+            .action-buttons .btn {
+                flex: 0 1 auto;
+                min-width: 72px;
+                max-width: 110px;
+                width: calc(25% - 10px);
+                justify-content: center;
+                font-size: 0.65rem;
+                padding: 8px 4px 6px;
+                min-height: 54px;
+                white-space: nowrap;
+                border-radius: 14px;
+            }
+            .action-buttons .btn .btn-icon {
+                font-size: 1.1rem;
+            }
+            .action-buttons .btn .btn-label {
+                font-size: 0.62rem;
+            }
+            .stats-bar {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 4px 8px;
+                padding: 6px 8px;
+                margin: 6px 0 8px 0;
+                border-radius: 10px;
+            }
+            .stats-bar span {
+                font-size: 0.72rem;
+            }
+            .stats-bar strong {
+                font-size: 0.75rem;
+            }
+            .table-wrap {
+                border-radius: 10px;
+                font-size: 0.7rem;
+            }
+            table {
+                min-width: 900px;
+                font-size: 0.7rem;
+            }
+            th {
+                padding: 8px 4px;
+                font-size: 0.7rem;
+            }
+            td {
+                padding: 3px 2px;
+                font-size: 0.7rem;
+                min-height: 32px;
+            }
+            td[contenteditable="true"] {
+                padding: 2px 3px;
+                min-width: 30px;
+            }
+            .status-select,
+            .type-select {
+                width: 60px;
+                font-size: 0.65rem;
+                padding: 2px 4px;
+                min-height: 26px;
+            }
+            .type-select {
+                width: 50px;
+            }
+            .row-actions button {
+                font-size: 0.85rem;
+                min-width: 24px;
+                min-height: 24px;
+                padding: 1px 4px;
+            }
+            .row-checkbox {
+                width: 14px;
+                height: 14px;
+            }
+            .counter {
+                font-size: 0.75rem;
+                padding: 4px 14px;
+            }
+            .mobile-table-controls {
+                display: flex;
+            }
+            .modal {
+                padding: 20px;
+                width: 95%;
+            }
+            .modal .drop-zone {
+                padding: 25px 15px;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 10px 6px 6px;
+                gap: 8px;
+            }
+            .footer-bottom .copyright {
+                font-size: 0.85rem;
+            }
+            .footer-bottom .logo img {
+                height: 24px;
+            }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px 4px;
+                border-radius: 12px;
+            }
+            h1 {
+                font-size: 1rem;
+            }
+            .filter-area {
+                gap: 4px;
+            }
+            .filter-area label {
+                font-size: 0.7rem;
+            }
+            .filter-area select {
+                flex: 0 1 95px;
+                min-width: 72px;
+                max-width: 110px;
+                font-size: 0.72rem;
+                min-height: 34px;
+                padding: 5px 8px;
+            }
+            .search-area input {
+                min-height: 34px;
+                font-size: 0.72rem;
+                padding: 5px 10px;
+            }
+            .view-tab {
+                padding: 7px 4px;
+                font-size: 0.68rem;
+            }
+            .view-tab .tab-count {
+                font-size: 0.62rem;
+                padding: 0 5px;
+                margin-right: 2px;
+            }
+            .action-buttons {
+                gap: 6px;
+            }
+            .action-buttons .btn {
+                flex: 0 1 auto;
+                min-width: 68px;
+                max-width: 100px;
+                width: calc(33.333% - 8px);
+                font-size: 0.6rem;
+                padding: 7px 3px 5px;
+                min-height: 52px;
+                gap: 2px;
+                border-radius: 12px;
+            }
+            .action-buttons .btn .btn-icon {
+                font-size: 1rem;
+            }
+            .action-buttons .btn .btn-label {
+                font-size: 0.58rem;
+            }
+            table {
+                min-width: 750px;
+                font-size: 0.6rem;
+            }
+            th {
+                padding: 6px 3px;
+                font-size: 0.6rem;
+            }
+            td {
+                padding: 2px 1px;
+                font-size: 0.6rem;
+                min-height: 28px;
+            }
+            .status-select,
+            .type-select {
+                width: 50px;
+                font-size: 0.55rem;
+                padding: 1px 3px;
+                min-height: 22px;
+            }
+            .type-select {
+                width: 42px;
+            }
+            .row-actions button {
+                font-size: 0.7rem;
+                min-width: 20px;
+                min-height: 20px;
+                padding: 1px 3px;
+            }
+            .stats-bar {
+                gap: 3px 6px;
+                padding: 5px 6px;
+            }
+            .stats-bar span {
+                font-size: 0.65rem;
+            }
+            .stats-bar strong {
+                font-size: 0.68rem;
+            }
+            .footer-bottom .logo img {
+                height: 22px;
+            }
+            .footer-bottom .copyright {
+                font-size: 0.75rem;
+            }
+        }
+        @media (pointer: coarse) {
+            .btn {
+                min-height: 54px;
+            }
+            .row-actions button,
+            .status-select,
+            .type-select,
+            .row-checkbox {
+                min-height: 36px;
+                min-width: 36px;
+            }
+            @media (max-width: 768px) {
+                .btn {
+                    min-height: 54px;
+                }
+                .row-actions button,
+                .status-select,
+                .type-select,
+                .row-checkbox {
+                    min-height: 34px;
+                    min-width: 34px;
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="toolbar">
+            <h1>📦 סטטוס משלוחים</h1>
+            <div class="filter-area">
+                <label for="statusFilter">🔎 סינון:</label>
+                <select id="statusFilter">
+                    <option value="all">הכל</option>
+                    <option value="arrived">הגיע</option>
+                    <option value="onway">בדרך</option>
+                    <option value="inprogress">בביצוע</option>
+                    <option value="missing">חוסר</option>
+                    <option value="preparing">הכנה</option>
+                    <option value="cancelled">בוטל</option>
+                    <option value="pending">המתנה</option>
+                    <option value="empty">חדש</option>
+                </select>
+                <div class="search-area">
+                    <input type="text" id="searchInput" placeholder="🔍 חיפוש מהיר...">
+                </div>
+                <span class="save-indicator" id="saveIndicator" title="💾 נשמר אוטומטית"></span>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-success" id="addRowBtn" data-tip="הוסף שורה חדשה או טאב חדש"><span class="btn-icon">➕</span><span class="btn-label">הוסף שורה / טאב</span></button>
+                <button class="btn btn-danger" id="deleteSelectedBtn" data-tip="מחק שורה/ות מסומנות"><span class="btn-icon">🗑️</span><span class="btn-label">מחק שורה/ות</span></button>
+                <button class="btn btn-selected" id="showSelectedBtn" data-tip="הצג שורות מסומנות בלבד"><span class="btn-icon">👁️</span><span class="btn-label">הצג מסומנים</span></button>
+                <button class="btn btn-move" id="moveBtn" data-tip="העבר שורות נבחרות לטאב אחר"><span class="btn-icon">↔️</span><span class="btn-label">העבר לטאב</span></button>
+                <button class="btn btn-sort" id="sortBtn" data-tip="מיון לפי סטטוס"><span class="btn-icon">🔽</span><span class="btn-label">מיון שורות</span></button>
+                <button class="btn btn-excel" id="exportExcelBtn" data-tip="יצא סטטוסים לקובץ אקסל"><span class="btn-icon">📤</span><span class="btn-label">יצא לקובץ</span></button>
+                <button class="btn btn-load" id="loadExcelBtn" data-tip="יבא סטטוסים מקובץ אקסל"><span class="btn-icon">📥</span><span class="btn-label">יבא מקובץ</span></button>
+            </div>
+        </div>
+
+        <div class="view-tabs" id="viewTabs">
+            <button type="button" class="view-tab active" id="tabToys" data-view="toys">
+                🧸 צעצועים <span class="tab-count" id="tabToysCount">0</span>
+            </button>
+            <button type="button" class="view-tab" id="tabElectronics" data-view="electronics">
+                🔌 אלקטרוניקה קלה <span class="tab-count" id="tabElectronicsCount">0</span>
+            </button>
+            <!-- טאבים מותאמים אישית יתווספו כאן דינמית -->
+            <button type="button" class="view-tab archive-tab" id="tabArchive" data-view="archive">
+                📁 ארכיב <span class="tab-count" id="tabArchiveCount">0</span>
+            </button>
+        </div>
+
+        <div class="stats-bar" id="statsBar">
+            <span>📊 סה"כ: <strong id="totalCount">0</strong></span>
+            <span>✅ הגיע: <strong id="arrivedCount">0</strong></span>
+            <span>🚚 בדרך: <strong id="onwayCount">0</strong></span>
+            <span>⚙️ בהכנה: <strong class="stat-preparing" id="preparingCount">0</strong></span>
+            <span>🔧 בביצוע: <strong class="stat-inprogress" id="inprogressCount">0</strong></span>
+            <span>❌ חוסר: <strong class="stat-missing" id="missingCount">0</strong></span>
+            <span>🚫 בוטל: <strong class="stat-cancelled" id="cancelledCount">0</strong></span>
+            <span>⏳ בהמתנה: <strong id="pendingCount">0</strong></span>
+        </div>
+
+        <div class="table-wrap">
+            <table id="deliveryTable">
+                <thead>
+                    <tr>
+                        <th style="width:32px;"><input type="checkbox" id="selectAllCheck"></th>
+                        <th>סוג מכולה</th>
+                        <th>20'</th>
+                        <th>40'</th>
+                        <th>הזמנה</th>
+                        <th>סוג מוצר</th>
+                        <th>תיק</th>
+                        <th>שם ספק</th>
+                        <th>תאריך הגעה</th>
+                        <th>ספק</th>
+                        <th>סכום $</th>
+                        <th>סטטוס</th>
+                        <th>הערה</th>
+                        <th style="width:60px;">פעולות</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+
+        <div class="footer-info">
+            <span class="counter" id="rowCounter">0 שורות</span>
+        </div>
+    </div>
+
+    <!-- תחתית עם זכויות יוצרים ולוגו – מחוץ לכרטיס, על הרקע הכחול -->
+    <div class="footer-bottom">
+        <div class="copyright">© 2026 כל הזכויות שמורות</div>
+        <div class="logo">
+            <img src="OG_Blue_Logo2.png" alt="OG Blue Logo">
+        </div>
+    </div>
+
+    <!-- מודל לטעינת אקסל -->
+    <div class="modal-overlay" id="loadModal">
+        <div class="modal">
+            <h2>📂 טעינת קובץ אקסל</h2>
+            <p style="color:#64748b; margin-bottom:5px;">בחר קובץ אקסל לטעינה. כל הנתונים הקיימים יוחלפו.</p>
+            <div class="drop-zone" id="dropZone">
+                <div class="icon">📁</div>
+                <p><strong>גרור קובץ לכאן</strong></p>
+                <p>או לחץ לבחירת קובץ</p>
+                <p style="font-size:0.8rem; color:#94a3b8;">תומך בקבצי .xlsx ו-.xls</p>
+                <p class="file-name" id="fileName" style="margin-top:10px;"></p>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+            </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelLoadBtn">ביטול</button>
+                <button class="btn btn-load" id="confirmLoadBtn" disabled>טען קובץ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- מודל להעברת שורות בין טאבים -->
+    <div class="modal-overlay" id="moveModal">
+        <div class="modal">
+            <h2>↔️ העברת שורות</h2>
+            <p style="color:#64748b; margin-bottom:16px;" id="moveModalDesc">בחר לאיזה טאב להעביר את השורות הנבחרות:</p>
+            <div class="move-targets" id="moveTargets" style="display:flex; flex-direction:column; gap:10px;">
+                <!-- כפתורי יעדים ייבנו דינמית -->
+            </div>
+            <div class="modal-actions" style="margin-top:20px;">
+                <button class="btn btn-secondary" id="cancelMoveBtn">ביטול</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- מודל בחירה: הוסף שורה או טאב -->
+    <div class="modal-overlay" id="addChoiceModal">
+        <div class="modal">
+            <h2>➕ הוספה</h2>
+            <p style="color:#64748b; margin-bottom:16px;">מה תרצה להוסיף?</p>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn btn-success" id="chooseAddRowBtn" style="justify-content:center; min-height:48px; font-size:0.95rem;">➕ הוסף שורה</button>
+                <button class="btn btn-load" id="chooseAddTabBtn" style="justify-content:center; min-height:48px; font-size:0.95rem;">📑 הוסף טאב חדש</button>
+            </div>
+            <div class="modal-actions" style="margin-top:20px;">
+                <button class="btn btn-secondary" id="cancelAddChoiceBtn">ביטול</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- מודל יצירת טאב חדש -->
+    <div class="modal-overlay" id="addTabModal">
+        <div class="modal">
+            <h2>📑 טאב חדש</h2>
+            <p style="color:#64748b; margin-bottom:12px;">הזן שם לטאב (עד 20 תווים):</p>
+            <input type="text" id="newTabNameInput" maxlength="20" placeholder="שם הטאב..." style="width:100%; padding:12px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; font-family:inherit; outline:none; box-sizing:border-box;" dir="rtl">
+            <p id="newTabNameError" style="color:#b91c1c; font-size:0.85rem; margin:8px 0 0; display:none;"></p>
+            <p style="color:#94a3b8; font-size:0.8rem; margin:6px 0 0;"><span id="newTabCharCount">0</span>/20</p>
+            <div class="modal-actions" style="margin-top:20px;">
+                <button class="btn btn-secondary" id="cancelAddTabBtn">ביטול</button>
+                <button class="btn btn-success" id="confirmAddTabBtn">צור טאב</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const statusMap = {
+                'arrived': 'הגיע',
+                'onway': 'בדרך',
+                'inprogress': 'בביצוע',
+                'missing': 'חוסר',
+                'preparing': 'הכנה',
+                'cancelled': 'בוטל',
+                'pending': 'המתנה',
+                'empty': 'חדש'
+            };
+
+            const statusHebToEng = {
+                'הגיע': 'arrived',
+                'בדרך': 'onway',
+                'בביצוע': 'inprogress',
+                'ביצוע': 'inprogress',
+                'חוסר': 'missing',
+                'הכנה': 'preparing',
+                'בוטל': 'cancelled',
+                'המתנה': 'pending',
+                'חדש': 'empty'
+            };
+
+            const sortOrder = {
+                'arrived': 1,
+                'onway': 2,
+                'inprogress': 3,
+                'preparing': 4,
+                'missing': 5,
+                'cancelled': 6,
+                'pending': 7,
+                'empty': 8,
+                '': 8
+            };
+
+            const defaultData = [
+                { type: "FCL", q20: "0", q40: "1", order: "150118535", product: "אופנועים", file: "101260008",
+                    supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-03-10", vendor: "24210046000",
+                    amount: "30074.00", status: "arrived", note: "הגיע" },
+                { type: "LCL", q20: "0", q40: "0", order: "150118544", product: "מאשה והדוב", file: "101260011",
+                    supplier: "GIOCHI PREZIOSI", date: "2026-03-22", vendor: "24210035000", amount: "20555.00",
+                    status: "arrived", note: "הגיע" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118545", product: "מאשה והדוב", file: "101260007",
+                    supplier: "FABRICAS AGRUPADAS DE MUN", date: "2026-03-30", vendor: "24210052000",
+                    amount: "61277.00", status: "arrived", note: "הגיע" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118555", product: "רכבות", file: "101260009",
+                    supplier: "SHANTOU SWEET TOYS COMPAN", date: "2026-03-30", vendor: "24210009000",
+                    amount: "32655.00", status: "arrived", note: "הגיע" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118540", product: "משאיות", file: "101260010",
+                    supplier: "SHANTOU SHENGQI IMP", date: "2026-04-04", vendor: "24210007000", amount: "23093.00",
+                    status: "arrived", note: "הגיע" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118549", product: "אופני איזון פדאלים",
+                    file: "101260013",
+                    supplier: "HEBEI JOYRIDE TOYS", date: "2026-04-21", vendor: "24210095000", amount: "20664.00",
+                    status: "arrived", note: "הגיע" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118548", product: "אופני איזון", file: "101260014",
+                    supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-04-22", vendor: "24210008000",
+                    amount: "17088.00", status: "arrived", note: "הגיע" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118551", product: "רובי ג'ל", file: "101260015",
+                    supplier: "DOWELLIN GROUP", date: "2026-05-02", vendor: "24210012000", amount: "40219.04",
+                    status: "arrived", note: "הגיע" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118547", product: "בימבה ג'וק", file: "101260016",
+                    supplier: "SHIJIAZHUANG SENTER INTER", date: "2026-06-16", vendor: "24210008000",
+                    amount: "24541.00", status: "arrived", note: "הגיע" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118559", product: "רובים פלסטיק", file: "101260018",
+                    supplier: "ZING ZASIA LIMITED", date: "2026-07-09", vendor: "24210010000", amount: "47423.89",
+                    status: "onway", note: "ממתין להגעה ושחרור" },
+                { type: "FCL", q20: "0", q40: "2", order: "150118556", product: "משחקי צבא", file: "101260017",
+                    supplier: "SHANTOU TOYS SMILE CO.,LT", date: "2026-08-07", vendor: "24210046000",
+                    amount: "31915.32", status: "onway", note: "ממתין להגעה ושחרור" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118564", product: "שטיחוני פעילות", file: "x",
+                    supplier: "GUANGDONG FAIRNESS ENTRPRISE", date: "2026-08-06", vendor: "24210090000",
+                    amount: "10096.50", status: "onway", note: "ממתין להגעה ושחרור" },
+                { type: "", q20: "", q40: "", order: "150118558", product: "בובות הפעלה", file: "x",
+                    supplier: "EOLO TOYS LTD", date: "", vendor: "24210037000", amount: "36087.00",
+                    status: "missing", note: "בתהליך חוסר תעודות מעבדה" },
+                { type: "", q20: "", q40: "", order: "150118560", product: "רכבי פעלולים על שלט", file: "x",
+                    supplier: "KABOOM ASIA LIMITED", date: "", vendor: "24210011000", amount: "52152.00",
+                    status: "missing", note: "ממתין חוסר תעודות משרד התקשורת" },
+                { type: "", q20: "", q40: "", order: "150118562", product: "כלי עבודה", file: "x",
+                    supplier: "SHANTOU SHENGQI IMP", date: "", vendor: "24210007000", amount: "38958.12",
+                    status: "inprogress", note: "נשלח לספק לביצוע" },
+                { type: "", q20: "", q40: "", order: "150118565", product: "שולחנות פעילות", file: "x",
+                    supplier: "WENZHOU RUIZHI CRAFTS", date: "", vendor: "24210900000", amount: "34318.50",
+                    status: "inprogress", note: "נשלח לספק לביצוע" },
+                { type: "", q20: "", q40: "", order: "150118571", product: "תלת אופן (בימבה יטבתה)", file: "x",
+                    supplier: "YONGKANG YULIEN INDUSTRY", date: "", vendor: "24210396000", amount: "20037.60",
+                    status: "inprogress", note: "נשלח לספק לביצוע" },
+                { type: "", q20: "", q40: "", order: "150118584", product: "שולחנות משחק", file: "x",
+                    supplier: "SPEEDINDUSTIAL INTERNATIONAL", date: "", vendor: "24220007000", amount: "17820.00",
+                    status: "inprogress", note: "נשלח לספק לביצוע" },
+                { type: "", q20: "", q40: "", order: "150118585", product: "שולחנות משחק", file: "x",
+                    supplier: "SPEEDINDUSTIAL INTERNATIONAL", date: "", vendor: "24220007000", amount: "21300.00",
+                    status: "inprogress", note: "נשלח לספק לביצוע - (קיבל מקדמה להכנת תעודת מעבדה)" },
+                { type: "", q20: "", q40: "", order: "150118579", product: "משאיות גדול", file: "x",
+                    supplier: "SHATOU FENGCHENGJIA TRAD -  HK FAIR TOYS", date: "", vendor: "24210355000",
+                    amount: "19945.44", status: "onway", note: "ממתין להכנת הסטודיו" },
+                { type: "", q20: "", q40: "", order: "150118580", product: "חניונים", file: "x",
+                    supplier: "GUANGDONG ZHENLE TOYS FACTORY", date: "", vendor: "24210356000",
+                    amount: "25260.48", status: "onway", note: "ממתין להכנת הסטודיו" },
+                { type: "", q20: "", q40: "", order: "150118572", product: "משאיות עבודה קטן", file: "x",
+                    supplier: "SHANTOU HUAHUAN IMPORTAND  -  HH TOYS", date: "", vendor: "24210365000",
+                    amount: "27164.58", status: "onway", note: "ממתין להכנת הסטודיו" },
+                { type: "", q20: "", q40: "", order: "150118566", product: "ספיידי", file: "x",
+                    supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "83944.78",
+                    status: "preparing", note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118567", product: "קוקומלון", file: "x",
+                    supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "46145.00",
+                    status: "preparing", note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118563", product: "שונות", file: "x",
+                    supplier: "HASBRO   -    JULY", date: "", vendor: "24210361100", amount: "295492.98",
+                    status: "preparing", note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118589", product: "שונות", file: "x",
+                    supplier: "HASBRO   -    SEPTEMBER", date: "", vendor: "24210361100", amount: "162861.02",
+                    status: "preparing", note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118588", product: "צבי נינג'ה", file: "x",
+                    supplier: "PLAYMATES", date: "", vendor: "24210336000", amount: "24822.57",
+                    status: "preparing", note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118587", product: "נשכן", file: "x",
+                    supplier: "GUANGDONG HUANGER BABY PRODUCTS", date: "", vendor: "24220008000",
+                    amount: "3769.52", status: "preparing", note: "בתהליך הכנה" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118591", product: "אופני איזון פדאלים", file: "x",
+                    supplier: "HEBEI JOYRIDE TOYS", date: "", vendor: "24210095000", amount: "20664.00",
+                    status: "preparing", note: "בתהליך הכנה" },
+                { type: "FCL", q20: "0", q40: "1", order: "150118592", product: "אופני איזון", file: "x",
+                    supplier: "SHIJIAZHUANG SENTER INTER", date: "", vendor: "24210008000", amount: "17837.40",
+                    status: "preparing", note: "בתהליך הכנה" },
+                { type: "", q20: "", q40: "", order: "150118550", product: "שולחנות משחק", file: "x",
+                    supplier: "GUANGDONG HUANGGUAN TECHN", date: "x", vendor: "24210005000", amount: "43940.00",
+                    status: "cancelled", note: "בוטל לעת עתה" },
+                { type: "", q20: "", q40: "", order: "150118557", product: "רכבות", file: "x",
+                    supplier: "HANG WING INDUSTRY", date: "x", vendor: "24210061000", amount: "71228.00",
+                    status: "cancelled", note: "בוטל לעת עתה" },
+                { type: "", q20: "", q40: "", order: "150118568", product: "קוקומלון", file: "x",
+                    supplier: "JAZWARES", date: "", vendor: "24210058000", amount: "30565.00",
+                    status: "cancelled", note: "בוטל לעת עתה" }
+            ];
+
+            const STORAGE_KEY_TOYS = 'toysData';
+            const STORAGE_KEY_ELECTRONICS = 'electronicsData';
+            const ARCHIVE_KEY = 'deliveryArchive';
+            const LEGACY_STORAGE_KEY = 'deliveryData'; // מיגרציה מגרסה ישנה
+            const CUSTOM_TABS_META_KEY = 'customTabsMeta'; // [{id, name}]
+            const CUSTOM_TAB_DATA_PREFIX = 'customTabData_';
+
+            // טאבים קבועים
+            const FIXED_TABS = [
+                { id: 'toys', name: 'צעצועים', icon: '🧸', fixed: true },
+                { id: 'electronics', name: 'אלקטרוניקה קלה', icon: '🔌', fixed: true },
+                { id: 'archive', name: 'ארכיב', icon: '📁', fixed: true, isArchive: true }
+            ];
+
+            function loadCustomTabsMeta() {
+                const saved = localStorage.getItem(CUSTOM_TABS_META_KEY);
+                if (saved) {
+                    try {
+                        const arr = JSON.parse(saved);
+                        if (Array.isArray(arr)) {
+                            return arr.filter(t => t && t.id && t.name).map(t => ({
+                                id: String(t.id),
+                                name: String(t.name).slice(0, 20)
+                            }));
+                        }
+                    } catch (e) {}
+                }
+                return [];
+            }
+
+            function saveCustomTabsMeta() {
+                localStorage.setItem(CUSTOM_TABS_META_KEY, JSON.stringify(customTabsMeta));
+            }
+
+            function loadCustomTabData(tabId) {
+                const saved = localStorage.getItem(CUSTOM_TAB_DATA_PREFIX + tabId);
+                if (saved) {
+                    try { return JSON.parse(saved); } catch (e) { return []; }
+                }
+                return [];
+            }
+
+            function saveCustomTabData(tabId, data) {
+                localStorage.setItem(CUSTOM_TAB_DATA_PREFIX + tabId, JSON.stringify(data));
+                flashSaveIndicator();
+                updateStats(data);
+            }
+
+            function getAllTabs() {
+                // סדר: צעצועים, אלקטרוניקה, מותאמים, ארכיב
+                const customs = customTabsMeta.map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    icon: '📑',
+                    fixed: false
+                }));
+                return [
+                    FIXED_TABS[0],
+                    FIXED_TABS[1],
+                    ...customs,
+                    FIXED_TABS[2]
+                ];
+            }
+
+            function getTabLabel(viewId) {
+                const t = getAllTabs().find(x => x.id === viewId);
+                return t ? t.name : viewId;
+            }
+
+            function isCustomView(viewId) {
+                return viewId && viewId !== 'toys' && viewId !== 'electronics' && viewId !== 'archive';
+            }
+
+            // פונקציות עזר לעיצוב מספרים
+            function formatNumber(value) {
+                if (value === undefined || value === null || value === '') return '';
+                const num = parseFloat(String(value).replace(/,/g, ''));
+                if (isNaN(num)) return String(value);
+                return num.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            function parseNumberFromDisplay(value) {
+                if (value === undefined || value === null || value === '') return '';
+                const cleaned = String(value).replace(/,/g, '');
+                const num = parseFloat(cleaned);
+                if (isNaN(num)) return String(value);
+                return num.toFixed(2);
+            }
+
+            function loadToysData() {
+                let saved = localStorage.getItem(STORAGE_KEY_TOYS);
+                if (!saved) {
+                    // מיגרציה מנתונים ישנים (משלוחים → צעצועים)
+                    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+                    if (legacy) {
+                        try {
+                            const parsed = JSON.parse(legacy);
+                            localStorage.setItem(STORAGE_KEY_TOYS, legacy);
+                            return parsed;
+                        } catch (e) {}
+                    }
+                }
+                if (saved) {
+                    try {
+                        return JSON.parse(saved);
+                    } catch (e) {
+                        return JSON.parse(JSON.stringify(defaultData));
+                    }
+                }
+                return JSON.parse(JSON.stringify(defaultData));
+            }
+
+            function loadElectronicsData() {
+                const saved = localStorage.getItem(STORAGE_KEY_ELECTRONICS);
+                if (saved) {
+                    try { return JSON.parse(saved); } catch (e) { return []; }
+                }
+                return [];
+            }
+
+            function loadArchive() {
+                const saved = localStorage.getItem(ARCHIVE_KEY);
+                if (saved) {
+                    try { return JSON.parse(saved); } catch (e) { return []; }
+                }
+                return [];
+            }
+
+            function flashSaveIndicator() {
+                const indicator = document.getElementById('saveIndicator');
+                if (!indicator) return;
+                indicator.classList.add('saving');
+                setTimeout(() => {
+                    indicator.classList.remove('saving');
+                }, 400);
+            }
+
+            function saveToysData(data) {
+                localStorage.setItem(STORAGE_KEY_TOYS, JSON.stringify(data));
+                flashSaveIndicator();
+                updateStats(data);
+            }
+
+            function saveElectronicsData(data) {
+                localStorage.setItem(STORAGE_KEY_ELECTRONICS, JSON.stringify(data));
+                flashSaveIndicator();
+                updateStats(data);
+            }
+
+            function saveArchive(data) {
+                localStorage.setItem(ARCHIVE_KEY, JSON.stringify(data));
+            }
+
+            let toysData = loadToysData();
+            let electronicsData = loadElectronicsData();
+            let archiveData = loadArchive();
+            let customTabsMeta = loadCustomTabsMeta();
+            let customTabsData = {}; // id -> rows[]
+            customTabsMeta.forEach(t => {
+                customTabsData[t.id] = loadCustomTabData(t.id);
+            });
+
+            // מזהה ייחודי יציב לכל שורה – חשוב לגרירה, מיון, מחיקה וזיהוי מדויק
+            let nextId = 1;
+            let nextCustomTabNum = 1;
+            function computeNextIdFrom(arr) {
+                if (!Array.isArray(arr)) return;
+                arr.forEach(r => {
+                    if (r && r._id) {
+                        const m = String(r._id).match(/^row-(\d+)$/);
+                        if (m) {
+                            const n = parseInt(m[1], 10);
+                            if (n >= nextId) nextId = n + 1;
+                        }
+                    }
+                });
+            }
+            computeNextIdFrom(toysData);
+            computeNextIdFrom(electronicsData);
+            computeNextIdFrom(archiveData);
+            Object.keys(customTabsData).forEach(id => computeNextIdFrom(customTabsData[id]));
+            customTabsMeta.forEach(t => {
+                const m = String(t.id).match(/^custom-(\d+)$/);
+                if (m) {
+                    const n = parseInt(m[1], 10);
+                    if (n >= nextCustomTabNum) nextCustomTabNum = n + 1;
+                }
+            });
+            if (nextId < 1000) nextId = 1000; // שמירה על טווח גבוה למניעת התנגשויות עם גרסאות ישנות
+
+            function ensureRowIds(arr) {
+                if (!Array.isArray(arr)) return;
+                arr.forEach(r => {
+                    if (r && !r._id) {
+                        r._id = 'row-' + (nextId++);
+                    }
+                });
+            }
+            ensureRowIds(toysData);
+            ensureRowIds(electronicsData);
+            ensureRowIds(archiveData);
+            Object.keys(customTabsData).forEach(id => ensureRowIds(customTabsData[id]));
+            // שמירה ראשונית של מזהים (בלי לקרוא ל-updateStats כדי למנוע בעיות טעינה)
+            try {
+                if (toysData.length) localStorage.setItem(STORAGE_KEY_TOYS, JSON.stringify(toysData));
+                if (electronicsData.length) localStorage.setItem(STORAGE_KEY_ELECTRONICS, JSON.stringify(electronicsData));
+                if (archiveData.length) localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiveData));
+            } catch (e) { /* ignore */ }
+
+            let showSelectedOnly = false;
+            let selectedIdsSnapshot = [];
+            let currentView = 'toys'; // 'toys' | 'electronics' | 'archive'
+            let lastMainView = 'toys'; // לשחזור מארכיב – לאיזה טאב להחזיר
+            let sortableInstance = null; // מופע Sortable לגרירת שורות
+
+
+            const tbody = document.getElementById('tableBody');
+            const filterSelect = document.getElementById('statusFilter');
+            const rowCounter = document.getElementById('rowCounter');
+            const selectAllCheck = document.getElementById('selectAllCheck');
+            const searchInput = document.getElementById('searchInput');
+
+            const loadModal = document.getElementById('loadModal');
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+            const confirmLoadBtn = document.getElementById('confirmLoadBtn');
+            const cancelLoadBtn = document.getElementById('cancelLoadBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+
+            let selectedFile = null;
+
+            function getStatusClass(status) {
+                if (!status || status === 'empty') return 'status-empty';
+                return `status-${status}`;
+            }
+
+            // הדבקה כטקסט נקי בלבד – מונע ירושת צבע רקע/סגנונות משורה צבעונית
+            function forcePlainTextPaste(e) {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                if (text == null) return;
+                const cleaned = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                // שמירה על מיקום הסמן והחלפת הבחירה בטקסט נקי
+                if (document.queryCommandSupported && document.queryCommandSupported('insertText')) {
+                    document.execCommand('insertText', false, cleaned);
+                } else {
+                    const sel = window.getSelection();
+                    if (!sel.rangeCount) return;
+                    const range = sel.getRangeAt(0);
+                    range.deleteContents();
+                    range.insertNode(document.createTextNode(cleaned));
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+
+            function formatDateForDisplay(dateStr) {
+                if (!dateStr || dateStr === 'x' || dateStr === '') return '—';
+                const str = String(dateStr);
+                const parts = str.split('-');
+                if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                return str;
+            }
+
+            function saveAndUpdate() {
+                saveActive();
+                updateCounter(document.querySelectorAll('#tableBody tr').length);
+            }
+
+            function sortData() {
+                const data = getActiveData();
+                data.sort((a, b) => {
+                    const orderA = sortOrder[a.status] || 8;
+                    const orderB = sortOrder[b.status] || 8;
+                    return orderA - orderB;
+                });
+                saveActive();
+                renderTable(filterSelect.value);
+                updateStats(getActiveData());
+            }
+
+            function getActiveData() {
+                if (currentView === 'archive') return archiveData;
+                if (currentView === 'electronics') return electronicsData;
+                if (currentView === 'toys') return toysData;
+                if (!customTabsData[currentView]) customTabsData[currentView] = [];
+                return customTabsData[currentView];
+            }
+
+            function setActiveData(data) {
+                if (currentView === 'archive') {
+                    archiveData = data;
+                    saveArchive(archiveData);
+                } else if (currentView === 'electronics') {
+                    electronicsData = data;
+                    saveElectronicsData(electronicsData);
+                } else if (currentView === 'toys') {
+                    toysData = data;
+                    saveToysData(toysData);
+                } else {
+                    customTabsData[currentView] = data;
+                    saveCustomTabData(currentView, data);
+                }
+            }
+
+            function findActiveRow(rowId) {
+                if (!rowId) return null;
+                const data = getActiveData();
+                // תמיד לפי _id יציב – ללא נפילה לאינדקס (שמשתנה במיון/סינון)
+                let found = data.find(r => r._id === rowId);
+                if (!found) {
+                    // ניסיון אחרון: אם יש שורה בלי _id (לא אמור לקרות) – נקצה ונסה שוב
+                    ensureRowIds(data);
+                    found = data.find(r => r._id === rowId);
+                }
+                return found || null;
+            }
+
+            function saveActive() {
+                if (currentView === 'archive') {
+                    saveArchive(archiveData);
+                } else if (currentView === 'electronics') {
+                    saveElectronicsData(electronicsData);
+                } else if (currentView === 'toys') {
+                    saveToysData(toysData);
+                } else {
+                    saveCustomTabData(currentView, customTabsData[currentView] || []);
+                }
+                updateStats(getActiveData());
+            }
+
+            function renderTabsUI() {
+                const container = document.getElementById('viewTabs');
+                if (!container) return;
+                // הסרת טאבים מותאמים קיימים
+                container.querySelectorAll('.view-tab[data-custom="1"]').forEach(el => el.remove());
+                const archiveBtn = document.getElementById('tabArchive');
+                customTabsMeta.forEach(t => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'view-tab' + (currentView === t.id ? ' active' : '');
+                    btn.dataset.view = t.id;
+                    btn.dataset.custom = '1';
+                    btn.id = 'tab-' + t.id;
+                    btn.innerHTML = '📑 ' + escapeHtml(t.name) + ' <span class="tab-count" id="tabCount-' + t.id + '">0</span>';
+                    btn.addEventListener('click', function() { switchView(t.id); });
+                    // הוספה לפני ארכיב
+                    container.insertBefore(btn, archiveBtn);
+                });
+                // עדכון active על קבועים
+                const tabToys = document.getElementById('tabToys');
+                const tabElectronics = document.getElementById('tabElectronics');
+                if (tabToys) tabToys.classList.toggle('active', currentView === 'toys');
+                if (tabElectronics) tabElectronics.classList.toggle('active', currentView === 'electronics');
+                if (archiveBtn) archiveBtn.classList.toggle('active', currentView === 'archive');
+            }
+
+            function escapeHtml(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            }
+
+            function switchView(view) {
+                currentView = view;
+                if (view === 'toys' || view === 'electronics' || isCustomView(view)) lastMainView = view;
+                showSelectedOnly = false;
+                selectedIdsSnapshot = [];
+                const selBtn = document.getElementById('showSelectedBtn');
+                if (selBtn) { selBtn.classList.remove('active'); selBtn.innerHTML = '<span class="btn-icon">👁️</span><span class="btn-label">הצג מסומנים</span>'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
+
+                renderTabsUI();
+
+                filterSelect.value = 'all';
+                searchInput.value = '';
+                renderTable('all');
+                updateStats(getActiveData());
+            }
+
+            function renderTable(filter = 'all') {
+                const searchTerm = searchInput.value.toLowerCase();
+                const sourceData = getActiveData();
+                // וידוא שכל השורות מקבלות _id יציב לפני רינדור
+                ensureRowIds(sourceData);
+
+                const filtered = sourceData.filter((row) => {
+                    if (showSelectedOnly) {
+                        if (!row._id || !selectedIdsSnapshot.includes(row._id)) return false;
+                    }
+
+                    let statusMatch = true;
+                    if (filter === 'all') statusMatch = true;
+                    else if (filter === 'empty') statusMatch = !row.status || row.status === 'empty';
+                    else statusMatch = row.status === filter;
+
+                    let searchMatch = true;
+                    if (searchTerm) {
+                        const rowText = Object.values(row).join(' ').toLowerCase();
+                        searchMatch = rowText.includes(searchTerm);
+                    }
+
+                    return statusMatch && searchMatch;
+                });
+
+                tbody.innerHTML = '';
+                if (sortableInstance) {
+                    sortableInstance.destroy();
+                    sortableInstance = null;
+                }
+                if (filtered.length === 0) {
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.colSpan = 14;
+                    td.className = 'empty-row-msg';
+                    td.textContent = searchTerm ? '🔍 אין תוצאות לחיפוש זה' : '🚫 אין שורות התואמות לסטטוס זה';
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+                    updateCounter(filtered.length);
+                    tbody.classList.add('no-sort');
+                    return;
+                }
+
+                filtered.forEach((row) => {
+                    const tr = document.createElement('tr');
+                    // תמיד _id יציב – אין שימוש באינדקס משתנה
+                    if (!row._id) {
+                        row._id = 'row-' + (nextId++);
+                    }
+                    tr.dataset.rowId = row._id;
+                    tr.className = getStatusClass(row.status);
+
+                    const tdCheck = document.createElement('td');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'row-checkbox';
+                    tdCheck.appendChild(checkbox);
+                    tr.appendChild(tdCheck);
+
+                    const tdType = document.createElement('td');
+                    const typeSelect = document.createElement('select');
+                    typeSelect.className = 'type-select';
+                    const typeOptions = ['', 'FCL', 'LCL', 'אחר'];
+                    typeOptions.forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt;
+                        option.textContent = opt || '';
+                        if (row.type === opt || (!row.type && opt === '')) option.selected = true;
+                        typeSelect.appendChild(option);
+                    });
+                    typeSelect.addEventListener('change', function() {
+                        const newVal = this.value;
+                        const rowData = findActiveRow(tr.dataset.rowId);
+                        if (rowData) {
+                            rowData.type = newVal;
+                            saveAndUpdate();
+                        }
+                    });
+                    tdType.appendChild(typeSelect);
+                    tr.appendChild(tdType);
+
+                    const fields = ['q20', 'q40', 'order', 'product', 'file', 'supplier', 'date', 'vendor',
+                        'amount'
+                    ];
+                    fields.forEach((field) => {
+                        const td = document.createElement('td');
+                        td.contentEditable = true;
+                        let val = row[field] !== undefined ? row[field] : '';
+                        if (field === 'date' && val) {
+                            td.textContent = formatDateForDisplay(val);
+                        } else if (field === 'amount') {
+                            td.textContent = formatNumber(val);
+                            td.setAttribute('data-raw', val);
+                        } else {
+                            td.textContent = val;
+                        }
+                        td.setAttribute('data-field', field);
+
+                        td.addEventListener('blur', function(e) {
+                            const newVal = this.textContent.trim();
+                            const rowData = findActiveRow(tr.dataset.rowId);
+                            if (rowData) {
+                                if (field === 'date') {
+                                    const parts = newVal.split('/');
+                                    if (parts.length === 3 && parts[2].length === 4) {
+                                        rowData[field] =
+                                        `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                                    } else if (newVal.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                        rowData[field] = newVal;
+                                    } else {
+                                        rowData[field] = newVal;
+                                    }
+                                } else if (field === 'amount') {
+                                    const parsed = parseNumberFromDisplay(newVal);
+                                    const num = parseFloat(parsed);
+                                    if (!isNaN(num) && num >= 0) {
+                                        rowData[field] = parsed;
+                                        this.textContent = formatNumber(parsed);
+                                        this.setAttribute('data-raw', parsed);
+                                    } else if (newVal === '' || newVal === '—') {
+                                        rowData[field] = '';
+                                        this.textContent = '';
+                                        this.setAttribute('data-raw', '');
+                                    } else {
+                                        alert('אנא הזן מספר תקין (לדוגמה: 1234.56)');
+                                        const raw = this.getAttribute('data-raw') || rowData[field] || '';
+                                        this.textContent = formatNumber(raw);
+                                    }
+                                } else {
+                                    rowData[field] = newVal;
+                                }
+                                saveAndUpdate();
+                            }
+                        });
+
+                        td.addEventListener('keydown', function(e) {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                this.blur();
+                            }
+                        });
+                        // הדבקה כטקסט נקי בלבד – בלי צבע רקע / HTML משורה אחרת
+                        td.addEventListener('paste', forcePlainTextPaste);
+                        tr.appendChild(td);
+                    });
+
+                    const tdStatus = document.createElement('td');
+                    const statusSelect = document.createElement('select');
+                    statusSelect.className = 'status-select';
+                    // אפשרות ריקה ראשונה – משאירה את הקוביה לבנה בלי טקסט
+                    const statusOptions = ['', 'empty', 'arrived', 'onway', 'inprogress', 'missing', 'preparing',
+                        'cancelled', 'pending'
+                    ];
+                    statusOptions.forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt;
+                        option.textContent = opt === '' ? '' : (statusMap[opt] || opt);
+                        const currentStatus = row.status || '';
+                        if (currentStatus === opt || (currentStatus === '' && opt === '')) option.selected = true;
+                        statusSelect.appendChild(option);
+                    });
+                    statusSelect.addEventListener('change', function() {
+                        const newStatus = this.value;
+                        const rowData = findActiveRow(tr.dataset.rowId);
+                        if (rowData) {
+                            // '' ו-'empty' נשמרים כריק (קוביה לבנה)
+                            rowData.status = (newStatus === 'empty' || newStatus === '') ? '' : newStatus;
+                            tr.className = getStatusClass(newStatus || 'empty');
+                            if (newStatus && newStatus !== '' && (!rowData.note || rowData.note === '')) {
+                                rowData.note = statusMap[newStatus] || '';
+                                const noteTd = tr.querySelector('td[data-field="note"]');
+                                if (noteTd) noteTd.textContent = rowData.note;
+                            }
+                            // מיון אוטומטי לפי סדר הסטטוסים אחרי שינוי
+                            sortData();
+                        }
+                    });
+                    tdStatus.appendChild(statusSelect);
+                    tr.appendChild(tdStatus);
+
+                    const tdNote = document.createElement('td');
+                    tdNote.contentEditable = true;
+                    tdNote.textContent = row.note || '';
+                    tdNote.setAttribute('data-field', 'note');
+                    tdNote.addEventListener('blur', function(e) {
+                        const newVal = this.textContent.trim();
+                        const rowData = findActiveRow(tr.dataset.rowId);
+                        if (rowData) {
+                            rowData.note = newVal;
+                            saveAndUpdate();
+                        }
+                    });
+                    tdNote.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.blur();
+                        }
+                    });
+                    // הדבקה כטקסט נקי בלבד גם בעמודת הערה
+                    tdNote.addEventListener('paste', forcePlainTextPaste);
+                    tr.appendChild(tdNote);
+
+                    const tdActions = document.createElement('td');
+                    tdActions.className = 'row-actions';
+
+                    // ידית גרירה – רק מכאן אפשר להתחיל לגרור את השורה
+                    const dragHandle = document.createElement('span');
+                    dragHandle.className = 'drag-handle';
+                    dragHandle.textContent = '☰';
+                    dragHandle.title = 'גרור לשינוי סדר (בנייד: החזק שנייה)';
+                    dragHandle.setAttribute('aria-label', 'גרור שורה');
+                    tdActions.appendChild(dragHandle);
+
+                    const delBtn = document.createElement('button');
+                    delBtn.textContent = '🗑️';
+                    delBtn.title = 'מחק שורה';
+                    delBtn.className = 'delete-btn';
+                    delBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const rowData = findActiveRow(tr.dataset.rowId);
+                        if (rowData) {
+                            if (confirm('למחוק שורה זו?')) {
+                                const data = getActiveData();
+                                const index = data.indexOf(rowData);
+                                if (index !== -1) data.splice(index, 1);
+                                renderTable(filterSelect.value);
+                                saveAndUpdate();
+                            }
+                        }
+                    });
+                    tdActions.appendChild(delBtn);
+                    tr.appendChild(tdActions);
+
+                    tbody.appendChild(tr);
+                });
+
+                updateCounter(filtered.length);
+                selectAllCheck.checked = false;
+
+                // אתחול / הרס גרירת שורות (Sortable)
+                if (sortableInstance) {
+                    sortableInstance.destroy();
+                    sortableInstance = null;
+                }
+                // גרירה מותרת רק כשאין סינון/חיפוש/הצגת מסומנים (כדי שהסדר יתאים לנתונים המלאים)
+                const canSort = filter === 'all' && !searchTerm && !showSelectedOnly && filtered.length > 1;
+                if (canSort && typeof Sortable !== 'undefined') {
+                    tbody.classList.remove('no-sort');
+                    try {
+                        sortableInstance = new Sortable(tbody, {
+                            animation: 180,
+                            delay: 1000,
+                            delayOnTouchOnly: true,
+                            touchStartThreshold: 8,
+                            handle: '.drag-handle',   // גרירה רק מהידית – לא חוסם select / עריכה
+                            ghostClass: 'sortable-ghost',
+                            chosenClass: 'sortable-chosen',
+                            dragClass: 'sortable-drag',
+                            onEnd: function(evt) {
+                                if (evt.oldIndex === evt.newIndex) return;
+                                const data = getActiveData();
+                                // כש-canSort=true הרשימה המוצגת = כל הנתונים לפי הסדר
+                                const moved = data.splice(evt.oldIndex, 1)[0];
+                                data.splice(evt.newIndex, 0, moved);
+                                saveActive();
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Sortable init failed:', e);
+                        tbody.classList.add('no-sort');
+                    }
+                } else {
+                    tbody.classList.add('no-sort');
+                }
+            }
+
+            function updateCounter(count) {
+                const n = getActiveData().length;
+                const label = getTabLabel(currentView);
+                rowCounter.textContent = label + ': ' + n + ' שורות';
+            }
+
+            function updateStats(data) {
+                const total = data.length;
+                const arrived = data.filter(r => r.status === 'arrived').length;
+                const onway = data.filter(r => r.status === 'onway').length;
+                const preparing = data.filter(r => r.status === 'preparing').length;
+                const inprogress = data.filter(r => r.status === 'inprogress').length;
+                const missing = data.filter(r => r.status === 'missing').length;
+                const cancelled = data.filter(r => r.status === 'cancelled').length;
+                const pending = data.filter(r => r.status === 'pending').length;
+
+                document.getElementById('totalCount').textContent = total;
+                document.getElementById('arrivedCount').textContent = arrived;
+                document.getElementById('onwayCount').textContent = onway;
+                document.getElementById('preparingCount').textContent = preparing;
+                document.getElementById('inprogressCount').textContent = inprogress;
+                document.getElementById('missingCount').textContent = missing;
+                document.getElementById('cancelledCount').textContent = cancelled;
+                document.getElementById('pendingCount').textContent = pending;
+                const tabToysCount = document.getElementById('tabToysCount');
+                const tabElectronicsCount = document.getElementById('tabElectronicsCount');
+                const tabArchiveCount = document.getElementById('tabArchiveCount');
+                if (tabToysCount) tabToysCount.textContent = toysData.length;
+                if (tabElectronicsCount) tabElectronicsCount.textContent = electronicsData.length;
+                if (tabArchiveCount) tabArchiveCount.textContent = archiveData.length;
+                customTabsMeta.forEach(t => {
+                    const el = document.getElementById('tabCount-' + t.id);
+                    if (el) el.textContent = (customTabsData[t.id] || []).length;
+                });
+            }
+
+            function addNewRow() {
+                if (currentView === 'archive') {
+                    alert('לא ניתן להוסיף שורה בארכיב. עבור לטאב אחר.');
+                    return;
+                }
+                const newRow = {
+                    _id: `row-${nextId++}`,
+                    type: '',
+                    q20: '',
+                    q40: '',
+                    order: 'חדש',
+                    product: 'מוצר חדש',
+                    file: 'x',
+                    supplier: 'ספק חדש',
+                    date: '',
+                    vendor: '24210000000',
+                    amount: '0.00',
+                    status: '',
+                    note: ''
+                };
+                if (currentView === 'electronics') {
+                    electronicsData.push(newRow);
+                } else if (currentView === 'toys') {
+                    toysData.push(newRow);
+                } else {
+                    if (!customTabsData[currentView]) customTabsData[currentView] = [];
+                    customTabsData[currentView].push(newRow);
+                }
+                renderTable(filterSelect.value);
+                saveAndUpdate();
+            }
+
+            function openAddChoiceModal() {
+                document.getElementById('addChoiceModal').classList.add('active');
+            }
+            function closeAddChoiceModal() {
+                document.getElementById('addChoiceModal').classList.remove('active');
+            }
+            function openAddTabModal() {
+                closeAddChoiceModal();
+                const input = document.getElementById('newTabNameInput');
+                const err = document.getElementById('newTabNameError');
+                const cnt = document.getElementById('newTabCharCount');
+                if (input) input.value = '';
+                if (err) { err.style.display = 'none'; err.textContent = ''; }
+                if (cnt) cnt.textContent = '0';
+                document.getElementById('addTabModal').classList.add('active');
+                setTimeout(() => { if (input) input.focus(); }, 100);
+            }
+            function closeAddTabModal() {
+                document.getElementById('addTabModal').classList.remove('active');
+            }
+
+            function createNewTab(name) {
+                name = String(name || '').trim().slice(0, 20);
+                if (!name) {
+                    const err = document.getElementById('newTabNameError');
+                    if (err) { err.textContent = 'יש להזין שם לטאב'; err.style.display = 'block'; }
+                    return false;
+                }
+                // בדיקת כפילות שם
+                const existingNames = getAllTabs().map(t => t.name);
+                if (existingNames.includes(name)) {
+                    const err = document.getElementById('newTabNameError');
+                    if (err) { err.textContent = 'כבר קיים טאב בשם זה'; err.style.display = 'block'; }
+                    return false;
+                }
+                const id = 'custom-' + (nextCustomTabNum++);
+                customTabsMeta.push({ id, name });
+                customTabsData[id] = [];
+                saveCustomTabsMeta();
+                saveCustomTabData(id, []);
+                closeAddTabModal();
+                renderTabsUI();
+                switchView(id);
+                return true;
+            }
+
+            function deleteSelectedRows() {
+                const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    alert('לא נבחרו שורות למחיקה');
+                    return;
+                }
+                if (!confirm('למחוק ' + checkboxes.length + ' שורות?')) return;
+                const idsToRemove = new Set();
+                checkboxes.forEach(cb => {
+                    const tr = cb.closest('tr');
+                    if (tr && tr.dataset.rowId) idsToRemove.add(tr.dataset.rowId);
+                });
+                const data = getActiveData();
+                ensureRowIds(data);
+                const filtered = data.filter(r => r._id && !idsToRemove.has(r._id));
+                if (currentView === 'archive') {
+                    archiveData = filtered;
+                    saveArchive(archiveData);
+                } else if (currentView === 'electronics') {
+                    electronicsData = filtered;
+                    saveElectronicsData(electronicsData);
+                } else if (currentView === 'toys') {
+                    toysData = filtered;
+                    saveToysData(toysData);
+                } else {
+                    customTabsData[currentView] = filtered;
+                    saveCustomTabData(currentView, filtered);
+                }
+                showSelectedOnly = false;
+                selectedIdsSnapshot = [];
+                const selBtn = document.getElementById('showSelectedBtn');
+                if (selBtn) { selBtn.classList.remove('active'); selBtn.innerHTML = '<span class="btn-icon">👁️</span><span class="btn-label">הצג מסומנים</span>'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
+                renderTable(filterSelect.value);
+                updateStats(getActiveData());
+            }
+
+            function toggleShowSelected() {
+                const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+                const selBtn = document.getElementById('showSelectedBtn');
+                if (showSelectedOnly) {
+                    showSelectedOnly = false;
+                    selectedIdsSnapshot = [];
+                    if (selBtn) { selBtn.classList.remove('active'); selBtn.innerHTML = '<span class="btn-icon">👁️</span><span class="btn-label">הצג מסומנים</span>'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
+                    renderTable(filterSelect.value);
+                    return;
+                }
+                if (checkboxes.length === 0) {
+                    alert('לא נבחרו שורות. סמן שורות עם הצ׳קבוקס ואז לחץ שוב.');
+                    return;
+                }
+                selectedIdsSnapshot = [];
+                checkboxes.forEach(cb => {
+                    const tr = cb.closest('tr');
+                    if (tr && tr.dataset.rowId) selectedIdsSnapshot.push(tr.dataset.rowId);
+                });
+                showSelectedOnly = true;
+                if (selBtn) { selBtn.classList.add('active'); selBtn.innerHTML = '<span class="btn-icon">👁️</span><span class="btn-label">הצג הכל</span>'; selBtn.setAttribute('data-tip', 'חזור לתצוגה מלאה'); }
+                renderTable(filterSelect.value);
+            }
+
+            function getDataRef(viewId) {
+                if (viewId === 'archive') return archiveData;
+                if (viewId === 'electronics') return electronicsData;
+                if (viewId === 'toys') return toysData;
+                if (!customTabsData[viewId]) customTabsData[viewId] = [];
+                return customTabsData[viewId];
+            }
+
+            function setDataRef(viewId, data) {
+                if (viewId === 'archive') {
+                    archiveData = data;
+                    saveArchive(archiveData);
+                } else if (viewId === 'electronics') {
+                    electronicsData = data;
+                    saveElectronicsData(electronicsData);
+                } else if (viewId === 'toys') {
+                    toysData = data;
+                    saveToysData(toysData);
+                } else {
+                    customTabsData[viewId] = data;
+                    saveCustomTabData(viewId, data);
+                }
+            }
+
+            function openMoveModal() {
+                const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    alert('לא נבחרו שורות להעברה. סמן שורות עם הצ׳קבוקס ואז לחץ שוב.');
+                    return;
+                }
+                const desc = document.getElementById('moveModalDesc');
+                if (desc) desc.textContent = 'בחר לאיזה טאב להעביר ' + checkboxes.length + ' שורות נבחרות:';
+
+                const targets = document.getElementById('moveTargets');
+                if (!targets) return;
+                targets.innerHTML = '';
+                getAllTabs().forEach(tab => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn ' + (tab.isArchive ? 'btn-archive' : (tab.fixed ? (tab.id === 'toys' ? 'btn-success' : 'btn-load') : 'btn-move'));
+                    btn.style.cssText = 'justify-content:center; min-height:44px; font-size:0.95rem;';
+                    btn.textContent = (tab.icon || '📑') + ' ' + tab.name;
+                    btn.dataset.target = tab.id;
+                    if (tab.id === currentView) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.45';
+                        btn.style.cursor = 'not-allowed';
+                    } else {
+                        btn.addEventListener('click', function() {
+                            performMove(tab.id);
+                        });
+                    }
+                    targets.appendChild(btn);
+                });
+
+                document.getElementById('moveModal').classList.add('active');
+            }
+
+            function closeMoveModal() {
+                document.getElementById('moveModal').classList.remove('active');
+            }
+
+            function performMove(targetView) {
+                if (targetView === currentView) {
+                    alert('השורות כבר נמצאות בטאב זה.');
+                    closeMoveModal();
+                    return;
+                }
+                const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    closeMoveModal();
+                    return;
+                }
+
+                const targetLabel = getTabLabel(targetView);
+                if (!confirm('להעביר ' + checkboxes.length + ' שורות לטאב "' + targetLabel + '"?')) return;
+
+                const idsToMove = new Set();
+                checkboxes.forEach(cb => {
+                    const tr = cb.closest('tr');
+                    if (tr && tr.dataset.rowId) idsToMove.add(tr.dataset.rowId);
+                });
+
+                // הוצאה מהמקור
+                let sourceArr = getDataRef(currentView).slice();
+                ensureRowIds(sourceArr);
+
+                const toMove = [];
+                const remaining = sourceArr.filter(r => {
+                    if (r._id && idsToMove.has(r._id)) { toMove.push(r); return false; }
+                    return true;
+                });
+                setDataRef(currentView, remaining);
+
+                // הוספה ליעד (עם מניעת כפילויות לפי מספר הזמנה)
+                let targetArr = getDataRef(targetView).slice();
+                ensureRowIds(targetArr);
+
+                const existingOrders = new Set(
+                    targetArr.map(r => String(r.order || '').trim()).filter(o => o && o !== 'חדש' && o !== 'x')
+                );
+                let added = 0;
+                toMove.forEach(r => {
+                    const k = String(r.order || '').trim();
+                    if (k && k !== 'חדש' && k !== 'x' && existingOrders.has(k)) return;
+                    targetArr.push(r);
+                    if (k) existingOrders.add(k);
+                    added++;
+                });
+                setDataRef(targetView, targetArr);
+
+                showSelectedOnly = false;
+                selectedIdsSnapshot = [];
+                const selBtn = document.getElementById('showSelectedBtn');
+                if (selBtn) { selBtn.classList.remove('active'); selBtn.innerHTML = '<span class="btn-icon">👁️</span><span class="btn-label">הצג מסומנים</span>'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
+
+                closeMoveModal();
+                renderTable(filterSelect.value);
+                updateStats(getActiveData());
+                alert('↔️ הועברו ' + added + ' שורות לטאב "' + targetLabel + '"');
+            }
+
+            function parseSheetToRows(sheet) {
+                const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+                if (!rawRows || rawRows.length === 0) return [];
+                const expectedHeaders = ['סוג מכולה', 'הזמנה', 'סוג מוצר', 'סטטוס'];
+                let headerRowIndex = 0;
+                for (let i = 0; i < Math.min(rawRows.length, 5); i++) {
+                    const rowStr = rawRows[i].map(c => String(c || '')).join(' ');
+                    const matchCount = expectedHeaders.filter(h => rowStr.includes(h)).length;
+                    if (matchCount >= 2) { headerRowIndex = i; break; }
+                }
+                const json = XLSX.utils.sheet_to_json(sheet, { range: headerRowIndex });
+                if (!json || json.length === 0) return [];
+                return json.map(row => {
+                    const safeDate = (val) => {
+                        if (!val || val === 'x' || val === '') return '';
+                        const str = String(val);
+                        const parts = str.split('/');
+                        if (parts.length === 3 && parts[2].length === 4) {
+                            return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+                        }
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+                        return str;
+                    };
+                    const safeAmount = (val) => {
+                        if (!val) return '0.00';
+                        const num = parseFloat(String(val).replace(/,/g, ''));
+                        if (!isNaN(num)) return num.toFixed(2);
+                        return '0.00';
+                    };
+                    const safeStatus = (val) => {
+                        if (!val) return '';
+                        const str = String(val).trim();
+                        if (statusMap[str]) return str;
+                        if (statusHebToEng[str]) return statusHebToEng[str];
+                        for (const [heb, eng] of Object.entries(statusHebToEng)) {
+                            if (str.includes(heb)) return eng;
+                        }
+                        return '';
+                    };
+                    return {
+                        _id: 'row-' + (nextId++),
+                        type: String(row['סוג מכולה'] || ''),
+                        q20: String(row["20'"] || ''),
+                        q40: String(row["40'"] || ''),
+                        order: String(row['הזמנה'] || ''),
+                        product: String(row['סוג מוצר'] || ''),
+                        file: String(row['תיק'] || ''),
+                        supplier: String(row['שם ספק'] || ''),
+                        date: safeDate(row['תאריך הגעה']),
+                        vendor: String(row['ספק'] || ''),
+                        amount: safeAmount(row['סכום $']),
+                        status: safeStatus(row['סטטוס']),
+                        note: String(row['הערה'] || '')
+                    };
+                });
+            }
+
+            function loadExcelFile(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        progressBar.style.display = 'block';
+                        progressFill.style.width = '30%';
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+
+                        // זיהוי גיליונות לפי שם
+                        let archiveSheetName = null;
+                        let toysSheetName = null;
+                        let electronicsSheetName = null;
+                        const customSheetMap = {}; // sheetName -> tabName (display)
+                        const knownFixed = new Set();
+
+                        for (const name of workbook.SheetNames) {
+                            const n = String(name);
+                            if (!archiveSheetName && (n.includes('ארכיב') || n.toLowerCase().includes('archive'))) {
+                                archiveSheetName = name;
+                                knownFixed.add(name);
+                            } else if (!electronicsSheetName && (n.includes('אלקטרוניקה') || n.toLowerCase().includes('electronic'))) {
+                                electronicsSheetName = name;
+                                knownFixed.add(name);
+                            } else if (!toysSheetName && (n.includes('צעצועים') || n.includes('סטטוס') || n.includes('משלוח') || n === 'Sheet1')) {
+                                toysSheetName = name;
+                                knownFixed.add(name);
+                            }
+                        }
+                        // אם לא זוהה צעצועים – קח את הראשון שאינו ארכיב/אלקטרוניקה
+                        if (!toysSheetName) {
+                            for (const name of workbook.SheetNames) {
+                                if (name !== archiveSheetName && name !== electronicsSheetName) {
+                                    toysSheetName = name;
+                                    knownFixed.add(name);
+                                    break;
+                                }
+                            }
+                        }
+                        // שאר הגיליונות = טאבים מותאמים
+                        for (const name of workbook.SheetNames) {
+                            if (knownFixed.has(name)) continue;
+                            if (name === archiveSheetName || name === electronicsSheetName || name === toysSheetName) continue;
+                            const tabName = String(name).trim().slice(0, 20);
+                            if (!tabName) continue;
+                            customSheetMap[name] = tabName;
+                        }
+
+                        progressFill.style.width = '50%';
+
+                        let importedToys = toysSheetName ? parseSheetToRows(workbook.Sheets[toysSheetName] || {}) : [];
+                        let importedElectronics = electronicsSheetName ? parseSheetToRows(workbook.Sheets[electronicsSheetName] || {}) : [];
+                        let importedArchive = archiveSheetName ? parseSheetToRows(workbook.Sheets[archiveSheetName] || {}) : [];
+                        const importedCustom = {};
+                        Object.keys(customSheetMap).forEach(sheetName => {
+                            importedCustom[customSheetMap[sheetName]] = parseSheetToRows(workbook.Sheets[sheetName] || {});
+                        });
+
+                        const hasAny = importedToys.length || importedElectronics.length || importedArchive.length ||
+                            Object.values(importedCustom).some(a => a.length);
+                        if (!hasAny) {
+                            alert('הקובץ ריק או לא נמצאו נתונים');
+                            progressBar.style.display = 'none';
+                            return;
+                        }
+
+                        // עזר: מפתח ייחודי לשורה (מספר הזמנה)
+                        function orderKey(r) {
+                            return String(r.order || '').trim();
+                        }
+                        function isValidOrder(o) {
+                            return o && o !== 'חדש' && o !== 'x' && o !== '—';
+                        }
+
+                        // הסרת כפילויות בתוך רשימה (לפי הזמנה)
+                        function dedupeByOrder(rows) {
+                            const seen = new Set();
+                            const out = [];
+                            rows.forEach(r => {
+                                const k = orderKey(r);
+                                if (isValidOrder(k)) {
+                                    if (seen.has(k)) return;
+                                    seen.add(k);
+                                }
+                                out.push(r);
+                            });
+                            return out;
+                        }
+
+                        // החלפה מלאה: מוחקים את כל הנתונים והטאבים הקודמים, טוענים רק מהקובץ
+
+                        // ניקוי טאבים מותאמים קודמים
+                        customTabsMeta.forEach(t => {
+                            try { localStorage.removeItem(CUSTOM_TAB_DATA_PREFIX + t.id); } catch (e) {}
+                        });
+                        customTabsMeta = [];
+                        customTabsData = {};
+
+                        // צעצועים – מהקובץ בלבד (ריק אם אין גיליון)
+                        toysData = toysSheetName ? dedupeByOrder(importedToys) : [];
+                        ensureRowIds(toysData);
+                        saveToysData(toysData);
+
+                        // אלקטרוניקה – מהקובץ בלבד
+                        electronicsData = electronicsSheetName ? dedupeByOrder(importedElectronics) : [];
+                        ensureRowIds(electronicsData);
+                        saveElectronicsData(electronicsData);
+
+                        // ארכיב – מהקובץ בלבד
+                        archiveData = archiveSheetName ? dedupeByOrder(importedArchive) : [];
+                        ensureRowIds(archiveData);
+                        saveArchive(archiveData);
+
+                        // טאבים מותאמים – רק אלה שקיימים בקובץ
+                        Object.keys(importedCustom).forEach(tabName => {
+                            const rows = dedupeByOrder(importedCustom[tabName]);
+                            ensureRowIds(rows);
+                            const id = 'custom-' + (nextCustomTabNum++);
+                            customTabsMeta.push({ id, name: tabName });
+                            customTabsData[id] = rows;
+                            saveCustomTabData(id, rows);
+                        });
+                        saveCustomTabsMeta();
+
+                        progressFill.style.width = '100%';
+                        showSelectedOnly = false;
+                        selectedIdsSnapshot = [];
+                        const selBtn = document.getElementById('showSelectedBtn');
+                        if (selBtn) { selBtn.classList.remove('active'); selBtn.innerHTML = '<span class="btn-icon">👁️</span><span class="btn-label">הצג מסומנים</span>'; selBtn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד'); }
+                        // מעבר לטאב הראשון שקיים בקובץ
+                        if (toysSheetName) currentView = 'toys';
+                        else if (electronicsSheetName) currentView = 'electronics';
+                        else if (customTabsMeta.length > 0) currentView = customTabsMeta[0].id;
+                        else if (archiveSheetName) currentView = 'archive';
+                        else currentView = 'toys';
+                        renderTabsUI();
+                        renderTable(filterSelect.value);
+                        updateStats(getActiveData());
+                        setTimeout(() => {
+                            progressBar.style.display = 'none';
+                            progressFill.style.width = '0%';
+                            loadModal.classList.remove('active');
+                            let msg = '✅ ייבוא הושלם – כל הנתונים הקודמים הוחלפו';
+                            msg += '\n🧸 צעצועים: ' + toysData.length + ' שורות';
+                            msg += '\n🔌 אלקטרוניקה קלה: ' + electronicsData.length + ' שורות';
+                            customTabsMeta.forEach(t => {
+                                msg += '\n📑 ' + t.name + ': ' + (customTabsData[t.id] || []).length + ' שורות';
+                            });
+                            msg += '\n📁 ארכיב: ' + archiveData.length + ' שורות';
+                            alert(msg);
+                        }, 500);
+                    } catch (error) {
+                        console.error('שגיאה בטעינת הקובץ:', error);
+                        alert('שגיאה בטעינת הקובץ: ' + error.message);
+                        progressBar.style.display = 'none';
+                        progressFill.style.width = '0%';
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            document.getElementById('loadExcelBtn').addEventListener('click', function() {
+                loadModal.classList.add('active');
+                selectedFile = null;
+                fileName.textContent = '';
+                confirmLoadBtn.disabled = true;
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+            });
+
+            cancelLoadBtn.addEventListener('click', function() {
+                loadModal.classList.remove('active');
+                selectedFile = null;
+                fileName.textContent = '';
+                confirmLoadBtn.disabled = true;
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+            });
+
+            loadModal.addEventListener('click', function(e) {
+                if (e.target === loadModal) {
+                    loadModal.classList.remove('active');
+                    selectedFile = null;
+                    fileName.textContent = '';
+                    confirmLoadBtn.disabled = true;
+                    progressBar.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }
+            });
+
+            dropZone.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    selectedFile = this.files[0];
+                    fileName.textContent = '📄 ' + selectedFile.name;
+                    confirmLoadBtn.disabled = false;
+                }
+            });
+
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    const file = e.dataTransfer.files[0];
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    if (ext === 'xlsx' || ext === 'xls') {
+                        selectedFile = file;
+                        fileName.textContent = '📄 ' + file.name;
+                        confirmLoadBtn.disabled = false;
+                    } else {
+                        alert('אנא בחר קובץ אקסל (.xlsx או .xls)');
+                    }
+                }
+            });
+
+            confirmLoadBtn.addEventListener('click', function() {
+                if (selectedFile) {
+                    let totalExisting = toysData.length + electronicsData.length + archiveData.length;
+                    customTabsMeta.forEach(t => { totalExisting += (customTabsData[t.id] || []).length; });
+                    if (totalExisting > 0) {
+                        if (!confirm(`⚠️ פעולה זו תמחק את כל הטאבים והשורות הקיימים ותטען רק את מה שבקובץ (סה"כ כעת: ${totalExisting} שורות). להמשיך?`)) {
+                            return;
+                        }
+                    }
+                    loadExcelFile(selectedFile);
+                }
+            });
+
+            function exportToExcel() {
+                try {
+                    const colorMap = {
+                        'arrived': '009953',
+                        'onway': '3BFFA6',
+                        'inprogress': '93C5FD',
+                        'missing': 'FC8D97',
+                        'preparing': 'FFE5B4',
+                        'cancelled': 'FF293C',
+                        'pending': 'E0E0E0',
+                        'empty': 'FFFFFF'
+                    };
+                    const headers = ['סוג מכולה', "20'", "40'", 'הזמנה', 'סוג מוצר', 'תיק', 'שם ספק', 'תאריך הגעה', 'ספק', 'סכום $', 'סטטוס', 'הערה'];
+                    const colWidths = [
+                        { wch: 12 }, { wch: 6 }, { wch: 6 }, { wch: 14 }, { wch: 20 },
+                        { wch: 14 }, { wch: 30 }, { wch: 14 }, { wch: 16 }, { wch: 12 },
+                        { wch: 12 }, { wch: 32 }
+                    ];
+
+                    function buildSheet(rows, titleText) {
+                        const aoa = [];
+                        aoa.push([titleText]);
+                        aoa.push(headers);
+                        rows.forEach(row => {
+                            let dateVal = row.date || '';
+                            if (dateVal) {
+                                const parts = String(dateVal).split('-');
+                                if (parts.length === 3) dateVal = parts[2] + '/' + parts[1] + '/' + parts[0];
+                            }
+                            aoa.push([
+                                row.type || '', row.q20 || '', row.q40 || '', row.order || '',
+                                row.product || '', row.file || '', row.supplier || '', dateVal,
+                                row.vendor || '', formatNumber(row.amount),
+                                statusMap[row.status] || row.status || '', row.note || ''
+                            ]);
+                        });
+                        const ws = XLSX.utils.aoa_to_sheet(aoa);
+                        if (!ws['!merges']) ws['!merges'] = [];
+                        ws['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 11 } });
+
+                        // RTL view
+                        ws['!views'] = [{ rightToLeft: true }];
+
+                        const titleCell = ws['A1'];
+                        if (titleCell) {
+                            titleCell.s = {
+                                font: { bold: true, sz: 14, color: { rgb: 'FFFFFF' } },
+                                fill: { fgColor: { rgb: '1E3A5F' } },
+                                alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 }
+                            };
+                        }
+                        for (let c = 0; c < 12; c++) {
+                            const addr = XLSX.utils.encode_cell({ r: 1, c: c });
+                            if (!ws[addr]) continue;
+                            ws[addr].s = {
+                                font: { bold: true, sz: 11 },
+                                fill: { fgColor: { rgb: 'D0DBE8' } },
+                                alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 },
+                                border: {
+                                    top: { style: 'thin', color: { rgb: '999999' } },
+                                    bottom: { style: 'thin', color: { rgb: '999999' } },
+                                    left: { style: 'thin', color: { rgb: '999999' } },
+                                    right: { style: 'thin', color: { rgb: '999999' } }
+                                }
+                            };
+                        }
+                        rows.forEach((row, i) => {
+                            const r = i + 2;
+                            const status = row.status || 'empty';
+                            const bg = colorMap[status] || 'FFFFFF';
+                            const strike = status === 'cancelled';
+                            for (let c = 0; c < 12; c++) {
+                                const addr = XLSX.utils.encode_cell({ r: r, c: c });
+                                if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+                                ws[addr].s = {
+                                    fill: { fgColor: { rgb: bg } },
+                                    alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 },
+                                    font: strike ? { strike: true } : {},
+                                    border: {
+                                        top: { style: 'thin', color: { rgb: '999999' } },
+                                        bottom: { style: 'thin', color: { rgb: '999999' } },
+                                        left: { style: 'thin', color: { rgb: '999999' } },
+                                        right: { style: 'thin', color: { rgb: '999999' } }
+                                    }
+                                };
+                            }
+                        });
+                        ws['!cols'] = colWidths;
+                        ws['!rows'] = [{ hpt: 28 }];
+                        return ws;
+                    }
+
+                    const now = new Date();
+                    const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const wb = XLSX.utils.book_new();
+                    // Workbook RTL
+                    if (!wb.Workbook) wb.Workbook = {};
+                    if (!wb.Workbook.Views) wb.Workbook.Views = [{}];
+                    wb.Workbook.Views[0].RTL = true;
+
+                    const toysWs = buildSheet(toysData, 'סטטוס צעצועים עדכני ל ' + dateStr);
+                    XLSX.utils.book_append_sheet(wb, toysWs, 'צעצועים');
+                    const elecWs = buildSheet(electronicsData, 'סטטוס אלקטרוניקה קלה עדכני ל ' + dateStr);
+                    XLSX.utils.book_append_sheet(wb, elecWs, 'אלקטרוניקה קלה');
+                    // טאבים מותאמים – שם הגיליון = שם הטאב (עד 31 תווים באקסל)
+                    customTabsMeta.forEach(t => {
+                        const rows = customTabsData[t.id] || [];
+                        const sheetName = String(t.name).slice(0, 31) || t.id;
+                        const ws = buildSheet(rows, 'סטטוס ' + t.name + ' עדכני ל ' + dateStr);
+                        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                    });
+                    const archWs = buildSheet(archiveData, 'ארכיב עדכני ל ' + dateStr);
+                    XLSX.utils.book_append_sheet(wb, archWs, 'ארכיב');
+                    XLSX.writeFile(wb, 'סטטוס משלוחים.xlsx');
+                } catch (error) {
+                    console.error('שגיאה ביצוא אקסל:', error);
+                    alert('אירעה שגיאה ביצוא הקובץ: ' + error.message);
+                }
+            }
+
+            filterSelect.addEventListener('change', function() {
+                renderTable(this.value);
+            });
+            searchInput.addEventListener('input', function() {
+                renderTable(filterSelect.value);
+            });
+            document.getElementById('addRowBtn').addEventListener('click', openAddChoiceModal);
+            document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedRows);
+            document.getElementById('showSelectedBtn').addEventListener('click', toggleShowSelected);
+            document.getElementById('moveBtn').addEventListener('click', openMoveModal);
+            document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+            document.getElementById('sortBtn').addEventListener('click', sortData);
+            document.getElementById('tabToys').addEventListener('click', function() { switchView('toys'); });
+            document.getElementById('tabElectronics').addEventListener('click', function() { switchView('electronics'); });
+            document.getElementById('tabArchive').addEventListener('click', function() { switchView('archive'); });
+            selectAllCheck.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.row-checkbox');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+
+            // מודל העברה בין טאבים
+            document.getElementById('cancelMoveBtn').addEventListener('click', closeMoveModal);
+            document.getElementById('moveModal').addEventListener('click', function(e) {
+                if (e.target === this) closeMoveModal();
+            });
+
+            // מודל בחירת הוספה (שורה / טאב)
+            document.getElementById('cancelAddChoiceBtn').addEventListener('click', closeAddChoiceModal);
+            document.getElementById('addChoiceModal').addEventListener('click', function(e) {
+                if (e.target === this) closeAddChoiceModal();
+            });
+            document.getElementById('chooseAddRowBtn').addEventListener('click', function() {
+                closeAddChoiceModal();
+                addNewRow();
+            });
+            document.getElementById('chooseAddTabBtn').addEventListener('click', openAddTabModal);
+
+            // מודל יצירת טאב
+            document.getElementById('cancelAddTabBtn').addEventListener('click', closeAddTabModal);
+            document.getElementById('addTabModal').addEventListener('click', function(e) {
+                if (e.target === this) closeAddTabModal();
+            });
+            document.getElementById('confirmAddTabBtn').addEventListener('click', function() {
+                const input = document.getElementById('newTabNameInput');
+                createNewTab(input ? input.value : '');
+            });
+            const newTabInput = document.getElementById('newTabNameInput');
+            if (newTabInput) {
+                newTabInput.addEventListener('input', function() {
+                    const cnt = document.getElementById('newTabCharCount');
+                    if (cnt) cnt.textContent = String(this.value.length);
+                    const err = document.getElementById('newTabNameError');
+                    if (err) err.style.display = 'none';
+                });
+                newTabInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        createNewTab(this.value);
+                    }
+                });
+            }
+
+            renderTabsUI();
+            renderTable('all');
+            updateStats(getActiveData());
+        })();
+    </script>
+</body>
+</html>
