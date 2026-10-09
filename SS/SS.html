@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+<title>ניהול משלוחים</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+<script defer src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<style>
+* { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background: #90c0fc; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+.container { max-width: 1550px; width: 100%; background: white; border-radius: 28px; box-shadow: 0 12px 40px rgba(0,0,0,0.1); padding: 20px 15px 20px; overflow: visible; }
+h1 { font-size: 1.5rem; margin: 0 0 8px 0; color: #0b1e33; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 15px; gap: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; position: relative; z-index: 20; }
+.filter-area { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
+.filter-area label { font-weight: 600; color: #1e293b; font-size: 0.9rem; }
+.filter-area select, .filter-area input { padding: 8px 14px; border-radius: 40px; border: 1px solid #cbd5e1; background: white; font-size: 0.9rem; cursor: pointer; outline: none; min-height: 40px; }
+.filter-area select { min-width: 100px; flex: 1; max-width: 180px; }
+.search-area { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 150px; }
+.search-area input { width: 100%; min-width: 120px; padding: 8px 14px; border-radius: 40px; border: 1px solid #cbd5e1; background: white; font-size: 0.9rem; outline: none; min-height: 40px; }
+.search-area input:focus { border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30,58,95,0.1); }
+.action-buttons { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; width: 100%; max-width: 720px; margin: 0 auto; }
+.btn { padding: 7px 14px; border: none; border-radius: 40px; font-weight: 600; font-size: 0.78rem; background: #eef2f6; color: #1e293b; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); min-height: 36px; min-width: 76px; white-space: nowrap; line-height: 1.15; }
+.action-buttons .btn { flex-direction: column; border-radius: 16px; padding: 8px 8px 7px; min-height: 58px; min-width: 84px; gap: 3px; font-size: 0.72rem; white-space: normal; }
+.action-buttons .btn .btn-icon { font-size: 1.2rem; line-height: 1; display: block; }
+.action-buttons .btn .btn-label { font-size: 0.68rem; font-weight: 600; line-height: 1.2; display: block; text-align: center; max-width: 100%; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(0,0,0,0.14); }
+.btn:active { transform: translateY(0); }
+.btn-success { background: #0f7b3a; color: white; }
+.btn-success:hover { background: #0b662f; }
+.btn-danger { background: #b91c1c; color: white; }
+.btn-danger:hover { background: #991515; }
+.btn-excel { background: #1d6f42; color: white; }
+.btn-excel:hover { background: #155a34; }
+.btn-sort { background: #6c5b7b; color: white; }
+.btn-sort:hover { background: #5a4a68; }
+.btn-load { background: #7c3aed; color: white; }
+.btn-load:hover { background: #6d28d9; }
+.btn-move { background: #d97706; color: white; }
+.btn-move:hover { background: #b45309; }
+.btn-archive { background: #475569; color: white; }
+.btn-archive:hover { background: #334155; }
+.btn-selected { background: #0891b2; color: white; }
+.btn-selected:hover { background: #0e7490; }
+.btn-selected.active { background: #155e75; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+.btn[data-tip] { position: relative; z-index: 1; }
+.btn[data-tip]:hover { z-index: 500; }
+.btn[data-tip]::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(-4px); background: #4c1d95; color: #fff; font-size: 0.8rem; font-weight: 600; line-height: 1.35; padding: 8px 14px; border-radius: 12px; white-space: nowrap; opacity: 0; visibility: hidden; pointer-events: none; transition: 0.18s; z-index: 501; box-shadow: 0 6px 18px rgba(76,29,149,0.35); }
+.btn[data-tip]::before { content: ''; position: absolute; top: calc(100% + 2px); left: 50%; transform: translateX(-50%) translateY(-4px); border: 6px solid transparent; border-bottom-color: #4c1d95; opacity: 0; visibility: hidden; pointer-events: none; transition: 0.18s; z-index: 501; }
+.btn[data-tip]:hover::after, .btn[data-tip]:hover::before { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.action-buttons .btn:last-child[data-tip]::after { left: auto; right: 0; transform: translateX(0) translateY(-4px); }
+.action-buttons .btn:last-child[data-tip]::before { left: auto; right: 16px; transform: translateX(0) translateY(-4px); }
+.action-buttons .btn:last-child[data-tip]:hover::after, .action-buttons .btn:last-child[data-tip]:hover::before { transform: translateX(0) translateY(0); }
+.action-buttons .btn:first-child[data-tip]::after { left: 0; transform: translateX(0) translateY(-4px); }
+.action-buttons .btn:first-child[data-tip]::before { left: 16px; transform: translateX(0) translateY(-4px); }
+.action-buttons .btn:first-child[data-tip]:hover::after, .action-buttons .btn:first-child[data-tip]:hover::before { transform: translateX(0) translateY(0); }
+.stats-bar { display: flex; gap: 6px 10px; margin: 8px 0 12px 0; flex-wrap: wrap; align-items: center; justify-content: flex-start; background: #f8fafc; padding: 8px 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.stats-bar span { font-size: 0.8rem; color: #1e293b; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; line-height: 1.3; }
+.stats-bar strong { color: #0b1e33; font-size: 0.85rem; }
+.stats-bar .stat-amount { color: #0f7b3a; font-weight: 700; }
+.stats-bar .stat-preparing { color: #eab308; font-weight: 700; }
+.stats-bar .stat-missing { color: #dc2626; font-weight: 700; }
+.stats-bar .stat-cancelled { color: #7f1d1d; font-weight: 700; }
+.stats-bar .stat-inprogress { color: #2563eb; font-weight: 700; }
+.view-tabs { display: flex; gap: 0; margin: 0 0 12px 0; border-bottom: 2px solid #e2e8f0; flex-wrap: wrap; }
+.view-tab { padding: 8px 20px; border: none; background: transparent; font-weight: 600; font-size: 0.9rem; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; border-radius: 8px 8px 0 0; font-family: inherit; }
+.view-tab:hover { color: #0b1e33; background: #f1f5f9; }
+.view-tab.active { color: #1e3a5f; border-bottom-color: #1e3a5f; background: #f8fafc; }
+.view-tab .tab-count { display: inline-block; background: #e2e8f0; color: #475569; font-size: 0.75rem; padding: 1px 8px; border-radius: 20px; margin-right: 6px; font-weight: 700; }
+.view-tab.active .tab-count { background: #1e3a5f; color: white; }
+.view-tab.archive-tab.active { color: #475569; border-bottom-color: #475569; }
+.view-tab.archive-tab.active .tab-count { background: #475569; }
+.table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid #e2e8f0; background: white; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 1000px; }
+th { background: #969696; color: #1a2c44; font-weight: 700; padding: 12px 6px; border-bottom: 2px solid #d0dbe8; text-align: center; white-space: nowrap; position: sticky; top: 0; z-index: 5; font-size: 0.8rem; }
+td { padding: 4px 3px; border-bottom: 1px solid #e9edf3; text-align: center; vertical-align: middle; min-height: 38px; font-size: 0.8rem; }
+td[contenteditable="true"] { outline: none; transition: background 0.1s; border-radius: 4px; min-width: 40px; padding: 3px 4px; }
+td[contenteditable="true"]:hover { background: rgba(30,58,95,0.05); }
+td[contenteditable="true"]:focus { background: rgba(255,255,255,0.8); box-shadow: inset 0 0 0 2px #1e3a5f; }
+.status-arrived td:not(.row-actions) { background-color: #009953; }
+.status-onway td:not(.row-actions) { background-color: #3bffa6; }
+.status-inprogress td:not(.row-actions) { background-color: #93c5fd; }
+.status-missing td:not(.row-actions) { background-color: #fc8d97; }
+.status-preparing td:not(.row-actions) { background-color: #ffe5b4; }
+.status-cancelled td:not(.row-actions) { background-color: #ff293c; text-decoration: line-through; }
+.status-pending td:not(.row-actions) { background-color: #e0e0e0; }
+.status-empty td:not(.row-actions) { background-color: #ffffff; }
+.row-actions { background-color: #ffffff !important; display: flex; gap: 3px; justify-content: center; align-items: center; flex-wrap: nowrap; }
+td:first-child { background-color: #ffffff !important; }
+.status-select, .type-select { padding: 3px 6px; border-radius: 30px; border: 1px solid #cbd5e1; background: white; font-size: 0.75rem; cursor: pointer; outline: none; font-weight: 500; width: 75px; min-height: 30px; }
+.type-select { width: 65px; }
+.save-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #22c55e; margin-right: 8px; transition: 0.3s; flex-shrink: 0; }
+.save-indicator.saving { background: #eab308; animation: pulse 0.5s ease-in-out; }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+.footer-info { margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 0.9rem; color: #1e293b; }
+.footer-bottom { margin-top: 18px; margin-bottom: 12px; padding: 8px 12px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 16px; width: 100%; max-width: 1550px; }
+.footer-bottom .copyright { font-size: 1rem; color: #0b1e33; font-weight: 600; white-space: nowrap; }
+.footer-bottom .logo img { height: 36px; width: auto; max-width: 180px; display: block; object-fit: contain; }
+.counter { background: #002555; padding: 5px 18px; border-radius: 30px; color: white; font-weight: 600; font-size: 0.85rem; }
+.empty-row-msg { text-align: center; padding: 30px 0; color: #6a7c94; }
+.sortable-ghost { opacity: 0.45; background: #c8ebfb !important; }
+.sortable-ghost td:not(.row-actions) { background: #c8ebfb !important; }
+.sortable-chosen { box-shadow: 0 0 0 2px #1e3a5f; }
+.sortable-drag { opacity: 0.95; cursor: grabbing !important; }
+.drag-handle { cursor: grab; color: #64748b; font-size: 1.05rem; user-select: none; -webkit-user-select: none; touch-action: none; padding: 2px 5px; border-radius: 6px; line-height: 1; }
+.drag-handle:hover { background: #e2e8f0; color: #1e3a5f; }
+.drag-handle:active, .sortable-chosen .drag-handle { cursor: grabbing; }
+#tableBody.no-sort .drag-handle { opacity: 0.35; cursor: default; pointer-events: none; }
+.row-actions button { background: transparent; border: none; font-size: 1rem; cursor: pointer; padding: 2px 6px; border-radius: 30px; transition: 0.1s; min-width: 28px; min-height: 28px; display: flex; align-items: center; justify-content: center; }
+.row-actions .delete-btn:hover { background: #fecaca; color: #b91c1c; }
+.row-checkbox { width: 16px; height: 16px; cursor: pointer; }
+.mobile-table-controls { display: none; justify-content: center; gap: 10px; margin-top: 10px; }
+.mobile-table-controls button { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 30px; background: white; cursor: pointer; font-size: 0.8rem; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: white; border-radius: 24px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
+.modal h2 { margin-top: 0; color: #0b1e33; }
+.modal .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; margin: 20px 0; }
+.modal .drop-zone:hover, .modal .drop-zone.dragover { border-color: #2563eb; background: #f0f7ff; }
+.modal .drop-zone .icon { font-size: 3rem; margin-bottom: 10px; }
+.modal .drop-zone p { margin: 5px 0; color: #64748b; }
+.modal .drop-zone .file-name { color: #0b1e33; font-weight: 600; }
+.modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.modal .modal-actions .btn { min-width: 100px; justify-content: center; }
+.modal .btn-secondary { background: #e2e8f0; color: #1e293b; }
+.modal .btn-secondary:hover { background: #cbd5e1; }
+.modal .progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin: 10px 0; display: none; }
+.modal .progress-bar .progress-fill { height: 100%; background: #2563eb; width: 0%; transition: width 0.3s; }
+@media (max-width: 768px) {
+  body { padding: 5px; }
+  .container { padding: 12px 8px; border-radius: 16px; }
+  h1 { font-size: 1.2rem; }
+  .toolbar { flex-direction: column; align-items: stretch; gap: 10px; padding-bottom: 12px; }
+  .filter-area { flex-direction: row; align-items: center; flex-wrap: nowrap; gap: 6px; width: 100%; }
+  .filter-area label { font-size: 0.78rem; white-space: nowrap; flex-shrink: 0; }
+  .filter-area select { flex: 0 1 110px; min-width: 80px; max-width: 130px; font-size: 0.8rem; min-height: 36px; padding: 6px 10px; }
+  .search-area { flex: 1 1 0; min-width: 0; }
+  .search-area input { width: 100%; min-width: 0; min-height: 36px; font-size: 0.8rem; padding: 6px 12px; }
+  .filter-area .save-indicator { flex-shrink: 0; }
+  .view-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .view-tabs::-webkit-scrollbar { display: none; }
+  .view-tab { flex: 1 1 0; min-width: 0; padding: 8px 6px; font-size: 0.75rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .view-tab .tab-count { font-size: 0.68rem; padding: 1px 6px; margin-right: 3px; }
+  .action-buttons { flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; max-width: 100%; margin: 0; }
+  .action-buttons .btn { flex: 0 1 auto; min-width: 72px; max-width: 110px; width: calc(25% - 10px); font-size: 0.65rem; padding: 8px 4px 6px; min-height: 54px; white-space: nowrap; border-radius: 14px; }
+  .action-buttons .btn .btn-icon { font-size: 1.1rem; }
+  .action-buttons .btn .btn-label { font-size: 0.62rem; }
+  .stats-bar { flex-direction: row; flex-wrap: wrap; gap: 4px 8px; padding: 6px 8px; margin: 6px 0 8px 0; border-radius: 10px; }
+  .stats-bar span { font-size: 0.72rem; }
+  .stats-bar strong { font-size: 0.75rem; }
+  .table-wrap { border-radius: 10px; }
+  table { min-width: 900px; font-size: 0.7rem; }
+  th { padding: 8px 4px; font-size: 0.7rem; }
+  td { padding: 3px 2px; font-size: 0.7rem; min-height: 32px; }
+  .status-select, .type-select { width: 60px; font-size: 0.65rem; padding: 2px 4px; min-height: 26px; }
+  .type-select { width: 50px; }
+  .row-actions button { font-size: 0.85rem; min-width: 24px; min-height: 24px; padding: 1px 4px; }
+  .row-checkbox { width: 14px; height: 14px; }
+  .counter { font-size: 0.75rem; padding: 4px 14px; }
+  .mobile-table-controls { display: flex; }
+  .modal { padding: 20px; width: 95%; }
+  .modal .drop-zone { padding: 25px 15px; }
+  .footer-bottom { flex-direction: column; align-items: center; text-align: center; padding: 10px 6px 6px; gap: 8px; }
+  .footer-bottom .copyright { font-size: 0.85rem; }
+  .footer-bottom .logo img { height: 24px; }
+}
+@media (max-width: 480px) {
+  .container { padding: 8px 4px; border-radius: 12px; }
+  h1 { font-size: 1rem; }
+  .filter-area { gap: 4px; }
+  .filter-area label { font-size: 0.7rem; }
+  .filter-area select { flex: 0 1 95px; min-width: 72px; max-width: 110px; font-size: 0.72rem; min-height: 34px; padding: 5px 8px; }
+  .search-area input { min-height: 34px; font-size: 0.72rem; padding: 5px 10px; }
+  .view-tab { padding: 7px 4px; font-size: 0.68rem; }
+  .view-tab .tab-count { font-size: 0.62rem; padding: 0 5px; margin-right: 2px; }
+  .action-buttons { gap: 6px; }
+  .action-buttons .btn { min-width: 68px; max-width: 100px; width: calc(33.333% - 8px); font-size: 0.6rem; padding: 7px 3px 5px; min-height: 52px; gap: 2px; border-radius: 12px; }
+  .action-buttons .btn .btn-icon { font-size: 1rem; }
+  .action-buttons .btn .btn-label { font-size: 0.58rem; }
+  table { min-width: 750px; font-size: 0.6rem; }
+  th { padding: 6px 3px; font-size: 0.6rem; }
+  td { padding: 2px 1px; font-size: 0.6rem; min-height: 28px; }
+  .status-select, .type-select { width: 50px; font-size: 0.55rem; padding: 1px 3px; min-height: 22px; }
+  .type-select { width: 42px; }
+  .row-actions button { font-size: 0.7rem; min-width: 20px; min-height: 20px; padding: 1px 3px; }
+  .stats-bar { gap: 3px 6px; padding: 5px 6px; }
+  .stats-bar span { font-size: 0.65rem; }
+  .stats-bar strong { font-size: 0.68rem; }
+  .footer-bottom .logo img { height: 22px; }
+  .footer-bottom .copyright { font-size: 0.75rem; }
+}
+@media (pointer: coarse) {
+  .btn { min-height: 54px; }
+  .row-actions button, .status-select, .type-select, .row-checkbox { min-height: 36px; min-width: 36px; }
+  @media (max-width: 768px) {
+    .btn { min-height: 54px; }
+    .row-actions button, .status-select, .type-select, .row-checkbox { min-height: 34px; min-width: 34px; }
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="toolbar">
+    <h1>📦 סטטוס משלוחים</h1>
+    <div class="filter-area">
+      <label for="statusFilter">🔎 סינון:</label>
+      <select id="statusFilter">
+        <option value="all">הכל</option>
+        <option value="arrived">הגיע</option>
+        <option value="onway">בדרך</option>
+        <option value="inprogress">בביצוע</option>
+        <option value="missing">חוסר</option>
+        <option value="preparing">הכנה</option>
+        <option value="cancelled">בוטל</option>
+        <option value="pending">המתנה</option>
+        <option value="empty">חדש</option>
+      </select>
+      <div class="search-area">
+        <input type="text" id="searchInput" placeholder="🔍 חיפוש מהיר...">
+      </div>
+      <span class="save-indicator" id="saveIndicator" title="💾 נשמר אוטומטית"></span>
+    </div>
+    <div class="action-buttons">
+      <button class="btn btn-success" id="addRowBtn" data-tip="הוסף שורה חדשה או טאב חדש"><span class="btn-icon">➕</span><span class="btn-label">הוסף שורה / טאב</span></button>
+      <button class="btn btn-danger" id="deleteSelectedBtn" data-tip="מחק שורה/ות מסומנות"><span class="btn-icon">🗑️</span><span class="btn-label">מחק שורה/ות</span></button>
+      <button class="btn btn-selected" id="showSelectedBtn" data-tip="הצג שורות מסומנות בלבד"><span class="btn-icon">👁️</span><span class="btn-label">הצג מסומנים</span></button>
+      <button class="btn btn-move" id="moveBtn" data-tip="העבר שורות נבחרות לטאב אחר"><span class="btn-icon">↔️</span><span class="btn-label">העבר לטאב</span></button>
+      <button class="btn btn-sort" id="sortBtn" data-tip="מיון לפי סטטוס"><span class="btn-icon">🔽</span><span class="btn-label">מיון שורות</span></button>
+      <button class="btn btn-excel" id="exportExcelBtn" data-tip="יצא סטטוסים לקובץ אקסל"><span class="btn-icon">📤</span><span class="btn-label">יצא לקובץ</span></button>
+      <button class="btn btn-load" id="loadExcelBtn" data-tip="יבא סטטוסים מקובץ אקסל"><span class="btn-icon">📥</span><span class="btn-label">יבא מקובץ</span></button>
+    </div>
+  </div>
+
+  <div class="view-tabs" id="viewTabs">
+    <button type="button" class="view-tab active" id="tabToys" data-view="toys">🧸 צעצועים <span class="tab-count" id="tabToysCount">0</span></button>
+    <button type="button" class="view-tab" id="tabElectronics" data-view="electronics">🔌 אלקטרוניקה קלה <span class="tab-count" id="tabElectronicsCount">0</span></button>
+    <button type="button" class="view-tab archive-tab" id="tabArchive" data-view="archive">📁 ארכיב <span class="tab-count" id="tabArchiveCount">0</span></button>
+  </div>
+
+  <div class="stats-bar" id="statsBar">
+    <span>📊 סה"כ: <strong id="totalCount">0</strong></span>
+    <span>💰 סה"כ $: <strong class="stat-amount" id="totalAmount">$0</strong></span>
+    <span>✅ הגיע: <strong id="arrivedCount">0</strong> (<strong class="stat-amount" id="arrivedAmount">$0</strong>)</span>
+    <span>🚚 בדרך: <strong id="onwayCount">0</strong> (<strong class="stat-amount" id="onwayAmount">$0</strong>)</span>
+    <span>⚙️ בהכנה: <strong class="stat-preparing" id="preparingCount">0</strong> (<strong class="stat-amount" id="preparingAmount">$0</strong>)</span>
+    <span>🔧 בביצוע: <strong class="stat-inprogress" id="inprogressCount">0</strong> (<strong class="stat-amount" id="inprogressAmount">$0</strong>)</span>
+    <span>❌ חוסר: <strong class="stat-missing" id="missingCount">0</strong> (<strong class="stat-amount" id="missingAmount">$0</strong>)</span>
+    <span>🚫 בוטל: <strong class="stat-cancelled" id="cancelledCount">0</strong> (<strong class="stat-amount" id="cancelledAmount">$0</strong>)</span>
+    <span>⏳ בהמתנה: <strong id="pendingCount">0</strong> (<strong class="stat-amount" id="pendingAmount">$0</strong>)</span>
+  </div>
+
+  <div class="table-wrap">
+    <table id="deliveryTable">
+      <thead>
+        <tr>
+          <th style="width:32px;"><input type="checkbox" id="selectAllCheck"></th>
+          <th>סוג מכולה</th>
+          <th>20'</th>
+          <th>40'</th>
+          <th>הזמנה</th>
+          <th>סוג מוצר</th>
+          <th>תיק</th>
+          <th>שם ספק</th>
+          <th>תאריך הגעה</th>
+          <th>ספק</th>
+          <th>סכום $</th>
+          <th>סטטוס</th>
+          <th>הערה</th>
+          <th style="width:60px;">פעולות</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer-info">
+    <span class="counter" id="rowCounter">0 שורות</span>
+  </div>
+</div>
+
+<div class="footer-bottom">
+  <div class="copyright">© 2026 כל הזכויות שמורות</div>
+  <div class="logo">
+    <img src="OG_Blue_Logo2.png" alt="OG Blue Logo" onerror="this.style.display='none'">
+  </div>
+</div>
+
+<!-- מודל טעינת אקסל -->
+<div class="modal-overlay" id="loadModal">
+  <div class="modal">
+    <h2>📂 טעינת קובץ אקסל</h2>
+    <p style="color:#64748b; margin-bottom:5px;">בחר קובץ אקסל לטעינה. כל הנתונים הקיימים יוחלפו.</p>
+    <div class="drop-zone" id="dropZone">
+      <div class="icon">📁</div>
+      <p><strong>גרור קובץ לכאן</strong></p>
+      <p>או לחץ לבחירת קובץ</p>
+      <p style="font-size:0.8rem; color:#94a3b8;">תומך בקבצי .xlsx ו-.xls</p>
+      <p class="file-name" id="fileName" style="margin-top:10px;"></p>
+      <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+    </div>
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="cancelLoadBtn">ביטול</button>
+      <button class="btn btn-load" id="confirmLoadBtn" disabled>טען קובץ</button>
+    </div>
+  </div>
+</div>
+
+<!-- מודל העברה בין טאבים -->
+<div class="modal-overlay" id="moveModal">
+  <div class="modal">
+    <h2>↔️ העברת שורות</h2>
+    <p style="color:#64748b; margin-bottom:16px;" id="moveModalDesc">בחר לאיזה טאב להעביר את השורות הנבחרות:</p>
+    <div class="move-targets" id="moveTargets" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn btn-secondary" id="cancelMoveBtn">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- מודל הוספה -->
+<div class="modal-overlay" id="addChoiceModal">
+  <div class="modal">
+    <h2>➕ הוספה</h2>
+    <p style="color:#64748b; margin-bottom:16px;">מה תרצה להוסיף?</p>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button class="btn btn-success" id="chooseAddRowBtn" style="justify-content:center; min-height:48px; font-size:0.95rem;">➕ הוסף שורה</button>
+      <button class="btn btn-load" id="chooseAddTabBtn" style="justify-content:center; min-height:48px; font-size:0.95rem;">📑 הוסף טאב חדש</button>
+    </div>
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn btn-secondary" id="cancelAddChoiceBtn">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- מודל טאב חדש -->
+<div class="modal-overlay" id="addTabModal">
+  <div class="modal">
+    <h2>📑 טאב חדש</h2>
+    <p style="color:#64748b; margin-bottom:12px;">הזן שם לטאב (עד 20 תווים):</p>
+    <input type="text" id="newTabNameInput" maxlength="20" placeholder="שם הטאב..." style="width:100%; padding:12px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:1rem; font-family:inherit; outline:none; box-sizing:border-box;" dir="rtl">
+    <p id="newTabNameError" style="color:#b91c1c; font-size:0.85rem; margin:8px 0 0; display:none;"></p>
+    <p style="color:#94a3b8; font-size:0.8rem; margin:6px 0 0;"><span id="newTabCharCount">0</span>/20</p>
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn btn-secondary" id="cancelAddTabBtn">ביטול</button>
+      <button class="btn btn-success" id="confirmAddTabBtn">צור טאב</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ============================================================
+  // 1. קבועים ומיפויים
+  // ============================================================
+  const statusMap = {
+    'arrived': 'הגיע', 'onway': 'בדרך', 'inprogress': 'בביצוע',
+    'missing': 'חוסר', 'preparing': 'הכנה', 'cancelled': 'בוטל',
+    'pending': 'המתנה', 'empty': 'חדש'
+  };
+  const statusHebToEng = {
+    'הגיע': 'arrived', 'בדרך': 'onway', 'בביצוע': 'inprogress', 'ביצוע': 'inprogress',
+    'חוסר': 'missing', 'הכנה': 'preparing', 'בוטל': 'cancelled',
+    'המתנה': 'pending', 'חדש': 'empty'
+  };
+  const sortOrder = { 'arrived': 1, 'onway': 2, 'inprogress': 3, 'preparing': 4, 'missing': 5, 'cancelled': 6, 'pending': 7, 'empty': 8, '': 8 };
+
+  const defaultData = [
+    { type:"FCL", q20:"0", q40:"1", order:"150118535", product:"אופנועים", file:"101260008", supplier:"SHANTOU TOYS SMILE CO.,LT", date:"2026-03-10", vendor:"24210046000", amount:30074.00, status:"arrived", note:"הגיע" },
+    { type:"LCL", q20:"0", q40:"0", order:"150118544", product:"מאשה והדוב", file:"101260011", supplier:"GIOCHI PREZIOSI", date:"2026-03-22", vendor:"24210035000", amount:20555.00, status:"arrived", note:"הגיע" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118545", product:"מאשה והדוב", file:"101260007", supplier:"FABRICAS AGRUPADAS DE MUN", date:"2026-03-30", vendor:"24210052000", amount:61277.00, status:"arrived", note:"הגיע" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118555", product:"רכבות", file:"101260009", supplier:"SHANTOU SWEET TOYS COMPAN", date:"2026-03-30", vendor:"24210009000", amount:32655.00, status:"arrived", note:"הגיע" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118540", product:"משאיות", file:"101260010", supplier:"SHANTOU SHENGQI IMP", date:"2026-04-04", vendor:"24210007000", amount:23093.00, status:"arrived", note:"הגיע" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118549", product:"אופני איזון פדאלים", file:"101260013", supplier:"HEBEI JOYRIDE TOYS", date:"2026-04-21", vendor:"24210095000", amount:20664.00, status:"arrived", note:"הגיע" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118548", product:"אופני איזון", file:"101260014", supplier:"SHIJIAZHUANG SENTER INTER", date:"2026-04-22", vendor:"24210008000", amount:17088.00, status:"arrived", note:"הגיע" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118551", product:"רובי ג'ל", file:"101260015", supplier:"DOWELLIN GROUP", date:"2026-05-02", vendor:"24210012000", amount:40219.04, status:"arrived", note:"הגיע" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118547", product:"בימבה ג'וק", file:"101260016", supplier:"SHIJIAZHUANG SENTER INTER", date:"2026-06-16", vendor:"24210008000", amount:24541.00, status:"arrived", note:"הגיע" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118559", product:"רובים פלסטיק", file:"101260018", supplier:"ZING ZASIA LIMITED", date:"2026-07-09", vendor:"24210010000", amount:47423.89, status:"onway", note:"ממתין להגעה ושחרור" },
+    { type:"FCL", q20:"0", q40:"2", order:"150118556", product:"משחקי צבא", file:"101260017", supplier:"SHANTOU TOYS SMILE CO.,LT", date:"2026-08-07", vendor:"24210046000", amount:31915.32, status:"onway", note:"ממתין להגעה ושחרור" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118564", product:"שטיחוני פעילות", file:"x", supplier:"GUANGDONG FAIRNESS ENTRPRISE", date:"2026-08-06", vendor:"24210090000", amount:10096.50, status:"onway", note:"ממתין להגעה ושחרור" },
+    { type:"", q20:"", q40:"", order:"150118558", product:"בובות הפעלה", file:"x", supplier:"EOLO TOYS LTD", date:"", vendor:"24210037000", amount:36087.00, status:"missing", note:"בתהליך חוסר תעודות מעבדה" },
+    { type:"", q20:"", q40:"", order:"150118560", product:"רכבי פעלולים על שלט", file:"x", supplier:"KABOOM ASIA LIMITED", date:"", vendor:"24210011000", amount:52152.00, status:"missing", note:"ממתין חוסר תעודות משרד התקשורת" },
+    { type:"", q20:"", q40:"", order:"150118562", product:"כלי עבודה", file:"x", supplier:"SHANTOU SHENGQI IMP", date:"", vendor:"24210007000", amount:38958.12, status:"inprogress", note:"נשלח לספק לביצוע" },
+    { type:"", q20:"", q40:"", order:"150118565", product:"שולחנות פעילות", file:"x", supplier:"WENZHOU RUIZHI CRAFTS", date:"", vendor:"24210900000", amount:34318.50, status:"inprogress", note:"נשלח לספק לביצוע" },
+    { type:"", q20:"", q40:"", order:"150118571", product:"תלת אופן (בימבה יטבתה)", file:"x", supplier:"YONGKANG YULIEN INDUSTRY", date:"", vendor:"24210396000", amount:20037.60, status:"inprogress", note:"נשלח לספק לביצוע" },
+    { type:"", q20:"", q40:"", order:"150118584", product:"שולחנות משחק", file:"x", supplier:"SPEEDINDUSTIAL INTERNATIONAL", date:"", vendor:"24220007000", amount:17820.00, status:"inprogress", note:"נשלח לספק לביצוע" },
+    { type:"", q20:"", q40:"", order:"150118585", product:"שולחנות משחק", file:"x", supplier:"SPEEDINDUSTIAL INTERNATIONAL", date:"", vendor:"24220007000", amount:21300.00, status:"inprogress", note:"נשלח לספק לביצוע - (קיבל מקדמה להכנת תעודת מעבדה)" },
+    { type:"", q20:"", q40:"", order:"150118579", product:"משאיות גדול", file:"x", supplier:"SHATOU FENGCHENGJIA TRAD -  HK FAIR TOYS", date:"", vendor:"24210355000", amount:19945.44, status:"onway", note:"ממתין להכנת הסטודיו" },
+    { type:"", q20:"", q40:"", order:"150118580", product:"חניונים", file:"x", supplier:"GUANGDONG ZHENLE TOYS FACTORY", date:"", vendor:"24210356000", amount:25260.48, status:"onway", note:"ממתין להכנת הסטודיו" },
+    { type:"", q20:"", q40:"", order:"150118572", product:"משאיות עבודה קטן", file:"x", supplier:"SHANTOU HUAHUAN IMPORTAND  -  HH TOYS", date:"", vendor:"24210365000", amount:27164.58, status:"onway", note:"ממתין להכנת הסטודיו" },
+    { type:"", q20:"", q40:"", order:"150118566", product:"ספיידי", file:"x", supplier:"JAZWARES", date:"", vendor:"24210058000", amount:83944.78, status:"preparing", note:"בתהליך הכנה" },
+    { type:"", q20:"", q40:"", order:"150118567", product:"קוקומלון", file:"x", supplier:"JAZWARES", date:"", vendor:"24210058000", amount:46145.00, status:"preparing", note:"בתהליך הכנה" },
+    { type:"", q20:"", q40:"", order:"150118563", product:"שונות", file:"x", supplier:"HASBRO   -    JULY", date:"", vendor:"24210361100", amount:295492.98, status:"preparing", note:"בתהליך הכנה" },
+    { type:"", q20:"", q40:"", order:"150118589", product:"שונות", file:"x", supplier:"HASBRO   -    SEPTEMBER", date:"", vendor:"24210361100", amount:162861.02, status:"preparing", note:"בתהליך הכנה" },
+    { type:"", q20:"", q40:"", order:"150118588", product:"צבי נינג'ה", file:"x", supplier:"PLAYMATES", date:"", vendor:"24210336000", amount:24822.57, status:"preparing", note:"בתהליך הכנה" },
+    { type:"", q20:"", q40:"", order:"150118587", product:"נשכן", file:"x", supplier:"GUANGDONG HUANGER BABY PRODUCTS", date:"", vendor:"24220008000", amount:3769.52, status:"preparing", note:"בתהליך הכנה" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118591", product:"אופני איזון פדאלים", file:"x", supplier:"HEBEI JOYRIDE TOYS", date:"", vendor:"24210095000", amount:20664.00, status:"preparing", note:"בתהליך הכנה" },
+    { type:"FCL", q20:"0", q40:"1", order:"150118592", product:"אופני איזון", file:"x", supplier:"SHIJIAZHUANG SENTER INTER", date:"", vendor:"24210008000", amount:17837.40, status:"preparing", note:"בתהליך הכנה" },
+    { type:"", q20:"", q40:"", order:"150118550", product:"שולחנות משחק", file:"x", supplier:"GUANGDONG HUANGGUAN TECHN", date:"x", vendor:"24210005000", amount:43940.00, status:"cancelled", note:"בוטל לעת עתה" },
+    { type:"", q20:"", q40:"", order:"150118557", product:"רכבות", file:"x", supplier:"HANG WING INDUSTRY", date:"x", vendor:"24210061000", amount:71228.00, status:"cancelled", note:"בוטל לעת עתה" },
+    { type:"", q20:"", q40:"", order:"150118568", product:"קוקומלון", file:"x", supplier:"JAZWARES", date:"", vendor:"24210058000", amount:30565.00, status:"cancelled", note:"בוטל לעת עתה" }
+  ];
+
+  const FIXED_TABS = [
+    { id: 'toys', name: 'צעצועים', icon: '🧸', fixed: true },
+    { id: 'electronics', name: 'אלקטרוניקה קלה', icon: '🔌', fixed: true },
+    { id: 'archive', name: 'ארכיב', icon: '📁', fixed: true, isArchive: true }
+  ];
+
+  // ============================================================
+  // 2. שכבת אחסון – IndexedDB עם fallback ל-localStorage
+  // ============================================================
+  const DB_NAME = 'deliveryDB';
+  const DB_VERSION = 1;
+  const STORE = 'kv';
+  let dbPromise = null;
+
+  function openDB() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      if (!('indexedDB' in window)) return reject(new Error('no-idb'));
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbPromise;
+  }
+
+  async function idbGet(key) {
+    try {
+      const db = await openDB();
+      return await new Promise((res, rej) => {
+        const tx = db.transaction(STORE, 'readonly');
+        const r = tx.objectStore(STORE).get(key);
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+    } catch {
+      const raw = localStorage.getItem(key);
+      if (!raw) return undefined;
+      try { return JSON.parse(raw); } catch { return undefined; }
+    }
+  }
+
+  async function idbSet(key, value) {
+    try {
+      const db = await openDB();
+      await new Promise((res, rej) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(value, key);
+        tx.oncomplete = res;
+        tx.onerror = () => rej(tx.error);
+      });
+    } catch {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+    }
+  }
+
+  async function idbDel(key) {
+    try {
+      const db = await openDB();
+      await new Promise((res, rej) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).delete(key);
+        tx.oncomplete = res;
+        tx.onerror = () => rej(tx.error);
+      });
+    } catch {
+      try { localStorage.removeItem(key); } catch {}
+    }
+  }
+
+  // ============================================================
+  // 3. ניהול State מרכזי – כל הטאבים במקום אחד
+  // ============================================================
+  const state = {
+    tabs: { toys: [], electronics: [], archive: {} },
+    meta: { customTabs: [] }, // [{id, name}]
+    index: {}, // tabId -> Map<rowId, row>
+    currentView: 'toys',
+    lastMainView: 'toys',
+    showSelectedOnly: false,
+    selectedIdsSnapshot: [],
+  };
+
+  let nextId = 1000;
+  let nextCustomTabNum = 1;
+  let sortableInstance = null;
+
+  // ============================================================
+  // 4. עזרי עיצוב / escape / זיהוי
+  // ============================================================
+  function escapeHtml(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function formatNumber(value) {
+    if (value === undefined || value === null || value === '') return '';
+    const num = typeof value === 'number' ? value : parseFloat(String(value).replace(/,/g, ''));
+    if (isNaN(num)) return String(value);
+    return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function formatCurrency(n) {
+    if (!isFinite(n)) return '$0';
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function parseNumberFromDisplay(value) {
+    if (value === undefined || value === null || value === '') return 0;
+    const cleaned = String(value).replace(/,/g, '').replace(/\$/g, '').trim();
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  }
+
+  function formatDateForDisplay(dateStr) {
+    if (!dateStr || dateStr === 'x' || dateStr === '') return '—';
+    const str = String(dateStr);
+    const parts = str.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return str;
+  }
+
+  function getStatusClass(status) {
+    if (!status || status === 'empty') return 'status-empty';
+    return `status-${status}`;
+  }
+
+  function buildSearchIndex(row) {
+    const parts = [
+      row.type, row.q20, row.q40, row.order, row.product,
+      row.file, row.supplier, row.vendor, row.note,
+      formatDateForDisplay(row.date),
+      statusMap[row.status] || ''
+    ];
+    row._search = parts.filter(Boolean).join(' ').toLowerCase();
+  }
+
+  function ensureRowIds(arr) {
+    if (!Array.isArray(arr)) return;
+    arr.forEach(r => {
+      if (r && !r._id) r._id = 'row-' + (nextId++);
+      if (r && (r.amount === undefined || r.amount === null || r.amount === '')) r.amount = 0;
+      if (r && typeof r.amount !== 'number') r.amount = parseNumberFromDisplay(r.amount);
+      if (r) buildSearchIndex(r);
+    });
+  }
+
+  function isValidOrder(o) { return o && o !== 'חדש' && o !== 'x' && o !== '—'; }
+
+  // ============================================================
+  // 5. אינדקס מהיר + getRowById
+  // ============================================================
+  function rebuildIndex(tabId) {
+    const arr = state.tabs[tabId] || [];
+    state.index[tabId] = new Map(arr.map(r => [r._id, r]));
+  }
+
+  function getRowById(id) {
+    return state.index[state.currentView]?.get(id) || null;
+  }
+
+  function getTabData(tabId) {
+    if (!state.tabs[tabId]) state.tabs[tabId] = [];
+    return state.tabs[tabId];
+  }
+
+  function getAllTabs() {
+    const customs = state.meta.customTabs.map(t => ({ id: t.id, name: t.name, icon: '📑', fixed: false }));
+    return [FIXED_TABS[0], FIXED_TABS[1], ...customs, FIXED_TABS[2]];
+  }
+
+  function getTabLabel(viewId) {
+    const t = getAllTabs().find(x => x.id === viewId);
+    return t ? t.name : viewId;
+  }
+
+  function isCustomView(viewId) {
+    return viewId && viewId !== 'toys' && viewId !== 'electronics' && viewId !== 'archive';
+  }
+
+  // ============================================================
+  // 6. שמירה מתוזמנת (debounced) – IndexedDB
+  // ============================================================
+  let saveTimer = null;
+  const pendingSaves = new Set();
+  let saveIndicatorTimer = null;
+
+  function flashSaveIndicator() {
+    const ind = document.getElementById('saveIndicator');
+    if (!ind) return;
+    ind.classList.add('saving');
+    clearTimeout(saveIndicatorTimer);
+    saveIndicatorTimer = setTimeout(() => ind.classList.remove('saving'), 400);
+  }
+
+  function scheduleSave(tabId) {
+    pendingSaves.add(tabId);
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSaves, 350);
+    flashSaveIndicator();
+  }
+
+  async function flushSaves() {
+    const ids = Array.from(pendingSaves);
+    pendingSaves.clear();
+    for (const id of ids) {
+      try { await idbSet('tab_' + id, state.tabs[id] || []); } catch (e) {}
+    }
+  }
+
+  // שמירה סינכרונית אחרונה לפני יציאה
+  window.addEventListener('beforeunload', () => {
+    for (const id of pendingSaves) {
+      try { localStorage.setItem('tab_' + id, JSON.stringify(state.tabs[id] || [])); } catch {}
+    }
+  });
+
+  async function saveMeta() {
+    await idbSet('customTabsMeta', state.meta.customTabs);
+  }
+
+  function saveTab(tabId) {
+    scheduleSave(tabId);
+    rebuildIndex(tabId);
+    if (tabId === state.currentView) {
+      updateStats(getTabData(tabId));
+      updateAllTabCounts();
+    }
+  }
+
+  // ============================================================
+  // 7. טעינה ראשונית
+  // ============================================================
+  async function loadAllData() {
+    // מיגרציה מ-localStorage ישן
+    const legacyToys = localStorage.getItem('toysData');
+    const legacyElec = localStorage.getItem('electronicsData');
+    const legacyArchive = localStorage.getItem('deliveryArchive');
+
+    // מטא טאבים מותאמים
+    let meta = await idbGet('customTabsMeta');
+    if (!meta) {
+      try { meta = JSON.parse(localStorage.getItem('customTabsMeta') || '[]'); } catch { meta = []; }
+    }
+    if (!Array.isArray(meta)) meta = [];
+    state.meta.customTabs = meta.filter(t => t && t.id && t.name);
+
+    // צעצועים
+    let toys = await idbGet('tab_toys');
+    if (!toys && legacyToys) { try { toys = JSON.parse(legacyToys); } catch {} }
+    if (!toys) toys = structuredClone(defaultData);
+    state.tabs.toys = Array.isArray(toys) ? toys : [];
+
+    // אלקטרוניקה
+    let elec = await idbGet('tab_electronics');
+    if (!elec && legacyElec) { try { elec = JSON.parse(legacyElec); } catch {} }
+    state.tabs.electronics = Array.isArray(elec) ? elec : [];
+
+    // ארכיב
+    let arch = await idbGet('tab_archive');
+    if (!arch && legacyArchive) { try { arch = JSON.parse(legacyArchive); } catch {} }
+    state.tabs.archive = Array.isArray(arch) ? arch : [];
+
+    // טאבים מותאמים
+    for (const t of state.meta.customTabs) {
+      let d = await idbGet('tab_' + t.id);
+      if (!d) {
+        try { d = JSON.parse(localStorage.getItem('customTabData_' + t.id) || '[]'); } catch { d = []; }
+      }
+      state.tabs[t.id] = Array.isArray(d) ? d : [];
+    }
+
+    // איסוף nextId מקסימלי מכל השורות
+    Object.keys(state.tabs).forEach(id => {
+      state.tabs[id].forEach(r => {
+        if (r && r._id) {
+          const m = String(r._id).match(/^row-(\d+)$/);
+          if (m) nextId = Math.max(nextId, parseInt(m[1], 10) + 1);
+        }
+      });
+    });
+
+    // איסוף nextCustomTabNum
+    state.meta.customTabs.forEach(t => {
+      const m = String(t.id).match(/^custom-(\d+)$/);
+      if (m) nextCustomTabNum = Math.max(nextCustomTabNum, parseInt(m[1], 10) + 1);
+    });
+
+    // וידוא _id + אינדקס חיפוש + המרת amount למספר
+    Object.keys(state.tabs).forEach(id => {
+      ensureRowIds(state.tabs[id]);
+      rebuildIndex(id);
+    });
+  }
+
+  // ============================================================
+  // 8. רינדור טבלה – Event Delegation + HTML string
+  // ============================================================
+  const tbody = document.getElementById('tableBody');
+  const filterSelect = document.getElementById('statusFilter');
+  const rowCounter = document.getElementById('rowCounter');
+  const selectAllCheck = document.getElementById('selectAllCheck');
+  const searchInput = document.getElementById('searchInput');
+
+  function rowToHtml(row) {
+    const statusClass = getStatusClass(row.status);
+    const typeOpts = ['', 'FCL', 'LCL', 'אחר']
+      .map(o => `<option value="${escapeHtml(o)}"${row.type === o ? ' selected' : ''}>${escapeHtml(o)}</option>`)
+      .join('');
+    const statusOpts = ['', 'empty', 'arrived', 'onway', 'inprogress', 'missing', 'preparing', 'cancelled', 'pending']
+      .map(o => {
+        const label = o === '' ? '' : (statusMap[o] || o);
+        return `<option value="${o}"${(row.status || '') === o ? ' selected' : ''}>${label}</option>`;
+      }).join('');
+
+    return `<tr data-row-id="${escapeHtml(row._id)}" class="${statusClass}">
+      <td><input type="checkbox" class="row-checkbox"></td>
+      <td><select class="type-select">${typeOpts}</select></td>
+      <td contenteditable="true" data-field="q20">${escapeHtml(row.q20)}</td>
+      <td contenteditable="true" data-field="q40">${escapeHtml(row.q40)}</td>
+      <td contenteditable="true" data-field="order">${escapeHtml(row.order)}</td>
+      <td contenteditable="true" data-field="product">${escapeHtml(row.product)}</td>
+      <td contenteditable="true" data-field="file">${escapeHtml(row.file)}</td>
+      <td contenteditable="true" data-field="supplier">${escapeHtml(row.supplier)}</td>
+      <td contenteditable="true" data-field="date">${formatDateForDisplay(row.date)}</td>
+      <td contenteditable="true" data-field="vendor">${escapeHtml(row.vendor)}</td>
+      <td contenteditable="true" data-field="amount" data-raw="${row.amount || 0}">${formatNumber(row.amount)}</td>
+      <td><select class="status-select">${statusOpts}</select></td>
+      <td contenteditable="true" data-field="note">${escapeHtml(row.note)}</td>
+      <td class="row-actions">
+        <span class="drag-handle" title="גרור לשינוי סדר">☰</span>
+        <button class="delete-btn" title="מחק שורה" type="button">🗑️</button>
+      </td>
+    </tr>`;
+  }
+
+  let renderRaf = null;
+
+  function renderTable(filter = 'all') {
+    if (renderRaf) cancelAnimationFrame(renderRaf);
+    renderRaf = requestAnimationFrame(() => {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const sourceData = getTabData(state.currentView);
+      ensureRowIds(sourceData);
+
+      const filtered = sourceData.filter(row => {
+        if (state.showSelectedOnly && !state.selectedIdsSnapshot.includes(row._id)) return false;
+        if (filter !== 'all') {
+          if (filter === 'empty') {
+            if (row.status && row.status !== 'empty') return false;
+          } else if (row.status !== filter) return false;
+        }
+        if (searchTerm && !(row._search || '').includes(searchTerm)) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="14" class="empty-row-msg">${
+          searchTerm ? '🔍 אין תוצאות לחיפוש זה' : '🚫 אין שורות התואמות לסטטוס זה'
+        }</td></tr>`;
+      } else {
+        tbody.innerHTML = filtered.map(rowToHtml).join('');
+      }
+
+      updateCounter();
+      selectAllCheck.checked = false;
+      initSortable(filter, searchTerm, filtered.length);
+    });
+  }
+
+  function initSortable(filter, searchTerm, filteredLen) {
+    if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+    const canSort = filter === 'all' && !searchTerm && !state.showSelectedOnly && filteredLen > 1;
+    if (canSort && typeof Sortable !== 'undefined') {
+      tbody.classList.remove('no-sort');
+      try {
+        sortableInstance = new Sortable(tbody, {
+          animation: 180, delay: 1000, delayOnTouchOnly: true, touchStartThreshold: 8,
+          handle: '.drag-handle',
+          ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', dragClass: 'sortable-drag',
+          onEnd: function(evt) {
+            if (evt.oldIndex === evt.newIndex) return;
+            const data = getTabData(state.currentView);
+            const moved = data.splice(evt.oldIndex, 1)[0];
+            data.splice(evt.newIndex, 0, moved);
+            saveTab(state.currentView);
+          }
+        });
+      } catch (e) { tbody.classList.add('no-sort'); }
+    } else {
+      tbody.classList.add('no-sort');
+    }
+  }
+
+  function updateCounter() {
+    const n = getTabData(state.currentView).length;
+    rowCounter.textContent = getTabLabel(state.currentView) + ': ' + n + ' שורות';
+  }
+
+  // ============================================================
+  // 9. סטטיסטיקות – לולאה אחת
+  // ============================================================
+  function computeStats(data) {
+    const s = { total: data.length, arrived: 0, onway: 0, preparing: 0, inprogress: 0,
+      missing: 0, cancelled: 0, pending: 0, totalAmount: 0,
+      amount: { arrived: 0, onway: 0, preparing: 0, inprogress: 0, missing: 0, cancelled: 0, pending: 0 } };
+    for (const r of data) {
+      const st = r.status;
+      if (st && s[st] !== undefined) s[st]++;
+      const amt = typeof r.amount === 'number' ? r.amount : parseNumberFromDisplay(r.amount);
+      s.totalAmount += amt;
+      if (st && s.amount[st] !== undefined) s.amount[st] += amt;
+    }
+    return s;
+  }
+
+  function updateStats(data) {
+    const s = computeStats(data);
+    document.getElementById('totalCount').textContent = s.total;
+    document.getElementById('arrivedCount').textContent = s.arrived;
+    document.getElementById('onwayCount').textContent = s.onway;
+    document.getElementById('preparingCount').textContent = s.preparing;
+    document.getElementById('inprogressCount').textContent = s.inprogress;
+    document.getElementById('missingCount').textContent = s.missing;
+    document.getElementById('cancelledCount').textContent = s.cancelled;
+    document.getElementById('pendingCount').textContent = s.pending;
+
+    document.getElementById('totalAmount').textContent = formatCurrency(s.totalAmount);
+    document.getElementById('arrivedAmount').textContent = formatCurrency(s.amount.arrived);
+    document.getElementById('onwayAmount').textContent = formatCurrency(s.amount.onway);
+    document.getElementById('preparingAmount').textContent = formatCurrency(s.amount.preparing);
+    document.getElementById('inprogressAmount').textContent = formatCurrency(s.amount.inprogress);
+    document.getElementById('missingAmount').textContent = formatCurrency(s.amount.missing);
+    document.getElementById('cancelledAmount').textContent = formatCurrency(s.amount.cancelled);
+    document.getElementById('pendingAmount').textContent = formatCurrency(s.amount.pending);
+
+    updateAllTabCounts();
+  }
+
+  function updateAllTabCounts() {
+    const elToys = document.getElementById('tabToysCount');
+    const elElec = document.getElementById('tabElectronicsCount');
+    const elArch = document.getElementById('tabArchiveCount');
+    if (elToys) elToys.textContent = state.tabs.toys.length;
+    if (elElec) elElec.textContent = state.tabs.electronics.length;
+    if (elArch) elArch.textContent = state.tabs.archive.length;
+    state.meta.customTabs.forEach(t => {
+      const el = document.getElementById('tabCount-' + t.id);
+      if (el) el.textContent = (state.tabs[t.id] || []).length;
+    });
+  }
+
+  // ============================================================
+  // 10. Event Delegation על tbody
+  // ============================================================
+  function forcePlainTextPaste(e) {
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    if (text == null) return;
+    const cleaned = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    if (document.queryCommandSupported && document.queryCommandSupported('insertText')) {
+      document.execCommand('insertText', false, cleaned);
+    } else {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(document.createTextNode(cleaned));
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  tbody.addEventListener('paste', function(e) {
+    const td = e.target.closest('td[contenteditable="true"]');
+    if (td) forcePlainTextPaste(e);
+  });
+
+  tbody.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.closest('td[contenteditable="true"]')) {
+      e.preventDefault();
+      e.target.blur();
+    }
+  });
+
+  tbody.addEventListener('focusout', function(e) {
+    const td = e.target.closest('td[contenteditable="true"]');
+    if (!td) return;
+    const tr = td.closest('tr');
+    if (!tr || !tr.dataset.rowId) return;
+    const row = getRowById(tr.dataset.rowId);
+    if (!row) return;
+    const field = td.dataset.field;
+    const newVal = td.textContent.trim();
+
+    if (field === 'date') {
+      const parts = newVal.split('/');
+      if (parts.length === 3 && parts[2].length === 4) {
+        row.date = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+      } else if (/^\d{4}-\d{2}-\d{2}$/.test(newVal)) {
+        row.date = newVal;
+      } else {
+        row.date = newVal;
+      }
+    } else if (field === 'amount') {
+      const parsed = parseNumberFromDisplay(newVal);
+      row.amount = parsed;
+      td.textContent = formatNumber(parsed);
+      td.setAttribute('data-raw', parsed);
+    } else {
+      row[field] = newVal;
+    }
+    buildSearchIndex(row);
+    saveTab(state.currentView);
+  });
+
+  tbody.addEventListener('change', function(e) {
+    const target = e.target;
+    const tr = target.closest('tr');
+    if (!tr || !tr.dataset.rowId) return;
+    const row = getRowById(tr.dataset.rowId);
+    if (!row) return;
+
+    if (target.classList.contains('type-select')) {
+      row.type = target.value;
+      buildSearchIndex(row);
+      saveTab(state.currentView);
+    } else if (target.classList.contains('status-select')) {
+      const newStatus = target.value;
+      row.status = (newStatus === 'empty' || newStatus === '') ? '' : newStatus;
+      tr.className = getStatusClass(newStatus || 'empty');
+      if (newStatus && newStatus !== '' && (!row.note || row.note === '')) {
+        row.note = statusMap[newStatus] || '';
+        const noteTd = tr.querySelector('td[data-field="note"]');
+        if (noteTd) noteTd.textContent = row.note;
+      }
+      buildSearchIndex(row);
+      // מיון אוטומטי
+      const data = getTabData(state.currentView);
+      data.sort((a, b) => (sortOrder[a.status] || 8) - (sortOrder[b.status] || 8));
+      saveTab(state.currentView);
+      renderTable(filterSelect.value);
+    }
+  });
+
+  tbody.addEventListener('click', function(e) {
+    const delBtn = e.target.closest('.delete-btn');
+    if (!delBtn) return;
+    const tr = delBtn.closest('tr');
+    if (!tr || !tr.dataset.rowId) return;
+    if (!confirm('למחוק שורה זו?')) return;
+    const data = getTabData(state.currentView);
+    const idx = data.findIndex(r => r._id === tr.dataset.rowId);
+    if (idx !== -1) {
+      data.splice(idx, 1);
+      saveTab(state.currentView);
+      renderTable(filterSelect.value);
+    }
+  });
+
+  // ============================================================
+  // 11. כפתור "הצג מסומנים" – פונקציה אחת לאיפוס
+  // ============================================================
+  function resetShowSelected() {
+    state.showSelectedOnly = false;
+    state.selectedIdsSnapshot = [];
+    const btn = document.getElementById('showSelectedBtn');
+    if (btn) {
+      btn.classList.remove('active');
+      btn.innerHTML = '<span class="btn-icon">👁️</span><span class="btn-label">הצג מסומנים</span>';
+      btn.setAttribute('data-tip', 'הצג שורות מסומנות בלבד');
+    }
+  }
+
+  function toggleShowSelected() {
+    if (state.showSelectedOnly) {
+      resetShowSelected();
+      renderTable(filterSelect.value);
+      return;
+    }
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) {
+      alert('לא נבחרו שורות. סמן שורות עם הצ׳קבוקס ואז לחץ שוב.');
+      return;
+    }
+    state.selectedIdsSnapshot = [];
+    checkboxes.forEach(cb => {
+      const tr = cb.closest('tr');
+      if (tr && tr.dataset.rowId) state.selectedIdsSnapshot.push(tr.dataset.rowId);
+    });
+    state.showSelectedOnly = true;
+    const btn = document.getElementById('showSelectedBtn');
+    if (btn) {
+      btn.classList.add('active');
+      btn.innerHTML = '<span class="btn-icon">👁️</span><span class="btn-label">הצג הכל</span>';
+      btn.setAttribute('data-tip', 'חזור לתצוגה מלאה');
+    }
+    renderTable(filterSelect.value);
+  }
+
+  // ============================================================
+  // 12. פעולות על נתונים – גנריות לחלוטין
+  // ============================================================
+  function addNewRow() {
+    if (state.currentView === 'archive') {
+      alert('לא ניתן להוסיף שורה בארכיב. עבור לטאב אחר.');
+      return;
+    }
+    const newRow = {
+      _id: 'row-' + (nextId++),
+      type: '', q20: '', q40: '',
+      order: 'חדש', product: 'מוצר חדש', file: 'x',
+      supplier: 'ספק חדש', date: '', vendor: '24210000000',
+      amount: 0, status: '', note: ''
+    };
+    buildSearchIndex(newRow);
+    getTabData(state.currentView).push(newRow);
+    saveTab(state.currentView);
+    renderTable(filterSelect.value);
+  }
+
+  function deleteSelectedRows() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) { alert('לא נבחרו שורות למחיקה'); return; }
+    if (!confirm('למחוק ' + checkboxes.length + ' שורות?')) return;
+    const ids = new Set();
+    checkboxes.forEach(cb => {
+      const tr = cb.closest('tr');
+      if (tr && tr.dataset.rowId) ids.add(tr.dataset.rowId);
+    });
+    const data = getTabData(state.currentView);
+    state.tabs[state.currentView] = data.filter(r => !ids.has(r._id));
+    resetShowSelected();
+    saveTab(state.currentView);
+    renderTable(filterSelect.value);
+  }
+
+  function sortData() {
+    const data = getTabData(state.currentView);
+    data.sort((a, b) => (sortOrder[a.status] || 8) - (sortOrder[b.status] || 8));
+    saveTab(state.currentView);
+    renderTable(filterSelect.value);
+  }
+
+  function moveRows(fromTab, toTab, idsSet) {
+    const src = getTabData(fromTab);
+    const moved = src.filter(r => idsSet.has(r._id));
+    state.tabs[fromTab] = src.filter(r => !idsSet.has(r._id));
+    const dst = getTabData(toTab);
+    const existing = new Set(dst.map(r => String(r.order || '').trim()).filter(isValidOrder));
+    const added = [];
+    for (const r of moved) {
+      const k = String(r.order || '').trim();
+      if (isValidOrder(k) && existing.has(k)) continue;
+      if (isValidOrder(k)) existing.add(k);
+      dst.push(r); added.push(r);
+    }
+    saveTab(fromTab); saveTab(toTab);
+    return added.length;
+  }
+
+  // ============================================================
+  // 13. מודלים
+  // ============================================================
+  // --- מודל הוספה ---
+  function openAddChoiceModal() { document.getElementById('addChoiceModal').classList.add('active'); }
+  function closeAddChoiceModal() { document.getElementById('addChoiceModal').classList.remove('active'); }
+
+  // --- מודל טאב חדש ---
+  function openAddTabModal() {
+    closeAddChoiceModal();
+    const input = document.getElementById('newTabNameInput');
+    const err = document.getElementById('newTabNameError');
+    const cnt = document.getElementById('newTabCharCount');
+    if (input) input.value = '';
+    if (err) { err.style.display = 'none'; err.textContent = ''; }
+    if (cnt) cnt.textContent = '0';
+    document.getElementById('addTabModal').classList.add('active');
+    setTimeout(() => input && input.focus(), 100);
+  }
+  function closeAddTabModal() { document.getElementById('addTabModal').classList.remove('active'); }
+
+  function createNewTab(name) {
+    name = String(name || '').trim().slice(0, 20);
+    const err = document.getElementById('newTabNameError');
+    if (!name) { if (err) { err.textContent = 'יש להזין שם לטאב'; err.style.display = 'block'; } return false; }
+    const existingNames = getAllTabs().map(t => t.name);
+    if (existingNames.includes(name)) {
+      if (err) { err.textContent = 'כבר קיים טאב בשם זה'; err.style.display = 'block'; } return false;
+    }
+    const id = 'custom-' + (nextCustomTabNum++);
+    state.meta.customTabs.push({ id, name });
+    state.tabs[id] = [];
+    rebuildIndex(id);
+    saveMeta();
+    saveTab(id);
+    closeAddTabModal();
+    renderTabsUI();
+    switchView(id);
+    return true;
+  }
+
+  // --- מודל העברה ---
+  function openMoveModal() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) { alert('לא נבחרו שורות להעברה.'); return; }
+    const desc = document.getElementById('moveModalDesc');
+    if (desc) desc.textContent = 'בחר לאיזה טאב להעביר ' + checkboxes.length + ' שורות נבחרות:';
+    const targets = document.getElementById('moveTargets');
+    targets.innerHTML = '';
+    getAllTabs().forEach(tab => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn ' + (tab.isArchive ? 'btn-archive' : (tab.fixed ? (tab.id === 'toys' ? 'btn-success' : 'btn-load') : 'btn-move'));
+      btn.style.cssText = 'justify-content:center; min-height:44px; font-size:0.95rem;';
+      btn.textContent = (tab.icon || '📑') + ' ' + tab.name;
+      if (tab.id === state.currentView) {
+        btn.disabled = true; btn.style.opacity = '0.45'; btn.style.cursor = 'not-allowed';
+      } else {
+        btn.addEventListener('click', () => performMove(tab.id));
+      }
+      targets.appendChild(btn);
+    });
+    document.getElementById('moveModal').classList.add('active');
+  }
+  function closeMoveModal() { document.getElementById('moveModal').classList.remove('active'); }
+
+  function performMove(targetView) {
+    if (targetView === state.currentView) { alert('השורות כבר נמצאות בטאב זה.'); closeMoveModal(); return; }
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) { closeMoveModal(); return; }
+    const targetLabel = getTabLabel(targetView);
+    if (!confirm('להעביר ' + checkboxes.length + ' שורות לטאב "' + targetLabel + '"?')) return;
+    const ids = new Set();
+    checkboxes.forEach(cb => {
+      const tr = cb.closest('tr');
+      if (tr && tr.dataset.rowId) ids.add(tr.dataset.rowId);
+    });
+    const added = moveRows(state.currentView, targetView, ids);
+    resetShowSelected();
+    closeMoveModal();
+    renderTable(filterSelect.value);
+    updateStats(getTabData(state.currentView));
+    alert('↔️ הועברו ' + added + ' שורות לטאב "' + targetLabel + '"');
+  }
+
+  // ============================================================
+  // 14. טאבים – רינדור ומעבר
+  // ============================================================
+  function renderTabsUI() {
+    const container = document.getElementById('viewTabs');
+    container.querySelectorAll('.view-tab[data-custom="1"]').forEach(el => el.remove());
+    const archiveBtn = document.getElementById('tabArchive');
+    state.meta.customTabs.forEach(t => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'view-tab' + (state.currentView === t.id ? ' active' : '');
+      btn.dataset.view = t.id;
+      btn.dataset.custom = '1';
+      btn.id = 'tab-' + t.id;
+      btn.innerHTML = '📑 ' + escapeHtml(t.name) + ' <span class="tab-count" id="tabCount-' + t.id + '">0</span>';
+      btn.addEventListener('click', () => switchView(t.id));
+      container.insertBefore(btn, archiveBtn);
+    });
+    document.getElementById('tabToys').classList.toggle('active', state.currentView === 'toys');
+    document.getElementById('tabElectronics').classList.toggle('active', state.currentView === 'electronics');
+    document.getElementById('tabArchive').classList.toggle('active', state.currentView === 'archive');
+    updateAllTabCounts();
+  }
+
+  function switchView(view) {
+    state.currentView = view;
+    if (view === 'toys' || view === 'electronics' || isCustomView(view)) state.lastMainView = view;
+    resetShowSelected();
+    renderTabsUI();
+    filterSelect.value = 'all';
+    searchInput.value = '';
+    renderTable('all');
+    updateStats(getTabData(view));
+  }
+
+  // ============================================================
+  // 15. ייצוא לאקסל – טעינה דינמית של XLSX
+  // ============================================================
+  let xlsxPromise = null;
+  function loadXLSX() {
+    if (window.XLSX) return Promise.resolve(window.XLSX);
+    if (xlsxPromise) return xlsxPromise;
+    xlsxPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js';
+      s.onload = () => resolve(window.XLSX);
+      s.onerror = () => reject(new Error('טעינת ספריית XLSX נכשלה. בדוק חיבור לאינטרנט.'));
+      document.head.appendChild(s);
+    });
+    return xlsxPromise;
+  }
+
+  async function exportToExcel() {
+    try {
+      await loadXLSX();
+    } catch (e) {
+      alert('❌ ' + e.message); return;
+    }
+    try {
+      const colorMap = {
+        'arrived': '009953', 'onway': '3BFFA6', 'inprogress': '93C5FD',
+        'missing': 'FC8D97', 'preparing': 'FFE5B4', 'cancelled': 'FF293C',
+        'pending': 'E0E0E0', 'empty': 'FFFFFF'
+      };
+      const headers = ['סוג מכולה', "20'", "40'", 'הזמנה', 'סוג מוצר', 'תיק', 'שם ספק', 'תאריך הגעה', 'ספק', 'סכום $', 'סטטוס', 'הערה'];
+      const colWidths = [
+        { wch: 12 }, { wch: 6 }, { wch: 6 }, { wch: 14 }, { wch: 20 }, { wch: 14 },
+        { wch: 30 }, { wch: 14 }, { wch: 16 }, { wch: 14 }, { wch: 12 }, { wch: 32 }
+      ];
+
+      function buildSheet(rows, titleText) {
+        const aoa = [[titleText], headers];
+        let totalAmount = 0;
+        rows.forEach(row => {
+          let dateVal = row.date || '';
+          if (dateVal) {
+            const parts = String(dateVal).split('-');
+            if (parts.length === 3) dateVal = parts[2] + '/' + parts[1] + '/' + parts[0];
+          }
+          const amt = typeof row.amount === 'number' ? row.amount : parseNumberFromDisplay(row.amount);
+          totalAmount += amt;
+          aoa.push([
+            row.type || '', row.q20 || '', row.q40 || '', row.order || '',
+            row.product || '', row.file || '', row.supplier || '', dateVal,
+            row.vendor || '', amt, // מספר אמיתי
+            statusMap[row.status] || row.status || '', row.note || ''
+          ]);
+        });
+        // שורת סיכום
+        aoa.push([]);
+        const summaryRowIdx = aoa.length;
+        aoa.push(['סה"כ', '', '', '', '', '', '', '', '', totalAmount, '', '']);
+
+        const ws = XLSX.utils.aoa_to_sheet(aoa);
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 11 } }];
+        ws['!views'] = [{ rightToLeft: true }];
+
+        const titleCell = ws['A1'];
+        if (titleCell) {
+          titleCell.s = {
+            font: { bold: true, sz: 14, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '1E3A5F' } },
+            alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 }
+          };
+        }
+        for (let c = 0; c < 12; c++) {
+          const addr = XLSX.utils.encode_cell({ r: 1, c });
+          if (!ws[addr]) continue;
+          ws[addr].s = {
+            font: { bold: true, sz: 11 },
+            fill: { fgColor: { rgb: 'D0DBE8' } },
+            alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 },
+            border: { top: {style:'thin',color:{rgb:'999999'}}, bottom: {style:'thin',color:{rgb:'999999'}}, left: {style:'thin',color:{rgb:'999999'}}, right: {style:'thin',color:{rgb:'999999'}} }
+          };
+        }
+        rows.forEach((row, i) => {
+          const r = i + 2;
+          const status = row.status || 'empty';
+          const bg = colorMap[status] || 'FFFFFF';
+          const strike = status === 'cancelled';
+          for (let c = 0; c < 12; c++) {
+            const addr = XLSX.utils.encode_cell({ r, c });
+            if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+            ws[addr].s = {
+              fill: { fgColor: { rgb: bg } },
+              alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 },
+              font: strike ? { strike: true } : {},
+              border: { top: {style:'thin',color:{rgb:'999999'}}, bottom: {style:'thin',color:{rgb:'999999'}}, left: {style:'thin',color:{rgb:'999999'}}, right: {style:'thin',color:{rgb:'999999'}} }
+            };
+          }
+        });
+        // עיצוב שורת סיכום
+        const sumCell = XLSX.utils.encode_cell({ r: summaryRowIdx, c: 9 });
+        if (ws[sumCell]) {
+          ws[sumCell].s = {
+            font: { bold: true, sz: 12, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '0F7B3A' } },
+            alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 }
+          };
+        }
+        const sumLabel = XLSX.utils.encode_cell({ r: summaryRowIdx, c: 0 });
+        if (ws[sumLabel]) {
+          ws[sumLabel].s = {
+            font: { bold: true, sz: 12, color: { rgb: 'FFFFFF' } },
+            fill: { fgColor: { rgb: '0F7B3A' } },
+            alignment: { horizontal: 'center', vertical: 'center', readingOrder: 2 }
+          };
+        }
+        ws['!cols'] = colWidths;
+        ws['!rows'] = [{ hpt: 28 }];
+        return ws;
+      }
+
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const wb = XLSX.utils.book_new();
+      wb.Workbook = { Views: [{ RTL: true }] };
+
+      XLSX.utils.book_append_sheet(wb, buildSheet(state.tabs.toys, 'סטטוס צעצועים עדכני ל ' + dateStr), 'צעצועים');
+      XLSX.utils.book_append_sheet(wb, buildSheet(state.tabs.electronics, 'סטטוס אלקטרוניקה קלה עדכני ל ' + dateStr), 'אלקטרוניקה קלה');
+      state.meta.customTabs.forEach(t => {
+        const sheetName = String(t.name).slice(0, 31) || t.id;
+        XLSX.utils.book_append_sheet(wb, buildSheet(state.tabs[t.id] || [], 'סטטוס ' + t.name + ' עדכני ל ' + dateStr), sheetName);
+      });
+      XLSX.utils.book_append_sheet(wb, buildSheet(state.tabs.archive, 'ארכיב עדכני ל ' + dateStr), 'ארכיב');
+
+      XLSX.writeFile(wb, 'סטטוס משלוחים.xlsx');
+    } catch (error) {
+      console.error('שגיאה ביצוא אקסל:', error);
+      alert('אירעה שגיאה ביצוא הקובץ: ' + error.message);
+    }
+  }
+
+  // ============================================================
+  // 16. ייבוא מאקסל
+  // ============================================================
+  const loadModal = document.getElementById('loadModal');
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const fileName = document.getElementById('fileName');
+  const confirmLoadBtn = document.getElementById('confirmLoadBtn');
+  const cancelLoadBtn = document.getElementById('cancelLoadBtn');
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
+  let selectedFile = null;
+
+  function parseSheetToRows(sheet) {
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+    if (!rawRows || rawRows.length === 0) return [];
+    const expectedHeaders = ['סוג מכולה', 'הזמנה', 'סוג מוצר', 'סטטוס'];
+    let headerRowIndex = 0;
+    for (let i = 0; i < Math.min(rawRows.length, 5); i++) {
+      const rowStr = rawRows[i].map(c => String(c || '')).join(' ');
+      if (expectedHeaders.filter(h => rowStr.includes(h)).length >= 2) { headerRowIndex = i; break; }
+    }
+    const json = XLSX.utils.sheet_to_json(sheet, { range: headerRowIndex });
+    if (!json || json.length === 0) return [];
+    return json.map(row => {
+      const safeDate = (val) => {
+        if (!val || val === 'x' || val === '') return '';
+        const str = String(val);
+        const parts = str.split('/');
+        if (parts.length === 3 && parts[2].length === 4) {
+          return parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+        }
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+        return str;
+      };
+      const safeAmount = (val) => {
+        if (val === undefined || val === null || val === '') return 0;
+        const num = parseFloat(String(val).replace(/,/g, '').replace(/\$/g, ''));
+        return isNaN(num) ? 0 : num;
+      };
+      const safeStatus = (val) => {
+        if (!val) return '';
+        const str = String(val).trim();
+        if (statusMap[str]) return str;
+        if (statusHebToEng[str]) return statusHebToEng[str];
+        for (const [heb, eng] of Object.entries(statusHebToEng)) {
+          if (str.includes(heb)) return eng;
+        }
+        return '';
+      };
+      const r = {
+        _id: 'row-' + (nextId++),
+        type: String(row['סוג מכולה'] || ''),
+        q20: String(row["20'"] || ''),
+        q40: String(row["40'"] || ''),
+        order: String(row['הזמנה'] || ''),
+        product: String(row['סוג מוצר'] || ''),
+        file: String(row['תיק'] || ''),
+        supplier: String(row['שם ספק'] || ''),
+        date: safeDate(row['תאריך הגעה']),
+        vendor: String(row['ספק'] || ''),
+        amount: safeAmount(row['סכום $']),
+        status: safeStatus(row['סטטוס']),
+        note: String(row['הערה'] || '')
+      };
+      buildSearchIndex(r);
+      return r;
+    });
+  }
+
+  function dedupeByOrder(rows) {
+    const seen = new Set();
+    const out = [];
+    for (const r of rows) {
+      const k = String(r.order || '').trim();
+      if (isValidOrder(k)) {
+        if (seen.has(k)) continue;
+        seen.add(k);
+      }
+      out.push(r);
+    }
+    return out;
+  }
+
+  async function loadExcelFile(file) {
+    try {
+      await loadXLSX();
+    } catch (e) {
+      alert('❌ ' + e.message); return;
+    }
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        progressBar.style.display = 'block';
+        progressFill.style.width = '30%';
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        let archiveSheetName = null, toysSheetName = null, electronicsSheetName = null;
+        const customSheetMap = {};
+        const knownFixed = new Set();
+
+        for (const name of workbook.SheetNames) {
+          const n = String(name);
+          if (!archiveSheetName && (n.includes('ארכיב') || n.toLowerCase().includes('archive'))) {
+            archiveSheetName = name; knownFixed.add(name);
+          } else if (!electronicsSheetName && (n.includes('אלקטרוניקה') || n.toLowerCase().includes('electronic'))) {
+            electronicsSheetName = name; knownFixed.add(name);
+          } else if (!toysSheetName && (n.includes('צעצועים') || n.includes('סטטוס') || n.includes('משלוח') || n === 'Sheet1')) {
+            toysSheetName = name; knownFixed.add(name);
+          }
+        }
+        if (!toysSheetName) {
+          for (const name of workbook.SheetNames) {
+            if (name !== archiveSheetName && name !== electronicsSheetName) {
+              toysSheetName = name; knownFixed.add(name); break;
+            }
+          }
+        }
+        for (const name of workbook.SheetNames) {
+          if (knownFixed.has(name)) continue;
+          if (name === archiveSheetName || name === electronicsSheetName || name === toysSheetName) continue;
+          const tabName = String(name).trim().slice(0, 20);
+          if (tabName) customSheetMap[name] = tabName;
+        }
+
+        progressFill.style.width = '50%';
+
+        const importedToys = toysSheetName ? parseSheetToRows(workbook.Sheets[toysSheetName] || {}) : [];
+        const importedElectronics = electronicsSheetName ? parseSheetToRows(workbook.Sheets[electronicsSheetName] || {}) : [];
+        const importedArchive = archiveSheetName ? parseSheetToRows(workbook.Sheets[archiveSheetName] || {}) : [];
+        const importedCustom = {};
+        Object.keys(customSheetMap).forEach(sheetName => {
+          importedCustom[customSheetMap[sheetName]] = parseSheetToRows(workbook.Sheets[sheetName] || {});
+        });
+
+        const hasAny = importedToys.length || importedElectronics.length || importedArchive.length ||
+          Object.values(importedCustom).some(a => a.length);
+        if (!hasAny) {
+          alert('הקובץ ריק או לא נמצאו נתונים');
+          progressBar.style.display = 'none';
+          return;
+        }
+
+        // מחיקת טאבים מותאמים קודמים מהאחסון
+        for (const t of state.meta.customTabs) {
+          try { await idbDel('tab_' + t.id); } catch {}
+        }
+
+        // איפוס State
+        state.meta.customTabs = [];
+        state.tabs = { toys: [], electronics: [], archive: [] };
+
+        state.tabs.toys = toysSheetName ? dedupeByOrder(importedToys) : [];
+        state.tabs.electronics = electronicsSheetName ? dedupeByOrder(importedElectronics) : [];
+        state.tabs.archive = archiveSheetName ? dedupeByOrder(importedArchive) : [];
+
+        Object.keys(importedCustom).forEach(tabName => {
+          const rows = dedupeByOrder(importedCustom[tabName]);
+          const id = 'custom-' + (nextCustomTabNum++);
+          state.meta.customTabs.push({ id, name: tabName });
+          state.tabs[id] = rows;
+        });
+
+        // שמירה ל-IndexedDB
+        await idbSet('tab_toys', state.tabs.toys);
+        await idbSet('tab_electronics', state.tabs.electronics);
+        await idbSet('tab_archive', state.tabs.archive);
+        for (const t of state.meta.customTabs) {
+          await idbSet('tab_' + t.id, state.tabs[t.id]);
+        }
+        await idbSet('customTabsMeta', state.meta.customTabs);
+
+        // וידוא _id + אינדקס
+        Object.keys(state.tabs).forEach(id => { ensureRowIds(state.tabs[id]); rebuildIndex(id); });
+
+        progressFill.style.width = '100%';
+        resetShowSelected();
+
+        if (toysSheetName) state.currentView = 'toys';
+        else if (electronicsSheetName) state.currentView = 'electronics';
+        else if (state.meta.customTabs.length > 0) state.currentView = state.meta.customTabs[0].id;
+        else if (archiveSheetName) state.currentView = 'archive';
+        else state.currentView = 'toys';
+
+        renderTabsUI();
+        renderTable(filterSelect.value);
+        updateStats(getTabData(state.currentView));
+
+        setTimeout(() => {
+          progressBar.style.display = 'none';
+          progressFill.style.width = '0%';
+          loadModal.classList.remove('active');
+          let msg = '✅ ייבוא הושלם – כל הנתונים הקודמים הוחלפו';
+          msg += '\n🧸 צעצועים: ' + state.tabs.toys.length + ' שורות';
+          msg += '\n🔌 אלקטרוניקה קלה: ' + state.tabs.electronics.length + ' שורות';
+          state.meta.customTabs.forEach(t => {
+            msg += '\n📑 ' + t.name + ': ' + (state.tabs[t.id] || []).length + ' שורות';
+          });
+          msg += '\n📁 ארכיב: ' + state.tabs.archive.length + ' שורות';
+          alert(msg);
+        }, 500);
+      } catch (error) {
+        console.error('שגיאה בטעינת הקובץ:', error);
+        alert('שגיאה בטעינת הקובץ: ' + error.message);
+        progressBar.style.display = 'none';
+        progressFill.style.width = '0%';
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ============================================================
+  // 17. חיבור אירועי UI
+  // ============================================================
+  function bindUI() {
+    // כפתורים ראשיים
+    document.getElementById('addRowBtn').addEventListener('click', openAddChoiceModal);
+    document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedRows);
+    document.getElementById('showSelectedBtn').addEventListener('click', toggleShowSelected);
+    document.getElementById('moveBtn').addEventListener('click', openMoveModal);
+    document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+    document.getElementById('loadExcelBtn').addEventListener('click', () => {
+      loadModal.classList.add('active');
+      selectedFile = null;
+      fileName.textContent = '';
+      confirmLoadBtn.disabled = true;
+      progressBar.style.display = 'none';
+      progressFill.style.width = '0%';
+    });
+    document.getElementById('sortBtn').addEventListener('click', sortData);
+
+    // טאבים קבועים
+    document.getElementById('tabToys').addEventListener('click', () => switchView('toys'));
+    document.getElementById('tabElectronics').addEventListener('click', () => switchView('electronics'));
+    document.getElementById('tabArchive').addEventListener('click', () => switchView('archive'));
+
+    // סינון וחיפוש
+    filterSelect.addEventListener('change', () => renderTable(filterSelect.value));
+    searchInput.addEventListener('input', debounce(() => renderTable(filterSelect.value), 150));
+
+    // בחר הכל
+    selectAllCheck.addEventListener('change', function() {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = this.checked);
+    });
+
+    // מודל טעינה
+    cancelLoadBtn.addEventListener('click', () => {
+      loadModal.classList.remove('active');
+      selectedFile = null; fileName.textContent = ''; confirmLoadBtn.disabled = true;
+      progressBar.style.display = 'none'; progressFill.style.width = '0%';
+    });
+    loadModal.addEventListener('click', e => { if (e.target === loadModal) cancelLoadBtn.click(); });
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        selectedFile = this.files[0];
+        fileName.textContent = '📄 ' + selectedFile.name;
+        confirmLoadBtn.disabled = false;
+      }
+    });
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        const file = e.dataTransfer.files[0];
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'xlsx' || ext === 'xls') {
+          selectedFile = file;
+          fileName.textContent = '📄 ' + file.name;
+          confirmLoadBtn.disabled = false;
+        } else alert('אנא בחר קובץ אקסל (.xlsx או .xls)');
+      }
+    });
+    confirmLoadBtn.addEventListener('click', () => {
+      if (!selectedFile) return;
+      let totalExisting = 0;
+      Object.keys(state.tabs).forEach(id => totalExisting += (state.tabs[id] || []).length);
+      if (totalExisting > 0 && !confirm(`⚠️ פעולה זו תמחק את כל הטאבים והשורות הקיימים ותטען רק את מה שבקובץ (סה"כ כעת: ${totalExisting} שורות). להמשיך?`)) return;
+      loadExcelFile(selectedFile);
+    });
+
+    // מודל העברה
+    document.getElementById('cancelMoveBtn').addEventListener('click', closeMoveModal);
+    document.getElementById('moveModal').addEventListener('click', e => { if (e.target.id === 'moveModal') closeMoveModal(); });
+
+    // מודל הוספה
+    document.getElementById('cancelAddChoiceBtn').addEventListener('click', closeAddChoiceModal);
+    document.getElementById('addChoiceModal').addEventListener('click', e => { if (e.target.id === 'addChoiceModal') closeAddChoiceModal(); });
+    document.getElementById('chooseAddRowBtn').addEventListener('click', () => { closeAddChoiceModal(); addNewRow(); });
+    document.getElementById('chooseAddTabBtn').addEventListener('click', openAddTabModal);
+
+    // מודל טאב חדש
+    document.getElementById('cancelAddTabBtn').addEventListener('click', closeAddTabModal);
+    document.getElementById('addTabModal').addEventListener('click', e => { if (e.target.id === 'addTabModal') closeAddTabModal(); });
+    document.getElementById('confirmAddTabBtn').addEventListener('click', () => {
+      createNewTab(document.getElementById('newTabNameInput').value);
+    });
+    const newTabInput = document.getElementById('newTabNameInput');
+    newTabInput.addEventListener('input', function() {
+      const cnt = document.getElementById('newTabCharCount');
+      if (cnt) cnt.textContent = String(this.value.length);
+      const err = document.getElementById('newTabNameError');
+      if (err) err.style.display = 'none';
+    });
+    newTabInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); createNewTab(this.value); }
+    });
+  }
+
+  function debounce(fn, ms) {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  }
+
+  // ============================================================
+  // 18. אתחול
+  // ============================================================
+  async function init() {
+    await loadAllData();
+    bindUI();
+    renderTabsUI();
+    renderTable('all');
+    updateStats(getTabData(state.currentView));
+
+    // שמירה תקופתית של שינויים תלויים
+    window.addEventListener('online', () => { if (pendingSaves.size) flushSaves(); });
+  }
+
+  init().catch(err => {
+    console.error('Init error:', err);
+    // גם אם נכשל טעינה – נציג משהו
+    try {
+      state.tabs.toys = structuredClone(defaultData);
+      ensureRowIds(state.tabs.toys);
+      rebuildIndex('toys');
+      bindUI();
+      renderTabsUI();
+      renderTable('all');
+      updateStats(state.tabs.toys);
+    } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
