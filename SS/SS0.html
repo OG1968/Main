@@ -411,9 +411,7 @@ td:first-child { background-color: #ffffff !important; }
     { id: 'toys', name: 'צעצועים', icon: '🧸', fixed: true },
     { id: 'electronics', name: 'אלקטרוניקה קלה', icon: '🔌', fixed: true },
     { id: 'archive', name: 'ארכיב', icon: '📁', fixed: true, isArchive: true }
-  ];
-
-  // ============================================================
+  ];  // ============================================================
   // 2. שכבת אחסון – IndexedDB + WAL (Write-Ahead Log) ב-localStorage
   // ============================================================
   const DB_NAME = 'deliveryDB';
@@ -618,14 +616,6 @@ td:first-child { background-color: #ffffff !important; }
     return '';
   }
 
-  // בודק אם מחרוזת "נראית" כמו ניסיון להזין תאריך (בשביל החלטה אם להתריע)
-  function looksLikeDateInput(str) {
-    const s = String(str || '').trim();
-    if (!s) return false;
-    if (s === 'x' || s === '—' || s === '-') return false;
-    return /[\d\/\.\-]/.test(s);
-  }
-
   // ============================================================
   // 3. ניהול State
   // ============================================================
@@ -699,6 +689,11 @@ td:first-child { background-color: #ffffff !important; }
       if (r && !r._id) r._id = 'row-' + (nextId++);
       if (r && (r.amount === undefined || r.amount === null || r.amount === '')) r.amount = 0;
       if (r && typeof r.amount !== 'number') r.amount = parseNumberFromDisplay(r.amount);
+      // נרמול תאריך קיים
+      if (r && r.date) {
+        const normalized = normalizeDateToISO(r.date);
+        r.date = normalized || r.date;
+      }
       if (r) buildSearchIndex(r);
     });
   }
@@ -737,13 +732,10 @@ td:first-child { background-color: #ffffff !important; }
   }
 
   // ============================================================
-  // 6. שמירה מתוזמנת – עם ניסיון חוזר מבוקר ו-WAL עמיד
+  // 6. שמירה מתוזמנת
   // ============================================================
   let saveTimer = null;
   const pendingSaves = new Set();
-  const failedSaveAttempts = new Map(); // tabId -> מספר ניסיונות
-  const MAX_SAVE_RETRIES = 5;
-  let saveRetryTimer = null;
   let saveIndicatorTimer = null;
 
   function setSaveIndicator(mode, message) {
@@ -763,79 +755,38 @@ td:first-child { background-color: #ffffff !important; }
 
   function scheduleSave(tabId) {
     const data = state.tabs[tabId] || [];
-    // WAL נכתב תמיד סינכרונית לפני כל ניסיון IDB
     const walOk = writeWAL(tabId, data);
-    if (!walOk) {
-      // אם WAL נכשל – ננסה לשמור בכל מקרה ל-IDB מיד
-      pendingSaves.add(tabId);
-      flushSaves();
-      return;
-    }
+    if (!walOk) { flushSaves(); return; }
     pendingSaves.add(tabId);
-    failedSaveAttempts.delete(tabId); // איפוס מונה כשלים על עריכה חדשה
     setSaveIndicator('saving', '⏳ שומר...');
     clearTimeout(saveTimer);
     saveTimer = setTimeout(flushSaves, 350);
   }
 
   async function flushSaves() {
-    if (pendingSaves.size === 0) return;
-
-    // צילום הרשימה הנוכחית בלי לרוקן עדיין
     const ids = Array.from(pendingSaves);
+    pendingSaves.clear();
+
     const results = await Promise.allSettled(ids.map(async (id) => {
       const data = state.tabs[id] || [];
       const now = Date.now();
-      // סדר חשוב: קודם הנתונים, אחר כך חתימת הזמן
       await idbSet('tab_' + id, data);
       await idbSet('tabSavedAt_' + id, now);
+      clearWAL(id);
       return id;
     }));
 
-    const failedIds = [];
-    results.forEach((res, i) => {
-      const id = ids[i];
-      if (res.status === 'fulfilled') {
-        // הצלחה מאומתת – עכשיו בטוח להסיר מהתור ולנקות WAL
-        pendingSaves.delete(id);
-        failedSaveAttempts.delete(id);
-        clearWAL(id);
-      } else {
-        failedIds.push(id);
-        const attempts = (failedSaveAttempts.get(id) || 0) + 1;
-        failedSaveAttempts.set(id, attempts);
-        console.error(`[save] tab "${id}" failed (attempt ${attempts}):`, res.reason);
-        // WAL נשאר על כנו – הוא מקור האמת עד לאימות
-        // pendingSaves נשאר מכיל את ה-id כדי שניסיון חוזר יתפוס אותו
-      }
-    });
-
-    if (failedIds.length > 0) {
-      setSaveIndicator('error', `⚠️ ${failedIds.length} טאבים לא נשמרו – מנסה שוב...`);
-      const maxAttempts = Math.max(...failedIds.map(id => failedSaveAttempts.get(id) || 0));
-      if (maxAttempts <= MAX_SAVE_RETRIES) {
-        const delay = Math.min(1000 * Math.pow(2, maxAttempts - 1), 15000);
-        clearTimeout(saveRetryTimer);
-        saveRetryTimer = setTimeout(() => { flushSaves(); }, delay);
-      } else {
-        setSaveIndicator('error', `❌ שמירה נכשלה סופית. הנתונים ב-WAL – רענן את הדף.`);
-      }
+    const failed = results.filter(r => r.status === 'rejected');
+    if (failed.length > 0) {
+      setSaveIndicator('error', '⚠️ ' + failed.length + ' טאבים לא נשמרו. הנתונים ב-WAL.');
     } else if (ids.length > 0) {
       setSaveIndicator('saved', '✅ נשמר בהצלחה');
     }
   }
 
-  async function retryFailedSaves() {
-    const failed = Array.from(failedSaveAttempts.keys());
-    if (failed.length === 0) return;
-    failed.forEach(id => { pendingSaves.add(id); failedSaveAttempts.delete(id); });
-    await flushSaves();
-  }
-
   function flushSavesSync() {
-    if (pendingSaves.size === 0 && failedSaveAttempts.size === 0) return;
+    if (pendingSaves.size === 0) return;
     for (const id of pendingSaves) writeWAL(id, state.tabs[id] || []);
-    for (const id of failedSaveAttempts.keys()) writeWAL(id, state.tabs[id] || []);
   }
 
   window.addEventListener('beforeunload', flushSavesSync);
@@ -889,19 +840,6 @@ td:first-child { background-color: #ffffff !important; }
 
     Object.keys(state.tabs).forEach(id => {
       ensureRowIds(state.tabs[id]);
-      // נרמול תאריכים רטרואקטיבי עם דיווח
-      let normalizedCount = 0;
-      state.tabs[id].forEach(r => {
-        if (r && r.date && r.date !== 'x') {
-          const norm = normalizeDateToISO(r.date);
-          if (norm && norm !== r.date) { r.date = norm; normalizedCount++; }
-          else if (!norm) { r.date = ''; normalizedCount++; }
-        }
-        if (r) buildSearchIndex(r);
-      });
-      if (normalizedCount > 0) {
-        console.info(`[date-normalize] "${id}": ${normalizedCount} תאריכים נורמלו`);
-      }
       rebuildIndex(id);
     });
   }
@@ -935,7 +873,7 @@ td:first-child { background-color: #ffffff !important; }
       <td contenteditable="true" data-field="product">${escapeHtml(row.product)}</td>
       <td contenteditable="true" data-field="file">${escapeHtml(row.file)}</td>
       <td contenteditable="true" data-field="supplier">${escapeHtml(row.supplier)}</td>
-      <td contenteditable="true" data-field="date" data-raw="${escapeHtml(row.date || '')}">${formatDateForDisplay(row.date)}</td>
+      <td contenteditable="true" data-field="date">${formatDateForDisplay(row.date)}</td>
       <td contenteditable="true" data-field="vendor">${escapeHtml(row.vendor)}</td>
       <td contenteditable="true" data-field="amount" data-raw="${row.amount || 0}">${formatNumber(row.amount)}</td>
       <td><select class="status-select">${statusOpts}</select></td>
@@ -1106,80 +1044,19 @@ td:first-child { background-color: #ffffff !important; }
     if (!row) return;
     const field = td.dataset.field;
     const newVal = td.textContent.trim();
-    const oldVal = td.dataset.raw || '';
 
-    // ---------- שדה תאריך: אימות לפני שמירה, התראה על קלט שגוי ----------
     if (field === 'date') {
-      // מקרה 1: הקלט ריק בכוונה – מחיקת התאריך
-      if (newVal === '' || newVal === '—' || newVal === 'x' || newVal === '-') {
-        row.date = '';
-        td.textContent = '—';
-        td.dataset.raw = '';
-        buildSearchIndex(row);
-        saveTab(state.currentView);
-        return;
-      }
-
       const normalized = normalizeDateToISO(newVal);
-
-      // מקרה 2: קלט שנראה כמו תאריך אך לא תקין – החזר ערך קודם + התראה
-      if (!normalized && looksLikeDateInput(newVal)) {
-        td.textContent = oldVal ? formatDateForDisplay(oldVal) : '—';
-        td.dataset.raw = oldVal || '';
-        td.style.transition = 'background 0.4s';
-        td.style.background = '#fecaca';
-        setTimeout(() => { td.style.background = ''; }, 800);
-        alert(`⚠️ תאריך לא תקין: "${newVal}"\nהערך הקודם נשמר: ${oldVal ? formatDateForDisplay(oldVal) : '—'}\n\nפורמטים נתמכים: 31/12/2026, 2026-12-31, 31.12.2026`);
-        return;
-      }
-
-      // מקרה 3: תאריך תקין
-      if (normalized) {
-        row.date = normalized;
-        td.textContent = formatDateForDisplay(normalized);
-        td.dataset.raw = normalized;
-        buildSearchIndex(row);
-        saveTab(state.currentView);
-        return;
-      }
-
-      // מקרה 4: קלט לא ריק, לא נראה כתאריך – החזר ערך קודם בשקט
-      td.textContent = oldVal ? formatDateForDisplay(oldVal) : '—';
-      td.dataset.raw = oldVal || '';
-      return;
-    }
-
-    // ---------- שדה סכום: אימות לפני שמירה ----------
-    if (field === 'amount') {
-      // אם הקלט ריק – אפס
-      if (newVal === '') {
-        row.amount = 0;
-        td.textContent = '0.00';
-        td.dataset.raw = 0;
-        buildSearchIndex(row);
-        saveTab(state.currentView);
-        return;
-      }
-      // אם יש תווים לא מספריים – התראה והחזר ערך קודם
-      if (/[^\d,\.\s$]/.test(newVal)) {
-        td.textContent = oldVal ? formatNumber(oldVal) : '0.00';
-        td.style.transition = 'background 0.4s';
-        td.style.background = '#fecaca';
-        setTimeout(() => { td.style.background = ''; }, 800);
-        alert(`⚠️ סכום לא תקין: "${newVal}"\nהערך הקודם נשמר.`);
-        return;
-      }
+      row.date = normalized;
+      td.textContent = formatDateForDisplay(normalized);
+    } else if (field === 'amount') {
       const parsed = parseNumberFromDisplay(newVal);
       row.amount = parsed;
       td.textContent = formatNumber(parsed);
-      td.dataset.raw = parsed;
-      buildSearchIndex(row);
-      saveTab(state.currentView);
-      return;
+      td.setAttribute('data-raw', parsed);
+    } else {
+      row[field] = newVal;
     }
-
-    // ---------- שאר השדות ----------
-    row[field] = newVal;
     buildSearchIndex(row);
     saveTab(state.currentView);
   });
@@ -1482,6 +1359,7 @@ td:first-child { background-color: #ffffff !important; }
         const aoa = [[titleText], headers];
         let totalAmount = 0;
         rows.forEach(row => {
+          // תאריך: המרה ל-Date object אמיתי
           let dateCell = '';
           if (row.date) {
             const iso = normalizeDateToISO(row.date);
@@ -1541,6 +1419,7 @@ td:first-child { background-color: #ffffff !important; }
               border: { top: {style:'thin',color:{rgb:'999999'}}, bottom: {style:'thin',color:{rgb:'999999'}}, left: {style:'thin',color:{rgb:'999999'}}, right: {style:'thin',color:{rgb:'999999'}} }
             };
           }
+          // פורמט תאריך לעמודה H
           const dateAddr = XLSX.utils.encode_cell({ r, c: 7 });
           if (ws[dateAddr] && ws[dateAddr].t === 'd') {
             ws[dateAddr].z = 'dd/mm/yyyy';
@@ -1588,7 +1467,7 @@ td:first-child { background-color: #ffffff !important; }
   }
 
   // ============================================================
-  // 16. ייבוא מאקסל – זיהוי גיליונות לפי כותרות + דיווח כפילויות
+  // 16. ייבוא מאקסל
   // ============================================================
   const loadModal = document.getElementById('loadModal');
   const dropZone = document.getElementById('dropZone');
@@ -1617,39 +1496,16 @@ td:first-child { background-color: #ffffff !important; }
     return '';
   }
 
-  const REQUIRED_HEADERS = ['סוג מכולה', 'הזמנה', 'סוג מוצר', 'סטטוס'];
-
-  function getSheetHeaderRow(sheet) {
-    if (!sheet) return null;
-    const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
-    for (let i = 0; i < Math.min(rawRows.length, 8); i++) {
-      const cells = (rawRows[i] || []).map(c => String(c || '').trim());
-      const matches = REQUIRED_HEADERS.filter(h => cells.includes(h)).length;
-      if (matches >= 3) return { rowIndex: i, headers: cells };
-    }
-    return null;
-  }
-
-  function classifySheet(sheet, sheetName) {
-    const headerInfo = getSheetHeaderRow(sheet);
-    const hasDataStructure = !!headerInfo;
-    const lowerName = String(sheetName).toLowerCase();
-
-    const nameIsToys = ['צעצועים', 'toys', 'toy'].some(k => lowerName.includes(k));
-    const nameIsElec = ['אלקטרוניקה', 'electronics', 'electronic'].some(k => lowerName.includes(k));
-    const nameIsArchive = ['ארכיב', 'archive', 'ארכיון'].some(k => lowerName.includes(k));
-
-    if (nameIsArchive && hasDataStructure) return { role: 'archive', confidence: 'high', headerInfo };
-    if (nameIsElec && hasDataStructure) return { role: 'electronics', confidence: 'high', headerInfo };
-    if (nameIsToys && hasDataStructure) return { role: 'toys', confidence: 'high', headerInfo };
-    if (hasDataStructure) return { role: 'custom', confidence: 'medium', headerInfo };
-    return { role: 'unknown', confidence: 'none', headerInfo: null };
-  }
-
   function parseSheetToRows(sheet) {
-    const headerInfo = getSheetHeaderRow(sheet);
-    if (!headerInfo) return [];
-    const json = XLSX.utils.sheet_to_json(sheet, { range: headerInfo.rowIndex, raw: true, defval: '' });
+    const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
+    if (!rawRows || rawRows.length === 0) return [];
+    const expectedHeaders = ['סוג מכולה', 'הזמנה', 'סוג מוצר', 'סטטוס'];
+    let headerRowIndex = 0;
+    for (let i = 0; i < Math.min(rawRows.length, 5); i++) {
+      const rowStr = rawRows[i].map(c => String(c || '')).join(' ');
+      if (expectedHeaders.filter(h => rowStr.includes(h)).length >= 2) { headerRowIndex = i; break; }
+    }
+    const json = XLSX.utils.sheet_to_json(sheet, { range: headerRowIndex, raw: true, defval: '' });
     if (!json || json.length === 0) return [];
 
     return json.map(row => {
@@ -1673,16 +1529,18 @@ td:first-child { background-color: #ffffff !important; }
     });
   }
 
-  function findDuplicates(rows) {
-    const seen = new Map();
-    const dups = [];
-    rows.forEach((r, idx) => {
+  function dedupeByOrder(rows) {
+    const seen = new Set();
+    const out = [];
+    for (const r of rows) {
       const k = String(r.order || '').trim();
-      if (!isValidOrder(k)) return;
-      if (seen.has(k)) dups.push({ order: k, firstIdx: seen.get(k), dupIdx: idx });
-      else seen.set(k, idx);
-    });
-    return dups;
+      if (isValidOrder(k)) {
+        if (seen.has(k)) continue;
+        seen.add(k);
+      }
+      out.push(r);
+    }
+    return out;
   }
 
   async function loadExcelFile(file) {
@@ -1693,109 +1551,57 @@ td:first-child { background-color: #ffffff !important; }
     reader.onload = async function(e) {
       try {
         progressBar.style.display = 'block';
-        progressFill.style.width = '20%';
-
+        progressFill.style.width = '30%';
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array', cellDates: true });
 
-        // ---------- שלב 1: סיווג כל הגיליונות ----------
-        const classification = {};
-        for (const name of workbook.SheetNames) {
-          const sheet = workbook.Sheets[name];
-          if (!sheet) continue;
-          classification[name] = classifySheet(sheet, name);
-        }
-
-        // ---------- שלב 2: שיוך סופי ----------
-        let toysSheetName = null, elecSheetName = null, archiveSheetName = null;
+        let archiveSheetName = null, toysSheetName = null, electronicsSheetName = null;
         const customSheetMap = {};
+        const knownFixed = new Set();
 
         for (const name of workbook.SheetNames) {
-          const c = classification[name];
-          if (!c || c.confidence === 'none') continue;
-          if (c.role === 'archive' && !archiveSheetName) archiveSheetName = name;
-          else if (c.role === 'electronics' && !elecSheetName) elecSheetName = name;
-          else if (c.role === 'toys' && !toysSheetName) toysSheetName = name;
-          else if (c.role === 'custom') customSheetMap[name] = String(name).trim().slice(0, 20);
-        }
-
-        // אם לא נמצא גיליון "toys" לפי שם – בחר את הראשון עם מבנה נתונים
-        if (!toysSheetName) {
-          for (const name of workbook.SheetNames) {
-            if (name === elecSheetName || name === archiveSheetName) continue;
-            if (classification[name]?.confidence === 'medium') { toysSheetName = name; break; }
+          const n = String(name);
+          if (!archiveSheetName && (n.includes('ארכיב') || n.toLowerCase().includes('archive'))) {
+            archiveSheetName = name; knownFixed.add(name);
+          } else if (!electronicsSheetName && (n.includes('אלקטרוניקה') || n.toLowerCase().includes('electronic'))) {
+            electronicsSheetName = name; knownFixed.add(name);
+          } else if (!toysSheetName && (n.includes('צעצועים') || n.includes('סטטוס') || n.includes('משלוח') || n === 'Sheet1')) {
+            toysSheetName = name; knownFixed.add(name);
           }
         }
-
-        progressFill.style.width = '45%';
-
-        // ---------- שלב 3: פירסור ----------
-        const parsed = { custom: {} };
-        if (toysSheetName) parsed.toys = parseSheetToRows(workbook.Sheets[toysSheetName]);
-        if (elecSheetName) parsed.electronics = parseSheetToRows(workbook.Sheets[elecSheetName]);
-        if (archiveSheetName) parsed.archive = parseSheetToRows(workbook.Sheets[archiveSheetName]);
-        for (const sheetName of Object.keys(customSheetMap)) {
-          parsed.custom[customSheetMap[sheetName]] = parseSheetToRows(workbook.Sheets[sheetName]);
+        if (!toysSheetName) {
+          for (const name of workbook.SheetNames) {
+            if (name !== archiveSheetName && name !== electronicsSheetName) {
+              toysSheetName = name; knownFixed.add(name); break;
+            }
+          }
+        }
+        for (const name of workbook.SheetNames) {
+          if (knownFixed.has(name)) continue;
+          if (name === archiveSheetName || name === electronicsSheetName || name === toysSheetName) continue;
+          const tabName = String(name).trim().slice(0, 20);
+          if (tabName) customSheetMap[name] = tabName;
         }
 
-        const totalRows = (parsed.toys?.length || 0) + (parsed.electronics?.length || 0) +
-                          (parsed.archive?.length || 0) +
-                          Object.values(parsed.custom).reduce((s, a) => s + a.length, 0);
+        progressFill.style.width = '50%';
 
-        if (totalRows === 0) {
-          alert('הקובץ ריק או שלא זוהו נתונים תואמים.');
+        const importedToys = toysSheetName ? parseSheetToRows(workbook.Sheets[toysSheetName] || {}) : [];
+        const importedElectronics = electronicsSheetName ? parseSheetToRows(workbook.Sheets[electronicsSheetName] || {}) : [];
+        const importedArchive = archiveSheetName ? parseSheetToRows(workbook.Sheets[archiveSheetName] || {}) : [];
+        const importedCustom = {};
+        Object.keys(customSheetMap).forEach(sheetName => {
+          importedCustom[customSheetMap[sheetName]] = parseSheetToRows(workbook.Sheets[sheetName] || {});
+        });
+
+        const hasAny = importedToys.length || importedElectronics.length || importedArchive.length ||
+          Object.values(importedCustom).some(a => a.length);
+        if (!hasAny) {
+          alert('הקובץ ריק או לא נמצאו נתונים');
           progressBar.style.display = 'none';
-          progressFill.style.width = '0%';
           return;
         }
 
-        // ---------- שלב 4: זיהוי כפילויות (ללא מחיקה) ----------
-        const dupReport = [];
-        if (parsed.toys) {
-          const d = findDuplicates(parsed.toys);
-          if (d.length) dupReport.push({ tab: 'צעצועים', count: d.length, samples: d.slice(0, 3).map(x => x.order) });
-        }
-        if (parsed.electronics) {
-          const d = findDuplicates(parsed.electronics);
-          if (d.length) dupReport.push({ tab: 'אלקטרוניקה קלה', count: d.length, samples: d.slice(0, 3).map(x => x.order) });
-        }
-        if (parsed.archive) {
-          const d = findDuplicates(parsed.archive);
-          if (d.length) dupReport.push({ tab: 'ארכיב', count: d.length, samples: d.slice(0, 3).map(x => x.order) });
-        }
-        Object.keys(parsed.custom).forEach(tabName => {
-          const d = findDuplicates(parsed.custom[tabName]);
-          if (d.length) dupReport.push({ tab: tabName, count: d.length, samples: d.slice(0, 3).map(x => x.order) });
-        });
-
-        // ---------- שלב 5: תצוגה מקדימה + אישור ----------
-        let previewMsg = '📋 סיכום ייבוא:\n';
-        previewMsg += '━━━━━━━━━━━━━━━━━━━━\n';
-        if (toysSheetName) previewMsg += `🧸 צעצועים (${toysSheetName}): ${parsed.toys.length} שורות\n`;
-        if (elecSheetName) previewMsg += `🔌 אלקטרוניקה קלה (${elecSheetName}): ${parsed.electronics.length} שורות\n`;
-        Object.keys(parsed.custom).forEach(name => {
-          previewMsg += `📑 ${name}: ${parsed.custom[name].length} שורות\n`;
-        });
-        if (archiveSheetName) previewMsg += `📁 ארכיב (${archiveSheetName}): ${parsed.archive.length} שורות\n`;
-        previewMsg += '━━━━━━━━━━━━━━━━━━━━\n';
-        previewMsg += `סה"כ: ${totalRows} שורות\n`;
-
-        if (dupReport.length > 0) {
-          previewMsg += '\n⚠️ זוהו מספרי הזמנה כפולים (הם יישמרו כפי שהם, לא יימחקו):\n';
-          dupReport.forEach(d => {
-            previewMsg += `• ${d.tab}: ${d.count} כפילויות (לדוגמה: ${d.samples.join(', ')})\n`;
-          });
-        }
-
-        previewMsg += '\nלהמשיך בייבוא? כל הנתונים הקיימים יוחלפו.';
-
-        if (!confirm(previewMsg)) {
-          progressBar.style.display = 'none';
-          progressFill.style.width = '0%';
-          return;
-        }
-
-        // ---------- שלב 6: ביצוע ההחלפה ----------
+        // מחיקת WAL וטאבים מותאמים קודמים
         for (const t of state.meta.customTabs) {
           try { await idbDel('tab_' + t.id); } catch {}
           clearWAL(t.id);
@@ -1805,15 +1611,15 @@ td:first-child { background-color: #ffffff !important; }
         state.meta.customTabs = [];
         state.tabs = { toys: [], electronics: [], archive: [] };
 
-        // שומרים את כל השורות – ללא הסרת כפילויות
-        state.tabs.toys = parsed.toys || [];
-        state.tabs.electronics = parsed.electronics || [];
-        state.tabs.archive = parsed.archive || [];
+        state.tabs.toys = toysSheetName ? dedupeByOrder(importedToys) : [];
+        state.tabs.electronics = electronicsSheetName ? dedupeByOrder(importedElectronics) : [];
+        state.tabs.archive = archiveSheetName ? dedupeByOrder(importedArchive) : [];
 
-        Object.keys(parsed.custom).forEach(tabName => {
+        Object.keys(importedCustom).forEach(tabName => {
+          const rows = dedupeByOrder(importedCustom[tabName]);
           const id = 'custom-' + (nextCustomTabNum++);
           state.meta.customTabs.push({ id, name: tabName });
-          state.tabs[id] = parsed.custom[tabName];
+          state.tabs[id] = rows;
         });
 
         const now = Date.now();
@@ -1835,7 +1641,7 @@ td:first-child { background-color: #ffffff !important; }
         resetShowSelected();
 
         if (toysSheetName) state.currentView = 'toys';
-        else if (elecSheetName) state.currentView = 'electronics';
+        else if (electronicsSheetName) state.currentView = 'electronics';
         else if (state.meta.customTabs.length > 0) state.currentView = state.meta.customTabs[0].id;
         else if (archiveSheetName) state.currentView = 'archive';
         else state.currentView = 'toys';
@@ -1848,8 +1654,15 @@ td:first-child { background-color: #ffffff !important; }
           progressBar.style.display = 'none';
           progressFill.style.width = '0%';
           loadModal.classList.remove('active');
+          let msg = '✅ ייבוא הושלם – כל הנתונים הקודמים הוחלפו';
+          msg += '\n🧸 צעצועים: ' + state.tabs.toys.length + ' שורות';
+          msg += '\n🔌 אלקטרוניקה קלה: ' + state.tabs.electronics.length + ' שורות';
+          state.meta.customTabs.forEach(t => {
+            msg += '\n📑 ' + t.name + ': ' + (state.tabs[t.id] || []).length + ' שורות';
+          });
+          msg += '\n📁 ארכיב: ' + state.tabs.archive.length + ' שורות';
+          alert(msg);
         }, 500);
-
       } catch (error) {
         console.error('שגיאה בטעינת הקובץ:', error);
         alert('שגיאה בטעינת הקובץ: ' + error.message);
@@ -1965,9 +1778,7 @@ td:first-child { background-color: #ffffff !important; }
     renderTabsUI();
     renderTable('all');
     updateStats(getTabData(state.currentView));
-    window.addEventListener('online', () => {
-      if (pendingSaves.size || failedSaveAttempts.size) retryFailedSaves();
-    });
+    window.addEventListener('online', () => { if (pendingSaves.size) flushSaves(); });
   }
 
   init().catch(err => {
