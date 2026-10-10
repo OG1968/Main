@@ -20,6 +20,26 @@
         box-sizing: border-box;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
+      :root {
+        /* צבעי סטטוס – מקור יחיד (גם למצב כהה הצבעים נשארים) */
+        --status-arrived-bg: #009953;
+        --status-arrived-fg: #ffffff;
+        --status-onway-bg: #3bffa6;
+        --status-onway-fg: #0b1e33;
+        --status-inprogress-bg: #93c5fd;
+        --status-inprogress-fg: #0b1e33;
+        --status-missing-bg: #fc8d97;
+        --status-missing-fg: #0b1e33;
+        --status-preparing-bg: #ffe5b4;
+        --status-preparing-fg: #0b1e33;
+        --status-cancelled-bg: #ff293c;
+        --status-cancelled-fg: #ffffff;
+        --status-pending-bg: #e0e0e0;
+        --status-pending-fg: #0b1e33;
+        --status-empty-bg: #ffffff;
+        --status-empty-fg: inherit;
+        --row-actions-bg: #ffffff;
+      }
       html,
       body {
         max-width: 100%;
@@ -34,6 +54,7 @@
         align-items: center;
         min-height: 100vh;
         transition: background 0.25s ease;
+        color-scheme: light;
       }
       .container {
         max-width: 1550px;
@@ -462,32 +483,40 @@
         box-shadow: inset 0 0 0 2px #1e3a5f;
       }
       .status-arrived td:not(.row-actions) {
-        background-color: #009953;
+        background-color: var(--status-arrived-bg);
+        color: var(--status-arrived-fg);
       }
       .status-onway td:not(.row-actions) {
-        background-color: #3bffa6;
+        background-color: var(--status-onway-bg);
+        color: var(--status-onway-fg);
       }
       .status-inprogress td:not(.row-actions) {
-        background-color: #93c5fd;
+        background-color: var(--status-inprogress-bg);
+        color: var(--status-inprogress-fg);
       }
       .status-missing td:not(.row-actions) {
-        background-color: #fc8d97;
+        background-color: var(--status-missing-bg);
+        color: var(--status-missing-fg);
       }
       .status-preparing td:not(.row-actions) {
-        background-color: #ffe5b4;
+        background-color: var(--status-preparing-bg);
+        color: var(--status-preparing-fg);
       }
       .status-cancelled td:not(.row-actions) {
-        background-color: #ff293c;
+        background-color: var(--status-cancelled-bg);
+        color: var(--status-cancelled-fg);
         text-decoration: line-through;
       }
       .status-pending td:not(.row-actions) {
-        background-color: #e0e0e0;
+        background-color: var(--status-pending-bg);
+        color: var(--status-pending-fg);
       }
       .status-empty td:not(.row-actions) {
-        background-color: #ffffff;
+        background-color: var(--status-empty-bg);
+        color: var(--status-empty-fg);
       }
       .row-actions {
-        background-color: #ffffff !important;
+        background-color: var(--row-actions-bg) !important;
         display: flex;
         gap: 3px;
         justify-content: center;
@@ -495,7 +524,7 @@
         flex-wrap: nowrap;
       }
       td:first-child {
-        background-color: #ffffff !important;
+        background-color: var(--row-actions-bg) !important;
       }
       .status-select,
       .type-select {
@@ -815,6 +844,11 @@
    ============================================================ */
       body.dark-mode {
         background: #0f172a;
+        color-scheme: dark;
+        /* רק רקע/טקסט של שורות "ריקות" ופעולות משתנים במצב כהה */
+        --status-empty-bg: #1e293b;
+        --status-empty-fg: #e2e8f0;
+        --row-actions-bg: #1e293b;
       }
       body.dark-mode .container {
         background: #1e293b;
@@ -911,16 +945,6 @@
         background: rgba(255, 255, 255, 0.12);
         box-shadow: inset 0 0 0 2px #60a5fa;
       }
-      body.dark-mode .status-empty td:not(.row-actions) {
-        background-color: #1e293b;
-        color: #e2e8f0;
-      }
-      body.dark-mode .row-actions {
-        background-color: #1e293b !important;
-      }
-      body.dark-mode td:first-child {
-        background-color: #1e293b !important;
-      }
       body.dark-mode .status-select,
       body.dark-mode .type-select {
         background: #334155;
@@ -994,37 +1018,6 @@
       }
       body.dark-mode #themeToggle:hover {
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65);
-      }
-
-      /* שורות סטטוס – נשארות בצבע המקורי גם במצב כהה */
-      body.dark-mode table tr.status-arrived td:not(.row-actions) {
-        background-color: #009953;
-        color: #ffffff;
-      }
-      body.dark-mode table tr.status-onway td:not(.row-actions) {
-        background-color: #3bffa6;
-        color: #0b1e33;
-      }
-      body.dark-mode table tr.status-inprogress td:not(.row-actions) {
-        background-color: #93c5fd;
-        color: #0b1e33;
-      }
-      body.dark-mode table tr.status-missing td:not(.row-actions) {
-        background-color: #fc8d97;
-        color: #0b1e33;
-      }
-      body.dark-mode table tr.status-preparing td:not(.row-actions) {
-        background-color: #ffe5b4;
-        color: #0b1e33;
-      }
-      body.dark-mode table tr.status-cancelled td:not(.row-actions) {
-        background-color: #ff293c;
-        color: #ffffff;
-        text-decoration: line-through;
-      }
-      body.dark-mode table tr.status-pending td:not(.row-actions) {
-        background-color: #e0e0e0;
-        color: #0b1e33;
       }
 
       @media (max-width: 768px) {
@@ -1798,6 +1791,17 @@
         // ============================================================
         // 1. קבועים ומיפויים
         // ============================================================
+        /* צבעי סטטוס לייצוא אקסל (ללא #) – מקבילים למשתני CSS ב-:root */
+        const STATUS_COLORS = {
+          arrived: "009953",
+          onway: "3BFFA6",
+          inprogress: "93C5FD",
+          missing: "FC8D97",
+          preparing: "FFE5B4",
+          cancelled: "FF293C",
+          pending: "E0E0E0",
+          empty: "FFFFFF",
+        };
         const statusMap = {
           arrived: "הגיע",
           onway: "בדרך",
@@ -4053,16 +4057,7 @@
           }
 
           try {
-            const colorMap = {
-              arrived: "009953",
-              onway: "3BFFA6",
-              inprogress: "93C5FD",
-              missing: "FC8D97",
-              preparing: "FFE5B4",
-              cancelled: "FF293C",
-              pending: "E0E0E0",
-              empty: "FFFFFF",
-            };
+            const colorMap = STATUS_COLORS;
             const headers = [
               "סוג מכולה",
               "20'",
