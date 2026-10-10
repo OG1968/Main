@@ -17,6 +17,7 @@ body {
   align-items: center;
   min-height: 100vh;
   overflow-x: auto;
+  transition: background 0.25s ease;
 }
 .container {
   max-width: 1550px;
@@ -26,6 +27,7 @@ body {
   box-shadow: 0 12px 40px rgba(0,0,0,0.1);
   padding: 20px 15px 20px;
   overflow: visible;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 h1 { font-size: 1.5rem; margin: 0 0 8px 0; color: #0b1e33; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 15px; gap: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; position: relative; z-index: 20; }
@@ -173,6 +175,127 @@ td:first-child { background-color: #ffffff !important; }
 .modal .progress-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin: 10px 0; display: none; }
 .modal .progress-bar .progress-fill { height: 100%; background: #2563eb; width: 0%; transition: width 0.3s; }
 
+/* ============================================================
+   כפתור מצב תצוגה (בהיר/כהה)
+   ============================================================ */
+#themeToggle {
+  position: fixed;
+  top: 5px;
+  left: 5px;
+  z-index: 1500;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+  padding: 0;
+}
+#themeToggle:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+#themeToggle:active { transform: translateY(0) scale(0.98); }
+
+/* ============================================================
+   מצב כהה – רקעים כהים, טקסט בהיר.
+   שורות סטטוס שומרות על הצבע המקורי שלהן.
+   ============================================================ */
+body.dark-mode {
+  background: #0f172a;
+}
+body.dark-mode .container {
+  background: #1e293b;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  color: #e2e8f0;
+}
+body.dark-mode h1 { color: #f1f5f9; }
+body.dark-mode .toolbar { border-bottom-color: #334155; }
+body.dark-mode .filter-area label { color: #e2e8f0; }
+body.dark-mode .filter-area select,
+body.dark-mode .filter-area input,
+body.dark-mode .search-area input {
+  background: #334155;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+body.dark-mode .search-area input:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,0.25); }
+body.dark-mode .btn { background: #334155; color: #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.35); }
+body.dark-mode .btn:hover { box-shadow: 0 5px 14px rgba(0,0,0,0.5); }
+body.dark-mode .stats-bar { background: #0f172a; border-color: #334155; }
+body.dark-mode .stats-bar span { color: #cbd5e1; }
+body.dark-mode .stats-bar strong { color: #f1f5f9; }
+body.dark-mode .view-tabs { border-bottom-color: #334155; }
+body.dark-mode .view-tab { color: #94a3b8; }
+body.dark-mode .view-tab:hover { color: #f1f5f9; background: #334155; }
+body.dark-mode .view-tab.active { color: #93c5fd; border-bottom-color: #93c5fd; background: #1e293b; }
+body.dark-mode .view-tab .tab-count { background: #334155; color: #cbd5e1; }
+body.dark-mode .view-tab.active .tab-count { background: #93c5fd; color: #0f172a; }
+body.dark-mode .view-tab.archive-tab.active { color: #cbd5e1; border-bottom-color: #94a3b8; }
+body.dark-mode .view-tab.archive-tab.active .tab-count { background: #94a3b8; color: #0f172a; }
+body.dark-mode .table-wrap { background: #1e293b; border-color: #334155; }
+body.dark-mode th {
+  background: #334155;
+  color: #f1f5f9;
+  border-bottom-color: #475569;
+  box-shadow: 0 2px 0 0 #475569;
+}
+body.dark-mode td { border-bottom-color: #334155; color: #e2e8f0; }
+body.dark-mode td[contenteditable="true"]:hover { background: rgba(255,255,255,0.06); }
+body.dark-mode td[contenteditable="true"]:focus { background: rgba(255,255,255,0.12); box-shadow: inset 0 0 0 2px #60a5fa; }
+body.dark-mode .status-empty td:not(.row-actions) { background-color: #1e293b; color: #e2e8f0; }
+body.dark-mode .row-actions { background-color: #1e293b !important; }
+body.dark-mode td:first-child { background-color: #1e293b !important; }
+body.dark-mode .status-select,
+body.dark-mode .type-select { background: #334155; color: #f1f5f9; border-color: #475569; }
+body.dark-mode .drag-handle { color: #94a3b8; }
+body.dark-mode .drag-handle:hover { background: #334155; color: #93c5fd; }
+body.dark-mode .row-actions .delete-btn:hover { background: #7f1d1d; color: #fecaca; }
+body.dark-mode .empty-row-msg { color: #94a3b8; }
+body.dark-mode .counter { background: #1e3a5f; }
+body.dark-mode .footer-info { color: #cbd5e1; }
+body.dark-mode .footer-bottom .copyright { color: #e2e8f0; }
+body.dark-mode .modal { background: #1e293b; color: #e2e8f0; }
+body.dark-mode .modal h2 { color: #f1f5f9; }
+body.dark-mode .modal .drop-zone { border-color: #475569; }
+body.dark-mode .modal .drop-zone:hover,
+body.dark-mode .modal .drop-zone.dragover { border-color: #60a5fa; background: #1e3a5f; }
+body.dark-mode .modal .drop-zone p { color: #94a3b8; }
+body.dark-mode .modal .drop-zone .file-name { color: #f1f5f9; }
+body.dark-mode .modal .btn-secondary { background: #334155; color: #e2e8f0; }
+body.dark-mode .modal .btn-secondary:hover { background: #475569; }
+body.dark-mode .modal .progress-bar { background: #334155; }
+body.dark-mode #newTabNameInput {
+  background: #334155 !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+body.dark-mode #themeToggle {
+  background: #334155;
+  color: #fbbf24;
+  border-color: #475569;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+body.dark-mode #themeToggle:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.65); }
+
+/* ============================================================
+   שורות סטטוס – נשארות בצבע המקורי גם במצב כהה.
+   חייב להיות אחרי כללי הרקע הכהים כדי לגבור עליהם.
+   ============================================================ */
+body.dark-mode table tr.status-arrived td:not(.row-actions) { background-color: #009953; color: #ffffff; }
+body.dark-mode table tr.status-onway td:not(.row-actions) { background-color: #3bffa6; color: #0b1e33; }
+body.dark-mode table tr.status-inprogress td:not(.row-actions) { background-color: #93c5fd; color: #0b1e33; }
+body.dark-mode table tr.status-missing td:not(.row-actions) { background-color: #fc8d97; color: #0b1e33; }
+body.dark-mode table tr.status-preparing td:not(.row-actions) { background-color: #ffe5b4; color: #0b1e33; }
+body.dark-mode table tr.status-cancelled td:not(.row-actions) { background-color: #ff293c; color: #ffffff; text-decoration: line-through; }
+body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: #e0e0e0; color: #0b1e33; }
+
 @media (max-width: 768px) {
   body { padding: 5px; }
   .container { padding: 12px 8px; border-radius: 16px; }
@@ -210,6 +333,7 @@ td:first-child { background-color: #ffffff !important; }
   .footer-bottom { flex-direction: column; align-items: center; text-align: center; padding: 10px 6px 6px; gap: 8px; }
   .footer-bottom .copyright { font-size: 0.85rem; }
   .footer-bottom .logo img { height: 24px; }
+  #themeToggle { width: 38px; height: 38px; font-size: 1.05rem; }
 }
 @media (max-width: 480px) {
   .container { padding: 8px 4px; border-radius: 12px; }
@@ -235,6 +359,7 @@ td:first-child { background-color: #ffffff !important; }
   .stats-bar strong { font-size: 0.68rem; }
   .footer-bottom .logo img { height: 22px; }
   .footer-bottom .copyright { font-size: 0.75rem; }
+  #themeToggle { width: 34px; height: 34px; font-size: 0.95rem; }
 }
 @media (pointer: coarse) {
   .btn { min-height: 54px; }
@@ -247,6 +372,9 @@ td:first-child { background-color: #ffffff !important; }
 </style>
 </head>
 <body>
+<!-- כפתור מצב תצוגה – שמאל למעלה, 5px מכל קצה -->
+<button id="themeToggle" type="button" title="החלף מצב תצוגה (בהיר/כהה)" aria-label="החלף מצב תצוגה">🌙</button>
+
 <div class="container">
   <div class="toolbar">
     <h1>📦 סטטוס משלוחים</h1>
@@ -419,7 +547,6 @@ td:first-child { background-color: #ffffff !important; }
   const EXCEL_EPOCH_MIN = 36526;
   const EXCEL_EPOCH_MAX = 73415;
 
-  // ← תיקון: זיהוי שורות "סיכום" וזבל בייבוא
   const SUMMARY_LABELS = new Set([
     'סה"כ', 'סהכ', 'סה"כ:', 'סך הכל', 'סך הכול', 'סך-הכל',
     'total', 'sum', 'grand total', 'subtotal'
@@ -468,7 +595,7 @@ td:first-child { background-color: #ffffff !important; }
   ];
 
   // ============================================================
-  // State – מוצהר מוקדם כי assertWritable קורא לו
+  // State
   // ============================================================
   const state = {
     tabs: { toys: [], electronics: [], archive: [] },
@@ -487,7 +614,7 @@ td:first-child { background-color: #ffffff !important; }
   let sortableInstance = null;
 
   // ============================================================
-  // guard מרכזי לכל כתיבה
+  // guard
   // ============================================================
   function assertWritable(context) {
     if (state.readOnly) {
@@ -502,7 +629,7 @@ td:first-child { background-color: #ffffff !important; }
   }
 
   // ============================================================
-  // 2. שכבת אחסון – IndexedDB + WAL
+  // 2. אחסון – IndexedDB + WAL
   // ============================================================
   const DB_NAME = 'deliveryDB';
   const DB_VERSION = 1;
@@ -830,7 +957,7 @@ td:first-child { background-color: #ffffff !important; }
   }
 
   // ============================================================
-  // 6. שמירה מתוזמנת – עם מונה גרסאות למניעת מרוץ
+  // 6. שמירה מתוזמנת
   // ============================================================
   let saveTimer = null;
   const pendingSaves = new Set();
@@ -906,7 +1033,7 @@ td:first-child { background-color: #ffffff !important; }
         const currentVersion = saveVersions.get(id) || 0;
 
         if (currentVersion > versionAtWrite) {
-          console.info(`[save] tab "${id}" had newer edits during save (v${versionAtWrite} -> v${currentVersion}), keeping WAL`);
+          console.info(`[save] tab "${id}" had newer edits during save, keeping WAL`);
           continue;
         }
 
@@ -1188,7 +1315,7 @@ td:first-child { background-color: #ffffff !important; }
   }
 
   // ============================================================
-  // 10. Event Delegation על tbody
+  // 10. Event Delegation
   // ============================================================
   function forcePlainTextPaste(e) {
     e.preventDefault();
@@ -1873,24 +2000,20 @@ td:first-child { background-color: #ffffff !important; }
     return { role: 'unknown', confidence: 'none', headerInfo: null };
   }
 
-  // ← תיקון: סינון שורות "סה"כ", ריקות וזבל לפני המיפוי
   function isSummaryOrJunkRow(row) {
     const first = String(row['סוג מכולה'] || row['__EMPTY'] || '').trim();
 
-    // 1. תווית "סה"כ" / "total" למיניהן
     if (first) {
       if (SUMMARY_LABELS.has(first)) return true;
       if (/^סה"?כ[\s:]*$/.test(first)) return true;
       if (/^סה"?כ[\s:\-–]/i.test(first)) return true;
     }
 
-    // 2. שורה ריקה לחלוטין
     const hasAny = Object.values(row).some(v =>
       v !== '' && v !== null && v !== undefined
     );
     if (!hasAny) return true;
 
-    // 3. שורה בלי שום תוכן מזוהה
     const order = String(row['הזמנה'] || '').trim();
     const supplier = String(row['שם ספק'] || '').trim();
     const product = String(row['סוג מוצר'] || '').trim();
@@ -1914,7 +2037,6 @@ td:first-child { background-color: #ffffff !important; }
     const rows = [];
     for (const raw of json) {
       if (isSummaryOrJunkRow(raw)) {
-        // ספירה נפרדת לדיווח
         const first = String(raw['סוג מכולה'] || raw['__EMPTY'] || '').trim();
         if (SUMMARY_LABELS.has(first) || /^סה"?כ/.test(first)) skippedSummary++;
         else skippedJunk++;
@@ -2210,7 +2332,37 @@ td:first-child { background-color: #ffffff !important; }
   }
 
   // ============================================================
-  // 17. חיבור אירועי UI
+  // 17. מצב תצוגה (בהיר/כהה)
+  // ============================================================
+  const THEME_STORAGE_KEY = 'themePreference';
+
+  function applyTheme(theme) {
+    const isDark = theme === 'dark';
+    document.body.classList.toggle('dark-mode', isDark);
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.textContent = isDark ? '☀️' : '🌙';
+      btn.title = isDark ? 'עבור למצב בהיר' : 'עבור למצב כהה';
+      btn.setAttribute('aria-label', btn.title);
+    }
+  }
+
+  function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem(THEME_STORAGE_KEY); } catch {}
+    const theme = (saved === 'dark' || saved === 'light') ? saved : 'light';
+    applyTheme(theme);
+  }
+
+  function toggleTheme() {
+    const isDark = document.body.classList.contains('dark-mode');
+    const next = isDark ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_STORAGE_KEY, next); } catch {}
+  }
+
+  // ============================================================
+  // 18. חיבור אירועי UI
   // ============================================================
   function debounce(fn, ms) {
     let t;
@@ -2306,12 +2458,16 @@ td:first-child { background-color: #ffffff !important; }
     newTabInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') { e.preventDefault(); createNewTab(this.value); }
     });
+
+    // כפתור מצב תצוגה
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
   }
 
   // ============================================================
-  // 18. אתחול
+  // 19. אתחול
   // ============================================================
   async function init() {
+    initTheme();
     await loadAllData();
     bindUI();
     renderTabsUI();
@@ -2350,6 +2506,7 @@ td:first-child { background-color: #ffffff !important; }
     document.body.prepend(banner);
 
     try {
+      initTheme();
       bindUI();
       renderTabsUI();
       tbody.innerHTML = `<tr><td colspan="14" class="empty-row-msg" style="color:#b91c1c; font-weight:600;">
