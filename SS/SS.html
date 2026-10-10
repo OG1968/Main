@@ -384,6 +384,21 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     .row-actions button, .status-select, .type-select, .row-checkbox { min-height: 34px; min-width: 34px; }
   }
 }
+
+/* ===== כותרת צפה (sticky) מסונכרנת עם הגלילה האופקית ===== */
+#floatingHead {
+  display: none;
+  position: fixed;
+  top: 0;
+  z-index: 60;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  touch-action: pan-x;
+}
+#floatingHead.visible { display: block; }
+#floatingHead table { min-width: 0 !important; table-layout: fixed; width: auto; }
 </style>
 </head>
 <body>
@@ -2532,6 +2547,114 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       console.error('Fallback render failed:', e);
     }
   });
+})();
+</script>
+
+<script>
+/* כותרת צפה: מופיעה בגלילת הדף מטה, ונגררת הצידה יחד עם הטבלה */
+(function () {
+  const wrap  = document.querySelector('.table-wrap');
+  const table = document.getElementById('deliveryTable');
+  if (!wrap || !table) return;
+  const thead = table.tHead;
+  const origCheck = document.getElementById('selectAllCheck');
+
+  const box = document.createElement('div');
+  box.id = 'floatingHead';
+  box.setAttribute('aria-hidden', 'true');
+  const cloneTable = document.createElement('table');
+  const cloneHead  = thead.cloneNode(true);
+  cloneHead.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  cloneTable.appendChild(cloneHead);
+  box.appendChild(cloneTable);
+  document.body.appendChild(box);
+
+  const cloneCheck = cloneHead.querySelector('input[type="checkbox"]');
+  if (cloneCheck && origCheck) {
+    cloneCheck.addEventListener('click', function (e) {
+      e.preventDefault();
+      origCheck.click();
+      syncCheck();
+    });
+  }
+  function syncCheck() {
+    if (cloneCheck && origCheck) {
+      cloneCheck.checked = origCheck.checked;
+      cloneCheck.indeterminate = origCheck.indeterminate;
+    }
+  }
+
+  function syncWidths() {
+    const orig  = thead.rows[0].cells;
+    const clone = cloneHead.rows[0].cells;
+    let total = 0;
+    for (let i = 0; i < orig.length; i++) {
+      const w = orig[i].getBoundingClientRect().width;
+      clone[i].style.width = w + 'px';
+      clone[i].style.minWidth = w + 'px';
+      clone[i].style.maxWidth = w + 'px';
+      total += w;
+    }
+    cloneTable.style.width = total + 'px';
+  }
+
+  function update() {
+    const r = wrap.getBoundingClientRect();
+    const h = thead.getBoundingClientRect().height;
+    const show = r.top < 0 && r.bottom > h + 4;
+    box.classList.toggle('visible', show);
+    if (!show) return;
+    box.style.left  = (r.left + wrap.clientLeft) + 'px';
+    box.style.width = wrap.clientWidth + 'px';
+    box.scrollLeft  = wrap.scrollLeft;   // סנכרון אופקי (עובד גם ב-RTL)
+    syncCheck();
+  }
+
+  let ticking = false;
+  function schedule() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () { ticking = false; update(); });
+  }
+
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', function () { syncWidths(); schedule(); });
+  wrap.addEventListener('scroll', schedule, { passive: true });
+
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () { syncWidths(); schedule(); }).observe(table);
+  }
+  new MutationObserver(function () { syncWidths(); schedule(); })
+    .observe(table.tBodies[0], { childList: true });
+
+  /* גרירה/החלקה על הכותרת הצפה גוללת גם את הטבלה */
+  box.addEventListener('wheel', function (e) {
+    const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+    if (dx) { wrap.scrollLeft += dx; e.preventDefault(); }
+  }, { passive: false });
+
+  let startX = null, startLeft = 0;
+  box.addEventListener('touchstart', function (e) {
+    startX = e.touches[0].clientX; startLeft = wrap.scrollLeft;
+  }, { passive: true });
+  box.addEventListener('touchmove', function (e) {
+    if (startX === null) return;
+    wrap.scrollLeft = startLeft - (e.touches[0].clientX - startX);
+  }, { passive: true });
+  box.addEventListener('touchend', function () { startX = null; });
+
+  let mdX = null, mdLeft = 0;
+  box.addEventListener('mousedown', function (e) {
+    if (e.target.tagName === 'INPUT') return;
+    mdX = e.clientX; mdLeft = wrap.scrollLeft; box.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', function (e) {
+    if (mdX !== null) wrap.scrollLeft = mdLeft - (e.clientX - mdX);
+  });
+  window.addEventListener('mouseup', function () { mdX = null; box.style.cursor = ''; });
+
+  syncWidths();
+  update();
 })();
 </script>
 </body>
