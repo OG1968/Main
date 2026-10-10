@@ -120,9 +120,6 @@ th {
   text-align: center;
   white-space: nowrap;
   font-size: 0.8rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
   box-shadow: 0 2px 0 0 #d0dbe8;
 }
 
@@ -395,7 +392,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
   background: transparent;
   border-radius: 0 0 12px 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  touch-action: pan-x;
+  touch-action: pan-y;
 }
 #floatingHead.visible { display: block; }
 #floatingHead table { min-width: 0 !important; table-layout: fixed; width: auto; }
@@ -705,7 +702,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
         const tx = db.transaction(STORE, 'readwrite');
         tx.objectStore(STORE).put(value, key);
         tx.oncomplete = res;
-        tx.onerror = () => rej(tx.error);
+        tx.onerror = tx.onabort = () => rej(tx.error);
       });
       return true;
     } catch (e) {
@@ -718,6 +715,24 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     }
   }
 
+  // כתיבה אטומית של כמה מפתחות בטרנזקציה אחת (נתונים + חותמת זמן)
+  async function idbSetMany(entries) {
+    try {
+      const db = await openDB();
+      await new Promise((res, rej) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        const st = tx.objectStore(STORE);
+        for (const [k, v] of entries) st.put(v, k);
+        tx.oncomplete = res;
+        tx.onerror = tx.onabort = () => rej(tx.error);
+      });
+      return true;
+    } catch (e) {
+      for (const [k, v] of entries) localStorage.setItem(k, JSON.stringify(v));
+      return true;
+    }
+  }
+
   async function idbDel(key) {
     try {
       const db = await openDB();
@@ -725,7 +740,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
         const tx = db.transaction(STORE, 'readwrite');
         tx.objectStore(STORE).delete(key);
         tx.oncomplete = res;
-        tx.onerror = () => rej(tx.error);
+        tx.onerror = tx.onabort = () => rej(tx.error);
       });
     } catch {
       try { localStorage.removeItem(key); } catch {}
@@ -849,7 +864,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       return validateAndFormat(y, mo, d, opts);
     }
 
-    const parsed = Date.parse(str);
+    const parsed = /\d{4}/.test(str) ? Date.parse(str) : NaN;
     if (!isNaN(parsed)) {
       const dt = new Date(parsed);
       return validateAndFormat(dt.getFullYear(), dt.getMonth() + 1, dt.getDate(), opts);
@@ -940,7 +955,11 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       formatDateForDisplay(row.date),
       statusMap[row.status] || ''
     ];
-    row._search = parts.filter(Boolean).join(' ').toLowerCase();
+    // לא enumerable => לא נכנס ל-JSON/IndexedDB/WAL (חוסך נפח ושמירה כבדה)
+    Object.defineProperty(row, '_search', {
+      value: parts.filter(Boolean).join(' ').toLowerCase(),
+      writable: true, enumerable: false, configurable: true
+    });
   }
 
   function ensureRowIds(arr) {
@@ -949,7 +968,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       if (r && !r._id) r._id = 'row-' + (nextId++);
       if (r && (r.amount === undefined || r.amount === null || r.amount === '')) r.amount = 0;
       if (r && typeof r.amount !== 'number') r.amount = parseNumberFromDisplay(r.amount);
-      if (r) buildSearchIndex(r);
+      if (r && r._search === undefined) buildSearchIndex(r);
     });
   }
 
@@ -964,7 +983,9 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
   }
 
   function getRowById(id) {
-    return state.index[state.currentView]?.get(id) || null;
+    return state.index[state.currentView]?.get(id)
+        || getTabData(state.currentView).find(r => r._id === id)
+        || null;
   }
 
   function getTabData(tabId) {
@@ -1049,8 +1070,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       const data = state.tabs[id] || [];
       const versionAtWrite = saveVersions.get(id) || 0;
       const now = Date.now();
-      await idbSet('tab_' + id, data);
-      await idbSet('tabSavedAt_' + id, now);
+      await idbSetMany([['tab_' + id, data], ['tabSavedAt_' + id, now]]);
       return { id, versionAtWrite, now };
     }));
 
@@ -1127,9 +1147,9 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     return true;
   }
 
-  function saveTab(tabId) {
+  function saveTab(tabId, structural) {
     scheduleSave(tabId);
-    rebuildIndex(tabId);
+    if (structural) rebuildIndex(tabId);
     if (tabId === state.currentView) {
       updateStats(getTabData(tabId));
       updateAllTabCounts();
@@ -1194,16 +1214,35 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
   const selectAllCheck = document.getElementById('selectAllCheck');
   const searchInput = document.getElementById('searchInput');
 
+  const TYPE_LIST = ['', 'FCL', 'LCL', 'אחר'];
+  const STATUS_LIST = ['', 'empty', 'arrived', 'onway', 'inprogress', 'missing', 'preparing', 'cancelled', 'pending'];
+  const typeOptsCache = new Map();
+  const statusOptsCache = new Map();
+
+  function getTypeOpts(sel) {
+    let h = typeOptsCache.get(sel);
+    if (h === undefined) {
+      h = TYPE_LIST.map(o => `<option value="${escapeHtml(o)}"${sel === o ? ' selected' : ''}>${escapeHtml(o)}</option>`).join('');
+      typeOptsCache.set(sel, h);
+    }
+    return h;
+  }
+  function getStatusOpts(sel) {
+    let h = statusOptsCache.get(sel);
+    if (h === undefined) {
+      h = STATUS_LIST.map(o => {
+        const label = o === '' ? '' : (statusMap[o] || o);
+        return `<option value="${o}"${sel === o ? ' selected' : ''}>${label}</option>`;
+      }).join('');
+      statusOptsCache.set(sel, h);
+    }
+    return h;
+  }
+
   function rowToHtml(row) {
     const statusClass = getStatusClass(row.status);
-    const typeOpts = ['', 'FCL', 'LCL', 'אחר']
-      .map(o => `<option value="${escapeHtml(o)}"${row.type === o ? ' selected' : ''}>${escapeHtml(o)}</option>`)
-      .join('');
-    const statusOpts = ['', 'empty', 'arrived', 'onway', 'inprogress', 'missing', 'preparing', 'cancelled', 'pending']
-      .map(o => {
-        const label = o === '' ? '' : (statusMap[o] || o);
-        return `<option value="${o}"${(row.status || '') === o ? ' selected' : ''}>${label}</option>`;
-      }).join('');
+    const typeOpts = getTypeOpts(row.type || '');
+    const statusOpts = getStatusOpts(row.status || '');
 
     return `<tr data-row-id="${escapeHtml(row._id)}" class="${statusClass}">
       <td><input type="checkbox" class="row-checkbox"></td>
@@ -1254,7 +1293,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
         tbody.innerHTML = filtered.map(rowToHtml).join('');
       }
 
-      updateCounter();
+      updateCounter(filtered.length);
       selectAllCheck.checked = false;
       initSortable(filter, searchTerm, filtered.length);
     });
@@ -1286,9 +1325,11 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     }
   }
 
-  function updateCounter() {
+  function updateCounter(shown) {
     const n = getTabData(state.currentView).length;
-    rowCounter.textContent = getTabLabel(state.currentView) + ': ' + n + ' שורות';
+    let txt = getTabLabel(state.currentView) + ': ' + n + ' שורות';
+    if (typeof shown === 'number' && shown !== n) txt += ' (מוצגות ' + shown + ')';
+    rowCounter.textContent = txt;
   }
 
   // ============================================================
@@ -1351,7 +1392,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     e.preventDefault();
     const text = (e.clipboardData || window.clipboardData).getData('text/plain');
     if (text == null) return;
-    const cleaned = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const cleaned = String(text).replace(/\s*[\r\n]+\s*/g, ' ');
     if (document.queryCommandSupported && document.queryCommandSupported('insertText')) {
       document.execCommand('insertText', false, cleaned);
     } else {
@@ -1395,6 +1436,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
 
     if (field === 'date') {
       if (newVal === '' || newVal === '—' || newVal === 'x' || newVal === '-') {
+        if (!row.date) { td.textContent = '—'; td.dataset.raw = ''; return; }
         row.date = '';
         td.textContent = '—';
         td.dataset.raw = '';
@@ -1416,6 +1458,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       }
 
       if (normalized) {
+        if (normalized === row.date) { td.textContent = formatDateForDisplay(normalized); return; }
         row.date = normalized;
         td.textContent = formatDateForDisplay(normalized);
         td.dataset.raw = normalized;
@@ -1431,6 +1474,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
 
     if (field === 'amount') {
       if (newVal === '') {
+        if (row.amount === 0) { td.textContent = '0.00'; return; }
         row.amount = 0;
         td.textContent = '0.00';
         td.dataset.raw = 0;
@@ -1447,6 +1491,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
         return;
       }
       const parsed = parseNumberFromDisplay(newVal);
+      if (parsed === row.amount) { td.textContent = formatNumber(parsed); return; }
       row.amount = parsed;
       td.textContent = formatNumber(parsed);
       td.dataset.raw = parsed;
@@ -1455,6 +1500,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       return;
     }
 
+    if (String(row[field] ?? '') === newVal) return;
     row[field] = newVal;
     buildSearchIndex(row);
     saveTab(state.currentView);
@@ -1464,6 +1510,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     const target = e.target;
     const tr = target.closest('tr');
     if (!tr || !tr.dataset.rowId) return;
+    if (!target.matches('select')) return;
     if (!assertWritable('selectChange')) {
       renderTable(filterSelect.value);
       return;
@@ -1503,7 +1550,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     const idx = data.findIndex(r => r._id === tr.dataset.rowId);
     if (idx !== -1) {
       data.splice(idx, 1);
-      saveTab(state.currentView);
+      saveTab(state.currentView, true);
       renderTable(filterSelect.value);
     }
   });
@@ -1569,8 +1616,16 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     };
     buildSearchIndex(newRow);
     getTabData(state.currentView).push(newRow);
-    saveTab(state.currentView);
-    renderTable(filterSelect.value);
+    saveTab(state.currentView, true);
+    // לוודא שהשורה החדשה גלויה (בלי סינון/חיפוש/"הצג מסומנים") ולגלול אליה
+    resetShowSelected();
+    filterSelect.value = 'all';
+    searchInput.value = '';
+    renderTable('all');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const tr = tbody.querySelector('tr[data-row-id="' + newRow._id + '"]');
+      if (tr) tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }));
   }
 
   function deleteSelectedRows() {
@@ -1589,7 +1644,7 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     const data = getTabData(state.currentView);
     state.tabs[state.currentView] = data.filter(r => !ids.has(r._id));
     resetShowSelected();
-    saveTab(state.currentView);
+    saveTab(state.currentView, true);
     renderTable(filterSelect.value);
   }
 
@@ -1628,8 +1683,8 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     if (moved.length > 0) {
       const movedIds = new Set(moved.map(r => r._id));
       state.tabs[fromTab] = src.filter(r => !movedIds.has(r._id));
-      saveTab(fromTab);
-      saveTab(toTab);
+      saveTab(fromTab, true);
+      saveTab(toTab, true);
     } else {
       rebuildIndex(toTab);
     }
@@ -1765,7 +1820,6 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     resetShowSelected();
     closeMoveModal();
     renderTable(filterSelect.value);
-    updateStats(getTabData(state.currentView));
 
     let msg = `↔️ הועברו ${result.added} שורות לטאב "${targetLabel}"`;
     if (result.skipped > 0) {
@@ -2318,17 +2372,12 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
         });
 
         const now = Date.now();
-        await idbSet('tab_toys', state.tabs.toys);
-        await idbSet('tabSavedAt_toys', now);
-        await idbSet('tab_electronics', state.tabs.electronics);
-        await idbSet('tabSavedAt_electronics', now);
-        await idbSet('tab_archive', state.tabs.archive);
-        await idbSet('tabSavedAt_archive', now);
-        for (const t of state.meta.customTabs) {
-          await idbSet('tab_' + t.id, state.tabs[t.id]);
-          await idbSet('tabSavedAt_' + t.id, now);
+        const entries = [];
+        for (const id of Object.keys(state.tabs)) {
+          entries.push(['tab_' + id, state.tabs[id]], ['tabSavedAt_' + id, now]);
         }
-        await idbSet('customTabsMeta', state.meta.customTabs);
+        entries.push(['customTabsMeta', state.meta.customTabs]);
+        await idbSetMany(entries);   // אטומי: או הכל או כלום
 
         Object.keys(state.tabs).forEach(id => { ensureRowIds(state.tabs[id]); rebuildIndex(id); });
 
@@ -2399,7 +2448,10 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
   }
 
+  let uiBound = false;
   function bindUI() {
+    if (uiBound) return;
+    uiBound = true;
     document.getElementById('addRowBtn').addEventListener('click', openAddChoiceModal);
     document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedRows);
     document.getElementById('showSelectedBtn').addEventListener('click', toggleShowSelected);
@@ -2619,7 +2671,10 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
 
   window.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', function () { syncWidths(); schedule(); });
-  wrap.addEventListener('scroll', schedule, { passive: true });
+  wrap.addEventListener('scroll', function () {
+    if (box.classList.contains('visible')) box.scrollLeft = wrap.scrollLeft;  // בלי השהיה – אין "זנב"
+    else schedule();
+  }, { passive: true });
 
   if (window.ResizeObserver) {
     new ResizeObserver(function () { syncWidths(); schedule(); }).observe(table);
