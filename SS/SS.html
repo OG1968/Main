@@ -396,7 +396,37 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
 }
 #floatingHead.visible { display: block; }
 #floatingHead table { min-width: 0 !important; table-layout: fixed; width: auto; }
-</style>
+
+    /* --- סימון כפילות מספר הזמנה --- */
+    td.duplicate-cell {
+      background: #fee2e2 !important;
+      box-shadow: inset 0 0 0 2px #ef4444;
+    }
+    body.dark-mode td.duplicate-cell { background: #7f1d1d !important; }
+
+    /* --- Placeholder לתאים ריקים --- */
+    td[contenteditable="true"][data-placeholder]:empty::before {
+      content: attr(data-placeholder);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    /* --- מיון לפי כותרות --- */
+    th.sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+    th.sortable-th:hover { background: #e2e8f0; }
+    th.sortable-th::after { content: " ⇅"; opacity: .45; font-size: .8em; }
+    th.sortable-th.sort-asc::after { content: " ▲"; opacity: 1; }
+    th.sortable-th.sort-desc::after { content: " ▼"; opacity: 1; }
+    th.sortable-th.sort-asc, th.sortable-th.sort-desc { background: #dbeafe; color: #1e3a5f; }
+
+    /* --- הודעת אזהרה חיה --- */
+    #liveWarning {
+      position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+      background: #b91c1c; color: white; padding: 10px 18px; border-radius: 30px;
+      font-weight: 600; font-size: .9rem; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      z-index: 9999; display: none; max-width: 90vw; text-align: center;
+    }
+  </style>
 </head>
 <body>
 <!-- כפתור מצב תצוגה – שמאל למעלה, 5px מכל קצה -->
@@ -460,13 +490,13 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
           <th>סוג מכולה</th>
           <th>20'</th>
           <th>40'</th>
-          <th>הזמנה</th>
+          <th class="sortable-th" data-sort="order" title="לחץ למיון">הזמנה</th>
           <th>סוג מוצר</th>
           <th>תיק</th>
           <th>שם ספק</th>
-          <th>תאריך הגעה</th>
-          <th>ספק</th>
-          <th>סכום $</th>
+          <th class="sortable-th" data-sort="date" title="לחץ למיון">תאריך הגעה</th>
+          <th class="sortable-th" data-sort="vendor" title="לחץ למיון">ספק</th>
+          <th class="sortable-th" data-sort="amount" title="לחץ למיון">סכום $</th>
           <th>סטטוס</th>
           <th>הערה</th>
           <th style="width:60px;">פעולות</th>
@@ -1249,20 +1279,107 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       <td><select class="type-select">${typeOpts}</select></td>
       <td contenteditable="true" data-field="q20">${escapeHtml(row.q20)}</td>
       <td contenteditable="true" data-field="q40">${escapeHtml(row.q40)}</td>
-      <td contenteditable="true" data-field="order">${escapeHtml(row.order)}</td>
-      <td contenteditable="true" data-field="product">${escapeHtml(row.product)}</td>
+      <td contenteditable="true" data-field="order" data-placeholder="מספר הזמנה">${escapeHtml(row.order)}</td>
+      <td contenteditable="true" data-field="product" data-placeholder="סוג מוצר">${escapeHtml(row.product)}</td>
       <td contenteditable="true" data-field="file">${escapeHtml(row.file)}</td>
-      <td contenteditable="true" data-field="supplier">${escapeHtml(row.supplier)}</td>
+      <td contenteditable="true" data-field="supplier" data-placeholder="שם ספק">${escapeHtml(row.supplier)}</td>
       <td contenteditable="true" data-field="date" data-raw="${escapeHtml(row.date || '')}">${formatDateForDisplay(row.date)}</td>
-      <td contenteditable="true" data-field="vendor">${escapeHtml(row.vendor)}</td>
+      <td contenteditable="true" data-field="vendor" data-placeholder="מספר ספק">${escapeHtml(row.vendor)}</td>
       <td contenteditable="true" data-field="amount" data-raw="${row.amount || 0}">${formatNumber(row.amount)}</td>
       <td><select class="status-select">${statusOpts}</select></td>
-      <td contenteditable="true" data-field="note">${escapeHtml(row.note)}</td>
+      <td contenteditable="true" data-field="note" data-placeholder="הערה">${escapeHtml(row.note)}</td>
       <td class="row-actions">
         <span class="drag-handle" title="גרור לשינוי סדר">☰</span>
         <button class="delete-btn" title="מחק שורה" type="button">🗑️</button>
       </td>
     </tr>`;
+  }
+
+
+  // ============================================================
+  // 8b. מיון לפי כותרות + אזהרת כפילויות חיה
+  // ============================================================
+  const columnSort = { field: null, dir: 1 };
+
+  function compareRows(a, b, field) {
+    // עדיפות ראשונה תמיד: סדר הסטטוסים הקבוע
+    const statusDiff = (sortOrder[a.status] || 8) - (sortOrder[b.status] || 8);
+    if (statusDiff !== 0) return statusDiff;
+
+    // עדיפות שנייה: המיון שנבחר בכותרת
+    if (field === 'amount') {
+      const av = typeof a.amount === 'number' ? a.amount : parseNumberFromDisplay(a.amount);
+      const bv = typeof b.amount === 'number' ? b.amount : parseNumberFromDisplay(b.amount);
+      return av - bv;
+    }
+    if (field === 'date') {
+      const av = normalizeDateToISO(a.date) || '';
+      const bv = normalizeDateToISO(b.date) || '';
+      if (!av && !bv) return 0;
+      if (!av) return 1;
+      if (!bv) return -1;
+      return av.localeCompare(bv);
+    }
+    const av = String(a[field] ?? '').trim();
+    const bv = String(b[field] ?? '').trim();
+    if (!av && !bv) return 0;
+    if (!av) return 1;
+    if (!bv) return -1;
+    return av.localeCompare(bv, 'he', { numeric: true });
+  }
+
+  function updateSortIndicators() {
+    document.querySelectorAll('#deliveryTable th.sortable-th').forEach(th => {
+      th.classList.remove('sort-asc', 'sort-desc');
+      if (th.dataset.sort === columnSort.field) {
+        th.classList.add(columnSort.dir === 1 ? 'sort-asc' : 'sort-desc');
+      }
+    });
+  }
+
+  function toggleColumnSort(field) {
+    if (columnSort.field === field) {
+      if (columnSort.dir === 1) columnSort.dir = -1;
+      else { columnSort.field = null; columnSort.dir = 1; }
+    } else {
+      columnSort.field = field;
+      columnSort.dir = 1;
+    }
+    updateSortIndicators();
+    renderTable(filterSelect.value);
+  }
+
+  let liveWarningTimer = null;
+  function showLiveWarning(message) {
+    let el = document.getElementById('liveWarning');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'liveWarning';
+      el.setAttribute('role', 'alert');
+      document.body.appendChild(el);
+    }
+    el.textContent = message;
+    el.style.display = 'block';
+    clearTimeout(liveWarningTimer);
+    liveWarningTimer = setTimeout(() => { el.style.display = 'none'; }, 4000);
+  }
+
+  function updateOrderDuplicateWarning(td, tr, row, value) {
+    const val = String(value || '').trim();
+    td.classList.remove('duplicate-cell');
+    td.removeAttribute('title');
+
+    if (!val || !isValidOrder(val)) return;
+
+    const duplicate = getTabData(state.currentView).some(r =>
+      r && r._id !== row._id && String(r.order || '').trim() === val
+    );
+
+    if (duplicate) {
+      td.classList.add('duplicate-cell');
+      td.title = '⚠️ מספר הזמנה זה כבר קיים בטאב הנוכחי';
+      showLiveWarning('⚠️ קיימת כבר שורה עם מספר הזמנה ' + val + ' בטאב הנוכחי');
+    }
   }
 
   let renderRaf = null;
@@ -1285,24 +1402,28 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
         return true;
       });
 
-      if (filtered.length === 0) {
+      const displayRows = columnSort.field
+        ? [...filtered].sort((a, b) => compareRows(a, b, columnSort.field) * columnSort.dir)
+        : filtered;
+
+      if (displayRows.length === 0) {
         tbody.innerHTML = `<tr><td colspan="14" class="empty-row-msg">${
           searchTerm ? '🔍 אין תוצאות לחיפוש זה' : '🚫 אין שורות התואמות לסטטוס זה'
         }</td></tr>`;
       } else {
-        tbody.innerHTML = filtered.map(rowToHtml).join('');
+        tbody.innerHTML = displayRows.map(rowToHtml).join('');
       }
 
-      updateCounter(filtered.length);
+      updateCounter(displayRows.length);
       selectAllCheck.checked = false;
-      initSortable(filter, searchTerm, filtered.length);
+      initSortable(filter, searchTerm, displayRows.length);
     });
   }
 
   function initSortable(filter, searchTerm, filteredLen) {
     if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
     const canSort = filter === 'all' && !searchTerm && !state.showSelectedOnly &&
-                    filteredLen > 1 && !state.readOnly;
+                    !columnSort.field && filteredLen > 1 && !state.readOnly;
     if (canSort && typeof Sortable !== 'undefined') {
       tbody.classList.remove('no-sort');
       try {
@@ -1407,6 +1528,14 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     }
   }
 
+  tbody.addEventListener('input', function(e) {
+    const td = e.target.closest('td[contenteditable="true"]');
+    if (!td || td.dataset.field !== 'order') return;
+    const tr = td.closest('tr');
+    const row = tr && tr.dataset.rowId ? getRowById(tr.dataset.rowId) : null;
+    if (row) updateOrderDuplicateWarning(td, tr, row, td.textContent);
+  });
+
   tbody.addEventListener('paste', function(e) {
     const td = e.target.closest('td[contenteditable="true"]');
     if (td) forcePlainTextPaste(e);
@@ -1433,6 +1562,10 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     const field = td.dataset.field;
     const newVal = td.textContent.trim();
     const oldVal = td.dataset.raw || '';
+
+    if (field === 'order') {
+      updateOrderDuplicateWarning(td, tr, row, newVal);
+    }
 
     if (field === 'date') {
       if (newVal === '' || newVal === '—' || newVal === 'x' || newVal === '-') {
@@ -1610,8 +1743,8 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     const newRow = {
       _id: 'row-' + (nextId++),
       type: '', q20: '', q40: '',
-      order: 'חדש', product: 'מוצר חדש', file: 'x',
-      supplier: 'ספק חדש', date: '', vendor: '24210000000',
+      order: '', product: '', file: '',
+      supplier: '', date: '', vendor: '',
       amount: 0, status: '', note: ''
     };
     buildSearchIndex(newRow);
@@ -1859,6 +1992,9 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
     state.currentView = view;
     if (view === 'toys' || view === 'electronics' || isCustomView(view)) state.lastMainView = view;
     resetShowSelected();
+    columnSort.field = null;
+    columnSort.dir = 1;
+    updateSortIndicators();
     renderTabsUI();
     filterSelect.value = 'all';
     searchInput.value = '';
@@ -2471,6 +2607,11 @@ body.dark-mode table tr.status-pending td:not(.row-actions) { background-color: 
       progressFill.style.width = '0%';
     });
     document.getElementById('sortBtn').addEventListener('click', sortData);
+
+    document.querySelector('#deliveryTable thead').addEventListener('click', function(e) {
+      const th = e.target.closest('th.sortable-th');
+      if (th && th.dataset.sort) toggleColumnSort(th.dataset.sort);
+    });
 
     document.getElementById('tabToys').addEventListener('click', () => switchView('toys'));
     document.getElementById('tabElectronics').addEventListener('click', () => switchView('electronics'));
