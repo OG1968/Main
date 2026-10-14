@@ -6,11 +6,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.5"
     />
-    <title>ניהול משלוחים</title>
-    <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>"
-    />
+    <title>סטטוס משלוחים</title>
+        <link rel="icon" href="SS.png" type="image/x-icon">
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"
@@ -2573,24 +2570,44 @@
         function normalizeDateToISO(val, opts = {}) {
           if (val === null || val === undefined || val === "") return "";
 
-          if (val instanceof Date) {
-            if (isNaN(val.getTime())) return "";
-            const y = val.getFullYear(),
-              m = val.getMonth() + 1,
-              d = val.getDate();
-            return validateAndFormat(y, m, d, opts);
+          // Date / אובייקט דמוי-Date מ-SheetJS
+          if (
+            (val instanceof Date ||
+              (typeof val === "object" &&
+                val !== null &&
+                typeof val.getTime === "function")) &&
+            !Array.isArray(val)
+          ) {
+            try {
+              if (isNaN(val.getTime())) return "";
+              // עיגול לאמצע היום – מונע הזזת יום בגלל אזור זמן
+              const t = new Date(val.getTime() + 12 * 3600 * 1000);
+              return validateAndFormat(
+                t.getUTCFullYear(),
+                t.getUTCMonth() + 1,
+                t.getUTCDate(),
+                opts,
+              );
+            } catch {
+              return "";
+            }
           }
 
           if (typeof val === "number" && isFinite(val)) {
-            if (val < EXCEL_EPOCH_MIN || val > EXCEL_EPOCH_MAX) return "";
-            const wholeDays = Math.floor(val);
-            const epochMs = (wholeDays - 25569) * 86400 * 1000;
-            const dt = new Date(epochMs);
-            if (isNaN(dt.getTime())) return "";
-            const y = dt.getUTCFullYear(),
-              m = dt.getUTCMonth() + 1,
-              d = dt.getUTCDate();
-            return validateAndFormat(y, m, d, opts);
+            if (val >= EXCEL_EPOCH_MIN && val <= EXCEL_EPOCH_MAX) {
+              const wholeDays = Math.floor(val);
+              const epochMs = (wholeDays - 25569) * 86400 * 1000;
+              // עיגול לאמצע היום – כמו בטיפול ב-Date
+              const dt = new Date(epochMs + 12 * 3600 * 1000);
+              if (isNaN(dt.getTime())) return "";
+              return validateAndFormat(
+                dt.getUTCFullYear(),
+                dt.getUTCMonth() + 1,
+                dt.getUTCDate(),
+                opts,
+              );
+            }
+            return "";
           }
 
           const str = String(val).trim();
@@ -2604,9 +2621,13 @@
             return "";
           }
 
-          let m = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+          // 2026-10-14 או 2026-10-14T00:00:00.000Z
+          let m = str.match(
+            /^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:[T\s].*)?$/,
+          );
           if (m) return validateAndFormat(+m[1], +m[2], +m[3], opts);
 
+          // dd/mm/yyyy | dd.mm.yyyy | dd-mm-yyyy
           m = str.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})$/);
           if (m) {
             let d = +m[1],
@@ -2623,9 +2644,9 @@
           if (!isNaN(parsed)) {
             const dt = new Date(parsed);
             return validateAndFormat(
-              dt.getFullYear(),
-              dt.getMonth() + 1,
-              dt.getDate(),
+              dt.getUTCFullYear(),
+              dt.getUTCMonth() + 1,
+              dt.getUTCDate(),
               opts,
             );
           }
@@ -4330,7 +4351,41 @@
           return "";
         }
 
-        const REQUIRED_HEADERS = ["סוג מכולה", "הזמנה", "סוג מוצר", "סטטוס"];
+        function normalizeHeader(h) {
+          return String(h == null ? "" : h)
+            .replace(/[\u200E\u200F\u202A-\u202E\uFEFF]/g, "")
+            .trim()
+            .replace(/[’‘`´′]/g, "'")
+            .replace(/[“”″]/g, '"')
+            .replace(/\s+/g, " ")
+            .replace(/\s*\$\s*/g, " $")
+            .replace(/^20\s*['′]?$/i, "20'")
+            .replace(/^40\s*['′]?$/i, "40'")
+            .replace(/^סכום\s*\$?$/i, "סכום $")
+            .replace(/^סכום\s*דולר$/i, "סכום $");
+        }
+
+        const POSITIONAL_FIELDS = [
+          "type", "q20", "q40", "order", "product", "file",
+          "supplier", "date", "vendor", "amount", "status", "note",
+        ];
+
+        const CANONICAL_HEADERS = {
+          "סוג מכולה": "type",
+          "20'": "q20",
+          "40'": "q40",
+          הזמנה: "order",
+          "סוג מוצר": "product",
+          תיק: "file",
+          "שם ספק": "supplier",
+          "תאריך הגעה": "date",
+          ספק: "vendor",
+          "סכום $": "amount",
+          סטטוס: "status",
+          הערה: "note",
+        };
+
+        const REQUIRED_HEADER_KEYS = ["סוג מכולה", "הזמנה", "סוג מוצר", "סטטוס"];
 
         function getSheetHeaderRow(sheet) {
           if (!sheet) return null;
@@ -4339,12 +4394,15 @@
             defval: "",
             raw: true,
           });
-          for (let i = 0; i < Math.min(rawRows.length, 8); i++) {
-            const cells = (rawRows[i] || []).map((c) => String(c || "").trim());
-            const matches = REQUIRED_HEADERS.filter((h) =>
-              cells.includes(h),
+          for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
+            const cells = (rawRows[i] || []).map((c) =>
+              normalizeHeader(String(c || "")),
+            );
+            const matches = REQUIRED_HEADER_KEYS.filter((h) =>
+              cells.includes(normalizeHeader(h)),
             ).length;
-            if (matches >= 3) return { rowIndex: i, headers: cells };
+            if (matches >= 3 || cells.filter(Boolean).length >= 10)
+              return { rowIndex: i, headers: cells };
           }
           return null;
         }
@@ -4353,7 +4411,6 @@
           const headerInfo = getSheetHeaderRow(sheet);
           const hasDataStructure = !!headerInfo;
           const lowerName = String(sheetName).toLowerCase();
-
           const nameIsToys = ["צעצועים", "toys", "toy"].some((k) =>
             lowerName.includes(k),
           );
@@ -4363,7 +4420,6 @@
           const nameIsArchive = ["ארכיב", "archive", "ארכיון"].some((k) =>
             lowerName.includes(k),
           );
-
           if (nameIsArchive && hasDataStructure)
             return { role: "archive", confidence: "high", headerInfo };
           if (nameIsElec && hasDataStructure)
@@ -4375,74 +4431,117 @@
           return { role: "unknown", confidence: "none", headerInfo: null };
         }
 
-        function isSummaryOrJunkRow(row) {
-          const first = String(row["סוג מכולה"] || row["__EMPTY"] || "").trim();
-
+        function isSummaryOrJunkValues(values) {
+          const first = String(values[0] ?? "").trim();
           if (first) {
-            if (SUMMARY_LABELS.has(first)) return true;
+            const fn = normalizeHeader(first);
+            if (SUMMARY_LABELS.has(first) || SUMMARY_LABELS.has(fn)) return true;
             if (/^סה"?כ[\s:]*$/.test(first)) return true;
             if (/^סה"?כ[\s:\-–]/i.test(first)) return true;
           }
-
-          const hasAny = Object.values(row).some(
+          const hasAny = values.some(
             (v) => v !== "" && v !== null && v !== undefined,
           );
           if (!hasAny) return true;
-
-          const order = String(row["הזמנה"] || "").trim();
-          const supplier = String(row["שם ספק"] || "").trim();
-          const product = String(row["סוג מוצר"] || "").trim();
-          const amountRaw = row["סכום $"];
+          const order = String(values[3] ?? "").trim();
+          const product = String(values[4] ?? "").trim();
+          const supplier = String(values[6] ?? "").trim();
+          const amountRaw = values[9];
           const hasAmount =
             amountRaw !== "" && amountRaw !== null && amountRaw !== undefined;
-
           if (!order && !supplier && !product && !hasAmount) return true;
-
           return false;
         }
 
         function parseSheetToRows(sheet) {
           const headerInfo = getSheetHeaderRow(sheet);
           if (!headerInfo) return [];
-          const json = XLSX.utils.sheet_to_json(sheet, {
-            range: headerInfo.rowIndex,
-            raw: true,
+
+          const rawRows = XLSX.utils.sheet_to_json(sheet, {
+            header: 1,
             defval: "",
+            raw: true,
           });
-          if (!json || json.length === 0) return [];
+          if (!rawRows || rawRows.length <= headerInfo.rowIndex) return [];
+
+          const headerCells = (rawRows[headerInfo.rowIndex] || []).map((c) =>
+            String(c ?? ""),
+          );
+
+          const colIndexByField = {};
+          headerCells.forEach((h, idx) => {
+            const field = CANONICAL_HEADERS[normalizeHeader(h)];
+            if (field && colIndexByField[field] === undefined)
+              colIndexByField[field] = idx;
+          });
+          headerCells.forEach((h, idx) => {
+            const n = normalizeHeader(h);
+            if (colIndexByField.q20 === undefined && /^20/.test(n))
+              colIndexByField.q20 = idx;
+            if (colIndexByField.q40 === undefined && /^40/.test(n))
+              colIndexByField.q40 = idx;
+            if (
+              colIndexByField.amount === undefined &&
+              (n.includes("סכום") || n.includes("$") || /amount/i.test(n))
+            )
+              colIndexByField.amount = idx;
+            if (
+              colIndexByField.date === undefined &&
+              (n.includes("תאריך") || /date/i.test(n))
+            )
+              colIndexByField.date = idx;
+          });
+          POSITIONAL_FIELDS.forEach((f, i) => {
+            if (colIndexByField[f] === undefined) colIndexByField[f] = i;
+          });
 
           let skippedSummary = 0;
           let skippedJunk = 0;
-
           const rows = [];
-          for (const raw of json) {
-            if (isSummaryOrJunkRow(raw)) {
-              const first = String(
-                raw["סוג מכולה"] || raw["__EMPTY"] || "",
-              ).trim();
+
+          for (let r = headerInfo.rowIndex + 1; r < rawRows.length; r++) {
+            const cells = rawRows[r] || [];
+            const values = POSITIONAL_FIELDS.map(
+              (f) => cells[colIndexByField[f]],
+            );
+
+            if (isSummaryOrJunkValues(values)) {
+              const first = String(values[0] ?? "").trim();
               if (SUMMARY_LABELS.has(first) || /^סה"?כ/.test(first))
                 skippedSummary++;
               else skippedJunk++;
               continue;
             }
 
-            const r = {
+            const rawDate = values[7];
+            const normDate = normalizeDateToISO(rawDate);
+            if (rows.length < 3) {
+              console.info("[import] date raw→norm", {
+                order: values[3],
+                rawDate,
+                rawType: rawDate == null ? "null" : typeof rawDate,
+                isDate: rawDate instanceof Date,
+                normDate,
+                dateColIdx: colIndexByField.date,
+              });
+            }
+            const rowObj = {
               _id: "row-" + nextId++,
-              type: safeString(raw["סוג מכולה"]),
-              q20: safeString(raw["20'"]),
-              q40: safeString(raw["40'"]),
-              order: safeString(raw["הזמנה"]),
-              product: safeString(raw["סוג מוצר"]),
-              file: safeString(raw["תיק"]),
-              supplier: safeString(raw["שם ספק"]),
-              date: normalizeDateToISO(raw["תאריך הגעה"]),
-              vendor: safeString(raw["ספק"]),
-              amount: safeAmount(raw["סכום $"]),
-              status: safeStatus(raw["סטטוס"]),
-              note: safeString(raw["הערה"]),
+              type: safeString(values[0]),
+              q20: safeString(values[1]),
+              q40: safeString(values[2]),
+              order: safeString(values[3]),
+              product: safeString(values[4]),
+              file: safeString(values[5]),
+              supplier: safeString(values[6]),
+              date: normDate,
+              vendor: safeString(values[8]),
+              amount: safeAmount(values[9]),
+              status: safeStatus(values[10]),
+              note: safeString(values[11]),
             };
-            buildSearchIndex(r);
-            rows.push(r);
+            buildSearchIndex(rowObj);
+            rows.push(rowObj);
           }
 
           if (skippedSummary > 0 || skippedJunk > 0) {
@@ -4450,8 +4549,67 @@
               `[import] דולגו ${skippedSummary} שורות סיכום ו-${skippedJunk} שורות ריקות/זבל`,
             );
           }
-
           return rows;
+        }
+
+        async function wipeAllAppStorage() {
+          try {
+            const toRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (
+                k &&
+                (k.startsWith(WAL_PREFIX) ||
+                  k.startsWith("tab_") ||
+                  k.startsWith("tabSavedAt_") ||
+                  k === "customTabsMeta")
+              )
+                toRemove.push(k);
+            }
+            toRemove.forEach((k) => {
+              try {
+                localStorage.removeItem(k);
+              } catch {}
+            });
+          } catch (e) {
+            console.warn("[wipe] localStorage", e);
+          }
+
+          try {
+            const db = await openDB();
+            await new Promise((res, rej) => {
+              const tx = db.transaction(STORE, "readwrite");
+              const req = tx.objectStore(STORE).clear();
+              req.onsuccess = () => res();
+              req.onerror = () => rej(req.error);
+              tx.onabort = () => rej(tx.error);
+            });
+          } catch (e) {
+            console.warn("[wipe] IDB clear, trying deleteDatabase", e);
+            try {
+              dbPromise = null;
+              await new Promise((res) => {
+                const req = indexedDB.deleteDatabase(DB_NAME);
+                req.onsuccess = req.onerror = req.onblocked = () => res();
+              });
+              await openDB();
+            } catch (e2) {
+              console.error("[wipe] deleteDatabase failed", e2);
+            }
+          }
+
+          pendingSaves.clear();
+          failedSaveAttempts.clear();
+          saveVersions.clear();
+          savedVersions.clear();
+          walTimestamps.clear();
+          state.meta.customTabs = [];
+          state.tabs = { toys: [], electronics: [], archive: [] };
+          state.index = {};
+          state.showSelectedOnly = false;
+          state.selectedIdsSnapshot = [];
+          nextId = 1000;
+          nextCustomTabNum = 1;
         }
 
         function findDuplicates(rows) {
@@ -4706,31 +4864,8 @@
                 return;
               }
 
-              for (const t of state.meta.customTabs) {
-                try {
-                  await idbDel("tab_" + t.id);
-                } catch {}
-                try {
-                  await idbDel("tabSavedAt_" + t.id);
-                } catch {}
-                clearWAL(t.id);
-                pendingSaves.delete(t.id);
-                failedSaveAttempts.delete(t.id);
-                saveVersions.delete(t.id);
-                savedVersions.delete(t.id);
-                walTimestamps.delete(t.id);
-              }
-              ["toys", "electronics", "archive"].forEach((id) => {
-                clearWAL(id);
-                pendingSaves.delete(id);
-                failedSaveAttempts.delete(id);
-                saveVersions.delete(id);
-                savedVersions.delete(id);
-                walTimestamps.delete(id);
-              });
-
-              state.meta.customTabs = [];
-              state.tabs = { toys: [], electronics: [], archive: [] };
+              // ===== דריסה מלאה: מוחק הכל וטוען מחדש מהקובץ =====
+              await wipeAllAppStorage();
 
               state.tabs.toys = parsed.toys || [];
               state.tabs.electronics = parsed.electronics || [];
@@ -4742,6 +4877,26 @@
                 state.tabs[id] = parsed.custom[tabName];
               });
 
+              Object.keys(state.tabs).forEach((id) => {
+                ensureRowIds(state.tabs[id]);
+                rebuildIndex(id);
+              });
+
+              Object.keys(state.tabs).forEach((id) => {
+                const sample = (state.tabs[id] || [])[0];
+                if (sample) {
+                  console.info("[import] sample row in", id, {
+                    order: sample.order,
+                    product: sample.product,
+                    supplier: sample.supplier,
+                    amount: sample.amount,
+                    status: sample.status,
+                    date: sample.date,
+                    note: sample.note,
+                  });
+                }
+              });
+
               const now = Date.now();
               const entries = [];
               for (const id of Object.keys(state.tabs)) {
@@ -4751,15 +4906,36 @@
                 );
               }
               entries.push(["customTabsMeta", state.meta.customTabs]);
-              await idbSetMany(entries); // אטומי: או הכל או כלום
 
-              Object.keys(state.tabs).forEach((id) => {
-                ensureRowIds(state.tabs[id]);
-                rebuildIndex(id);
-              });
+              let storageOk = true;
+              try {
+                await idbSetMany(entries);
+                const verify = await idbGet("tab_toys");
+                if (
+                  !Array.isArray(verify) ||
+                  verify.length !== (state.tabs.toys || []).length
+                ) {
+                  storageOk = false;
+                  console.error(
+                    "[import] storage verify failed",
+                    verify?.length,
+                    state.tabs.toys?.length,
+                  );
+                }
+              } catch (storageErr) {
+                storageOk = false;
+                console.error("[import] storage write failed", storageErr);
+              }
+
+              Object.keys(state.tabs).forEach((id) => clearWAL(id));
 
               progressFill.style.width = "100%";
               resetShowSelected();
+              filterSelect.value = "all";
+              searchInput.value = "";
+              columnSort.field = null;
+              columnSort.dir = 1;
+              updateSortIndicators();
 
               if (toysSheetName) state.currentView = "toys";
               else if (elecSheetName) state.currentView = "electronics";
@@ -4769,8 +4945,68 @@
               else state.currentView = "toys";
 
               renderTabsUI();
-              renderTable(filterSelect.value);
+              renderTable("all");
               updateStats(getTabData(state.currentView));
+              updateAllTabCounts();
+
+              const loadedCount =
+                (state.tabs.toys?.length || 0) +
+                (state.tabs.electronics?.length || 0) +
+                (state.tabs.archive?.length || 0) +
+                state.meta.customTabs.reduce(
+                  (s, t) => s + (state.tabs[t.id]?.length || 0),
+                  0,
+                );
+
+              const sample = (state.tabs[state.currentView] || [])[0];
+              let sampleTxt = "";
+              if (sample) {
+                sampleTxt =
+                  "\n\nדוגמה (שורה ראשונה):\n" +
+                  "הזמנה: " +
+                  (sample.order || "—") +
+                  "\nמוצר: " +
+                  (sample.product || "—") +
+                  "\nתאריך: " +
+                  (sample.date
+                    ? formatDateForDisplay(sample.date)
+                    : "— (ריק!)") +
+                  "\nספק: " +
+                  (sample.supplier || "—") +
+                  "\nסכום: " +
+                  (sample.amount ?? "—") +
+                  "\nסטטוס: " +
+                  (statusMap[sample.status] || sample.status || "—");
+              }
+              // ספירת תאריכים לכל טאב
+              Object.keys(state.tabs).forEach((id) => {
+                const arr = state.tabs[id] || [];
+                const withDate = arr.filter((r) => r && r.date).length;
+                console.info(
+                  `[import] dates in "${id}": ${withDate}/${arr.length} rows have a date`,
+                );
+              });
+
+              if (!storageOk) {
+                alert(
+                  "⚠️ הנתונים נטענו למסך (" +
+                    loadedCount +
+                    " שורות) אבל השמירה לזיכרון הדפדפן נכשלה.\n\n" +
+                    "Tracking Prevention / קובץ מקומי חוסמים אחסון.\n" +
+                    "אל תרענן – הנתונים ייעלמו.\n\n" +
+                    "פתרון: כבה Tracking Prevention לאתר זה, או פתח דרך שרת מקומי (לא file://)." +
+                    sampleTxt,
+                );
+              } else {
+                alert(
+                  "✅ הייבוא הושלם בהצלחה!\n\n" +
+                    "כל הנתונים הקודמים נמחקו.\n" +
+                    "נטענו " +
+                    loadedCount +
+                    " שורות מהקובץ." +
+                    sampleTxt,
+                );
+              }
 
               setTimeout(() => {
                 progressBar.style.display = "none";
