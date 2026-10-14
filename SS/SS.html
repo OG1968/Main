@@ -1469,10 +1469,10 @@
           <button
             class="btn btn-danger"
             id="deleteSelectedBtn"
-            data-tip="מחק שורה/ות מסומנות"
+            data-tip="מחק שורות מסומנות או טאב ריק"
           >
             <span class="btn-icon">🗑️</span
-            ><span class="btn-label">מחק שורה/ות</span>
+            ><span class="btn-label">מחק שורות/טאב</span>
           </button>
           <button
             class="btn btn-selected"
@@ -1732,6 +1732,53 @@
         </div>
         <div class="modal-actions" style="margin-top: 20px">
           <button class="btn btn-secondary" id="cancelAddChoiceBtn">
+            ביטול
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- מודל מחיקה -->
+    <div class="modal-overlay" id="deleteChoiceModal">
+      <div class="modal">
+        <h2>🗑️ מחיקה</h2>
+        <p style="color: #64748b; margin-bottom: 16px">מה תרצה למחוק?</p>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <button
+            class="btn btn-danger"
+            id="chooseDeleteRowsBtn"
+            style="
+              justify-content: center;
+              min-height: 48px;
+              font-size: 0.95rem;
+            "
+          >
+            🗑️ מחק שורות מסומנות
+          </button>
+          <button
+            class="btn btn-archive"
+            id="chooseDeleteTabBtn"
+            style="
+              justify-content: center;
+              min-height: 48px;
+              font-size: 0.95rem;
+            "
+            disabled
+          >
+            📑 מחק טאב
+          </button>
+          <p
+            id="deleteTabHint"
+            style="
+              color: #94a3b8;
+              font-size: 0.85rem;
+              margin: 0;
+              text-align: center;
+            "
+          ></p>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px">
+          <button class="btn btn-secondary" id="cancelDeleteChoiceBtn">
             ביטול
           </button>
         </div>
@@ -3068,6 +3115,8 @@
                 `[date-normalize] "${id}": ${normalizedCount} תאריכים נורמלו`,
               );
             }
+            // בטעינה: מיון לפי סטטוס, ובתוך כל סטטוס לפי תאריך הגעה
+            sortTabByStatusThenDate(id);
             rebuildIndex(id);
           });
         }
@@ -3173,6 +3222,20 @@
           if (!av) return 1;
           if (!bv) return -1;
           return av.localeCompare(bv, "he", { numeric: true });
+        }
+
+        /** מיון ראשי לפי סטטוס, משני לפי תאריך הגעה (ריקים בסוף) */
+        function compareByStatusThenDate(a, b) {
+          const statusDiff =
+            (sortOrder[a.status] || 8) - (sortOrder[b.status] || 8);
+          if (statusDiff !== 0) return statusDiff;
+          return compareRows(a, b, "date");
+        }
+
+        function sortTabByStatusThenDate(tabId) {
+          const data = getTabData(tabId);
+          if (!Array.isArray(data) || data.length < 2) return;
+          data.sort(compareByStatusThenDate);
         }
 
         function updateSortIndicators() {
@@ -3739,6 +3802,50 @@
           );
         }
 
+        function openDeleteChoiceModal() {
+          if (!assertWritable("openDeleteChoiceModal")) {
+            alert("⛔ במצב קריאה בלבד לא ניתן למחוק.");
+            return;
+          }
+          const tabBtn = document.getElementById("chooseDeleteTabBtn");
+          const hint = document.getElementById("deleteTabHint");
+          const view = state.currentView;
+          const rowCount = getTabData(view).length;
+          const isCustom = isCustomView(view);
+          const tabName = getTabLabel(view);
+
+          if (!isCustom) {
+            tabBtn.disabled = true;
+            tabBtn.style.opacity = "0.45";
+            tabBtn.style.cursor = "not-allowed";
+            hint.textContent =
+              "טאבים קבועים (צעצועים / אלקטרוניקה / ארכיב) לא ניתנים למחיקה.";
+          } else if (rowCount > 0) {
+            tabBtn.disabled = true;
+            tabBtn.style.opacity = "0.45";
+            tabBtn.style.cursor = "not-allowed";
+            hint.textContent =
+              'מחיקת טאב "' +
+              tabName +
+              '" תתאפשר רק לאחר מחיקת כל השורות (' +
+              rowCount +
+              " שורות).";
+          } else {
+            tabBtn.disabled = false;
+            tabBtn.style.opacity = "1";
+            tabBtn.style.cursor = "pointer";
+            hint.textContent =
+              'הטאב "' + tabName + '" ריק – ניתן למחוק אותו.';
+          }
+          document.getElementById("deleteChoiceModal").classList.add("active");
+        }
+
+        function closeDeleteChoiceModal() {
+          document
+            .getElementById("deleteChoiceModal")
+            .classList.remove("active");
+        }
+
         function deleteSelectedRows() {
           if (!assertWritable("deleteSelectedRows")) {
             alert("⛔ במצב קריאה בלבד לא ניתן למחוק שורות.");
@@ -3762,15 +3869,67 @@
           renderTable(filterSelect.value);
         }
 
+        async function deleteCurrentTab() {
+          if (!assertWritable("deleteCurrentTab")) {
+            alert("⛔ במצב קריאה בלבד לא ניתן למחוק טאב.");
+            return;
+          }
+          const view = state.currentView;
+          if (!isCustomView(view)) {
+            alert("לא ניתן למחוק טאב קבוע.");
+            return;
+          }
+          const rows = getTabData(view);
+          if (rows.length > 0) {
+            alert(
+              "לא ניתן למחוק טאב עם שורות. מחק קודם את כל השורות בטאב.",
+            );
+            return;
+          }
+          const tabName = getTabLabel(view);
+          if (
+            !confirm(
+              'למחוק את הטאב "' +
+                tabName +
+                '" לצמיתות?\nפעולה זו אינה ניתנת לביטול.',
+            )
+          )
+            return;
+
+          state.meta.customTabs = state.meta.customTabs.filter(
+            (t) => t.id !== view,
+          );
+          delete state.tabs[view];
+          delete state.index[view];
+          clearWAL(view);
+          try {
+            await idbDel("tab_" + view);
+            await idbDel("tabSavedAt_" + view);
+          } catch (e) {
+            console.warn("[deleteTab] idb cleanup", e);
+          }
+          await saveMeta();
+
+          closeDeleteChoiceModal();
+          const fallback =
+            state.lastMainView &&
+            state.lastMainView !== view &&
+            state.tabs[state.lastMainView]
+              ? state.lastMainView
+              : "toys";
+          state.currentView = fallback;
+          renderTabsUI();
+          switchView(fallback);
+          alert('✅ הטאב "' + tabName + '" נמחק.');
+        }
+
         function sortData() {
           if (!assertWritable("sortData")) {
             alert("⛔ במצב קריאה בלבד לא ניתן למיין.");
             return;
           }
           const data = getTabData(state.currentView);
-          data.sort(
-            (a, b) => (sortOrder[a.status] || 8) - (sortOrder[b.status] || 8),
-          );
+          data.sort(compareByStatusThenDate);
           saveTab(state.currentView);
           renderTable(filterSelect.value);
         }
@@ -5077,10 +5236,29 @@
             .addEventListener("click", openAddChoiceModal);
           document
             .getElementById("deleteSelectedBtn")
-            .addEventListener("click", deleteSelectedRows);
+            .addEventListener("click", openDeleteChoiceModal);
           document
             .getElementById("showSelectedBtn")
             .addEventListener("click", toggleShowSelected);
+          document
+            .getElementById("cancelDeleteChoiceBtn")
+            .addEventListener("click", closeDeleteChoiceModal);
+          document
+            .getElementById("deleteChoiceModal")
+            .addEventListener("click", (e) => {
+              if (e.target.id === "deleteChoiceModal") closeDeleteChoiceModal();
+            });
+          document
+            .getElementById("chooseDeleteRowsBtn")
+            .addEventListener("click", () => {
+              closeDeleteChoiceModal();
+              deleteSelectedRows();
+            });
+          document
+            .getElementById("chooseDeleteTabBtn")
+            .addEventListener("click", () => {
+              deleteCurrentTab();
+            });
           document
             .getElementById("moveBtn")
             .addEventListener("click", openMoveModal);
