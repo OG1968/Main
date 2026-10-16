@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.5"
     />
     <title>סטטוס משלוחים</title>
-        <link rel="icon" href="SS.png" type="image/x-icon">
+    <link rel="icon" href="SS.png" type="image/x-icon" />
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"
@@ -3834,8 +3834,7 @@
             tabBtn.disabled = false;
             tabBtn.style.opacity = "1";
             tabBtn.style.cursor = "pointer";
-            hint.textContent =
-              'הטאב "' + tabName + '" ריק – ניתן למחוק אותו.';
+            hint.textContent = 'הטאב "' + tabName + '" ריק – ניתן למחוק אותו.';
           }
           document.getElementById("deleteChoiceModal").classList.add("active");
         }
@@ -3881,9 +3880,7 @@
           }
           const rows = getTabData(view);
           if (rows.length > 0) {
-            alert(
-              "לא ניתן למחוק טאב עם שורות. מחק קודם את כל השורות בטאב.",
-            );
+            alert("לא ניתן למחוק טאב עם שורות. מחק קודם את כל השורות בטאב.");
             return;
           }
           const tabName = getTabLabel(view);
@@ -4525,8 +4522,18 @@
         }
 
         const POSITIONAL_FIELDS = [
-          "type", "q20", "q40", "order", "product", "file",
-          "supplier", "date", "vendor", "amount", "status", "note",
+          "type",
+          "q20",
+          "q40",
+          "order",
+          "product",
+          "file",
+          "supplier",
+          "date",
+          "vendor",
+          "amount",
+          "status",
+          "note",
         ];
 
         const CANONICAL_HEADERS = {
@@ -4544,7 +4551,12 @@
           הערה: "note",
         };
 
-        const REQUIRED_HEADER_KEYS = ["סוג מכולה", "הזמנה", "סוג מוצר", "סטטוס"];
+        const REQUIRED_HEADER_KEYS = [
+          "סוג מכולה",
+          "הזמנה",
+          "סוג מוצר",
+          "סטטוס",
+        ];
 
         function getSheetHeaderRow(sheet) {
           if (!sheet) return null;
@@ -4594,7 +4606,8 @@
           const first = String(values[0] ?? "").trim();
           if (first) {
             const fn = normalizeHeader(first);
-            if (SUMMARY_LABELS.has(first) || SUMMARY_LABELS.has(fn)) return true;
+            if (SUMMARY_LABELS.has(first) || SUMMARY_LABELS.has(fn))
+              return true;
             if (/^סה"?כ[\s:]*$/.test(first)) return true;
             if (/^סה"?כ[\s:\-–]/i.test(first)) return true;
           }
